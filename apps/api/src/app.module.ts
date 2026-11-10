@@ -17,6 +17,9 @@ import { TwinModule } from "./modules/twin/twin.module";
 import { LooksModule } from "./modules/looks/looks.module";
 import { IntentModule } from "./modules/intent/intent.module";
 import { FlagsModule } from "./modules/flags/flags.module";
+import { PaymentsModule } from "./modules/payments/payments.module";
+import { OrdersModule } from "./modules/orders/orders.module";
+import { AnalyticsModule } from "./modules/analytics/analytics.module";
 
 @Controller()
 class HealthController {
@@ -47,6 +50,9 @@ class HealthController {
     LooksModule,
     IntentModule,
     FlagsModule,
+    PaymentsModule,
+    OrdersModule,
+    AnalyticsModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: AuthGuard }],

@@ -3,6 +3,7 @@
 import type { Intent } from "@nyambika/contracts";
 import { useParams, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { HoldToBuy } from "@/components/hold-to-buy";
 import { LookView } from "@/components/look-view";
 import { ErrorNote, Screen, Spinner } from "@/components/ui";
 import { api } from "@/lib/api";
@@ -85,7 +86,9 @@ function Stream() {
               replace(await api<Look>(`/looks/${look.id}/variant`, { method: "POST", json: { variantId } }));
               setTimeout(() => void load(), 900);
             }}
-          />
+          >
+            <HoldToBuy look={look} />
+          </LookView>
           {i === 0 && index === 0 && data.looks.length > 1 && (
             <p className="pointer-events-none absolute inset-x-0 bottom-[178px] z-10 text-center text-sm text-txt/80">↑ swipe up · next look</p>
           )}

@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
+import { HoldToBuy } from "@/components/hold-to-buy";
 import { LookView } from "@/components/look-view";
 import { ErrorNote, Screen, Spinner } from "@/components/ui";
 import { api } from "@/lib/api";
@@ -30,7 +31,7 @@ function TryOn() {
   if (!look) return <Screen><div className="grid min-h-dvh place-items-center"><Spinner /></div></Screen>;
   return (
     <div className="mx-auto h-dvh w-full max-w-[480px]">
-      <LookView look={look} onSave={save} onVariant={variant} />
+      <LookView look={look} onSave={save} onVariant={variant}><HoldToBuy look={look} /></LookView>
     </div>
   );
 }

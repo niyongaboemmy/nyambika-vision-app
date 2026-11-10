@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import type { ButtonHTMLAttributes, ReactNode } from "react";
+import { useEffect, useState, type ButtonHTMLAttributes, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 
 /** Mobile-first frame: full-bleed on phones, a centred phone-width column on larger screens. */
 export function Screen({ children, className = "", aurora = true }: { children: ReactNode; className?: string; aurora?: boolean }) {
@@ -72,16 +73,26 @@ export function Spinner({ className = "" }: { className?: string }) {
   return <span className={`inline-block size-5 animate-spin rounded-full border-2 border-white/30 border-t-white ${className}`} />;
 }
 
+/** Bottom sheet, portalled to <body> so ancestors with transforms/backdrop-filter can't trap or overlap it. */
 export function Sheet({ open, onClose, children }: { open: boolean; onClose: () => void; children: ReactNode }) {
-  if (!open) return null;
-  return (
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+  if (!open || !mounted) return null;
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-end justify-center" role="dialog" aria-modal="true">
       <button aria-label="Close" className="absolute inset-0 bg-black/60" onClick={onClose} />
       <div className="relative w-full max-w-[480px] animate-rise rounded-t-[28px] border border-white/15 bg-ink-2 p-5 pb-[max(env(safe-area-inset-bottom),20px)]">
         <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-white/25" />
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
