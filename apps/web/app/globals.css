@@ -118,3 +118,8 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+@keyframes scan {
+  0%, 100% { top: 8%; }
+  50% { top: 88%; }
+}

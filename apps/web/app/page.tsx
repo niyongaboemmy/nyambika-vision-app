@@ -13,7 +13,7 @@ export default function Home() {
         <span className="orb size-40 animate-orb rounded-full shadow-[0_0_80px_rgba(139,92,246,.45)]" />
         <h1 className="font-display text-4xl font-black text-grad">{t("app.tagline")}</h1>
         {me && (
-          <Link href="/studio"><Button variant="glass">{t("studio.title")}</Button></Link>
+          <div className="flex gap-2"><Link href="/mirror"><Button>🪞 {t("mirror.title")}</Button></Link><Link href="/studio"><Button variant="glass">{t("studio.title")}</Button></Link></div>
         )}
       </main>
     </Screen>

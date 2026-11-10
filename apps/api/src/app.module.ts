@@ -13,6 +13,8 @@ import { IdentityModule } from "./modules/identity/identity.module";
 import { PagesModule } from "./modules/pages/pages.module";
 import { CatalogueModule } from "./modules/catalogue/catalogue.module";
 import { CoopsModule } from "./modules/coops/coops.module";
+import { TwinModule } from "./modules/twin/twin.module";
+import { LooksModule } from "./modules/looks/looks.module";
 
 @Controller()
 class HealthController {
@@ -39,6 +41,8 @@ class HealthController {
     PagesModule,
     CatalogueModule,
     CoopsModule,
+    TwinModule,
+    LooksModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: AuthGuard }],
