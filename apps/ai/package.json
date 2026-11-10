@@ -1,0 +1,8 @@
+{
+  "name": "@nyambika/ai",
+  "private": true,
+  "scripts": {
+    "dev": ".venv/bin/uvicorn app.main:app --port 8100 --reload",
+    "test": ".venv/bin/pytest -q"
+  }
+}

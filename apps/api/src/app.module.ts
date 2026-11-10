@@ -1,0 +1,40 @@
+import { Controller, Get, Module } from "@nestjs/common";
+import { APP_GUARD } from "@nestjs/core";
+import { AiClient, AiModule } from "./common/ai.client";
+import { AuthGuard, Public } from "./common/auth";
+import { CommonModule } from "./common/common.module";
+import { ConsentModule } from "./common/consent.service";
+import { MessagingModule } from "./common/messaging.service";
+import { MeteringModule } from "./common/metering.service";
+import { PrismaModule } from "./common/prisma.service";
+import { StorageModule } from "./common/storage.service";
+import { FilesModule } from "./modules/files/files.module";
+import { IdentityModule } from "./modules/identity/identity.module";
+
+@Controller()
+class HealthController {
+  constructor(private ai: AiClient) {}
+  @Public()
+  @Get("health")
+  async health() {
+    const ai = await this.ai.get<{ status: string }>("/health").catch(() => ({ status: "down" }));
+    return { status: "ok", ai: ai.status, time: new Date().toISOString() };
+  }
+}
+
+@Module({
+  imports: [
+    PrismaModule,
+    StorageModule,
+    AiModule,
+    CommonModule,
+    MessagingModule,
+    ConsentModule,
+    MeteringModule,
+    FilesModule,
+    IdentityModule,
+  ],
+  controllers: [HealthController],
+  providers: [{ provide: APP_GUARD, useClass: AuthGuard }],
+})
+export class AppModule {}

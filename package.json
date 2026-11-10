@@ -1,0 +1,20 @@
+{
+  "name": "nyambika",
+  "private": true,
+  "packageManager": "pnpm@11.21.0",
+  "scripts": {
+    "dev": "turbo run dev --parallel",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "db:migrate": "pnpm --filter @nyambika/api db:migrate",
+    "db:seed": "pnpm --filter @nyambika/api db:seed",
+    "e2e": "pnpm --filter @nyambika/web e2e",
+    "setup": "pnpm install && pnpm --filter @nyambika/contracts build && bash scripts/setup-ai.sh && pnpm db:migrate && pnpm db:seed"
+  },
+  "devDependencies": {
+    "turbo": "2.11.10",
+    "typescript": "5.9.3"
+  }
+}

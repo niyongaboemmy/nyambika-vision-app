@@ -1,0 +1,30 @@
+{
+  "name": "@nyambika/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3000",
+    "build": "next build",
+    "start": "next start --port 3000",
+    "typecheck": "tsc --noEmit",
+    "e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.0",
+    "@tailwindcss/postcss": "4.3.5",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "tailwindcss": "4.3.5",
+    "typescript": "5.9.3"
+  },
+  "dependencies": {
+    "@nyambika/contracts": "workspace:*",
+    "@nyambika/i18n": "workspace:*",
+    "@use-gesture/react": "10.3.1",
+    "next": "16.4.6",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "server-only": "^0.0.1"
+  }
+}

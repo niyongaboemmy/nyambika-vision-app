@@ -1,0 +1,605 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Nyambika Vision Prototype</title>
+<style>
+:root{--terra:#B4532A;--terra2:#D9774A;--ink:#1E1A17;--cream:#FBF6EF;--sand:#F1E6D6;--gold:#E3A33B;--green:#2F7D5B;--sky:#00A1DE;--blue:#1F5FA8;--muted:#7A6E64;--line:#E6DACA}
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:1920px;height:1080px;overflow:hidden;background:#140F0C;font-family:"Avenir Next","Helvetica Neue",Helvetica,Arial,sans-serif;color:#fff}
+#stage{position:relative;width:1920px;height:1080px;overflow:hidden;background:radial-gradient(1200px 800px at 75% 40%,#3A2418 0%,#1C1410 55%,#120D0A 100%)}
+.imig{position:absolute;inset:0;opacity:.07;background:
+ repeating-linear-gradient(45deg,#fff 0 2px,transparent 2px 28px),
+ repeating-linear-gradient(-45deg,#fff 0 2px,transparent 2px 28px)}
+#topbar{position:absolute;left:80px;right:80px;top:34px;display:flex;justify-content:space-between;align-items:center;font-size:20px;color:#E9DCCB}
+#topbar b{font-size:24px;letter-spacing:.5px;color:#fff}
+.logoMark{display:inline-block;width:34px;height:34px;border-radius:10px;vertical-align:middle;margin-right:12px;background:conic-gradient(from 45deg,var(--terra),var(--gold),var(--terra),#000,var(--terra));position:relative}
+.logoMark:after{content:"";position:absolute;inset:7px;border-radius:5px;background:#1C1410;border:2px solid #fff}
+.pillTop{border:1px solid rgba(255,255,255,.25);padding:6px 14px;border-radius:20px;font-size:16px;margin-left:10px}
+/* left panel */
+#left{position:absolute;left:80px;top:120px;width:820px;height:760px}
+#stepNo{font-size:22px;letter-spacing:3px;color:var(--gold);font-weight:600;text-transform:uppercase}
+#rel{display:inline-block;margin-left:14px;font-size:16px;letter-spacing:1px;padding:5px 12px;border-radius:14px;vertical-align:middle}
+.r1{background:#2F7D5B}.r2{background:#1F5FA8}.r3{background:#7B3FA0}
+#title{font-size:58px;font-weight:700;line-height:1.08;margin-top:18px;color:#fff}
+#desc{font-size:25px;line-height:1.45;margin-top:22px;color:#E9DCCB;max-width:780px}
+#uiBox{margin-top:30px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:22px 28px;max-width:780px}
+#uiBox h4{font-size:16px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:12px}
+#uiList div{font-size:21px;line-height:1.35;color:#F4ECE2;padding:6px 0 6px 30px;position:relative}
+#uiList div:before{content:"";position:absolute;left:4px;top:15px;width:10px;height:10px;border-radius:3px;background:var(--terra2)}
+#caption{position:absolute;left:80px;width:820px;top:858px;font-size:21px;line-height:1.4;color:#fff;background:rgba(0,0,0,.45);border-left:4px solid var(--gold);padding:12px 18px;border-radius:8px}
+/* journey */
+#journey{position:absolute;left:80px;right:80px;top:950px;height:90px}
+#jline{position:absolute;left:30px;right:30px;top:22px;height:4px;background:rgba(255,255,255,.15);border-radius:2px}
+#jfill{position:absolute;left:30px;top:22px;height:4px;background:linear-gradient(90deg,var(--terra2),var(--gold));border-radius:2px}
+.jst{position:absolute;top:10px;width:120px;margin-left:-60px;text-align:center;font-size:15px;color:#9E9084}
+.jst i{display:block;margin:0 auto 10px;width:28px;height:28px;border-radius:50%;background:#2A211C;border:3px solid #5A4A40}
+.jst.done{color:#D7C8B8}.jst.done i{background:var(--terra);border-color:var(--terra2)}
+.jst.on{color:#fff;font-weight:700}.jst.on i{background:var(--gold);border-color:#fff;box-shadow:0 0 0 7px rgba(227,163,59,.25)}
+/* phone */
+#phone{position:absolute;left:1010px;top:70px;width:384px;height:804px;border-radius:54px;background:#0C0A09;box-shadow:0 0 0 2px #3B312B,0 40px 90px rgba(0,0,0,.6),inset 0 0 0 2px #2A2420}
+#screen{position:absolute;left:12px;top:12px;width:360px;height:780px;border-radius:44px;overflow:hidden;background:var(--cream);color:var(--ink)}
+#notch{position:absolute;left:50%;top:10px;width:110px;height:30px;margin-left:-55px;background:#0C0A09;border-radius:16px;z-index:50}
+.screen{position:absolute;inset:0;background:var(--cream);overflow:hidden;visibility:hidden;font-size:13px}
+.sb{height:44px;display:flex;justify-content:space-between;align-items:flex-end;padding:0 26px 6px;font-size:13px;font-weight:600;position:relative;z-index:5}
+.sb.dark{color:#fff}
+#finger{position:absolute;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;background:rgba(255,255,255,.55);border:2px solid rgba(30,26,23,.5);box-shadow:0 4px 14px rgba(0,0,0,.35);z-index:90;opacity:0;pointer-events:none}
+#ripple{position:absolute;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;border:3px solid var(--terra);z-index:89;opacity:0}
+/* callouts */
+.co{position:absolute;left:1386px;height:2px;z-index:20}
+.co .ln{position:absolute;left:0;top:0;width:58px;height:2px;background:var(--gold)}
+.co .dt{position:absolute;left:-7px;top:-6px;width:14px;height:14px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 5px rgba(227,163,59,.25)}
+.co .lb{position:absolute;left:66px;top:-19px;white-space:nowrap;font-size:18px;color:#fff;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);padding:7px 14px;border-radius:10px}
+/* overlays */
+.ov{position:absolute;inset:0;z-index:200;opacity:0;visibility:hidden}
+#intro{background:radial-gradient(900px 600px at 50% 45%,#4A2B1B,#160F0B 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+#intro .big{font-size:120px;font-weight:800;letter-spacing:2px}
+#intro .big span{color:var(--gold)}
+#intro .sub{font-size:34px;color:#E9DCCB;margin-top:14px}
+#intro .tags{margin-top:44px;display:flex;gap:18px}
+#intro .tags div{font-size:22px;padding:12px 22px;border-radius:30px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.06)}
+#intro .note{position:absolute;bottom:60px;font-size:18px;color:#9E9084}
+#outro{background:radial-gradient(1200px 800px at 50% 40%,#2E1D14,#120D0A 75%);padding:70px 90px}
+#outro h2{font-size:48px;font-weight:800}
+#outro h2 span{color:var(--gold)}
+#outro .sub{font-size:22px;color:#D7C8B8;margin-top:8px}
+.ia{position:absolute;left:220px;right:90px;top:210px;height:520px}
+.node{position:absolute;width:230px;padding:16px 18px;border-radius:18px;background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.18);font-size:18px;color:#E9DCCB;line-height:1.35}
+.node b{display:block;font-size:22px;color:#fff;margin-bottom:6px}
+.node.main{border-color:var(--terra2);background:rgba(180,83,42,.22)}
+.node.r2{border-color:#4C86D0}.node.r3{border-color:#A56BC9}
+.arrow{position:absolute;height:3px;background:var(--gold)}
+.arrow:after{content:"";position:absolute;right:-2px;top:-6px;border-left:12px solid var(--gold);border-top:7.5px solid transparent;border-bottom:7.5px solid transparent}
+.navbar{position:absolute;left:90px;right:90px;bottom:120px;display:flex;gap:16px;align-items:center}
+.navbar .lbl{font-size:18px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-right:10px}
+.navbar div.it{flex:1;text-align:center;padding:14px;border-radius:14px;background:rgba(255,255,255,.07);font-size:20px}
+.principles{position:absolute;left:90px;right:90px;bottom:48px;display:flex;gap:30px;font-size:19px;color:#D7C8B8}
+.principles span:before{content:"● ";color:var(--terra2)}
+
+/* ---------- app UI components ---------- */
+.hdr{display:flex;justify-content:space-between;align-items:center;padding:6px 18px 10px}
+.hello{font-size:13px;color:var(--muted)}
+.h1{font-size:21px;font-weight:700;margin-top:2px}
+.avatar{width:38px;height:38px;border-radius:50%;background:var(--terra);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700}
+.searchbar{margin:0 16px;height:44px;border-radius:14px;background:#fff;border:1px solid var(--line);display:flex;align-items:center;padding:0 14px;gap:10px;color:var(--muted);font-size:14px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.searchbar .cam{margin-left:auto}
+.searchbar .q{color:var(--ink);font-weight:600}
+.caret{display:inline-block;width:2px;height:18px;background:var(--terra);vertical-align:middle;margin-left:1px}
+.chips{display:flex;gap:8px;padding:12px 16px;overflow:hidden;white-space:nowrap}
+.chip{padding:7px 12px;border-radius:18px;background:#fff;border:1px solid var(--line);font-size:12.5px;font-weight:600;flex:none}
+.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.chip.try.on{background:var(--terra);border-color:var(--terra)}
+.sec{display:flex;justify-content:space-between;padding:10px 18px 8px;font-weight:700;font-size:15px}
+.sec span{font-weight:600;color:var(--terra);font-size:12.5px}
+.hcards{display:flex;gap:12px;padding:0 16px;overflow:hidden}
+.pcard{flex:none;width:150px;border-radius:16px;background:#fff;border:1px solid var(--line);overflow:hidden}
+.pcard .cv{height:70px;position:relative}
+.pcard .lg{position:absolute;left:10px;bottom:-16px;width:36px;height:36px;border-radius:50%;border:3px solid #fff;color:#fff;font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center}
+.pcard .bd{padding:20px 10px 10px}
+.pcard .nm{font-weight:700;font-size:13px}
+.pcard .ty{font-size:11px;color:var(--muted);margin-top:2px}
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:3px 7px;border-radius:8px;margin-top:6px}
+.b-try{background:#FBE3D6;color:var(--terra)}.b-3d{background:#DDE8F6;color:var(--blue)}.b-ver{background:#DCEFE5;color:var(--green)}
+.coopcard{margin:0 16px;border-radius:18px;padding:14px;background:linear-gradient(120deg,#2F7D5B,#1F5A42);color:#fff;display:flex;gap:12px;align-items:center}
+.coopcard .ic{width:52px;height:52px;border-radius:14px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:24px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 12px}
+.prod{background:#fff;border-radius:16px;border:1px solid var(--line);overflow:hidden;position:relative}
+.prod .im{height:160px;display:flex;align-items:flex-end;justify-content:center;position:relative}
+.prod .im svg{height:150px}
+.prod .tx{padding:8px 10px 10px}
+.prod .t{font-weight:700;font-size:12.5px}
+.prod .pr{font-weight:700;color:var(--terra);font-size:13px;margin-top:2px}
+.prod .by{font-size:11px;color:var(--muted);margin-top:3px}
+.prod .by u{color:var(--ink);text-decoration:none;font-weight:600}
+.prod .fl{position:absolute;top:8px;left:8px;display:flex;gap:4px}
+.prod .fl .badge{margin:0}
+.heart{position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:12px}
+.nav{position:absolute;left:0;right:0;bottom:0;height:74px;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding-top:10px;font-size:10.5px;color:var(--muted);z-index:10}
+.nav div{text-align:center}.nav div i{display:block;font-style:normal;font-size:19px;margin-bottom:2px}
+.nav .on{color:var(--terra);font-weight:700}
+.topnav{display:flex;align-items:center;gap:10px;padding:4px 14px 8px}
+.backb{width:34px;height:34px;border-radius:50%;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:16px;flex:none}
+.btn{height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px}
+.btn.pri{background:var(--terra);color:#fff;box-shadow:0 6px 16px rgba(180,83,42,.35)}
+.btn.sec2{background:#fff;border:1.5px solid var(--line);color:var(--ink);font-size:13px}
+.btn.dark{background:var(--ink);color:#fff}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-radius:26px 26px 0 0;box-shadow:0 -10px 30px rgba(0,0,0,.25);padding:14px 20px 24px}
+.grab{width:40px;height:5px;border-radius:3px;background:#DDD;margin:0 auto 14px}
+.row{display:flex;align-items:center;gap:10px}
+.opt{border:1.5px solid var(--line);border-radius:14px;padding:11px 12px;margin-top:8px;display:flex;align-items:center;gap:10px;font-size:13px;background:#fff}
+.opt .rd{width:18px;height:18px;border-radius:50%;border:2px solid #BBB;flex:none}
+.opt.sel{border-color:var(--terra);background:#FFF6F1}.opt.sel .rd{border:5px solid var(--terra)}
+.toast{position:absolute;left:20px;right:20px;bottom:96px;background:var(--ink);color:#fff;border-radius:14px;padding:13px 16px;font-size:13px;z-index:30}
+.lbl-ai{position:absolute;left:12px;top:12px;background:rgba(30,26,23,.78);color:#fff;font-size:11px;font-weight:600;padding:6px 10px;border-radius:10px}
+.lbl-c2pa{position:absolute;right:12px;top:12px;background:rgba(255,255,255,.92);color:var(--ink);font-size:10.5px;font-weight:700;padding:6px 9px;border-radius:10px}
+.check{display:flex;align-items:center;gap:10px;font-size:13.5px;padding:7px 0}
+.check i{width:22px;height:22px;border-radius:50%;background:#E8E0D5;flex:none;display:flex;align-items:center;justify-content:center;font-style:normal;color:#fff;font-size:12px;font-weight:700}
+.check.ok i{background:var(--green)}
+.spin{width:22px;height:22px;border-radius:50%;border:3px solid #E8E0D5;border-top-color:var(--terra);flex:none}
+.bub{max-width:250px;padding:9px 12px;border-radius:14px;font-size:13px;line-height:1.35;margin:6px 12px;position:relative;box-shadow:0 1px 1px rgba(0,0,0,.08)}
+.bub.me{background:#DCF8C6;margin-left:auto;border-top-right-radius:4px}
+.bub.them{background:#fff;border-top-left-radius:4px}
+.bub small{display:block;text-align:right;font-size:10px;color:#7d8b7d;margin-top:3px}
+.wave{display:flex;gap:3px;align-items:center;height:26px}
+.wave b{display:block;width:3px;border-radius:2px;background:var(--terra)}
+.stars{font-size:26px;letter-spacing:4px;color:#E2D6C6}
+</style></head>
+<body><div id="stage">
+<div class="imig"></div>
+<div id="topbar"><div><span class="logoMark"></span><b>Nyambika Vision</b><span class="pillTop">Customer Experience Prototype · v1.0</span></div><div style="font-size:17px;color:#A89A8D">Interactive simulation · Sample data, fictional members</div></div>
+
+<div id="left"><div><span id="stepNo"></span><span id="rel"></span></div><div id="title"></div><div id="desc"></div>
+<div id="uiBox"><h4>UI structure on this screen</h4><div id="uiList"></div></div></div>
+<div id="caption"></div>
+
+<div id="phone"><div id="screen"><div id="notch"></div>
+<div id="finger"></div><div id="ripple"></div>
+</div></div>
+<div id="callouts"></div>
+
+<div id="journey"><div id="jline"></div><div id="jfill"></div></div>
+
+<div id="intro" class="ov"><div class="big">Nyambika <span>Vision</span></div>
+<div class="sub">AI-powered virtual fitting room · Customer journey prototype</div>
+<div class="tags"><div>✂️ Tailors</div><div>🤝 Cooperatives</div><div>🛍 Sellers</div><div>✨ AI Try-on</div><div>🧊 3D · AR · VR</div></div>
+<div class="note">Every member keeps their own page · Nyambika hosts · Rwanda 2026+</div></div>
+
+<div id="outro" class="ov"><h2>Customer journey &amp; <span>UI structure</span></h2><div class="sub">Information architecture of the Nyambika customer app (PWA, mobile-first, RW · EN · FR)</div>
+<div class="ia" id="ia"></div>
+<div class="navbar"><span class="lbl">Bottom navigation</span><div class="it">🏠 Home</div><div class="it">🔍 Explore</div><div class="it">👗 Fitting room</div><div class="it">✨ Stylist</div><div class="it">👤 Me</div></div>
+<div class="principles"><span>Members own their pages</span><span>Pay the maker directly</span><span>Privacy by design</span><span>Fair AI for every skin tone</span><span>Data-light</span></div>
+</div>
+</div>
+
+<script>
+// ---------- helpers ----------
+const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
+const seg=(p,a,b)=>clamp((p-a)/(b-a));
+const ease=x=>x<.5?2*x*x:1-Math.pow(-2*x+2,2)/2;
+const $=id=>document.getElementById(id);
+const C={terra:'#B4532A',blue:'#1F5FA8',green:'#2F7D5B',gold:'#E3A33B'};
+let pid=0;
+function person(outfit,color,extra=''){
+  const id='kp'+(pid++);const skin='#7A4A2E',hair='#1B1410';
+  const dress=`<path d="M74 98 Q100 110 126 98 L132 150 Q140 220 152 300 Q100 314 48 300 Q60 220 68 150 Z" fill="var(--dress,${color})"/>
+  <path d="M74 98 Q100 110 126 98 L132 150 Q140 220 152 300 Q100 314 48 300 Q60 220 68 150 Z" fill="url(#${id})"/>
+  <path d="M74 98 L62 128 L75 133 L86 104Z M126 98 L138 128 L125 133 L114 104Z" fill="var(--dress,${color})"/>
+  <path d="M67 160 Q100 170 133 160 L134 172 Q100 182 66 172Z" fill="rgba(0,0,0,.28)"/>`;
+  const casual=`<path d="M72 98 Q100 108 128 98 L146 130 L134 138 L128 125 L128 205 L72 205 L72 125 L66 138 L54 130 Z" fill="#ECE6DC"/>
+  <path d="M72 200 L128 200 L124 395 L106 395 L100 245 L94 395 L76 395 Z" fill="#3B5B8A"/>`;
+  return `<svg viewBox="0 0 200 420" ${extra}><defs><pattern id="${id}" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="11" cy="11" r="5" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="2.2"/><path d="M0 0 L6 6 M22 0 L16 6 M0 22 L6 16 M22 22 L16 16" stroke="rgba(255,226,160,.65)" stroke-width="2.4"/></pattern></defs>
+  <circle cx="100" cy="50" r="38" fill="${hair}"/>
+  <path d="M70 102 Q50 160 55 228 L66 229 Q66 166 82 118 Z M130 102 Q150 160 145 228 L134 229 Q134 166 118 118 Z" fill="${skin}"/>
+  <path d="M84 290 L80 396 L92 396 L98 290 Z M102 290 L108 396 L120 396 L116 290Z" fill="${skin}"/>
+  <ellipse cx="85" cy="400" rx="12" ry="5" fill="#2A1E18"/><ellipse cx="115" cy="400" rx="12" ry="5" fill="#2A1E18"/>
+  <rect x="91" y="78" width="18" height="24" fill="${skin}"/>
+  ${outfit==='dress'?dress:casual}
+  <ellipse cx="100" cy="60" rx="23" ry="27" fill="${skin}"/>
+  <ellipse cx="91" cy="58" rx="2.6" ry="3.2" fill="#1B1410"/><ellipse cx="109" cy="58" rx="2.6" ry="3.2" fill="#1B1410"/>
+  <path d="M92 72 Q100 78 108 72" stroke="#3A1F14" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  </svg>`;
+}
+function garment(color,extra=''){
+  const id='kg'+(pid++);
+  return `<svg viewBox="40 80 120 240" ${extra}><defs><pattern id="${id}" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="11" cy="11" r="5" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="2.2"/><path d="M0 0 L6 6 M22 0 L16 6 M0 22 L6 16 M22 22 L16 16" stroke="rgba(255,226,160,.65)" stroke-width="2.4"/></pattern></defs>
+  <path d="M74 98 Q100 110 126 98 L132 150 Q140 220 152 300 Q100 314 48 300 Q60 220 68 150 Z" fill="var(--dress,${color})"/>
+  <path d="M74 98 Q100 110 126 98 L132 150 Q140 220 152 300 Q100 314 48 300 Q60 220 68 150 Z" fill="url(#${id})"/>
+  <path d="M74 98 L62 128 L75 133 L86 104Z M126 98 L138 128 L125 133 L114 104Z" fill="var(--dress,${color})"/>
+  <path d="M67 160 Q100 170 133 160 L134 172 Q100 182 66 172Z" fill="rgba(0,0,0,.28)"/>
+  <path d="M86 98 Q100 104 114 98" stroke="rgba(0,0,0,.3)" stroke-width="3" fill="none"/></svg>`;
+}
+const SB=(d)=>`<div class="sb ${d?'dark':''}"><span>9:41</span><span>▂▄▆█ 4G 🔋</span></div>`;
+const NAV=(on)=>`<div class="nav">${[['🏠','Home'],['🔍','Explore'],['👗','Fitting room'],['✨','Stylist'],['👤','Me']].map((x,i)=>`<div class="${i===on?'on':''}"><i>${x[0]}</i>${x[1]}</div>`).join('')}</div>`;
+function prodCard(title,price,by,type,color,bg,flags){
+  return `<div class="prod"><div class="im" style="background:${bg}">${garment(color)}<div class="fl">${flags}</div><div class="heart">♡</div></div>
+  <div class="tx"><div class="t">${title}</div><div class="pr">${price}</div><div class="by">by <u>${by}</u> · ${type}</div></div></div>`;
+}
+const TRY='<span class="badge b-try">✨ Try-on</span>', D3='<span class="badge b-3d">🧊 3D</span>';
+
+// ---------- screens ----------
+const S={};
+S.splash=`<div class="screen" id="splash" style="background:linear-gradient(170deg,#FBF6EF 0%,#F3E3CF 100%)">${SB()}
+<div style="text-align:center;margin-top:120px" id="spLogo">
+ <div style="width:92px;height:92px;margin:0 auto;border-radius:26px;background:conic-gradient(from 45deg,#B4532A,#E3A33B,#B4532A,#1E1A17,#B4532A);position:relative"><div style="position:absolute;inset:18px;border-radius:12px;background:#FBF6EF;border:3px solid #1E1A17"></div></div>
+ <div style="font-size:34px;font-weight:800;margin-top:20px">Nyambika</div>
+ <div style="display:inline-block;margin-top:6px;background:#1E1A17;color:#E3A33B;font-weight:700;padding:4px 14px;border-radius:12px;font-size:13px;letter-spacing:2px">VISION</div>
+ <div style="margin-top:14px;color:#7A6E64;font-size:14px">Try it on. Buy from the maker.</div></div>
+<div id="spLang" style="position:absolute;left:28px;right:28px;top:430px">
+ <div style="text-align:center;font-weight:700;margin-bottom:12px;font-size:14px">Hitamo ururimi · Choose language · Langue</div>
+ <div class="btn sec2" id="l1" style="margin-bottom:12px;font-size:15px">🇷🇼 Kinyarwanda</div>
+ <div class="btn sec2" id="l2" style="margin-bottom:12px;font-size:15px">🇬🇧 English</div>
+ <div class="btn sec2" id="l3" style="font-size:15px">🇫🇷 Français</div>
+ <div class="btn pri" id="lgo" style="margin-top:26px">Continue →</div></div></div>`;
+S.home=`<div class="screen" id="home">${SB()}<div style="position:absolute;top:44px;left:0;right:0;bottom:74px;overflow:hidden"><div id="homeScroll">
+<div class="hdr"><div><div class="hello">Muraho, Aline 👋</div><div class="h1">Discover Rwandan makers</div></div><div class="avatar">A</div></div>
+<div class="searchbar" id="hsb">🔍 <span>Search dresses, tailors, fabrics…</span><span class="cam">📷</span></div>
+<div class="chips"><span class="chip on">All</span><span class="chip">✂️ Tailors</span><span class="chip">🤝 Cooperatives</span><span class="chip">🛍 Sellers</span><span class="chip">✨ Try-on</span></div>
+<div class="sec">Featured pages <span>See all</span></div>
+<div class="hcards">
+ <div class="pcard"><div class="cv" style="background:linear-gradient(120deg,#B4532A,#E3A33B)"><div class="lg" style="background:#1E1A17">UC</div></div><div class="bd"><div class="nm">Uwase Couture</div><div class="ty">✂️ Tailor · Kimihurura</div><span class="badge b-ver">✓ Verified</span> <span class="badge b-try">✨</span></div></div>
+ <div class="pcard"><div class="cv" style="background:linear-gradient(120deg,#2F7D5B,#88B04B)"><div class="lg" style="background:#2F7D5B">TW</div></div><div class="bd"><div class="nm">Twiyubake Coop</div><div class="ty">🤝 Cooperative · Musanze</div><span class="badge b-ver">✓ Verified</span></div></div>
+ <div class="pcard"><div class="cv" style="background:linear-gradient(120deg,#1F5FA8,#00A1DE)"><div class="lg" style="background:#1F5FA8">KT</div></div><div class="bd"><div class="nm">Kigali Threads</div><div class="ty">🛍 Seller · Nyarugenge</div></div></div></div>
+<div class="sec">Cooperative of the month</div>
+<div class="coopcard"><div class="ic">🧵</div><div><div style="font-weight:700;font-size:14px">Twiyubake Sewing Cooperative</div><div style="font-size:11.5px;opacity:.85;margin-top:3px">18 women makers · Handmade kitenge dresses &amp; bags</div><div style="font-size:11px;margin-top:6px;font-weight:700">Visit page →</div></div></div>
+<div class="sec">Trending try-ons <span>See all</span></div>
+<div class="grid">${prodCard('Kitenge Wrap Dress','RWF 35,000','Uwase Couture','Tailor',C.terra,'#F6E7DA',TRY)}${prodCard('Imigongo Midi','RWF 42,000','Kigali Threads','Seller',C.blue,'#E4ECF6',TRY+D3)}</div>
+</div></div>${NAV(0)}</div>`;
+S.search=`<div class="screen" id="search">${SB()}
+<div class="topnav"><div class="backb">←</div><div class="searchbar" style="margin:0;flex:1">🔍 <span class="q" id="q"></span><span class="caret" id="caret"></span><span class="cam">📷</span></div></div>
+<div class="chips"><span class="chip">Filters ⚙</span><span class="chip try" id="chipTry">✨ Try-on ready</span><span class="chip">Dresses</span><span class="chip">Under 50k</span><span class="chip">Kigali</span></div>
+<div id="rmeta" style="padding:0 18px 8px;font-size:12px;color:var(--muted)"></div>
+<div class="grid" id="results">
+${prodCard('Kitenge Wrap Dress','RWF 35,000','Uwase Couture','Tailor',C.terra,'#F6E7DA',TRY)}
+${prodCard('Ankara Flare Dress','RWF 28,000','Twiyubake Coop','Coop',C.green,'#E2F0E8',TRY)}
+${prodCard('Wax Print Maxi','RWF 39,500','Kigali Threads','Seller',C.blue,'#E4ECF6',TRY+D3)}
+${prodCard('Kitenge Shift','RWF 24,000','Mama Kitenge','Seller',C.gold,'#FBF0DA',TRY)}</div>${NAV(1)}</div>`;
+S.page=`<div class="screen" id="pageS"><div id="pageSb" style="position:absolute;top:0;left:0;right:0;background:var(--cream);z-index:6;opacity:0;box-shadow:0 1px 0 var(--line)">${SB()}</div><div id="pageScroll">
+<div style="height:150px;background:linear-gradient(120deg,#B4532A,#E3A33B);position:relative">
+ <div class="imig" style="opacity:.18"></div>${SB(1)}<div class="backb" style="position:absolute;left:14px;top:52px">←</div><div class="backb" style="position:absolute;right:14px;top:52px">⤴</div></div>
+<div style="padding:0 18px;position:relative">
+ <div style="width:74px;height:74px;border-radius:50%;background:#1E1A17;color:#E3A33B;border:4px solid #FBF6EF;margin-top:-37px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:22px">UC</div>
+ <div style="font-size:21px;font-weight:800;margin-top:8px">Uwase Couture <span class="badge b-ver" style="vertical-align:middle">✓ Verified</span></div>
+ <div style="color:var(--muted);font-size:12.5px;margin-top:3px">✂️ Tailor · Kimihurura, Kigali · ★ 4.8 (126) · Made-to-measure</div>
+ <div class="row" style="margin-top:12px"><div class="btn dark" style="flex:1;height:38px;font-size:13px">+ Follow</div><div class="btn sec2" style="flex:1;height:38px">💬 WhatsApp</div><div class="btn sec2" style="width:44px;height:38px">⤴</div></div>
+ <div class="row" style="margin-top:14px;gap:16px;font-size:13px;font-weight:600;border-bottom:1px solid var(--line);padding-bottom:9px;color:var(--muted)"><span style="color:var(--terra);border-bottom:3px solid var(--terra);padding-bottom:7px;margin-bottom:-10px">Featured</span><span>Collections</span><span>Services</span><span>Reviews</span><span>About</span></div>
+ <div style="margin-top:12px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:11px 12px;display:flex;gap:10px;align-items:center"><div style="font-size:22px">🪡</div><div><div style="font-weight:700;font-size:13px">Custom dress from your fabric</div><div style="font-size:11.5px;color:var(--muted)">From RWF 25,000 · 5 days · uses your measurements</div></div></div>
+</div>
+<div class="sec" style="margin-top:4px">New collection <span>12 items</span></div>
+<div class="grid">${prodCard('Kitenge Wrap Dress','RWF 35,000','Uwase','Tailor',C.terra,'#F6E7DA',TRY+D3)}${prodCard('Umushanana Set','RWF 65,000','Uwase','Tailor',C.gold,'#FBF0DA',TRY)}${prodCard('Peplum Top','RWF 18,000','Uwase','Tailor',C.green,'#E2F0E8',TRY)}${prodCard('Office Dress','RWF 30,000','Uwase','Tailor',C.blue,'#E4ECF6',TRY)}</div>
+</div>${NAV(0)}</div>`;
+S.prod=`<div class="screen" id="prod">
+<div style="height:390px;background:linear-gradient(180deg,#F3E3CF,#EAD5BC);position:relative;display:flex;justify-content:center;align-items:flex-end"><div style="position:absolute;top:0;left:0;right:0;z-index:5">${SB()}</div>
+ <div style="position:absolute;inset:0;display:flex;justify-content:center;align-items:flex-end;padding-bottom:16px">${person('dress',C.terra,'style="height:320px"')}</div>
+ <div class="backb" style="position:absolute;left:14px;top:50px">←</div><div class="backb" style="position:absolute;right:14px;top:50px">♡</div>
+ <div class="lbl-ai" style="top:96px">AI-generated model image</div>
+ <div style="position:absolute;bottom:10px;left:0;right:0;text-align:center;font-size:10px;color:#7A6E64">● ○ ○ ○</div></div>
+<div style="padding:12px 18px">
+ <div class="row" style="justify-content:space-between"><div style="font-size:19px;font-weight:800">Kitenge Wrap Dress</div><div style="font-size:18px;font-weight:800;color:var(--terra)">RWF 35,000</div></div>
+ <div style="font-size:12px;color:var(--muted);margin-top:3px">by <b style="color:var(--ink)">Uwase Couture</b> ✓ · Made to order in 3 days · ★ 4.9</div>
+ <div class="row" style="margin-top:12px;font-size:12.5px;font-weight:600">Colour <span style="width:26px;height:26px;border-radius:50%;background:${C.terra};border:3px solid #fff;box-shadow:0 0 0 2px ${C.terra}"></span><span style="width:26px;height:26px;border-radius:50%;background:${C.blue}"></span><span style="width:26px;height:26px;border-radius:50%;background:${C.green}"></span></div>
+ <div class="row" style="margin-top:10px;font-size:12.5px;font-weight:600">Size ${['S','M','L','XL'].map(s=>`<span style="padding:6px 11px;border-radius:10px;border:1.5px solid var(--line);background:#fff">${s}</span>`).join('')}<span style="color:var(--terra);margin-left:auto">📏 Size guide</span></div>
+ <div class="btn pri" id="tryBtn" style="margin-top:16px">✨ Try it on me</div>
+ <div class="row" style="margin-top:10px"><div class="btn sec2" style="flex:1;height:44px">🧊 View in 3D / AR</div><div class="btn sec2" style="flex:1;height:44px">💬 Order via WhatsApp</div></div>
+ <div style="margin-top:12px;font-size:11.5px;color:var(--muted)">🧵 100% cotton wax print · Made in Kigali · Paid directly to the maker</div>
+</div></div>`;
+S.consent=`<div class="screen" id="consent" style="background:#6B5B50">
+<div style="position:absolute;inset:0;opacity:.35;background:linear-gradient(180deg,#F3E3CF,#EAD5BC)"></div>${SB(1)}
+<div class="sheet" id="cSheet" style="height:620px">
+<div class="grab"></div>
+<div style="font-size:19px;font-weight:800">Before your first try-on</div>
+<div style="font-size:12.5px;color:var(--muted);margin-top:4px">How Nyambika uses your photo</div>
+<div id="cItems" style="margin-top:10px">
+${[['📷','Used only to create your try-on preview'],['⏱','Auto-deleted after 30 days, or delete anytime'],['🔒','Never shared with sellers or tailors'],['🌍','Processed securely by our AI partners (authorised)'],['🚫','Not used to train AI unless you opt in']].map(x=>`<div class="ci" style="display:flex;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid #F0E8DD;font-size:13.5px"><span style="width:34px;height:34px;border-radius:10px;background:#FBF0E6;display:flex;align-items:center;justify-content:center;font-size:16px;flex:none">${x[0]}</span>${x[1]}</div>`).join('')}
+</div>
+<div class="row" style="margin-top:14px;font-size:13px"><span id="cbox" style="width:22px;height:22px;border-radius:6px;border:2px solid #BBB;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px;flex:none"></span>I'm 18+ and this is a photo of me</div>
+<div class="btn pri" id="cAgree" style="margin-top:16px;opacity:.45">I agree &amp; continue</div>
+<div style="text-align:center;margin-top:12px;font-size:12.5px;color:var(--terra);font-weight:600">Use an AI model instead · Read full notice</div>
+</div></div>`;
+S.cam=`<div class="screen" id="cam" style="background:#2B2420">${SB(1)}
+<div style="position:absolute;inset:0;background:linear-gradient(180deg,#4A3D35 0%,#3A302A 60%,#2A221E 100%)"></div>
+<div style="position:absolute;left:0;right:0;top:470px;height:310px;background:linear-gradient(180deg,#5B4B40,#3B302A)"></div>
+<div style="position:absolute;left:0;right:0;top:56px;text-align:center;color:#fff;font-size:13px;font-weight:600"><span style="background:rgba(0,0,0,.45);padding:7px 14px;border-radius:14px">Stand ~2 m away · whole body in the frame</span></div>
+<div style="position:absolute;left:80px;top:100px;width:200px;height:440px">${person('casual',C.terra,'style="width:200px;height:440px"')}</div>
+<svg style="position:absolute;left:70px;top:92px" width="220" height="460" viewBox="0 0 220 460"><path d="M110 12 C80 12 76 40 80 66 C82 84 90 96 96 104 C70 108 62 120 52 160 C44 196 42 230 46 262 L60 262 C62 232 64 200 74 170 L74 300 L84 450 L104 450 L110 320 L116 450 L136 450 L146 300 L146 170 C156 200 158 232 160 262 L174 262 C178 230 176 196 168 160 C158 120 150 108 124 104 C130 96 138 84 140 66 C144 40 140 12 110 12 Z" fill="none" stroke="#7CF2B0" stroke-width="3" stroke-dasharray="9 7" id="poseOutline"/></svg>
+<div style="position:absolute;left:16px;right:16px;top:560px;background:rgba(0,0,0,.55);border-radius:16px;padding:8px 14px;color:#fff" id="camChecks">
+${['Full body visible','Facing the camera','Good lighting','One person only'].map((x,i)=>`<div class="check" id="ck${i}"><i></i>${x}</div>`).join('')}</div>
+<div id="shutter" style="position:absolute;left:150px;top:718px;width:60px;height:60px;border-radius:50%;border:4px solid #fff;background:rgba(255,255,255,.25)"></div>
+<div style="position:absolute;left:40px;top:734px;color:#fff;font-size:20px">🖼</div><div style="position:absolute;right:40px;top:734px;color:#fff;font-size:20px">🔄</div>
+<div id="flash" style="position:absolute;inset:0;background:#fff;opacity:0"></div></div>`;
+S.gen=`<div class="screen" id="gen">${SB()}
+<div class="topnav"><div class="backb">←</div><div style="font-weight:700;font-size:16px">Creating your preview</div></div>
+<div class="row" style="justify-content:center;gap:14px;margin-top:20px">
+ <div style="width:110px;height:150px;border-radius:16px;background:#E9DFD2;overflow:hidden;display:flex;justify-content:center;align-items:flex-end">${person('casual',C.terra,'style="height:140px"')}</div>
+ <div style="font-size:26px;font-weight:300;color:var(--muted)">+</div>
+ <div style="width:110px;height:150px;border-radius:16px;background:#F6E7DA;display:flex;justify-content:center;align-items:center">${garment(C.terra,'style="height:120px"')}</div></div>
+<div style="display:flex;justify-content:center;margin-top:26px"><div id="ring" style="width:120px;height:120px;border-radius:50%;display:flex;align-items:center;justify-content:center"><div style="width:98px;height:98px;border-radius:50%;background:var(--cream);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800" id="pct">0%</div></div></div>
+<div style="margin:22px 28px 0">
+${['Uploading securely (compressed to 420 KB)','Generating your try-on with AI','Quality & fairness check · identity · skin tone','Adding AI label & content credentials'].map((x,i)=>`<div class="check" id="gs${i}"><span class="spin" id="gsp${i}"></span><i style="display:none"></i><span>${x}</span></div>`).join('')}</div>
+<div style="position:absolute;left:20px;right:20px;bottom:30px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-size:12.5px;display:flex;justify-content:space-between"><span>🎟 Free try-ons this week</span><b style="color:var(--terra)">4 of 5 left</b></div></div>`;
+S.res=`<div class="screen" id="res" style="--dress:${C.terra}">${SB()}
+<div class="topnav"><div class="backb">←</div><div style="font-weight:700;font-size:16px">Your try-on</div><div style="margin-left:auto;font-size:12px;color:var(--terra);font-weight:700">Before / After</div></div>
+<div style="margin:0 14px;height:410px;border-radius:22px;overflow:hidden;position:relative;background:linear-gradient(180deg,#E9DFD2,#DCCBB6)">
+ <div style="position:absolute;inset:0;display:flex;justify-content:center;align-items:flex-end;padding-bottom:6px">${person('casual',C.terra,'style="height:380px"')}</div>
+ <div id="after" style="position:absolute;inset:0;display:flex;justify-content:center;align-items:flex-end;padding-bottom:6px;background:linear-gradient(180deg,#E9DFD2,#DCCBB6);clip-path:inset(0 0 0 0)">${person('dress',C.terra,'style="height:380px"')}</div>
+ <div id="wipe" style="position:absolute;top:0;bottom:0;width:3px;background:#fff;box-shadow:0 0 10px rgba(0,0,0,.3)"></div>
+ <div class="lbl-ai">✨ AI preview · not a guarantee of fit</div><div class="lbl-c2pa" style="top:auto;bottom:10px;left:12px;right:auto">ⓒ Content Credentials</div>
+ <div style="position:absolute;bottom:14px;right:12px;font-size:10px;color:rgba(30,26,23,.55);font-weight:700">nyambika.rw</div></div>
+<div class="row" style="padding:12px 18px 4px;font-size:12.5px;font-weight:700">Colour
+ <span id="sw0" style="width:30px;height:30px;border-radius:50%;background:${C.terra}"></span><span id="sw1" style="width:30px;height:30px;border-radius:50%;background:${C.blue}"></span><span id="sw2" style="width:30px;height:30px;border-radius:50%;background:${C.green}"></span>
+ <span style="margin-left:auto;font-weight:600;color:var(--muted)">Size M · Good fit</span></div>
+<div class="row" style="padding:6px 18px;gap:8px" id="cmp"><span style="font-size:11.5px;color:var(--muted);width:56px">Compare</span>
+ ${[C.terra,C.blue,C.green].map((c,i)=>`<div class="cth" id="ct${i}" style="width:48px;height:60px;border-radius:10px;background:#E9DFD2;overflow:hidden;display:flex;justify-content:center;align-items:flex-end;opacity:0;--dress:${c}">${person('dress',c,'style="height:58px"')}</div>`).join('')}</div>
+<div class="row" style="padding:8px 14px;gap:8px"><div class="btn sec2" style="flex:1;height:44px">⤴ Share</div><div class="btn sec2" style="flex:1;height:44px">♡ Save</div><div class="btn pri" style="flex:1.2;height:44px">Order</div></div>
+<div class="row" style="justify-content:center;gap:24px;font-size:12px;color:var(--muted);margin-top:4px">Was this preview good? <span id="thumb" style="font-size:20px">👍</span><span style="font-size:20px">👎</span></div></div>`;
+S.wa=`<div class="screen" id="wa" style="background:#ECE5DD">
+<div style="background:#075E54;color:#fff;height:100px">${SB(1)}<div class="row" style="padding:8px 14px"><span>←</span><div style="width:36px;height:36px;border-radius:50%;background:#C9A27E;display:flex;align-items:center;justify-content:center;font-weight:700">G</div><div><div style="font-weight:700">Grace</div><div style="font-size:11px;opacity:.8">online</div></div></div></div>
+<div style="padding-top:12px">
+<div class="bub me" id="w1" style="padding:5px;--dress:${C.blue}"><div style="width:220px;height:250px;border-radius:10px;background:linear-gradient(180deg,#E9DFD2,#DCCBB6);position:relative;display:flex;justify-content:center;align-items:flex-end;overflow:hidden">${person('dress',C.blue,'style="height:236px"')}<div style="position:absolute;left:6px;top:6px;background:rgba(30,26,23,.75);color:#fff;font-size:9px;padding:4px 7px;border-radius:7px">✨ AI preview · nyambika.rw</div></div>
+ <div style="background:#fff;border-radius:8px;margin-top:5px;padding:7px 9px;font-size:11.5px"><b>Kitenge Wrap Dress · Uwase Couture</b><div style="color:#667">nyambika.rw/uwase-couture</div></div><small>9:44 ✓✓</small></div>
+<div class="bub me" id="w2">Blue or terracotta? 🤔 It's from Uwase Couture<small>9:44 ✓✓</small></div>
+<div class="bub them" id="wt" style="width:60px">• • •</div>
+<div class="bub them" id="w3">Blue!! 😍 It really suits you. Buy it 👏<small>9:45</small></div></div>
+<div style="position:absolute;left:8px;right:8px;bottom:14px;height:44px;border-radius:22px;background:#fff;display:flex;align-items:center;padding:0 16px;color:#999">Message</div></div>`;
+S.v3d=`<div class="screen" id="v3d" style="background:radial-gradient(400px 500px at 50% 40%,#3A2D26,#15110F);color:#fff">${SB(1)}
+<div class="topnav"><div class="backb" style="background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#fff">←</div><div style="font-weight:700;font-size:16px">3D view</div><span class="badge" style="background:#1F5FA8;color:#fff;margin:0 0 0 auto">R2</span></div>
+<div id="v3dStage" style="position:absolute;left:0;right:0;top:110px;height:470px">
+ <div id="turn" style="position:absolute;left:60px;right:60px;top:400px;height:56px;border-radius:50%;background:radial-gradient(closest-side,rgba(227,163,59,.45),rgba(227,163,59,0));"></div>
+ <div id="dress3d" style="position:absolute;left:90px;top:10px;width:180px;height:400px;--dress:${C.blue}">${garment(C.blue,'style="width:180px;height:400px"')}</div>
+ <div id="shade3d" style="position:absolute;left:90px;top:10px;width:180px;height:400px;pointer-events:none"></div></div>
+<div id="arRoom" style="position:absolute;inset:0;opacity:0;background:linear-gradient(180deg,#CBBBA8 0%,#BBA992 58%,#8E7A64 58%,#7A6754 100%)">${SB()}
+ <div style="position:absolute;left:30px;top:120px;width:80px;height:200px;background:#A88E74;border-radius:6px"></div><div style="position:absolute;right:26px;top:150px;width:60px;height:140px;background:#6E8B5E;border-radius:30px 30px 6px 6px"></div>
+ <div style="position:absolute;left:120px;top:150px;width:120px;height:330px;--dress:${C.blue}">${garment(C.blue,'style="width:120px;height:300px"')}<div style="width:6px;height:60px;background:#444;margin:-6px auto 0"></div><div style="width:70px;height:8px;border-radius:4px;background:#333;margin:0 auto"></div></div>
+ <div style="position:absolute;left:16px;top:56px;background:rgba(0,0,0,.6);color:#fff;font-size:12px;padding:7px 12px;border-radius:12px">📱 AR · life-size on a virtual mannequin · 1:1 scale</div>
+ <div style="position:absolute;right:16px;top:500px;background:#fff;color:var(--ink);font-size:11px;padding:6px 10px;border-radius:10px;font-weight:700">↕ 112 cm length</div></div>
+<div id="v3dUi" style="position:absolute;left:0;right:0;top:590px;padding:0 20px">
+ <div style="text-align:center;font-size:12px;opacity:.75">↔ Drag to rotate · pinch to zoom</div>
+ <div class="row" style="justify-content:center;margin-top:12px"><span style="width:28px;height:28px;border-radius:50%;background:${C.terra}"></span><span style="width:28px;height:28px;border-radius:50%;background:${C.blue};box-shadow:0 0 0 3px #fff"></span><span style="width:28px;height:28px;border-radius:50%;background:${C.green}"></span></div>
+ <div class="btn pri" id="arBtn" style="margin-top:16px">📱 View in your space (AR)</div>
+ <div style="text-align:center;font-size:10.5px;opacity:.6;margin-top:8px">AR Quick Look (iOS) · Scene Viewer (Android) · WebXR</div></div></div>`;
+S.sty=`<div class="screen" id="sty">${SB()}
+<div class="topnav" style="border-bottom:1px solid var(--line)"><div class="backb">←</div><div><div style="font-weight:800;font-size:15px">✨ Nyambika Stylist</div><div style="font-size:11px;color:var(--muted)">AI assistant · recommends from member pages</div></div><span class="badge" style="background:#1F5FA8;color:#fff;margin:0 0 0 auto">R2</span></div>
+<div style="padding:8px 0" id="styMsgs">
+<div class="bub me" id="s1" style="background:#FBE3D6;width:230px"><div class="row"><span>🎤</span><div class="wave" id="wave">${Array.from({length:22},(_,i)=>`<b style="height:${6+((i*7)%17)}px"></b>`).join('')}</div><span style="font-size:11px">0:04</span></div>
+ <div id="s1t" style="margin-top:6px;font-size:12.5px"><i>"Ndashaka imyenda y'ubukwe itarenze 50,000"</i><div style="font-size:11px;color:var(--muted);margin-top:2px">(I need a wedding outfit under RWF 50,000)</div></div></div>
+<div class="bub them" id="sTyping" style="width:62px">• • •</div>
+<div class="bub them" id="s2">Here are 3 wedding looks under RWF 50,000, all ready to try on 👇</div>
+<div id="sCards" style="display:flex;gap:10px;padding:4px 12px;overflow:hidden">
+${[['Kitenge Wrap Dress','35,000','Uwase Couture',C.terra,'#F6E7DA'],['Ankara Flare','28,000','Twiyubake Coop',C.green,'#E2F0E8'],['Wax Print Maxi','39,500','Kigali Threads',C.blue,'#E4ECF6']].map((x,i)=>`<div class="sc" id="sc${i}" style="flex:none;width:150px;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden"><div style="height:110px;background:${x[4]};display:flex;justify-content:center;align-items:center">${garment(x[3],'style="height:100px"')}</div><div style="padding:8px"><div style="font-weight:700;font-size:12px">${x[0]}</div><div style="font-size:11px;color:var(--muted)">RWF ${x[1]} · ${x[2]}</div><div class="btn pri" style="height:30px;font-size:11.5px;margin-top:6px;border-radius:9px">✨ Try on</div></div></div>`).join('')}</div>
+<div class="bub them" id="s3" style="font-size:12px">Tip: for a <i>gusaba</i> ceremony, pair it with a gold headwrap from Twiyubake Coop 💛</div></div>
+<div style="position:absolute;left:12px;right:12px;bottom:18px;height:48px;border-radius:24px;background:#fff;border:1px solid var(--line);display:flex;align-items:center;padding:0 6px 0 16px;color:#999;font-size:13px">Andika cyangwa uvuge… <span style="margin-left:auto;font-size:10.5px;margin-right:8px">RW · EN · FR</span><div id="mic" style="width:38px;height:38px;border-radius:50%;background:var(--terra);color:#fff;display:flex;align-items:center;justify-content:center">🎤</div></div></div>`;
+S.ord=`<div class="screen" id="ord" style="background:#6B5B50">
+<div style="position:absolute;inset:0;opacity:.35;background:linear-gradient(180deg,#F3E3CF,#EAD5BC)"></div>${SB(1)}
+<div class="sheet" style="height:680px">
+<div class="grab"></div>
+<div style="font-size:18px;font-weight:800">Order from Uwase Couture</div>
+<div id="sizeRec" style="margin-top:10px;background:#DCEFE5;border-radius:14px;padding:11px 12px;font-size:12.5px"><b style="color:var(--green)">📏 Your size: M · Good fit ✓</b><div style="color:#355;margin-top:3px">Based on your measurement profile · Waist comfortable · Hips slightly loose</div></div>
+<div style="font-weight:700;margin-top:14px;font-size:13px">Delivery</div>
+<div class="opt" id="d1"><span class="rd"></span>🏠 Pickup at Kimihurura <span style="margin-left:auto;font-weight:700">Free</span></div>
+<div class="opt" id="d2"><span class="rd"></span>🛵 Delivery in Kigali (by the maker) <span style="margin-left:auto;font-weight:700">1,500</span></div>
+<div style="font-weight:700;margin-top:14px;font-size:13px">Payment</div>
+<div class="opt" id="p1"><span class="rd"></span><span style="background:#FFCC00;color:#000;font-weight:800;font-size:10px;padding:3px 6px;border-radius:6px">MoMo</span> MTN Mobile Money</div>
+<div class="opt" id="p2"><span class="rd"></span><span style="background:#E40000;color:#fff;font-weight:800;font-size:10px;padding:3px 6px;border-radius:6px">airtel</span> Airtel Money</div>
+<div class="opt" id="p3"><span class="rd"></span>💬 Arrange on WhatsApp with the maker</div>
+<div style="font-size:11.5px;color:var(--muted);margin-top:10px">🔐 Paid directly to <b>Uwase Couture</b>'s merchant account</div>
+<div class="row" style="justify-content:space-between;margin-top:10px;font-size:14px"><span>Total</span><b id="tot">RWF 35,000</b></div>
+<div class="btn pri" id="payBtn" style="margin-top:12px">Pay with Mobile Money</div></div></div>`;
+S.momo=`<div class="screen" id="momo" style="background:#1E1A17">${SB(1)}
+<div id="mPrompt" style="position:absolute;left:24px;right:24px;top:200px;background:#fff;border-radius:20px;padding:20px;box-shadow:0 20px 50px rgba(0,0,0,.5)">
+ <div class="row"><span style="background:#FFCC00;color:#000;font-weight:800;font-size:12px;padding:4px 8px;border-radius:7px">MoMo</span><b>Mobile Money</b></div>
+ <div style="margin-top:14px;font-size:14px;line-height:1.5">Pay <b>RWF 36,500</b> to<br><b>UWASE COUTURE</b> (merchant 0457 21)?<br><span style="font-size:12px;color:var(--muted)">Ref: NY-24817 · Nyambika order</span></div>
+ <div style="margin-top:14px;font-size:12.5px">Enter PIN to confirm</div>
+ <div class="row" style="gap:14px;margin-top:10px;justify-content:center" id="pins">${[0,1,2,3,4].map(i=>`<span id="pin${i}" style="width:16px;height:16px;border-radius:50%;border:2px solid #999"></span>`).join('')}</div>
+ <div class="row" style="margin-top:18px"><div class="btn sec2" style="flex:1;height:42px">Cancel</div><div class="btn" id="mOk" style="flex:1;height:42px;background:#FFCC00;color:#000">Confirm</div></div></div>
+<div id="mDone" style="position:absolute;inset:0;background:var(--cream);opacity:0;text-align:center;padding-top:150px">
+ <div id="okCirc" style="width:110px;height:110px;border-radius:50%;background:var(--green);color:#fff;font-size:56px;margin:0 auto;display:flex;align-items:center;justify-content:center">✓</div>
+ <div style="font-size:24px;font-weight:800;margin-top:22px">Order confirmed!</div>
+ <div style="color:var(--muted);margin-top:8px;font-size:13.5px;line-height:1.5">RWF 36,500 paid directly to<br><b style="color:var(--ink)">Uwase Couture</b> · Order NY-24817</div>
+ <div style="margin:26px 26px 0;background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;text-align:left;font-size:12.5px;line-height:1.6">👗 Kitenge Wrap Dress · Blue · M<br>🛵 Delivery in Kigali · est. Friday<br>💬 Uwase will message you on WhatsApp</div>
+ <div class="btn pri" style="margin:22px 26px 0">Track my order</div></div></div>`;
+S.trk=`<div class="screen" id="trk">${SB()}
+<div id="notif" style="position:absolute;left:10px;right:10px;top:-90px;background:rgba(255,255,255,.97);border-radius:18px;padding:12px 14px;box-shadow:0 10px 30px rgba(0,0,0,.25);z-index:20;display:flex;gap:10px;align-items:center"><div style="width:38px;height:38px;border-radius:10px;background:#25D366;color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;flex:none">✆</div><div style="font-size:12.5px"><b>WhatsApp · Uwase Couture</b><div>Your blue dress is being sewn 🧵 Ready Thursday!</div></div></div>
+<div class="topnav"><div class="backb">←</div><div style="font-weight:800;font-size:16px">Order NY-24817</div></div>
+<div style="margin:6px 16px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px;display:flex;gap:12px;align-items:center;--dress:${C.blue}"><div style="width:58px;height:70px;border-radius:12px;background:#E4ECF6;display:flex;justify-content:center;align-items:center">${garment(C.blue,'style="height:62px"')}</div><div><b style="font-size:13.5px">Kitenge Wrap Dress</b><div style="font-size:12px;color:var(--muted)">Blue · M · RWF 36,500 · Uwase Couture</div></div></div>
+<div style="margin:14px 30px" id="tl">
+${[['Paid via MoMo','Mon 9:47'],['Accepted by Uwase Couture','Mon 10:02'],['Being made (made to order)','Tue'],['Out for delivery','Thu'],['Delivered','']].map((x,i)=>`<div class="tli" id="tl${i}" style="display:flex;gap:14px;position:relative;padding-bottom:20px"><span class="tdot" style="width:20px;height:20px;border-radius:50%;background:#E8E0D5;flex:none;z-index:2"></span><div><div style="font-weight:700;font-size:13px">${x[0]}</div><div style="font-size:11px;color:var(--muted)">${x[1]}</div></div>${i<4?'<span style="position:absolute;left:9px;top:20px;width:2px;height:100%;background:#E8E0D5"></span>':''}</div>`).join('')}</div>
+<div id="review" style="margin:0 16px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;opacity:0"><b style="font-size:13.5px">How was your order?</b><div class="stars" id="stars">★★★★★</div><div style="font-size:12px;color:var(--muted)">"Perfect fit and beautiful fabric. Murakoze Uwase!"</div></div>${NAV(4)}</div>`;
+S.prv=`<div class="screen" id="prv">${SB()}
+<div class="hdr"><div><div class="hello">Me</div><div class="h1">My fitting room</div></div><div class="avatar">A</div></div>
+<div class="row" style="padding:0 16px;gap:10px">${[C.blue,C.terra,C.green].map(c=>`<div style="flex:1;height:120px;border-radius:14px;background:#E9DFD2;display:flex;justify-content:center;align-items:flex-end;overflow:hidden;position:relative;--dress:${c}">${person('dress',c,'style="height:115px"')}<span style="position:absolute;left:5px;top:5px;font-size:8.5px;background:rgba(30,26,23,.7);color:#fff;padding:2px 5px;border-radius:5px">AI</span></div>`).join('')}</div>
+<div class="sec" style="margin-top:6px">Privacy centre 🔒</div>
+<div style="margin:0 16px;background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;font-size:13px">
+ <div style="padding:12px 14px;border-bottom:1px solid #F0E8DD;display:flex;justify-content:space-between"><span>📷 My try-on photos</span><b id="phCount">1 · auto-delete in 29 days</b></div>
+ <div style="padding:12px 14px;border-bottom:1px solid #F0E8DD;display:flex;justify-content:space-between"><span>📏 Measurement profile</span><b>Private</b></div>
+ <div style="padding:12px 14px;border-bottom:1px solid #F0E8DD;display:flex;justify-content:space-between;align-items:center"><span>🤖 Use my photos to improve AI</span><span style="width:42px;height:24px;border-radius:12px;background:#DDD;position:relative"><span style="position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;background:#fff"></span></span></div>
+ <div style="padding:12px 14px;border-bottom:1px solid #F0E8DD;display:flex;justify-content:space-between"><span>✅ My consents</span><b style="color:var(--terra)">View ›</b></div>
+ <div style="padding:12px 14px;display:flex;justify-content:space-between"><span>⬇️ Download my data</span><b style="color:var(--terra)">Request ›</b></div></div>
+<div class="btn sec2" id="delBtn" style="margin:14px 16px 0;color:#B3261E;border-color:#F0C9C4">🗑 Delete all my photos</div>
+<div class="toast" id="toast" style="opacity:0">✓ Photos deleted everywhere, including our AI partners</div>${NAV(4)}</div>`;
+S.vr=`<div class="screen" id="vr" style="background:#0E0B14;color:#fff">${SB(1)}
+<div style="position:absolute;inset:0;perspective:420px;overflow:hidden">
+ <div style="position:absolute;inset:0;background:radial-gradient(500px 300px at 50% 30%,#3B2A55,#0E0B14)"></div>
+ <div id="vrWorld" style="position:absolute;left:50%;top:50%;width:0;height:0;transform-style:preserve-3d">
+  <div style="position:absolute;left:-600px;top:120px;width:1200px;height:2400px;transform:rotateX(90deg) translateZ(-120px);transform-origin:50% 0;background:repeating-linear-gradient(0deg,rgba(227,163,59,.35) 0 2px,transparent 2px 80px),repeating-linear-gradient(90deg,rgba(227,163,59,.35) 0 2px,transparent 2px 80px),#1A1424"></div>
+  ${[['Uwase Couture','#B4532A',-120,-260,28],['Twiyubake Coop','#2F7D5B',120,-260,-28],['Kigali Threads','#1F5FA8',-120,-760,28],['Mama Kitenge','#E3A33B',120,-760,-28]].map(b=>`<div style="position:absolute;left:${b[2]-75}px;top:-150px;width:150px;height:250px;transform:translateZ(${b[3]}px) rotateY(${b[4]}deg);background:linear-gradient(180deg,${b[1]},#1A1424);border-radius:14px;border:2px solid rgba(255,255,255,.25);text-align:center;padding-top:14px;font-weight:800;font-size:15px;--dress:${b[1]}">${b[0]}<div style="height:170px;display:flex;justify-content:center;align-items:flex-end">${garment(b[1],'style="height:150px"')}</div><div style="font-size:11px;font-weight:600;opacity:.85">Visit page →</div></div>`).join('')}
+ </div></div>
+<div style="position:absolute;left:16px;top:56px;right:16px" class="row"><span style="background:rgba(0,0,0,.5);padding:7px 12px;border-radius:12px;font-size:12px">🥽 Nyambika Virtual Showroom</span><span class="badge" style="background:#7B3FA0;color:#fff;margin:0 0 0 auto">R3</span></div>
+<div style="position:absolute;left:20px;right:20px;bottom:30px">
+ <div style="text-align:center;font-size:11.5px;opacity:.75;margin-bottom:10px">WebXR · Meta Quest · Android XR · Apple Vision Pro · or 3D on phone</div>
+ <div class="btn" id="vrBtn" style="background:#7B3FA0;color:#fff">🥽 Enter VR showroom</div></div></div>`;
+
+const scr=$('screen');
+for(const k in S){scr.insertAdjacentHTML('beforeend',S[k]);}
+
+// ---------- journey ----------
+const PH=['Discover','Member page','Product','Consent','Capture','AI try-on','Share','Explore 3D · AI','Order & pay','Track','Privacy','Immersive'];
+const J=$('journey');const jw=1760-60;
+PH.forEach((n,i)=>{const d=document.createElement('div');d.className='jst';d.id='j'+i;d.style.left=(30+jw*i/(PH.length-1))+'px';d.innerHTML='<i></i>'+n;J.appendChild(d);});
+
+// ---------- scenes ----------
+const T=(p,x,y)=>[p,x,y];
+const SC=[
+{k:'intro',scr:'splash',ph:-1},
+{k:'splash',scr:'splash',ph:0,rel:'R1',step:'01 · Welcome',title:'Choose your language',desc:'First launch is a single, friendly choice. Kinyarwanda is first-class, alongside English and French.',ui:['Brand mark and promise: "Try it on. Buy from the maker."','Language selector: RW · EN · FR (changeable later in Me)','One primary action: Continue'],
+ co:[[200,'Brand & value proposition'],[470,'Language: RW · EN · FR'],[678,'Single primary CTA']],taps:[T(.55,180,548),T(.82,180,678)]},
+{k:'home',scr:'home',ph:0,rel:'R1',step:'02 · Discover',title:'Home = Nyambika directory',desc:'Home helps shoppers discover member pages (tailors, cooperatives and sellers), not a pooled marketplace.',ui:['Greeting + search with photo (visual) search','Filter chips: Tailors · Cooperatives · Sellers · Try-on','Featured pages carousel with verified badges','Cooperative of the month · Trending try-ons','Bottom nav: Home · Explore · Fitting room · Stylist · Me'],
+ co:[[142,'Search + visual search 📷'],[196,'Member-type filter chips'],[300,'Featured member pages'],[738,'Bottom navigation (5 tabs)']],taps:[T(.9,170,142)]},
+{k:'search',scr:'search',ph:0,rel:'R1',step:'03 · Search',title:'Search & filter "Try-on ready"',desc:'Results always show the owning page, so traffic flows to members. The Try-on filter shows only items the AI can render well.',ui:['Search field with typo-tolerant, RW/EN/FR search','Filter chips incl. ✨ Try-on ready','Result count by items and pages','Product card: image, price, "by <Page> · type", badges'],
+ co:[[70,'Search field (multilingual)'],[130,'✨ Try-on ready filter'],[300,'Product card + badges'],[402,'"by Page" → member page']],taps:[T(.45,96,130),T(.86,92,402)]},
+{k:'page',scr:'page',ph:1,rel:'R1',step:'04 · Member page',title:"The maker's own page",desc:'Each member manages their own storefront: identity, trust signals, services and collections. Nyambika only hosts.',ui:['Cover, logo, name + ✓ Verified badge','Type · location · rating · made-to-measure','Follow · WhatsApp · Share actions','Tabs: Featured · Collections · Services · Reviews · About','Services card (tailors) + product grid with badges'],
+ co:[[200,'Identity + verification'],[272,'Follow · WhatsApp · Share'],[318,'Page tabs'],[380,'Tailor services'],[560,'Collection grid']],taps:[T(.88,92,330)]},
+{k:'product',scr:'prod',ph:2,rel:'R1',step:'05 · Product',title:'One clear action: Try it on me',desc:'The product page combines the information needed to decide with a single, prominent try-on action.',ui:['Gallery with labelled AI model image','Title, price, maker, lead time, rating','Colour + size selectors, size guide','Primary CTA: ✨ Try it on me','Secondary: 3D/AR · Order via WhatsApp','Provenance: fabric, Made in Kigali, paid to maker'],
+ co:[[120,'Labelled AI model image'],[420,'Price · maker · lead time'],[500,'Colour & size + size guide'],[570,'Primary CTA: Try it on me'],[626,'3D/AR · WhatsApp order']],taps:[T(.84,180,570)]},
+{k:'consent',scr:'consent',ph:3,rel:'R1',step:'06 · Consent',title:'Clear, explicit consent',desc:'Before the first try-on, a short layered notice explains how the photo is used. This meets Rwanda Law 058/2021 and the privacy-by-design rules.',ui:['Bottom sheet over the product (keeps context)','5 plain-language promises with icons','18+ and own-photo attestation checkbox','Primary CTA enabled only after consent','Alternative: try on an AI model instead'],
+ co:[[200,'Consent bottom sheet'],[380,'Plain-language promises'],[548,'18+ / own-photo attestation'],[598,'Agree (enabled after tick)'],[644,'No-photo alternative']],taps:[T(.62,32,548),T(.84,180,598)]},
+{k:'camera',scr:'cam',ph:4,rel:'R1',step:'07 · Capture',title:'Guided photo capture',desc:'A pose outline and live, on-device checks give a usable photo the first time. Nothing is uploaded until the checks pass.',ui:['Instruction banner: distance and framing','Pose outline overlay','Live checks: body · facing · light · one person','Shutter · gallery upload · switch camera'],
+ co:[[72,'Framing instruction'],[300,'Pose outline overlay'],[620,'On-device quality checks'],[748,'Shutter / gallery']],taps:[T(.84,180,748)]},
+{k:'generating',scr:'gen',ph:5,rel:'R1',step:'08 · AI processing',title:'Transparent AI progress',desc:'Async generation with honest steps. A quality and fairness guard checks identity and skin tone before anything is shown.',ui:['Inputs preview: your photo + garment','Progress ring','Step list: upload → generate → fairness check → credentials','Free try-on quota (4 of 5 left this week)'],
+ co:[[130,'Inputs preview'],[290,'Progress indicator'],[430,'Fairness & quality guard step'],[748,'Quota / credits meter']],taps:[]},
+{k:'result',scr:'res',ph:5,rel:'R1',step:'09 · Result',title:'Try-on result & compare',desc:'The result is clearly labelled as an AI preview with Content Credentials. Colour switches regenerate it, and looks can be compared side by side.',ui:['Before/After wipe','Labels: AI preview · Content Credentials (C2PA)','Colour switcher + size fit hint','Compare strip (up to 4 looks)','Share · Save · Order + 👍/👎 feedback'],
+ co:[[110,'AI preview label'],[300,'Before / After view'],[440,'C2PA content credentials'],[524,'Colour switcher'],[580,'Compare looks'],[646,'Share · Save · Order']],taps:[T(.36,124,524),T(.52,164,524),T(.68,124,524),T(.9,64,646)]},
+{k:'wa',scr:'wa',ph:6,rel:'R1',step:'10 · Share',title:'Share to WhatsApp',desc:'Shared looks carry a watermark, the AI label and a deep link back to the maker\'s page, so social sharing turns into page traffic.',ui:['Watermarked AI preview image','Rich link card → member product page','Native WhatsApp conversation (no new habit)'],
+ co:[[240,'Watermark + AI label'],[392,'Deep link to member page'],[540,'Friend\'s feedback']],taps:[]},
+{k:'viewer3d',scr:'v3d',ph:7,rel:'R2',step:'11 · 3D & AR',title:'Explore in 3D, view in AR',desc:'Selected products have optimised 3D models (GLB/USDZ). Shoppers rotate them, then place them life-size in their room.',ui:['Interactive 3D viewer (rotate / zoom)','Colour variants on the 3D model','"View in your space" AR button','Platform-native AR: Quick Look · Scene Viewer · WebXR'],
+ co:[[300,'3D model viewer'],[640,'Variant swatches'],[694,'AR launch button']],taps:[T(.5,180,694)]},
+{k:'stylist',scr:'sty',ph:7,rel:'R2',step:'12 · AI stylist',title:'AI stylist with Kinyarwanda voice',desc:'A conversational stylist understands voice in Kinyarwanda, English and French, and recommends only real items from member pages.',ui:['Voice message with transcript + translation','Grounded recommendations (page, price, stock)','Inline "Try on" on each card','Cultural tips (e.g. gusaba, gukwa)','Input: text or voice · language chip'],
+ co:[[110,'Voice + transcript'],[300,'Recommendations from pages'],[482,'Try on from chat'],[738,'Voice / text input']],taps:[T(.9,88,482)]},
+{k:'size',scr:'ord',ph:8,rel:'R1',step:'13 · Order',title:'Size, delivery & payment',desc:'Size comes from the shopper\'s saved measurements. The maker delivers, and payment goes straight to their Mobile Money account.',ui:['Order sheet titled with the member page','Size recommendation with fit notes','Delivery options set by the maker','MTN MoMo · Airtel Money · WhatsApp','"Paid directly to <maker>" trust line'],
+ co:[[208,'Size recommendation'],[364,'Delivery (by maker)'],[450,'Mobile Money options'],[594,'Paid directly to maker'],[668,'Pay CTA']],taps:[T(.32,180,364),T(.55,180,450),T(.86,180,668)]},
+{k:'momo',scr:'momo',ph:8,rel:'R1',step:'14 · Pay',title:'Approve on Mobile Money',desc:'A push prompt to the shopper\'s phone, with no card needed. The confirmation shows that the maker was paid directly.',ui:['Mobile Money push prompt (PIN)','Merchant = member page, with order reference','Confirmation screen + order summary','Next step: Track my order'],
+ co:[[260,'MoMo push prompt (merchant = maker)'],[370,'PIN confirmation'],[540,'Confirmation + order summary']],taps:[T(.48,250,416)]},
+{k:'track',scr:'trk',ph:9,rel:'R1',step:'15 · Track & review',title:'Track, chat, review',desc:'A clear status timeline, WhatsApp updates from the maker, and a review after delivery that builds the page\'s reputation.',ui:['WhatsApp notification from the maker','Order card + status timeline','Made-to-order steps','Rating & review prompt'],
+ co:[[60,'WhatsApp update'],[150,'Order summary'],[330,'Status timeline'],[490,'Rating & review']],taps:[T(.84,130,470)]},
+{k:'privacy',scr:'prv',ph:10,rel:'R1',step:'16 · Fitting room & privacy',title:'Control my data',desc:'Saved looks live in the private fitting room. The privacy centre shows retention, consents and one-tap deletion.',ui:['My fitting room (saved AI looks, labelled)','Photo retention countdown','AI-training opt-in (off by default)','Consents · download my data','Delete all my photos'],
+ co:[[150,'Saved looks (private)'],[300,'Photo retention'],[394,'AI-training opt-in (off)'],[550,'Delete everywhere']],taps:[T(.62,180,550)]},
+{k:'vr',scr:'vr',ph:11,rel:'R3',step:'17 · Immersive',title:'Virtual showroom (VR)',desc:'Member pages become booths in a WebXR showroom for launches and fashion shows. Every booth links back to the member\'s page.',ui:['3D showroom with member booths','Headset or 3D-on-phone mode','Booth → "Visit page" (member stays the owner)','Events: virtual fashion shows'],
+ co:[[90,'Showroom header'],[380,'Member booths → member pages'],[726,'Enter VR (WebXR)']],taps:[T(.85,180,726)]},
+{k:'outro',scr:'vr',ph:-2}
+];
+// durations
+let DUR={};
+function setDurs(d){DUR=d;let t=0;for(const s of SC){s.dur=(d[s.k]||5)+1.3;s.st=t;t+=s.dur;}window.TOTAL=t;return t;}
+window.setDurs=setDurs;
+
+// ---------- per-scene animation ----------
+const F={};
+F.splash=(p)=>{$('spLogo').style.opacity=1;$('spLogo').style.transform=`translateY(${(1-ease(seg(p,0,.25)))*30}px)`;
+ $('spLang').style.opacity=ease(seg(p,.15,.35));
+ const on=p>.55;$('l2').style.borderColor=on?'var(--terra)':'';$('l2').style.background=on?'#FFF6F1':'';$('l2').style.color=on?'var(--terra)':'';};
+F.intro=(p)=>{$('spLogo').style.opacity=0;$('spLang').style.opacity=0;};
+F.home=(p)=>{const s=ease(seg(p,.25,.5))-ease(seg(p,.62,.8));$('homeScroll').style.transform=`translateY(${-300*s}px)`;
+ $('hsb').style.borderColor=p>.9?'var(--terra)':'';};
+F.search=(p)=>{const full='kitenge dress';const n=Math.round(full.length*seg(p,.03,.3));$('q').textContent=full.slice(0,n);
+ $('caret').style.opacity=(p<.32&&Math.floor(p*40)%2)?1:(p<.32?1:0);
+ const shown=p>.32;$('results').style.opacity=shown?ease(seg(p,.32,.4)):0;
+ const tr=p>.45;$('chipTry').classList.toggle('on',tr);
+ $('rmeta').textContent=!shown?'':(tr?'18 try-on ready items · from 7 member pages':'46 items · from 12 member pages');
+ const c=$('results').children[0];c.style.boxShadow=p>.84?'0 0 0 3px var(--terra)':'';};
+F.page=(p)=>{const s=ease(seg(p,.35,.65));$('pageScroll').style.transform=`translateY(${-220*s}px)`;$('pageSb').style.opacity=seg(s,.4,.7);};
+F.product=(p)=>{$('tryBtn').style.transform=`scale(${1+0.04*Math.sin(p*20)*(p>.6&&p<.84?1:0)})`;};
+F.consent=(p)=>{$('cSheet').style.transform=`translateY(${(1-ease(seg(p,0,.12)))*100}%)`;
+ [...document.querySelectorAll('#cItems .ci')].forEach((e,i)=>{const a=ease(seg(p,.12+i*.07,.2+i*.07));e.style.opacity=a;e.style.transform=`translateX(${(1-a)*20}px)`;});
+ const ck=p>.62;$('cbox').style.background=ck?'var(--terra)':'';$('cbox').style.borderColor=ck?'var(--terra)':'#BBB';$('cbox').textContent=ck?'✓':'';$('cAgree').style.opacity=ck?1:.45;};
+F.camera=(p)=>{[0,1,2,3].forEach(i=>{const ok=p>.25+i*.13;const e=$('ck'+i);e.classList.toggle('ok',ok);e.querySelector('i').textContent=ok?'✓':'';});
+ $('poseOutline').setAttribute('stroke',p>.66?'#7CF2B0':'#F2C77C');
+ $('flash').style.opacity=p>.85?Math.max(0,1-(p-.85)/.08):0;};
+F.generating=(p)=>{const pr=Math.min(100,Math.round(100*ease(seg(p,.03,.95))));$('pct').textContent=pr+'%';
+ $('ring').style.background=`conic-gradient(var(--terra) ${pr*3.6}deg,#E8E0D5 0)`;
+ const done=[.15,.58,.8,.93];done.forEach((d,i)=>{const e=$('gs'+i);const ok=p>d;const act=!ok&&(i===0||p>done[i-1]);
+  $('gsp'+i).style.display=ok?'none':'block';$('gsp'+i).style.opacity=act?1:.35;$('gsp'+i).style.transform=`rotate(${p*2000}deg)`;
+  const ic=e.querySelector('i');ic.style.display=ok?'flex':'none';ic.textContent='✓';e.classList.toggle('ok',ok);e.style.opacity=(ok||act)?1:.5;});};
+F.result=(p)=>{const w=ease(seg(p,.03,.22));const W=332;$('after').style.clipPath=`inset(0 ${(1-w)*100}% 0 0)`;$('wipe').style.left=(w*W)+'px';$('wipe').style.opacity=w<1?1:0;
+ let col=C.terra,si=0;if(p>.36){col=C.blue;si=1}if(p>.52){col=C.green;si=2}if(p>.68){col=C.blue;si=1}
+ $('res').style.setProperty('--dress',col);[0,1,2].forEach(i=>{$('sw'+i).style.boxShadow=i===si?'0 0 0 3px #fff,0 0 0 5px var(--ink)':'';});
+ $('ct0').style.opacity=p>.2?1:0;$('ct1').style.opacity=p>.38?1:0;$('ct2').style.opacity=p>.54?1:0;
+ [0,1,2].forEach(i=>{$('ct'+i).style.boxShadow=(i===si&&p>.2)?'0 0 0 2px var(--terra)':''});
+ $('thumb').style.transform=p>.8?'scale(1.25)':'';};
+F.wa=(p)=>{const a=(x)=>ease(seg(p,x,x+.08));$('w1').style.opacity=a(.05);$('w2').style.opacity=a(.25);$('wt').style.display=(p>.42&&p<.62)?'block':'none';$('w3').style.opacity=a(.62);$('w3').style.display=p>.62?'block':'none';};
+F.viewer3d=(p)=>{const ang=p*Math.PI*3.2;const sx=Math.cos(ang);const d=$('dress3d');d.style.transform=`scaleX(${Math.max(.18,Math.abs(sx))*(sx<0?-1:1)})`;
+ d.style.filter=`brightness(${.75+.35*Math.abs(sx)})`;const ar=ease(seg(p,.55,.68));$('arRoom').style.opacity=ar;$('v3dStage').style.opacity=1-ar;$('v3dUi').style.opacity=1-ar;};
+F.stylist=(p)=>{const a=(x)=>ease(seg(p,x,x+.07));$('s1').style.opacity=a(.03);
+ [...document.querySelectorAll('#wave b')].forEach((b,i)=>{b.style.opacity=(i/22)<seg(p,.03,.2)?1:.3});
+ $('s1t').style.opacity=a(.2);$('sTyping').style.display=(p>.28&&p<.42)?'block':'none';
+ $('s2').style.display=p>.42?'block':'none';$('s2').style.opacity=a(.42);
+ [0,1,2].forEach(i=>{const e=$('sc'+i);const v=a(.52+i*.08);e.style.opacity=v;e.style.transform=`translateX(${(1-v)*40}px)`;});
+ $('s3').style.display=p>.76?'block':'none';$('s3').style.opacity=a(.76);
+ $('mic').style.boxShadow=`0 0 0 ${p<.22?6+4*Math.sin(p*60):0}px rgba(180,83,42,.25)`;};
+F.size=(p)=>{$('sizeRec').style.opacity=ease(seg(p,.02,.15));
+ $('d2').classList.toggle('sel',p>.32);$('d1').classList.toggle('sel',false);$('p1').classList.toggle('sel',p>.55);
+ $('tot').textContent=p>.32?'RWF 36,500':'RWF 35,000';$('payBtn').textContent=p>.55?'Pay RWF 36,500 with MoMo':'Pay with Mobile Money';};
+F.momo=(p)=>{const n=Math.floor(6*seg(p,.1,.4));[0,1,2,3,4].forEach(i=>{$('pin'+i).style.background=i<n?'#1E1A17':'';$('pin'+i).style.borderColor=i<n?'#1E1A17':'#999'});
+ $('mPrompt').style.transform=`translateY(${(1-ease(seg(p,0,.1)))*80}px)`;$('mPrompt').style.opacity=ease(seg(p,0,.1));
+ const d=ease(seg(p,.55,.65));$('mDone').style.opacity=d;$('okCirc').style.transform=`scale(${.5+.5*ease(seg(p,.58,.72))})`;};
+F.track=(p)=>{[0,1,2,3,4].forEach(i=>{const th=[0,.1,.25,.62,.72][i];const ok=p>th;const cur=i===2&&p>.25&&p<.62;
+  const dt=$('tl'+i).querySelector('.tdot');dt.style.background=ok?(cur?'var(--gold)':'var(--green)'):'#E8E0D5';dt.style.boxShadow=cur?'0 0 0 5px rgba(227,163,59,.3)':'';});
+ const nb=ease(seg(p,.3,.38))-ease(seg(p,.6,.68));$('notif').style.top=(-90+nb*140)+'px';
+ $('review').style.opacity=ease(seg(p,.74,.8));const st=Math.round(5*seg(p,.8,.95));$('stars').innerHTML='<span style="color:#E3A33B">'+'★'.repeat(st)+'</span>'+'★'.repeat(5-st);};
+F.privacy=(p)=>{const del=p>.64;$('toast').style.opacity=del?ease(seg(p,.64,.7)):0;$('phCount').textContent=del?'0 · none stored':'1 · auto-delete in 29 days';};
+F.vr=(p)=>{$('vrWorld').style.transform=`translateZ(${-200+ease(p)*520}px) translateY(${20}px)`;$('vrBtn').style.boxShadow=`0 0 0 ${4+4*Math.sin(p*30)}px rgba(123,63,160,.35)`;};
+F.outro=()=>{};
+
+// outro IA
+(function(){const ia=$('ia');const N=[
+ ['main',0,0,'🏠 Home / Directory','Search · visual search · member-type chips · featured pages'],
+ ['main',290,0,'🏪 Member page','Tailor · Cooperative · Seller · owned by the member'],
+ ['main',580,0,'👗 Product','Price · variants · size guide · Try it on me'],
+ ['main',870,0,'🔒 Consent','Once · plain language · 18+ attestation'],
+ ['main',1160,0,'📷 Capture','Pose outline · on-device checks'],
+ ['main',1160,250,'✨ AI try-on','Generate → fairness guard → C2PA label'],
+ ['main',870,250,'🔁 Compare & share','Colours · looks · WhatsApp link'],
+ ['main',580,250,'🛒 Order & pay','Size · maker delivery · MoMo / Airtel / WhatsApp'],
+ ['main',290,250,'📦 Track & review','Timeline · WhatsApp updates · review'],
+ ['main',0,250,'👤 Me · Fitting room','Saved looks · measurements · privacy centre'],
+ ['r2',290,430,'🧊 3D & AR (R2)','GLB/USDZ viewer · Quick Look · Scene Viewer'],
+ ['r2',580,430,'✨ AI stylist (R2)','RW/EN/FR voice · grounded picks'],
+ ['r3',870,430,'🥽 VR showroom (R3)','WebXR booths · fashion shows · 3D avatar']];
+ N.forEach((n,i)=>{const d=document.createElement('div');d.className='node '+n[0];d.style.left=n[1]+'px';d.style.top=n[2]+'px';d.id='n'+i;d.innerHTML=`<b>${n[3]}</b>${n[4]}`;ia.appendChild(d);});
+ const A=[[232,55,56],[522,55,56],[812,55,56],[1102,55,56]];
+ A.forEach((a,i)=>{const e=document.createElement('div');e.className='arrow';e.style.left=a[0]+'px';e.style.top=a[1]+'px';e.style.width=a[2]+'px';e.id='a'+i;ia.appendChild(e);});
+ // down arrow capture->try-on
+ const dn=document.createElement('div');dn.style.cssText='position:absolute;left:1272px;top:150px;width:3px;height:96px;background:var(--gold)';dn.id='a4';ia.appendChild(dn);
+ [[1102,305],[812,305],[522,305],[232,305]].forEach((a,i)=>{const e=document.createElement('div');e.className='arrow';e.style.left=(a[0])+'px';e.style.top=a[1]+'px';e.style.width='56px';e.style.transform='scaleX(-1)';e.id='a'+(5+i);ia.appendChild(e);});
+})();
+
+// ---------- render ----------
+let lastScene=-1;
+function render(t){
+ let i=SC.findIndex(s=>t>=s.st&&t<s.st+s.dur);if(i<0)i=SC.length-1;
+ const s=SC[i];const lt=t-s.st;const p=clamp(lt/s.dur);
+ // overlays
+ const intro=$('intro'),outro=$('outro');
+ if(s.k==='intro'){intro.style.visibility='visible';intro.style.opacity=1-ease(seg(lt,s.dur-.6,s.dur));}else{intro.style.visibility='hidden';}
+ if(s.k==='outro'){outro.style.visibility='visible';outro.style.opacity=ease(seg(lt,0,.6));
+   for(let k=0;k<13;k++){const n=$('n'+k);const a=ease(seg(p,.05+k*.045,.12+k*.045));n.style.opacity=a;n.style.transform=`translateY(${(1-a)*16}px)`;}
+   for(let k=0;k<9;k++){const e=$('a'+k);if(e)e.style.opacity=ease(seg(p,.1+k*.05,.16+k*.05));}
+ }else outro.style.visibility='hidden';
+ // left panel
+ if(i!==lastScene){
+  if(s.title){$('stepNo').textContent=s.step;$('title').textContent=s.title;$('desc').textContent=s.desc;
+   const r=$('rel');r.textContent=s.rel==='R1'?'R1 · MVP':s.rel==='R2'?'R2 · Grow':'R3 · Expand';r.className=s.rel.toLowerCase();
+   $('uiList').innerHTML=s.ui.map(x=>`<div>${x}</div>`).join('');
+   $('callouts').innerHTML=(s.co||[]).map((c,j)=>`<div class="co" id="co${j}" style="top:${82+c[0]}px"><div class="dt"></div><div class="ln"></div><div class="lb">${c[1]}</div></div>`).join('');}
+  $('caption').textContent=NAR[s.k]||'';
+  lastScene=i;}
+ const fa=ease(seg(lt,0,.45));$('left').style.opacity=s.title?fa:0;$('left').style.transform=`translateX(${(1-fa)*-24}px)`;
+ $('caption').style.opacity=(s.title?fa:0);
+ (s.co||[]).forEach((c,j)=>{const e=$('co'+j);if(!e)return;const a=ease(seg(lt,.35+j*.25,.75+j*.25));e.style.opacity=a;e.querySelector('.lb').style.transform=`translateX(${(1-a)*16}px)`;});
+ // journey
+ const jv=s.ph>=0;$('journey').style.opacity=jv?1:0;
+ PH.forEach((n,k)=>{const e=$('j'+k);e.className='jst'+(k<s.ph?' done':'')+(k===s.ph?' on':'');});
+ $('jfill').style.width=(jv?jw*Math.max(0,s.ph)/(PH.length-1):0)+'px';
+ // phone
+ $('phone').style.opacity=s.k==='outro'?0:1;
+ const prev=i>0?SC[i-1].scr:null;
+ document.querySelectorAll('.screen').forEach(e=>{e.style.visibility='hidden';e.style.transform='';e.style.zIndex=1;});
+ const cur=$(s.scr==='page'?'pageS':s.scr);cur.style.visibility='visible';cur.style.zIndex=3;
+ if(prev&&prev!==s.scr&&lt<.45){const pe=$(prev==='page'?'pageS':prev);pe.style.visibility='visible';pe.style.zIndex=2;const e=ease(lt/.45);
+  cur.style.transform=`translateX(${(1-e)*100}%)`;pe.style.transform=`translateX(${-e*30}%)`;}
+ if(F[s.k])F[s.k](p,lt,s.dur);
+ // taps
+ const fg=$('finger'),rp=$('ripple');fg.style.opacity=0;rp.style.opacity=0;
+ (s.taps||[]).forEach(tp=>{const tt=lt-tp[0]*s.dur;if(tt>-.6&&tt<.45){
+   const a=tt<0?ease(seg(tt,-.6,-.25)):1-ease(seg(tt,.2,.45));fg.style.opacity=a;
+   const off=tt<0?(1-ease(seg(tt,-.6,0)))*40:0;fg.style.left=(tp[1]+off)+'px';fg.style.top=(tp[2]+off*1.2)+'px';
+   fg.style.transform=`scale(${tt>-.08&&tt<.12?.82:1})`;
+   if(tt>0&&tt<.45){const r=tt/.45;rp.style.opacity=1-r;rp.style.left=tp[1]+'px';rp.style.top=tp[2]+'px';rp.style.transform=`scale(${1+r*1.6})`;}}});
+}
+window.render=render;
+let NAR={};window.setNar=(n)=>{NAR=n};
+</script></body></html>

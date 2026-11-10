@@ -1,0 +1,398 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Nyambika Vision 2.0 Prototype</title>
+<style>
+:root{--terra:#E0703F;--terra2:#B4532A;--gold:#F2B84B;--violet:#8B5CF6;--sky:#38BDF8;--mint:#34D399;--ink:#0B0A0F;--glass:rgba(255,255,255,.09);--gline:rgba(255,255,255,.16);--txt:#F5EFE8;--mut:#A79E96}
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:1920px;height:1080px;overflow:hidden;background:#07060A;font-family:"Avenir Next","Helvetica Neue",Helvetica,Arial,sans-serif;color:#fff}
+#stage{position:relative;width:1920px;height:1080px;overflow:hidden;background:#07060A}
+.blob{position:absolute;border-radius:50%;filter:blur(90px);opacity:.55}
+#topbar{position:absolute;left:80px;right:80px;top:34px;display:flex;justify-content:space-between;align-items:center;font-size:20px;color:#DCD3CA;z-index:5}
+#topbar b{font-size:24px;color:#fff}
+.mark{display:inline-block;width:34px;height:34px;border-radius:50%;vertical-align:middle;margin-right:12px;background:conic-gradient(from 0deg,var(--terra),var(--gold),var(--violet),var(--sky),var(--terra));box-shadow:0 0 20px rgba(242,184,75,.5)}
+.pillTop{border:1px solid rgba(255,255,255,.25);padding:6px 14px;border-radius:20px;font-size:16px;margin-left:10px}
+#left{position:absolute;left:80px;top:122px;width:830px;z-index:5}
+#stepNo{font-size:21px;letter-spacing:3px;color:var(--gold);font-weight:600;text-transform:uppercase}
+#title{font-size:60px;font-weight:800;line-height:1.05;margin-top:16px;background:linear-gradient(90deg,#fff 0%,#FFE7C7 60%,#F2B84B 100%);-webkit-background-clip:text;color:transparent}
+#desc{font-size:25px;line-height:1.45;margin-top:20px;color:#E4DAD0;max-width:800px}
+#box{margin-top:28px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:22px;padding:20px 26px;max-width:800px;backdrop-filter:blur(10px)}
+#box h4{font-size:15px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:10px}
+#list div{font-size:21px;line-height:1.35;color:#F4ECE2;padding:6px 0 6px 34px;position:relative}
+#list div span.g{position:absolute;left:0;top:4px;font-size:20px}
+#chips{margin-top:18px;display:flex;flex-wrap:wrap;gap:10px}
+#chips span{font-size:16px;padding:7px 14px;border-radius:16px;background:rgba(139,92,246,.18);border:1px solid rgba(139,92,246,.45);color:#E9DDFF}
+#caption{position:absolute;left:80px;width:830px;top:862px;font-size:21px;line-height:1.4;color:#fff;background:rgba(0,0,0,.4);border-left:4px solid var(--gold);padding:12px 18px;border-radius:8px;z-index:5}
+/* moments bar */
+#moments{position:absolute;left:80px;right:80px;top:960px;height:80px;z-index:5;display:flex;gap:14px}
+.mo{flex:1;border-radius:16px;padding:10px 16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:12px;color:#9C918A;font-size:16px}
+.mo b{font-size:20px;color:#CFC5BC;display:block}
+.mo i{font-style:normal;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.08);font-size:18px;flex:none}
+.mo.on{background:linear-gradient(120deg,rgba(224,112,63,.35),rgba(139,92,246,.3));border-color:rgba(242,184,75,.7);color:#fff}
+.mo.on b{color:#fff}.mo.on i{background:var(--gold);color:#000}
+.mo.done{border-color:rgba(52,211,153,.5)}.mo.done i{background:var(--mint);color:#000}
+/* phone */
+#phone{position:absolute;left:1010px;top:70px;width:384px;height:804px;border-radius:56px;background:#050407;box-shadow:0 0 0 2px #2D2A33,0 0 80px rgba(139,92,246,.25),0 40px 90px rgba(0,0,0,.7);z-index:4}
+#screen{position:absolute;left:12px;top:12px;width:360px;height:780px;border-radius:46px;overflow:hidden;background:#0B0A0F;color:var(--txt)}
+#notch{position:absolute;left:50%;top:10px;width:110px;height:30px;margin-left:-55px;background:#000;border-radius:16px;z-index:80}
+.screen{position:absolute;inset:0;overflow:hidden;visibility:hidden;font-size:13px;background:#0B0A0F}
+.sb{height:44px;display:flex;justify-content:space-between;align-items:flex-end;padding:0 26px 6px;font-size:13px;font-weight:600;position:absolute;top:0;left:0;right:0;z-index:60;color:#fff}
+.aur{position:absolute;inset:-40px;background:radial-gradient(200px 220px at 20% 20%,rgba(224,112,63,.55),transparent 70%),radial-gradient(220px 240px at 85% 35%,rgba(139,92,246,.5),transparent 70%),radial-gradient(240px 200px at 50% 95%,rgba(242,184,75,.35),transparent 70%),#0B0A0F}
+.glass{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);backdrop-filter:blur(14px);border-radius:20px}
+.chipg{display:inline-block;padding:7px 12px;border-radius:16px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);font-size:12px;font-weight:600;color:#fff}
+.ailbl{position:absolute;background:rgba(0,0,0,.55);color:#fff;font-size:10.5px;font-weight:600;padding:5px 9px;border-radius:9px;border:1px solid rgba(255,255,255,.2)}
+#finger{position:absolute;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:rgba(255,255,255,.55);border:2px solid rgba(255,255,255,.9);box-shadow:0 0 18px rgba(242,184,75,.7);z-index:95;opacity:0}
+#finger2{position:absolute;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:rgba(255,255,255,.55);border:2px solid rgba(255,255,255,.9);box-shadow:0 0 18px rgba(242,184,75,.7);z-index:95;opacity:0}
+#trail{position:absolute;inset:0;z-index:94;pointer-events:none}
+.co{position:absolute;left:1386px;height:2px;z-index:6}
+.co .ln{position:absolute;left:0;top:0;width:58px;height:2px;background:linear-gradient(90deg,var(--gold),var(--violet))}
+.co .dt{position:absolute;left:-7px;top:-6px;width:14px;height:14px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 5px rgba(242,184,75,.25)}
+.co .lb{position:absolute;left:66px;top:-19px;white-space:nowrap;font-size:18px;color:#fff;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.18);padding:7px 14px;border-radius:10px}
+.ov{position:absolute;inset:0;z-index:200;opacity:0;visibility:hidden;background:#07060A}
+.ovbg{position:absolute;inset:0}
+/* intro */
+#intro .c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+#intro .big{font-size:126px;font-weight:800;letter-spacing:1px}
+#intro .big span{background:linear-gradient(90deg,var(--terra),var(--gold),var(--violet));-webkit-background-clip:text;color:transparent}
+#intro .sub{font-size:34px;color:#E4DAD0;margin-top:10px}
+#intro .tags{margin-top:44px;display:flex;gap:16px}
+#intro .tags div{font-size:22px;padding:12px 22px;border-radius:30px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.06)}
+/* analysis */
+#analysis .wrap{position:absolute;left:100px;right:100px;top:130px}
+#analysis h2,#compare h2,#outro h2{font-size:50px;font-weight:800}
+#analysis h2 span,#compare h2 span,#outro h2 span{background:linear-gradient(90deg,var(--gold),var(--violet));-webkit-background-clip:text;color:transparent}
+.anGrid{display:flex;gap:60px;margin-top:56px}
+.oldc{width:520px}
+.oldc h3,.newc h3{font-size:20px;letter-spacing:3px;text-transform:uppercase;color:#9C918A;margin-bottom:16px}
+.olditem{font-size:28px;color:#B7ADA4;padding:20px 22px;margin-bottom:16px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);position:relative}
+.olditem:after{content:"";position:absolute;left:14px;right:14px;top:50%;height:2px;background:#E0703F;transform-origin:left;transform:scaleX(var(--x,0))}
+.newc{flex:1}
+.newc h3{color:var(--gold)}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.pr{padding:28px 26px;min-height:150px;border-radius:18px;background:linear-gradient(130deg,rgba(224,112,63,.18),rgba(139,92,246,.16));border:1px solid rgba(255,255,255,.16)}
+.pr b{display:block;font-size:28px;margin-bottom:10px}
+.pr span{font-size:21px;color:#DCD3CA;line-height:1.35}
+/* compare */
+#compare .wrap{position:absolute;left:100px;right:100px;top:90px}
+.flowRow{display:flex;gap:8px;margin-top:20px;align-items:center;flex-wrap:nowrap}
+.fs{font-size:15px;padding:10px 10px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#9C918A;white-space:nowrap}
+.fb{font-size:26px;font-weight:700;padding:22px 26px;border-radius:20px;background:linear-gradient(130deg,rgba(224,112,63,.35),rgba(139,92,246,.35));border:1px solid rgba(242,184,75,.6);flex:1;text-align:center}
+.fb small{display:block;font-size:16px;font-weight:500;color:#E4DAD0;margin-top:4px}
+.metrics{display:flex;gap:30px;margin-top:60px}
+.met{flex:1;padding:26px 30px;border-radius:22px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12)}
+.met .k{font-size:18px;color:#9C918A;letter-spacing:2px;text-transform:uppercase}
+.met .v{font-size:54px;font-weight:800;margin-top:6px;white-space:nowrap}
+.met .v s{color:#7E746D;font-size:32px;text-decoration-color:#E0703F}
+.met .v em{font-style:normal;background:linear-gradient(90deg,var(--gold),var(--mint));-webkit-background-clip:text;color:transparent}
+.note{margin-top:30px;font-size:17px;color:#8E847C}
+/* outro */
+#outro .wrap{position:absolute;left:100px;right:100px;top:80px}
+.iaN{position:absolute;padding:18px 20px;border-radius:20px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.18);font-size:18px;color:#DCD3CA;line-height:1.35;width:300px}
+.iaN b{display:block;font-size:24px;color:#fff;margin-bottom:6px}
+.iaN.core{background:linear-gradient(130deg,rgba(224,112,63,.3),rgba(139,92,246,.3));border-color:rgba(242,184,75,.6)}
+.glos{position:absolute;left:100px;right:100px;bottom:70px;display:flex;gap:14px}
+.glos div{flex:1;text-align:center;padding:14px 8px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);font-size:17px;color:#E4DAD0}
+.glos div b{display:block;font-size:26px;margin-bottom:4px}
+</style></head>
+<body><div id="stage">
+<div class="blob" id="b1" style="width:700px;height:700px;background:#B4532A;left:900px;top:-200px"></div>
+<div class="blob" id="b2" style="width:600px;height:600px;background:#5B3FB0;left:1350px;top:400px"></div>
+<div class="blob" id="b3" style="width:500px;height:500px;background:#8A5A1A;left:-100px;top:600px;opacity:.35"></div>
+<div id="topbar"><div><span class="mark"></span><b>Nyambika Vision 2.0</b><span class="pillTop">AI-native interaction redesign · 2026+</span></div><div style="font-size:17px;color:#A79E96">Concept simulation · fictional members &amp; sample data</div></div>
+<div id="left"><div id="stepNo"></div><div id="title"></div><div id="desc"></div><div id="box"><h4>Interaction pattern</h4><div id="list"></div></div><div id="chips"></div></div>
+<div id="caption"></div>
+<div id="phone"><div id="screen"><div id="notch"></div><svg id="trail"></svg><div id="finger"></div><div id="finger2"></div></div></div>
+<div id="callouts"></div>
+<div id="moments">
+ <div class="mo" id="m0"><i>🪞</i><div><b>1 · Mirror</b>Create your twin once</div></div>
+ <div class="mo" id="m1"><i>🎙</i><div><b>2 · Ask / Snap</b>Voice or camera intent</div></div>
+ <div class="mo" id="m2"><i>✨</i><div><b>3 · See it on you</b>Swipe · morph · spin · Maker Space</div></div>
+ <div class="mo" id="m3"><i>✋</i><div><b>4 · Hold to buy</b>Paid directly to the maker</div></div>
+</div>
+
+<div id="intro" class="ov"><div class="ovbg aur" style="inset:0"></div><div class="c">
+<div class="big">Nyambika <span>Vision 2.0</span></div>
+<div class="sub">Zero-search fashion · Ask, see it on you, hold to buy</div>
+<div class="tags"><div>🎙 Voice in Kinyarwanda</div><div>🪞 Private digital twin</div><div>✨ Generative try-on</div><div>🧊 3D · AR mirror</div><div>✋ Gesture checkout</div></div></div></div>
+
+<div id="analysis" class="ov"><div class="wrap"><h2>UX analysis: from <span>traditional</span> to <span>AI-native</span></h2>
+<div class="anGrid"><div class="oldc"><h3>v1 patterns we remove</h3>
+<div class="olditem" id="o0">🔍 Search box &amp; keywords</div><div class="olditem" id="o1">📋 Category lists &amp; filters</div><div class="olditem" id="o2">🧱 Product grids to scroll</div><div class="olditem" id="o3">📷 Photo upload for every try-on</div><div class="olditem" id="o4">🧾 Multi-step checkout forms</div><div class="olditem" id="o5">🗂 Tab bar with 5 sections</div></div>
+<div class="newc"><h3>v2 design principles</h3><div class="pgrid">
+<div class="pr" id="p0"><b>🎯 Intent over search</b><span>Say or show what you need: occasion, budget, fabric.</span></div>
+<div class="pr" id="p1"><b>🪞 You first</b><span>Everything is shown on your private twin, not on a model.</span></div>
+<div class="pr" id="p2"><b>👆 Gestures over buttons</b><span>Swipe, drag, pinch, hold. Almost no forms.</span></div>
+<div class="pr" id="p3"><b>🎙 Conversational &amp; ambient</b><span>The Muse speaks RW/EN/FR. Updates come to you.</span></div>
+<div class="pr" id="p4"><b>🧊 Spatial</b><span>3D, AR mirror and Maker Spaces instead of flat pages.</span></div>
+<div class="pr" id="p5"><b>🧵 Makers at the centre</b><span>Every look is attributed. Pay the maker directly.</span></div></div></div></div></div></div>
+
+<div id="compare" class="ov"><div class="ovbg aur" style="inset:0;opacity:.5"></div><div class="wrap"><h2>Short workflow: <span>11 steps → 4 moments</span></h2>
+<div style="margin-top:36px;font-size:18px;color:#9C918A;letter-spacing:2px">V1 · TRADITIONAL</div>
+<div class="flowRow" id="oldFlow">${''}</div>
+<div style="margin-top:40px;font-size:18px;color:var(--gold);letter-spacing:2px">V2 · AI-NATIVE</div>
+<div class="flowRow" id="newFlow"><div class="fb">🪞 Mirror<small>once · 5 s</small></div><div class="fb">🎙 Ask / Snap<small>voice or camera</small></div><div class="fb">✨ See it on you<small>swipe · morph · Maker Space</small></div><div class="fb">✋ Hold to buy<small>paid to maker</small></div></div>
+<div class="metrics"><div class="met"><div class="k">Steps</div><div class="v"><s>11</s> → <em id="mv0">4</em></div></div><div class="met"><div class="k">Taps / gestures</div><div class="v"><s>24</s> → <em id="mv1">6</em></div></div><div class="met"><div class="k">Time to first look on you</div><div class="v"><s>~3 min</s> → <em id="mv2">8 s</em></div></div><div class="met"><div class="k">Time to purchase</div><div class="v"><s>~4 min</s> → <em id="mv3">&lt;1 min</em></div></div></div>
+<div class="note">Design targets estimated from the v1 prototype flow. To be validated in usability testing.</div></div></div>
+
+<div id="outro" class="ov"><div class="ovbg aur" style="inset:0;opacity:.45"></div><div class="wrap"><h2>New structure: <span>no tabs, no lists</span></h2>
+<div style="font-size:22px;color:#DCD3CA;margin-top:8px">Edge gestures + the Muse orb replace the tab bar. Every look stays attributed to its maker's page.</div>
+<div style="position:relative;height:500px;margin-top:30px" id="ia"></div></div>
+<div class="glos" id="glos"><div><b>🎙</b>Hold orb · ask</div><div><b>↑</b>Swipe up · next look</div><div><b>♥</b>Double-tap · save</div><div><b>◯</b>Drag ring · recolour</div><div><b>🤏</b>Pinch · 3D spin</div><div><b>←</b>Swipe left · Maker Space</div><div><b>✋</b>Hold · buy</div></div></div>
+</div>
+<script>
+const clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));const seg=(p,a,b)=>clamp((p-a)/(b-a));
+const ease=x=>x<.5?2*x*x:1-Math.pow(-2*x+2,2)/2;const $=id=>document.getElementById(id);
+const C={terra:'#C2562B',blue:'#2563EB',green:'#2F8F62',gold:'#E3A33B',violet:'#7C3AED'};
+let pid=0;const skin='#7A4A2E',hair='#1B1410';
+function dressPath(len){const H=300+70*len;return `M74 98 Q100 110 126 98 L132 150 Q140 220 ${152+10*len} ${H} Q100 ${H+14} ${48-10*len} ${H} Q60 220 68 150 Z`;}
+function sleevePath(s){const y=128+s*96;return `M74 98 L${62-s*8} ${y} L${76-s*6} ${y+5} L86 104Z M126 98 L${138+s*8} ${y} L${124+s*6} ${y+5} L114 104Z`;}
+function person(outfit,color,extra='',len=0,slv=0,glow=false){
+ const id='kp'+(pid++);
+ const pat=`<pattern id="${id}" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="11" cy="11" r="5" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="2.2"/><path d="M0 0 L6 6 M22 0 L16 6 M0 22 L6 16 M22 22 L16 16" stroke="rgba(255,226,160,.65)" stroke-width="2.4"/></pattern>`;
+ const dress=`<path d="${dressPath(len)}" fill="var(--dress,${color})"/><path d="${dressPath(len)}" fill="url(#${id})"/><path d="${sleevePath(slv)}" fill="var(--dress,${color})"/><path d="${sleevePath(slv)}" fill="url(#${id})"/><path d="M67 160 Q100 170 133 160 L134 172 Q100 182 66 172Z" fill="rgba(0,0,0,.28)"/>`;
+ const casual=`<path d="M72 98 Q100 108 128 98 L146 130 L134 138 L128 125 L128 205 L72 205 L72 125 L66 138 L54 130 Z" fill="#E7E1D8"/><path d="M72 200 L128 200 L124 395 L106 395 L100 245 L94 395 L76 395 Z" fill="#3B5B8A"/>`;
+ const g=glow?`<filter id="g${id}"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>`:'';
+ return `<svg viewBox="0 0 200 420" ${extra}><defs>${pat}${g}</defs><g ${glow?`filter="url(#g${id})"`:''}>
+ <circle cx="100" cy="50" r="38" fill="${hair}"/>
+ <path d="M70 102 Q50 160 55 228 L66 229 Q66 166 82 118 Z M130 102 Q150 160 145 228 L134 229 Q134 166 118 118 Z" fill="${skin}"/>
+ <path d="M84 290 L80 396 L92 396 L98 290 Z M102 290 L108 396 L120 396 L116 290Z" fill="${skin}"/>
+ <ellipse cx="85" cy="400" rx="12" ry="5" fill="#2A1E18"/><ellipse cx="115" cy="400" rx="12" ry="5" fill="#2A1E18"/>
+ <rect x="91" y="78" width="18" height="24" fill="${skin}"/>${outfit==='dress'?dress:casual}
+ <ellipse cx="100" cy="60" rx="23" ry="27" fill="${skin}"/><ellipse cx="91" cy="58" rx="2.6" ry="3.2" fill="#1B1410"/><ellipse cx="109" cy="58" rx="2.6" ry="3.2" fill="#1B1410"/>
+ <path d="M92 72 Q100 78 108 72" stroke="#3A1F14" stroke-width="2.2" fill="none" stroke-linecap="round"/></g></svg>`;}
+function garment(color,extra=''){const id='kg'+(pid++);return `<svg viewBox="40 80 120 240" ${extra}><defs><pattern id="${id}" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="11" cy="11" r="5" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="2.2"/><path d="M0 0 L6 6 M22 0 L16 6 M0 22 L6 16 M22 22 L16 16" stroke="rgba(255,226,160,.65)" stroke-width="2.4"/></pattern></defs><path d="${dressPath(0)}" fill="var(--dress,${color})"/><path d="${dressPath(0)}" fill="url(#${id})"/><path d="${sleevePath(0)}" fill="var(--dress,${color})"/><path d="M67 160 Q100 170 133 160 L134 172 Q100 182 66 172Z" fill="rgba(0,0,0,.28)"/></svg>`;}
+const SB=`<div class="sb"><span>9:41</span><span>▂▄▆█ 5G 🔋</span></div>`;
+const ORB=(id,sz)=>`<div id="${id}" style="width:${sz}px;height:${sz}px;border-radius:50%;background:conic-gradient(from 0deg,#E0703F,#F2B84B,#8B5CF6,#38BDF8,#E0703F);box-shadow:0 0 40px rgba(242,184,75,.6),0 0 90px rgba(139,92,246,.45);position:relative"><div style="position:absolute;inset:18%;border-radius:50%;background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.9),rgba(255,255,255,.15) 45%,rgba(11,10,15,.2) 70%)"></div></div>`;
+
+const S={};
+S.mirror=`<div class="screen" id="mirror">${SB}<div class="aur" style="opacity:.55"></div>
+<div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(40,32,28,.6),rgba(20,16,14,.9))"></div>
+<div style="position:absolute;top:58px;left:0;right:0;text-align:center"><div style="font-size:20px;font-weight:800">Mirror moment</div><div id="mirTxt" style="font-size:13px;color:#DCD3CA;margin-top:4px">Turn slowly once ↻</div></div>
+<div id="mirFig" style="position:absolute;left:80px;top:130px;width:200px;height:440px">${person('casual',C.terra,'style="width:200px;height:440px"')}</div>
+<div id="twinFig" style="position:absolute;left:80px;top:130px;width:200px;height:440px;opacity:0">${person('casual',C.terra,'style="width:200px;height:440px"',0,0,true)}</div>
+<div id="scanLine" style="position:absolute;left:50px;right:50px;height:3px;background:linear-gradient(90deg,transparent,#7CF2F0,transparent);box-shadow:0 0 18px #7CF2F0"></div>
+<svg id="dots" style="position:absolute;left:0;top:0" width="360" height="780"></svg>
+<div id="ringWrap" style="position:absolute;left:130px;top:560px;width:100px;height:28px;border-radius:50%;border:2px solid rgba(124,242,240,.8);box-shadow:0 0 20px rgba(124,242,240,.6)"></div>
+<div id="mirProg" style="position:absolute;left:150px;top:600px;width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center"><div style="width:48px;height:48px;border-radius:50%;background:#14111A;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px" id="mirPct">0%</div></div>
+<div class="glass" style="position:absolute;left:16px;right:16px;bottom:22px;padding:12px 14px;display:flex;align-items:center;gap:10px"><div style="font-size:20px">🔒</div><div style="font-size:12px;line-height:1.35;flex:1"><b>Private twin</b> · encrypted · only you see it<br><span style="color:#CFC5BC">Never shared with makers · delete anytime</span></div><div id="mirTog" style="width:44px;height:26px;border-radius:13px;background:#555;position:relative;flex:none"><div id="mirKnob" style="position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff"></div></div></div></div>`;
+S.muse=`<div class="screen" id="muse">${SB}<div class="aur"></div>
+<div id="twinGhost" style="position:absolute;left:105px;top:120px;width:150px;height:330px;opacity:.18">${person('casual',C.terra,'style="width:150px;height:330px"')}</div>
+<div style="position:absolute;top:64px;left:0;right:0;text-align:center"><div style="font-size:13px;color:#DCD3CA">Muraho Aline 👋</div><div style="font-size:21px;font-weight:800;margin-top:4px">What's the occasion?</div></div>
+<div style="position:absolute;left:110px;top:170px">${ORB('orb',140)}</div>
+<div id="wave" style="position:absolute;left:60px;right:60px;top:340px;height:40px;display:flex;gap:4px;align-items:center;justify-content:center">${Array.from({length:28},()=>'<b style="display:block;width:4px;border-radius:2px;background:linear-gradient(#F2B84B,#8B5CF6);height:6px"></b>').join('')}</div>
+<div id="trans" style="position:absolute;left:26px;right:26px;top:392px;text-align:center;font-size:15px;font-weight:600;line-height:1.4"></div>
+<div id="transEn" style="position:absolute;left:26px;right:26px;top:440px;text-align:center;font-size:11.5px;color:#BDB3AA"></div>
+<div id="intents" style="position:absolute;left:16px;right:16px;top:490px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center">
+ ${['💍 Wedding · Sat 16 Nov','💰 Under RWF 50k','🎨 Kitenge · elegant','📏 Your twin · size M','📍 Kigali makers'].map((x,i)=>`<span class="chipg ich" id="ic${i}" style="font-size:12.5px">${x}</span>`).join('')}</div>
+<div id="museStatus" style="position:absolute;left:0;right:0;top:604px;text-align:center;font-size:12px;color:#F2B84B;font-weight:700"></div>
+<div style="position:absolute;left:0;right:0;bottom:30px;display:flex;justify-content:center;align-items:center;gap:30px">
+ <div class="glass" style="width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px">📷</div>
+ <div id="micB" style="width:74px;height:74px;border-radius:50%;background:linear-gradient(135deg,#E0703F,#8B5CF6);display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 0 30px rgba(224,112,63,.6)">🎙</div>
+ <div class="glass" style="width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px">⌨︎</div></div>
+<div style="position:absolute;left:0;right:0;bottom:12px;text-align:center;font-size:10.5px;color:#A79E96">Hold to speak · RW · EN · FR</div></div>`;
+S.snap=`<div class="screen" id="snap">${SB}
+<div style="position:absolute;inset:0;background:linear-gradient(160deg,#5A4A3C,#2B231D)"></div>
+<div style="position:absolute;left:0;right:0;top:470px;bottom:0;background:linear-gradient(180deg,#6B5848,#3E3229)"></div>
+<div id="fabric" style="position:absolute;left:70px;top:230px;width:220px;height:260px;transform:perspective(500px) rotateX(18deg) rotateZ(-6deg);border-radius:6px;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,.5)">${'<svg width="220" height="260"><defs><pattern id="fab" width="36" height="36" patternUnits="userSpaceOnUse"><rect width="36" height="36" fill="#1E3FA0"/><circle cx="18" cy="18" r="9" fill="none" stroke="#F2B84B" stroke-width="3"/><path d="M0 0 L9 9 M36 0 L27 9 M0 36 L9 27 M36 36 L27 27" stroke="#fff" stroke-width="3"/></pattern></defs><rect width="220" height="260" fill="url(#fab)"/></svg>'}</div>
+<div id="reticle" style="position:absolute;left:60px;top:215px;width:240px;height:290px;border-radius:18px;border:2px solid rgba(255,255,255,.9)"></div>
+<div id="snapTag" class="glass" style="position:absolute;left:30px;right:30px;top:520px;padding:12px 14px;opacity:0"><div style="font-size:11px;color:#F2B84B;font-weight:700;letter-spacing:1px">RECOGNISED ON-DEVICE</div><div style="font-size:15px;font-weight:800;margin-top:3px">Kitenge wax print · indigo · geometric</div><div style="font-size:12px;color:#DCD3CA;margin-top:3px">3 Kigali makers work with this fabric · 9 looks for you</div></div>
+<div style="position:absolute;top:62px;left:0;right:0;text-align:center"><span class="chipg">📷 Snap to style · point at any fabric or outfit</span></div>
+<div style="position:absolute;left:0;right:0;bottom:34px;display:flex;justify-content:center"><div id="snapBtn" style="width:70px;height:70px;border-radius:50%;border:4px solid #fff;background:rgba(255,255,255,.2)"></div></div></div>`;
+const LOOKS=[[C.terra,'Uwase Couture','✂️ Tailor · Kimihurura','RWF 35,000 · made to measure','UC','#C2562B'],[C.green,'Twiyubake Coop','🤝 Cooperative · Musanze · by Mukamana','RWF 28,000 · handmade','TW','#2F8F62'],[C.blue,'Kigali Threads','🛍 Seller · Nyarugenge','RWF 39,500 · ready to ship','KT','#2563EB']];
+S.looks=`<div class="screen" id="looks">${SB}<div id="lookStack">${LOOKS.map((l,i)=>`<div class="lk" id="lk${i}" style="position:absolute;inset:0;--dress:${l[0]}">
+ <div style="position:absolute;inset:0;background:radial-gradient(260px 300px at 50% 40%,${l[5]}66,transparent 70%),radial-gradient(200px 200px at 85% 85%,rgba(139,92,246,.45),transparent 70%),#0B0A0F"></div>
+ <div style="position:absolute;left:70px;top:110px;width:220px;height:470px">${person('dress',l[0],'style="width:220px;height:470px"')}</div>
+ <div style="position:absolute;left:60px;top:560px;width:240px;height:30px;border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,0,.6),transparent)"></div>
+ <div class="glass" style="position:absolute;left:12px;right:70px;bottom:26px;padding:12px">
+  <div style="display:flex;gap:10px;align-items:center"><div style="width:40px;height:40px;border-radius:50%;background:${l[5]};display:flex;align-items:center;justify-content:center;font-weight:800;border:2px solid #fff">${l[4]}</div><div><div style="font-weight:800;font-size:14px">${l[1]} <span style="color:#34D399">✓</span></div><div style="font-size:11px;color:#DCD3CA">${l[2]}</div></div></div>
+  <div style="font-size:13px;font-weight:700;margin-top:8px">${l[3]}</div><div style="font-size:10.5px;color:#BDB3AA;margin-top:3px">← swipe for Maker Space · ✋ hold to buy</div></div></div>`).join('')}</div>
+<div style="position:absolute;top:56px;left:14px;right:14px;display:flex;justify-content:space-between;z-index:20"><span class="chipg">💍 For: Wedding · Sat</span><span class="chipg" id="lookN">Look 1 / 9</span></div>
+<div class="ailbl" style="top:96px;left:14px;z-index:20">✨ AI preview on your twin · C2PA</div>
+<div id="rail" style="position:absolute;right:10px;bottom:120px;display:flex;flex-direction:column;gap:14px;z-index:20;align-items:center">
+ ${[['♥','Save','rHeart'],['🧊','3D','r3d'],['👥','Ask','rAsk'],['🎨','Morph','rMorph'],['⤴','Share','rShare']].map(x=>`<div style="text-align:center;font-size:10px"><div id="${x[2]}" class="glass" style="width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px">${x[0]}</div>${x[1]}</div>`).join('')}</div>
+<div id="burst" style="position:absolute;left:180px;top:330px;font-size:90px;margin:-55px 0 0 -45px;opacity:0;z-index:30;color:#FF4D6D;text-shadow:0 0 30px rgba(255,77,109,.8)">♥</div>
+<div id="upHint" style="position:absolute;left:0;right:0;top:600px;text-align:center;font-size:11px;color:#DCD3CA;z-index:20">↑ swipe up · next look</div></div>`;
+S.morph=`<div class="screen" id="morph" style="--dress:${C.terra}">${SB}<div class="aur" style="opacity:.8"></div>
+<div id="ring" style="position:absolute;left:30px;top:120px;width:300px;height:300px;border-radius:50%;background:conic-gradient(hsl(0,70%,50%),hsl(60,70%,50%),hsl(120,70%,45%),hsl(180,70%,45%),hsl(240,70%,55%),hsl(300,70%,50%),hsl(360,70%,50%));-webkit-mask:radial-gradient(closest-side,transparent 86%,#000 88%);mask:radial-gradient(closest-side,transparent 86%,#000 88%);opacity:.9"></div>
+<div id="knob" style="position:absolute;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 12px rgba(0,0,0,.5);z-index:10"></div>
+<div id="morphFig" style="position:absolute;left:90px;top:110px;width:180px;height:390px"></div>
+<div style="position:absolute;top:56px;left:14px"><span class="chipg">🎨 Live morph · Uwase Couture</span></div>
+<div class="glass" style="position:absolute;left:16px;right:16px;top:520px;padding:12px 14px">
+ <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700">Length <span id="lenV" style="color:#F2B84B">Knee</span></div>
+ <div style="height:6px;border-radius:3px;background:rgba(255,255,255,.2);margin-top:8px;position:relative"><div id="lenBar" style="position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:linear-gradient(90deg,#E0703F,#F2B84B)"></div><div id="lenKnob" style="position:absolute;top:-6px;width:18px;height:18px;margin-left:-9px;border-radius:50%;background:#fff"></div></div>
+ <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;margin-top:14px">Sleeves <span id="slvV" style="color:#F2B84B">Short</span></div>
+ <div style="height:6px;border-radius:3px;background:rgba(255,255,255,.2);margin-top:8px;position:relative"><div id="slvBar" style="position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:linear-gradient(90deg,#E0703F,#F2B84B)"></div><div id="slvKnob" style="position:absolute;top:-6px;width:18px;height:18px;margin-left:-9px;border-radius:50%;background:#fff"></div></div></div>
+<div class="glass" style="position:absolute;left:16px;right:16px;bottom:26px;padding:11px 14px;font-size:12px;display:flex;gap:10px;align-items:center"><div style="font-size:20px">🪡</div><div><b>Tailor-made by Uwase</b><br><span style="color:#CFC5BC">Uses your twin measurements · ready in 4 days · +RWF 3,000</span></div></div></div>`;
+S.spin=`<div class="screen" id="spin" style="--dress:#1E4FC9">${SB}<div class="aur" style="opacity:.7"></div>
+<div id="spinStage"><div id="spinFig" style="position:absolute;left:90px;top:120px;width:180px;height:390px">${person('dress','#1E4FC9','style="width:180px;height:390px"',.55,.6)}</div>
+<div style="position:absolute;left:70px;top:495px;width:220px;height:34px;border-radius:50%;border:2px solid rgba(242,184,75,.6);box-shadow:0 0 24px rgba(242,184,75,.4)"></div>
+<div style="position:absolute;top:56px;left:14px"><span class="chipg">🧊 3D twin · 360°</span></div>
+<div style="position:absolute;left:0;right:0;top:560px;text-align:center;font-size:12px;color:#DCD3CA">🤏 pinch to zoom · drag to spin</div></div>
+<div id="arM" style="position:absolute;inset:0;opacity:0;background:linear-gradient(180deg,#C9B8A3 0%,#B9A58D 60%,#8D785F 60%,#6F5D49 100%)">${SB}
+ <div style="position:absolute;left:24px;top:110px;width:90px;height:220px;background:#A5896D;border-radius:6px"></div><div style="position:absolute;right:20px;top:160px;width:60px;height:150px;background:#6E8B5E;border-radius:30px 30px 6px 6px"></div>
+ <div style="position:absolute;left:90px;top:120px;width:180px;height:390px;--dress:#1E4FC9">${person('dress','#1E4FC9','style="width:180px;height:390px"',.55,.6)}</div>
+ <svg style="position:absolute;left:90px;top:120px" width="180" height="390">${[[90,50],[64,95],[116,95],[52,200],[128,200],[80,280],[120,280],[80,370],[120,370]].map(p=>`<circle cx="${p[0]*.9+9}" cy="${p[1]*.93}" r="4" fill="#7CF2F0"/>`).join('')}</svg>
+ <div style="position:absolute;top:56px;left:14px"><span class="chipg" style="background:#E0375A">● LIVE AR MIRROR</span></div>
+ <div class="ailbl" style="top:96px;left:14px">Body tracking on-device · nothing uploaded</div></div>
+<div class="glass" style="position:absolute;left:80px;right:80px;bottom:30px;padding:6px;display:flex;border-radius:24px;z-index:20"><div id="t3d" style="flex:1;text-align:center;padding:9px;border-radius:18px;font-weight:700;font-size:12px">🧊 3D twin</div><div id="tar" style="flex:1;text-align:center;padding:9px;border-radius:18px;font-weight:700;font-size:12px">🪞 AR mirror</div></div></div>`;
+S.circle=`<div class="screen" id="circle">${SB}<div class="aur"></div>
+<div style="position:absolute;top:60px;left:0;right:0;text-align:center"><div style="font-size:19px;font-weight:800">Ask your circle 👥</div><div style="font-size:12px;color:#DCD3CA;margin-top:3px">"Which one for Saturday's wedding?"</div></div>
+<div style="position:absolute;left:14px;right:14px;top:130px;display:flex;gap:10px">${[[C.terra,'Terracotta'],['#1E4FC9','Indigo'],[C.green,'Green']].map((x,i)=>`<div style="flex:1;position:relative;--dress:${x[0]}"><div class="glass" style="height:220px;display:flex;justify-content:center;align-items:flex-end;overflow:hidden">${person('dress',x[0],'style="height:205px"',i===1?.55:0,i===1?.6:0)}</div><div style="text-align:center;font-size:11.5px;font-weight:700;margin-top:6px">${x[1]}</div><div id="vb${i}" style="height:8px;border-radius:4px;background:linear-gradient(90deg,#F2B84B,#E0703F);margin-top:6px;width:0"></div><div id="vp${i}" style="text-align:center;font-size:12px;font-weight:800;margin-top:4px">0%</div></div>`).join('')}</div>
+<div id="votes" style="position:absolute;left:14px;right:14px;top:420px">
+${[['G','Grace','#C9A27E','💙 Indigo! So elegant'],['D','Divine','#7AA37A','Indigo for a wedding 👏'],['M','Mama Aline','#B98AC9','Indigo, with a gold headwrap 💛']].map((x,i)=>`<div class="vt" id="vt${i}" style="display:flex;gap:10px;align-items:center;margin-bottom:10px;opacity:0"><div style="width:34px;height:34px;border-radius:50%;background:${x[2]};display:flex;align-items:center;justify-content:center;font-weight:800;flex:none">${x[0]}</div><div class="glass" style="padding:8px 12px;font-size:12.5px;border-radius:14px"><b>${x[1]}</b> · ${x[3]}</div></div>`).join('')}</div>
+<div class="glass" style="position:absolute;left:16px;right:16px;bottom:26px;padding:12px;text-align:center;font-size:12px">🔗 Shared as a private live poll · AI-preview watermark</div></div>`;
+S.maker=`<div class="screen" id="maker">${SB}
+<div style="position:absolute;left:0;right:0;top:0;height:300px;overflow:hidden"><div id="mkBg" style="position:absolute;inset:-60px;background:repeating-linear-gradient(45deg,rgba(255,255,255,.08) 0 3px,transparent 3px 26px),repeating-linear-gradient(-45deg,rgba(255,255,255,.08) 0 3px,transparent 3px 26px),linear-gradient(130deg,#C2562B,#E3A33B 60%,#7C3AED)"></div>
+ <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,#0B0A0F)"></div>
+ <div style="position:absolute;left:14px;top:56px" class="chipg">▶ Story · "How I sew a kitenge wrap"</div></div>
+<div style="position:absolute;left:18px;top:200px;display:flex;gap:12px;align-items:flex-end"><div style="width:80px;height:80px;border-radius:50%;background:#14111A;border:3px solid #F2B84B;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:24px;color:#F2B84B">UC</div><div><div style="font-size:21px;font-weight:800">Uwase Couture <span style="color:#34D399;font-size:16px">✓</span></div><div style="font-size:11.5px;color:#DCD3CA">✂️ Tailor · Kimihurura · ★ 4.8 · 126 reviews</div></div></div>
+<div style="position:absolute;left:18px;right:18px;top:296px;font-size:12px;color:#CFC5BC;line-height:1.45">"Since 2014 I design wedding and office wear from Rwandan kitenge, made to your measurements." <b style="color:#F2B84B">Her page · managed by Uwase</b></div>
+<div style="position:absolute;left:0;right:0;top:360px;height:230px;perspective:600px" id="shelf">${[C.terra,C.gold,'#1E4FC9',C.green,C.violet].map((c,i)=>`<div class="sh" id="sh${i}" style="position:absolute;left:130px;top:10px;width:100px;height:190px;border-radius:16px;background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.04));border:1px solid rgba(255,255,255,.18);display:flex;justify-content:center;align-items:center;--dress:${c}">${garment(c,'style="height:160px"')}</div>`).join('')}</div>
+<div style="position:absolute;left:0;right:0;top:590px;text-align:center;font-size:11px;color:#A79E96">3D collection shelf · swipe to browse · tap to try on your twin</div>
+<div style="position:absolute;left:16px;right:16px;bottom:26px;display:flex;gap:8px">${['+ Follow','💬 Chat','📅 Book fitting'].map((x,i)=>`<div style="flex:1;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12.5px;${i===0?'background:linear-gradient(135deg,#E0703F,#8B5CF6)':'background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18)'}">${x}</div>`).join('')}</div></div>`;
+S.hold=`<div class="screen" id="hold" style="--dress:#1E4FC9">${SB}<div class="aur" style="opacity:.6"></div>
+<div style="position:absolute;left:105px;top:70px;width:150px;height:330px">${person('dress','#1E4FC9','style="width:150px;height:330px"',.55,.6)}</div>
+<div class="glass" id="hSheet" style="position:absolute;left:12px;right:12px;bottom:14px;padding:16px;border-radius:26px">
+ <div style="font-size:16px;font-weight:800">Indigo wrap · tailor-made</div><div style="font-size:11.5px;color:#DCD3CA">Uwase Couture ✓ · ready Thu</div>
+ <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">${['📏 Size from twin ✓','🛵 Delivery Fri ✓','💳 MoMo ••4521 ✓'].map((x,i)=>`<span class="chipg ach" id="ac${i}" style="font-size:11.5px">${x}</span>`).join('')}</div>
+ <div style="font-size:11.5px;color:#CFC5BC;margin-top:10px">🔐 Paid directly to <b style="color:#fff">Uwase Couture</b> · RWF 39,500</div>
+ <div style="display:flex;justify-content:center;margin-top:14px"><div id="holdRing" style="width:104px;height:104px;border-radius:50%;display:flex;align-items:center;justify-content:center"><div id="holdIn" style="width:88px;height:88px;border-radius:50%;background:linear-gradient(135deg,#E0703F,#8B5CF6);display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800;font-size:12px">✋<span id="holdTxt">Hold to buy</span></div></div></div></div>
+<div id="paid" style="position:absolute;inset:0;opacity:0;background:radial-gradient(circle at 50% 40%,rgba(52,211,153,.35),#0B0A0F 70%);text-align:center;padding-top:200px;z-index:30">
+ <div style="width:110px;height:110px;border-radius:50%;margin:0 auto;background:#34D399;color:#062;display:flex;align-items:center;justify-content:center;font-size:56px;font-weight:800" id="paidC">✓</div>
+ <div style="font-size:24px;font-weight:800;margin-top:20px">Paid · RWF 39,500</div><div style="font-size:13px;color:#DCD3CA;margin-top:8px;line-height:1.5">Directly to <b style="color:#fff">Uwase Couture</b><br>Fingerprint-approved Mobile Money</div>
+ <svg id="conf" width="360" height="780" style="position:absolute;left:0;top:0"></svg></div></div>`;
+S.ambient=`<div class="screen" id="ambient">${SB}
+<div style="position:absolute;inset:0;background:radial-gradient(300px 300px at 30% 20%,rgba(224,112,63,.5),transparent 70%),radial-gradient(300px 300px at 80% 70%,rgba(139,92,246,.5),transparent 70%),#0B0A0F"></div>
+<div style="position:absolute;top:70px;left:0;right:0;text-align:center"><div style="font-size:14px;color:#DCD3CA">Thursday 14 November</div><div style="font-size:76px;font-weight:300;letter-spacing:-2px">10:24</div></div>
+<div id="live" class="glass" style="position:absolute;left:14px;right:14px;top:220px;padding:14px;border-radius:24px">
+ <div style="display:flex;gap:10px;align-items:center"><div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#E0703F,#8B5CF6);display:flex;align-items:center;justify-content:center;font-size:20px">🧵</div><div style="flex:1"><div style="font-weight:800;font-size:13.5px">Uwase is sewing your dress</div><div style="font-size:11.5px;color:#DCD3CA" id="liveTxt">Live activity · ready Thursday</div></div></div>
+ <div style="display:flex;justify-content:space-between;font-size:10px;color:#CFC5BC;margin-top:12px"><span>Paid</span><span>Cutting</span><span>Sewing</span><span>Delivery</span></div>
+ <div style="height:6px;border-radius:3px;background:rgba(255,255,255,.2);margin-top:5px"><div id="liveBar" style="height:6px;border-radius:3px;background:linear-gradient(90deg,#34D399,#F2B84B);width:20%"></div></div></div>
+<div id="wn" class="glass" style="position:absolute;left:14px;right:14px;top:350px;padding:12px;border-radius:20px;display:flex;gap:10px;align-items:center;opacity:0"><div style="width:36px;height:36px;border-radius:10px;background:#25D366;display:flex;align-items:center;justify-content:center;font-size:18px;flex:none">✆</div><div style="font-size:12px"><b>WhatsApp · Uwase Couture</b><br>Your fitting photo 📸, the hem is perfect!</div></div>
+<div id="wd" class="glass" style="position:absolute;left:14px;right:14px;top:440px;padding:12px;border-radius:20px;opacity:0">
+ <div style="font-size:12px;font-weight:800">👗 Added to your digital wardrobe</div><div style="font-size:11px;color:#CFC5BC;margin-top:2px">The Muse styled it 3 ways for upcoming events</div>
+ <div style="display:flex;gap:8px;margin-top:10px">${['#1E4FC9','#1E4FC9','#1E4FC9'].map((c,i)=>`<div style="flex:1;height:110px;border-radius:12px;background:rgba(255,255,255,.08);display:flex;justify-content:center;align-items:flex-end;overflow:hidden;--dress:${c}">${person('dress',c,'style="height:105px"',.55,.6)}</div>`).join('')}</div></div>
+<div style="position:absolute;left:0;right:0;bottom:24px;text-align:center;font-size:11px;color:#A79E96">⌃ swipe up to open</div></div>`;
+
+const scr=$('screen');for(const k in S)scr.insertAdjacentHTML('beforeend',S[k]);
+// old flow in compare
+$('oldFlow').innerHTML=['Language','Home list','Search','Filter','Page','Product','Consent','Upload photo','Wait','Result','Checkout form'].map(x=>`<div class="fs">${x}</div>`).join('<span style="color:#5E5650">›</span>');
+// outro IA
+(function(){const N=[['core',520,0,'🎙 The Muse','Voice + camera intent · always one hold away'],['core',0,190,'🪞 My twin','Private · encrypted · delete anytime'],['core',520,190,'✨ Looks on you','Vertical stream rendered on your twin'],['core',1040,190,'🏪 Maker Spaces','Each member\'s own immersive page'],['',0,370,'👗 Wardrobe','Owned + saved looks · restyled by AI'],['',520,370,'✋ Hold to buy','Size from twin · MoMo passkey · paid to maker'],['',1040,370,'🔒 Trust centre','Consents · C2PA · data controls']];
+ N.forEach((n,i)=>{const d=document.createElement('div');d.className='iaN '+n[0];d.style.left=(n[1]+120)+'px';d.style.top=n[2]+'px';d.id='ia'+i;d.innerHTML=`<b>${n[3]}</b>${n[4]}`;$('ia').appendChild(d);});})();
+
+const SC=[
+{k:'intro',ov:'intro'},
+{k:'analysis',ov:'analysis'},
+{k:'mirror',scr:'mirror',m:0,step:'Moment 1 · Mirror',title:'A private twin in 5 seconds',desc:'Instead of uploading a photo for every try-on, the shopper turns once and creates a private digital twin. Consent is built into the moment.',list:[['↻','Turn once, with a live scan line and point cloud'],['🔒','Inline consent toggle, private by default'],['🪞','Twin reused for every look, size and fit']],chips:['3DGS avatar on SMPL-X','On-device capture','Encrypted · deletable'],co:[[80,'Guided mirror moment'],[330,'Live body scan → twin'],[620,'Capture progress'],[730,'Inline privacy consent']],g:[['tap',.78,336,730]]},
+{k:'muse',scr:'muse',m:1,step:'Moment 2 · Ask',title:'Ask the Muse, don\'t search',desc:'No search box, categories or feed. The shopper speaks naturally in Kinyarwanda, and the Muse turns the request into intent.',list:[['🎙','Hold-to-talk voice orb (RW · EN · FR)'],['🧠','Intent chips: occasion · budget · style · size'],['📷','Camera snap as the alternative input']],chips:['Kinyarwanda ASR','LLM intent parsing','Calendar-aware (opt-in)'],co:[[100,'Conversational prompt'],[240,'Muse orb (listening)'],[410,'Live transcript + translation'],[520,'Understood intent chips'],[716,'Hold-to-talk']],g:[['hold',.05,180,716,.42]]},
+{k:'snap',scr:'snap',m:1,step:'Moment 2 · Snap',title:'Or just point at a fabric',desc:'Visual intent: the camera recognises a kitenge print or an outfit and matches it to member makers who work with it.',list:[['📷','Point the camera, no typing'],['🎯','On-device recognition reticle'],['🧵','Fabric → makers → looks on your twin']],chips:['On-device vision','Visual embeddings','Maker matching'],co:[[70,'Snap-to-style mode'],[360,'Recognition reticle'],[560,'Fabric + matching makers']],g:[['tap',.3,180,738]]},
+{k:'looks',scr:'looks',m:2,step:'Moment 3 · See it on you',title:'Looks already on your twin',desc:'A full-screen vertical stream replaces product grids. Every look is generated on the shopper\'s twin and attributed to a real member maker.',list:[['↑','Swipe up / down: next or previous look'],['♥','Double-tap: save to wardrobe'],['🏷','Maker card always visible (name, type, price)'],['🧭','Side rail: 3D · ask circle · morph · share']],chips:['Generative VTON','Fairness guard','C2PA labels'],co:[[80,'Occasion context'],[300,'Look rendered on your twin'],[440,'Gesture rail'],[700,'Maker card (attribution)']],g:[['swipe',.3,180,560,180,240,.32],['swipe',.52,180,560,180,240,.32],['swipe',.68,180,260,180,580,.32],['dtap',.84,180,330]]},
+{k:'morph',scr:'morph',m:2,step:'Moment 3 · Morph',title:'Drag to recolour, shape to order',desc:'Direct manipulation replaces option dropdowns. Colour changes live, and tailor products can be reshaped and then sewn to the twin\'s measurements.',list:[['◯','Drag the colour ring: live recolour'],['↔','Slide length & sleeves (tailor-made)'],['🪡','Custom order priced instantly by the maker']],chips:['Real-time generative edit','Tailor style templates','Measurement-driven'],co:[[120,'Colour ring (drag)'],[290,'Live preview'],[560,'Length & sleeve morph'],[730,'Tailor-made by the maker']],g:[]},
+{k:'spin',scr:'spin',m:2,step:'Moment 3 · Spin & mirror',title:'3D twin and live AR mirror',desc:'Pinch to spin the twin in 3D, or flip to a live AR mirror that overlays the look on the shopper in real time.',list:[['🤏','Pinch / drag: 360° spin'],['🪞','Segmented toggle: 3D twin ↔ AR mirror'],['📍','Body tracking on-device, nothing uploaded']],chips:['WebGPU rendering','WebXR / ARCore','On-device tracking'],co:[[280,'3D twin (360°)'],[520,'Turntable'],[740,'3D ↔ AR toggle']],g:[['pinch',.08,180,330,.3],['tap',.58,270,740]]},
+{k:'circle',scr:'circle',m:2,step:'Moment 3 · Ask circle',title:'Friends vote, live',desc:'Social proof is built in. A private live poll lets friends and family vote on looks without leaving the experience.',list:[['👥','Share 3 looks as a live poll'],['📊','Real-time vote bars'],['💬','Comments from the circle']],chips:['Realtime sync','Watermarked previews','Private by link'],co:[[100,'Question to the circle'],[250,'Looks with live votes'],[470,'Friends\' reactions']],g:[]},
+{k:'maker',scr:'maker',m:2,step:'Moment 3 · Maker Space',title:'The maker\'s own immersive page',desc:'Swiping left on any maker opens their Maker Space, the modern form of the member page. Story, 3D collection shelf and reviews stay owned and managed by the member.',list:[['←','Swipe left on a maker card'],['▶','Story video header'],['🧊','3D collection shelf (coverflow)'],['📅','Follow · chat · book a fitting']],chips:['Member-owned page','3D shelf','WhatsApp chat'],co:[[80,'Maker story'],[240,'Identity + verification'],[320,'Owned & managed by member'],[460,'3D collection shelf'],[740,'Follow · Chat · Book fitting']],g:[['swipe',.04,300,400,60,400,.3],['swipe',.55,300,470,80,470,.25]]},
+{k:'hold',scr:'hold',m:3,step:'Moment 4 · Hold to buy',title:'Hold to buy, pay the maker',desc:'Checkout forms disappear. Size comes from the twin, delivery is suggested and the payment is approved with a passkey, straight to the maker\'s Mobile Money.',list:[['✓','Auto-filled: size · delivery · wallet'],['✋','Press-and-hold ring (prevents accidental buys)'],['🔐','Passkey / fingerprint approves MoMo'],['🧵','Paid directly to the member']],chips:['MoMo API','Passkeys (WebAuthn)','Direct-to-merchant'],co:[[540,'Auto-filled order chips'],[590,'Paid directly to maker'],[668,'Hold-to-buy ring']],g:[['hold',.3,180,668,.35]]},
+{k:'ambient',scr:'ambient',m:3,step:'After · Ambient',title:'Updates come to you',desc:'There\'s no order list to check. A live activity follows the order, the maker messages on WhatsApp, and the item joins the digital wardrobe for future styling.',list:[['📲','Lock-screen live activity'],['💬','WhatsApp updates from the maker'],['👗','Auto-added to digital wardrobe']],chips:['Live Activities / push','WhatsApp Cloud API','AI restyling'],co:[[150,'Time · lock screen'],[270,'Live order activity'],[380,'Maker update'],[510,'Digital wardrobe']],g:[]},
+{k:'compare',ov:'compare'},
+{k:'outro',ov:'outro'}];
+const NAR={};
+function setDurs(d,n){Object.assign(NAR,n);let t=0;for(const s of SC){s.dur=(d[s.k]||5)+1.3;s.st=t;t+=s.dur;}window.TOTAL=t;return t;}
+window.setDurs=setDurs;
+
+// ---- finger helpers ----
+const fg=$('finger'),fg2=$('finger2'),tr=$('trail');
+function finger(el,x,y,a,press){el.style.left=x+'px';el.style.top=y+'px';el.style.opacity=a;el.style.transform=`scale(${press?.8:1})`;}
+function gestures(s,lt){fg.style.opacity=0;fg2.style.opacity=0;tr.innerHTML='';
+ for(const g of (s.g||[])){const t0=g[1]*s.dur;const tt=lt-t0;
+  if(g[0]==='tap'||g[0]==='dtap'){if(tt>-.5&&tt<.55){const a=tt<0?ease(seg(tt,-.5,-.2)):1-ease(seg(tt,.3,.55));const pr=(tt>-.06&&tt<.1)||(g[0]==='dtap'&&tt>.18&&tt<.3);finger(fg,g[2],g[3],a,pr);
+    if(tt>0&&tt<.5)tr.innerHTML+=`<circle cx="${g[2]}" cy="${g[3]}" r="${22+tt*70}" fill="none" stroke="rgba(242,184,75,${1-tt*2})" stroke-width="3"/>`;}}
+  if(g[0]==='swipe'){const d=g[6]*s.dur*.5+.35;if(tt>-.3&&tt<d+.3){const q=ease(seg(tt,0,d));const x=g[2]+(g[4]-g[2])*q,y=g[3]+(g[5]-g[3])*q;const a=tt<0?seg(tt,-.3,0):1-seg(tt,d,d+.3);finger(fg,x,y,a,tt>0&&tt<d);
+    if(tt>0)tr.innerHTML+=`<line x1="${g[2]}" y1="${g[3]}" x2="${x}" y2="${y}" stroke="url(#tg)" stroke-width="10" stroke-linecap="round" opacity="${a*.6}"/>`;}}
+  if(g[0]==='hold'){const d=g[4]*s.dur;if(tt>-.4&&tt<d+.4){const a=tt<0?seg(tt,-.4,0):1-seg(tt,d,d+.4);finger(fg,g[2],g[3],a,tt>0&&tt<d);}}
+  if(g[0]==='pinch'){const d=g[4]*s.dur;if(tt>-.3&&tt<d+.3){const q=ease(seg(tt,0,d));const a=tt<0?seg(tt,-.3,0):1-seg(tt,d,d+.3);const r=40+70*q;finger(fg,g[2]-r*.7,g[3]+r*.7,a,true);finger(fg2,g[2]+r*.7,g[3]-r*.7,a,true);}}
+ }
+ tr.innerHTML=`<defs><linearGradient id="tg"><stop offset="0" stop-color="#F2B84B" stop-opacity="0"/><stop offset="1" stop-color="#F2B84B"/></linearGradient></defs>`+tr.innerHTML;}
+
+// ---- scene animations ----
+const F={};
+F.mirror=(p,lt)=>{const sc=seg(p,.05,.6);const y=130+440-ease(sc)*440;$('scanLine').style.top=y+'px';$('scanLine').style.opacity=sc>0&&sc<1?1:0;
+ $('ringWrap').style.top=(560-ease(sc)*430)+'px';$('ringWrap').style.opacity=sc<1?1:0;
+ const pc=Math.round(100*sc);$('mirPct').textContent=pc+'%';$('mirProg').style.background=`conic-gradient(#7CF2F0 ${pc*3.6}deg,rgba(255,255,255,.15) 0)`;
+ let d='';const n=Math.floor(140*sc);for(let i=0;i<n;i++){const r=Math.sin(i*12.9898)*43758.5453;const fx=r-Math.floor(r);const r2=Math.sin(i*78.233)*12345.678;const fy=r2-Math.floor(r2);
+  const yy=130+fy*430;if(yy<y-4)continue;const w=yy<230?30:yy<350?55:yy<480?60:30;const xx=180+(fx-.5)*2*w;d+=`<circle cx="${xx}" cy="${yy}" r="1.6" fill="#7CF2F0" opacity=".85"/>`;}
+ $('dots').innerHTML=sc<1?d:'';
+ const tw=ease(seg(p,.6,.72));$('twinFig').style.opacity=tw;$('mirFig').style.opacity=1-tw*.6;$('twinFig').style.filter=`drop-shadow(0 0 ${10*tw}px #7CF2F0)`;
+ $('mirTxt').textContent=p<.6?'Turn slowly once ↻':'✨ Your twin is ready';
+ const on=p>.78;$('mirTog').style.background=on?'#34D399':'#555';$('mirKnob').style.left=on?'21px':'3px';};
+F.muse=(p,lt)=>{const talk=p>.05&&p<.47;const bars=[...document.querySelectorAll('#wave b')];bars.forEach((b,i)=>{const h=talk?6+Math.abs(Math.sin(lt*9+i*.7)*Math.sin(lt*3.3+i))*30:6;b.style.height=h+'px';});
+ $('orb').style.transform=`scale(${1+(talk?.06*Math.sin(lt*10):.02*Math.sin(lt*3))}) rotate(${lt*40}deg)`;
+ const full="Ndashaka imyenda yo kwambara mu bukwe ku wa gatandatu, itarenze 50,000";const n=Math.round(full.length*seg(p,.08,.44));$('trans').textContent=n?'"'+full.slice(0,n)+(n<full.length?'…':'"'):'';
+ $('transEn').textContent=p>.46?'I need a wedding outfit for Saturday, under RWF 50,000':'';
+ [0,1,2,3,4].forEach(i=>{const a=ease(seg(p,.5+i*.06,.58+i*.06));const e=$('ic'+i);e.style.opacity=a;e.style.transform=`translateY(${(1-a)*14}px) scale(${.9+.1*a})`;});
+ $('museStatus').textContent=p>.82?'✨ Rendering 9 looks on your twin…':(p>.5?'Understood':'');
+ $('micB').style.boxShadow=`0 0 ${talk?50:30}px rgba(224,112,63,${talk?.9:.6})`;};
+F.snap=(p,lt)=>{const lock=ease(seg(p,.32,.5));const r=$('reticle');r.style.left=(60+ (1-lock)*-20)+'px';r.style.top=(215+(1-lock)*-25)+'px';r.style.width=(240+(1-lock)*40)+'px';r.style.height=(290+(1-lock)*50)+'px';r.style.borderColor=lock>.95?'#34D399':'rgba(255,255,255,.9)';r.style.boxShadow=lock>.95?'0 0 24px rgba(52,211,153,.7)':'';
+ $('snapTag').style.opacity=ease(seg(p,.5,.6));$('snapTag').style.transform=`translateY(${(1-ease(seg(p,.5,.6)))*20}px)`;};
+F.looks=(p,lt,dur)=>{// index position: 0 ->1 at .3-.4, 1->2 at .52-.62, 2->1? We do 0->1->2->back to 0? keep: 0→1→2, then swipe down to 1? Use pos
+ const d=.32*dur*.5+.35;const tr1=ease(seg(lt,.3*dur,.3*dur+d)),tr2=ease(seg(lt,.52*dur,.52*dur+d)),tr3=ease(seg(lt,.68*dur,.68*dur+d));
+ const pos=tr1+tr2-tr3*2; // ends at 0 (back to look 1)
+ [0,1,2].forEach(i=>{$('lk'+i).style.transform=`translateY(${(i-pos)*100}%)`;});
+ const idx=Math.round(pos);$('lookN').textContent=`Look ${idx+1} / 9`;
+ const b=lt-.84*dur;const ba=b>.15&&b<.9?1-seg(b,.5,.9):0;$('burst').style.opacity=ba;$('burst').style.transform=`scale(${.6+ease(seg(b,.15,.4))*.6})`;
+ $('rHeart').style.background=b>.2?'#FF4D6D':'';$('upHint').style.opacity=p<.3?1:0;};
+F.morph=(p,lt)=>{// ring drag 0.05-.4: angle sweep
+ const a=seg(p,.05,.4);const hue=(20+a*215)%360;const ang=(hue-90)*Math.PI/180;const cx=180,cy=270,R=140;
+ const kx=cx+R*Math.cos(ang),ky=cy+R*Math.sin(ang);$('knob').style.left=kx+'px';$('knob').style.top=ky+'px';$('knob').style.background=`hsl(${hue},70%,48%)`;
+ const col=`hsl(${hue},68%,42%)`;$('morph').style.setProperty('--dress',col);
+ const len=ease(seg(p,.45,.62))*.55, slv=ease(seg(p,.66,.82))*.6;$('morphFig').innerHTML=person('dress',col,'style="width:180px;height:390px"',len,slv);
+ $('lenBar').style.width=(20+len/.55*60)+'%';$('lenKnob').style.left=(20+len/.55*60)+'%';$('lenV').textContent=len<.2?'Knee':len<.45?'Midi':'Maxi';
+ $('slvBar').style.width=(15+slv/.6*65)+'%';$('slvKnob').style.left=(15+slv/.6*65)+'%';$('slvV').textContent=slv<.2?'Short':slv<.45?'Elbow':'Long';
+ // finger
+ fg.style.opacity=0;
+ if(p>.03&&p<.43)finger(fg,kx,ky,Math.min(seg(p,.03,.07),1-seg(p,.4,.43)),true);
+ else if(p>.43&&p<.64){const x=16+14+ (20+len/.55*60)/100*300;finger(fg,x,520+12+28,Math.min(seg(p,.43,.47),1-seg(p,.62,.64)),true);}
+ else if(p>.64&&p<.84){const x=16+14+(15+slv/.6*65)/100*300;finger(fg,x,520+12+82,Math.min(seg(p,.64,.68),1-seg(p,.82,.84)),true);}};
+F.spin=(p,lt)=>{const ang=p<.55?ease(seg(p,.1,.55))*Math.PI*2.5:Math.PI*2.5;const sx=Math.cos(ang);$('spinFig').style.transform=`scaleX(${Math.max(.15,Math.abs(sx))*(sx<0?-1:1)}) scale(${1+.15*Math.sin(seg(p,.05,.35)*Math.PI)})`;
+ const ar=ease(seg(p,.6,.7));$('arM').style.opacity=ar;$('spinStage').style.opacity=1-ar;
+ $('t3d').style.background=ar<.5?'rgba(255,255,255,.25)':'';$('tar').style.background=ar>=.5?'rgba(224,55,90,.85)':'';};
+F.circle=(p)=>{const v=[[.18,.07],[.72,.18],[.10,.75]];// pct final: t,i,g
+ const q=ease(seg(p,.1,.8));const fin=[14,72,14];[0,1,2].forEach(i=>{const val=Math.round(fin[i]*q);$('vb'+i).style.width=val+'%';$('vp'+i).textContent=val+'%';});
+ [0,1,2].forEach(i=>{const a=ease(seg(p,.25+i*.15,.33+i*.15));$('vt'+i).style.opacity=a;$('vt'+i).style.transform=`translateX(${(1-a)*-20}px)`;});};
+F.maker=(p,lt)=>{$('mkBg').style.transform=`translate(${Math.sin(lt*.6)*20}px,${lt*6%26}px) scale(1.1)`;
+ const off=ease(seg(p,.55,.72))*1.0+p*.6;[0,1,2,3,4].forEach(i=>{const d=i-2-off+1;const e=$('sh'+i);e.style.transform=`translateX(${d*95}px) translateZ(${-Math.abs(d)*90}px) rotateY(${-d*30}deg)`;e.style.opacity=1-Math.min(.7,Math.abs(d)*.3);e.style.zIndex=10-Math.round(Math.abs(d)*2);});};
+F.hold=(p,lt)=>{[0,1,2].forEach(i=>{const a=ease(seg(p,.04+i*.06,.12+i*.06));$('ac'+i).style.opacity=a;$('ac'+i).style.background=a>.9?'rgba(52,211,153,.25)':'';});
+ const hp=seg(p,.3,.3+.35);$('holdRing').style.background=`conic-gradient(#34D399 ${hp*360}deg,rgba(255,255,255,.18) 0)`;$('holdIn').style.transform=`scale(${hp>0&&hp<1?.94:1})`;
+ $('holdTxt').textContent=hp<=0?'Hold to buy':hp<1?'Keep holding…':'👆 Approved';
+ const pd=ease(seg(p,.7,.78));$('paid').style.opacity=pd;$('paidC').style.transform=`scale(${.5+.5*ease(seg(p,.72,.85))})`;
+ let c='';if(p>.72){const q=seg(p,.72,1);for(let i=0;i<46;i++){const r=Math.sin(i*91.7)*1000;const fx=r-Math.floor(r);const r2=Math.sin(i*13.3)*1000;const fy=r2-Math.floor(r2);
+  const x=180+(fx-.5)*340*q;const y=250+(fy-.6)*300*q+q*q*220;c+=`<rect x="${x}" y="${y}" width="6" height="10" rx="2" fill="${['#F2B84B','#E0703F','#8B5CF6','#34D399','#38BDF8'][i%5]}" transform="rotate(${i*40+q*300} ${x} ${y})" opacity="${1-q*.7}"/>`;}}$('conf').innerHTML=c;};
+F.ambient=(p)=>{$('liveBar').style.width=(20+ease(seg(p,.05,.6))*50)+'%';$('liveTxt').textContent=p<.35?'Live activity · cutting fabric':'Live activity · sewing · ready Thursday';
+ $('wn').style.opacity=ease(seg(p,.3,.4));$('wn').style.transform=`translateY(${(1-ease(seg(p,.3,.4)))*-20}px)`;$('wd').style.opacity=ease(seg(p,.55,.65));};
+// overlays anims
+F.analysis=(p)=>{[0,1,2,3,4,5].forEach(i=>{$('o'+i).style.setProperty('--x',ease(seg(p,.08+i*.05,.14+i*.05)));$('o'+i).style.opacity=1-.45*seg(p,.08+i*.05,.14+i*.05);});
+ [0,1,2,3,4,5].forEach(i=>{const a=ease(seg(p,.42+i*.07,.5+i*.07));$('p'+i).style.opacity=a;$('p'+i).style.transform=`translateY(${(1-a)*20}px)`;});};
+F.compare=(p)=>{[...$('oldFlow').children].forEach((e,i)=>{e.style.opacity=ease(seg(p,.02+i*.012,.06+i*.012));});[...$('newFlow').children].forEach((e,i)=>{const a=ease(seg(p,.2+i*.06,.28+i*.06));e.style.opacity=a;e.style.transform=`scale(${.9+.1*a})`;});
+ [...document.querySelectorAll('.met')].forEach((e,i)=>{const a=ease(seg(p,.45+i*.08,.53+i*.08));e.style.opacity=a;e.style.transform=`translateY(${(1-a)*20}px)`;});};
+F.outro=(p)=>{for(let i=0;i<7;i++){const a=ease(seg(p,.05+i*.06,.12+i*.06));$('ia'+i).style.opacity=a;$('ia'+i).style.transform=`translateY(${(1-a)*16}px)`;}
+ [...$('glos').children].forEach((e,i)=>{e.style.opacity=ease(seg(p,.5+i*.04,.56+i*.04));});};
+F.intro=()=>{};
+
+let last=-1;
+function render(t){let i=SC.findIndex(s=>t>=s.st&&t<s.st+s.dur);if(i<0)i=SC.length-1;const s=SC[i];const lt=t-s.st;const p=clamp(lt/s.dur);
+ // background blobs drift
+ $('b1').style.transform=`translate(${Math.sin(t*.15)*60}px,${Math.cos(t*.12)*40}px)`;$('b2').style.transform=`translate(${Math.cos(t*.1)*70}px,${Math.sin(t*.13)*50}px)`;
+ // overlays
+ ['intro','analysis','compare','outro'].forEach(o=>{const e=$(o);if(s.ov===o){e.style.visibility='visible';const fin=ease(seg(lt,0,.6)),fout=1-ease(seg(lt,s.dur-.5,s.dur));e.style.opacity=(o==='intro'?1:fin)*(o==='outro'?1:fout);}else e.style.visibility='hidden';});
+ if(i!==last){if(s.title){$('stepNo').textContent=s.step;$('title').textContent=s.title;$('desc').textContent=s.desc;
+   $('list').innerHTML=s.list.map(x=>`<div><span class="g">${x[0]}</span>${x[1]}</div>`).join('');$('chips').innerHTML=s.chips.map(c=>`<span>${c}</span>`).join('');
+   $('callouts').innerHTML=(s.co||[]).map((c,j)=>`<div class="co" id="co${j}" style="top:${82+c[0]}px"><div class="dt"></div><div class="ln"></div><div class="lb">${c[1]}</div></div>`).join('');}
+  $('caption').textContent=NAR[s.k]||'';last=i;}
+ const fa=ease(seg(lt,0,.45));$('left').style.opacity=s.title?fa:0;$('left').style.transform=`translateX(${(1-fa)*-24}px)`;$('caption').style.opacity=s.title?fa:0;
+ (s.co||[]).forEach((c,j)=>{const e=$('co'+j);if(!e)return;const a=ease(seg(lt,.35+j*.25,.75+j*.25));e.style.opacity=a;e.querySelector('.lb').style.transform=`translateX(${(1-a)*16}px)`;});
+ $('moments').style.opacity=s.m>=0?1:0;[0,1,2,3].forEach(k=>{$('m'+k).className='mo'+(k<s.m?' done':'')+(k===s.m?' on':'');});
+ $('phone').style.opacity=s.scr?1:0;
+ document.querySelectorAll('.screen').forEach(e=>{e.style.visibility='hidden';e.style.transform='';e.style.zIndex=1;e.style.opacity=1;});
+ if(s.scr){const cur=$(s.scr);cur.style.visibility='visible';cur.style.zIndex=3;const prev=i>0?SC[i-1].scr:null;
+  if(prev&&prev!==s.scr&&lt<.5){const pe=$(prev);pe.style.visibility='visible';pe.style.zIndex=2;const e=ease(lt/.5);cur.style.opacity=e;cur.style.transform=`scale(${1.08-.08*e})`;pe.style.transform=`scale(${1-.06*e})`;pe.style.opacity=1-e;}}
+ gestures(s,lt);if(F[s.k])F[s.k](p,lt,s.dur);}
+window.render=render;
+</script></body></html>

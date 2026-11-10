@@ -1,0 +1,120 @@
+@import "tailwindcss";
+
+/* Nyambika v2 design tokens (prototype v2 aurora palette). */
+@theme {
+  --color-terra: #e0703f;
+  --color-terra-2: #b4532a;
+  --color-gold: #f2b84b;
+  --color-violet: #8b5cf6;
+  --color-sky: #38bdf8;
+  --color-mint: #34d399;
+  --color-ink: #0b0a0f;
+  --color-ink-2: #15131b;
+  --color-ink-3: #1f1c26;
+  --color-txt: #f5efe8;
+  --color-mut: #a79e96;
+  --color-line: rgb(255 255 255 / 0.16);
+  --font-sans: var(--font-body), "Avenir Next", "Helvetica Neue", system-ui, sans-serif;
+  --font-display: var(--font-display-face), var(--font-body), system-ui, sans-serif;
+  --animate-orb: orb-spin 9s linear infinite;
+  --animate-pulse-ring: pulse-ring 1.8s ease-out infinite;
+  --animate-rise: rise 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-shimmer: shimmer 1.6s linear infinite;
+}
+
+@keyframes orb-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes pulse-ring {
+  0% { transform: scale(0.9); opacity: 0.7; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+@keyframes rise {
+  from { transform: translateY(14px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to { background-position: 200% 0; }
+}
+
+:root {
+  color-scheme: dark;
+  --bg: var(--color-ink);
+  --fg: var(--color-txt);
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--fg);
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  min-height: 100dvh;
+  font-family: var(--font-sans);
+  overscroll-behavior-y: none;
+}
+
+/* The member Page Manager and host admin use a light, high-contrast theme
+   for readability outdoors and long working sessions. */
+.theme-light {
+  color-scheme: light;
+  --bg: #faf7f3;
+  --fg: #1c1917;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.aurora {
+  background:
+    radial-gradient(60% 40% at 15% 15%, rgb(224 112 63 / 0.45), transparent 70%),
+    radial-gradient(60% 45% at 90% 35%, rgb(139 92 246 / 0.4), transparent 70%),
+    radial-gradient(70% 40% at 50% 100%, rgb(242 184 75 / 0.25), transparent 70%),
+    var(--color-ink);
+}
+
+.glass {
+  background: rgb(255 255 255 / 0.09);
+  border: 1px solid rgb(255 255 255 / 0.16);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.orb {
+  background: conic-gradient(from 0deg, var(--color-terra), var(--color-gold), var(--color-violet), var(--color-sky), var(--color-terra));
+}
+
+.grad-cta {
+  background: linear-gradient(120deg, var(--color-terra), var(--color-violet));
+}
+
+.text-grad {
+  background: linear-gradient(90deg, #fff 0%, #ffe7c7 60%, var(--color-gold) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, rgb(255 255 255 / 0.04), rgb(255 255 255 / 0.12), rgb(255 255 255 / 0.04));
+  background-size: 200% 100%;
+  animation: var(--animate-shimmer);
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }
+
+:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

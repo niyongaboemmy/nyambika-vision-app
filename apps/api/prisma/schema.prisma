@@ -1,0 +1,537 @@
+// Nyambika core data model (SRS §8.1 + v2 change requests CR-02/05/06).
+// Tenant isolation is enforced per page in the API layer (see docs/adr/0003-tenancy.md).
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [vector]
+}
+
+enum Role {
+  SHOPPER
+  PAGE_OWNER
+  PAGE_STAFF
+  COOP_ADMIN
+  COOP_MEMBER
+  HOST_ADMIN
+  MODERATOR
+  DPO
+  SUPPORT
+}
+
+enum MemberType {
+  TAILOR
+  COOPERATIVE
+  SELLER
+}
+
+enum PageStatus {
+  DRAFT
+  PENDING_VERIFICATION
+  PUBLISHED
+  PAUSED
+  SUSPENDED
+  CLOSED
+}
+
+enum ProductStatus {
+  DRAFT
+  PENDING_APPROVAL
+  PUBLISHED
+  OUT_OF_STOCK
+  ARCHIVED
+}
+
+enum TryOnReadiness {
+  NOT_ASSESSED
+  READY
+  NEEDS_BETTER_PHOTO
+  NOT_SUPPORTED
+}
+
+enum PayoutTarget {
+  PAGE
+  MAKER
+}
+
+enum OrderStatus {
+  NEW
+  AWAITING_PAYMENT
+  PAID
+  ACCEPTED
+  DECLINED
+  IN_PREPARATION
+  READY
+  SHIPPED
+  DELIVERED
+  COMPLETED
+  CANCELLED
+  DISPUTED
+  RESOLVED
+}
+
+enum GenerationStatus {
+  QUEUED
+  GENERATING
+  GUARDING
+  DELIVERED
+  WITHHELD
+  FAILED
+}
+
+model User {
+  id          String           @id @default(cuid())
+  phone       String           @unique
+  name        String?
+  locale      String           @default("en")
+  createdAt   DateTime         @default(now())
+  deletedAt   DateTime?
+  roles       RoleAssignment[]
+  sessions    Session[]
+  twins       Twin[]
+  consents    ConsentRecord[]
+  intents     IntentSession[]
+  looks       Look[]
+  generations Generation[]
+  orders      Order[]          @relation("ShopperOrders")
+  follows     Follow[]
+  usage       UsageEvent[]
+}
+
+model OtpChallenge {
+  id         String    @id @default(cuid())
+  phone      String
+  codeHash   String
+  attempts   Int       @default(0)
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([phone, createdAt])
+}
+
+model Session {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshHash String    @unique
+  expiresAt   DateTime
+  revokedAt   DateTime?
+  createdAt   DateTime  @default(now())
+}
+
+model RoleAssignment {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role      Role
+  pageId    String?
+  page      Page?    @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, role, pageId])
+}
+
+model Page {
+  id             String           @id @default(cuid())
+  handle         String           @unique
+  name           String
+  memberType     MemberType
+  status         PageStatus       @default(DRAFT)
+  verified       Boolean          @default(false)
+  story          String           @default("")
+  district       String           @default("")
+  sector         String           @default("")
+  whatsapp       String           @default("")
+  instagram      String           @default("")
+  theme          String           @default("terra")
+  momoMerchant   String           @default("")
+  airtelMerchant String           @default("")
+  allowanceOn    Boolean          @default(true)
+  rating         Float            @default(0)
+  reviewCount    Int              @default(0)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  roles          RoleAssignment[]
+  products       Product[]
+  makers         CoopMember[]
+  orders         Order[]
+  follows        Follow[]
+  subscription   Subscription?
+  sizeCharts     SizeChart[]
+  usage          UsageEvent[]
+}
+
+model Follow {
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  pageId    String
+  page      Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([userId, pageId])
+}
+
+/// A maker inside a cooperative page (FR-COOP-02/04/05).
+model CoopMember {
+  id                   String         @id @default(cuid())
+  pageId               String
+  page                 Page           @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  userId               String?
+  name                 String
+  phone                String         @default("")
+  momoMerchant         String         @default("")
+  active               Boolean        @default(true)
+  attributionConsent   Boolean        @default(true)
+  createdAt            DateTime       @default(now())
+  products             ProductMaker[]
+}
+
+model SizeChart {
+  id        String    @id @default(cuid())
+  pageId    String
+  page      Page      @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  name      String
+  /// [{size:"M", chestCm:[88,94], heightRatio:[0.24,0.27]}]
+  rows      Json
+  products  Product[]
+}
+
+model Product {
+  id             String                       @id @default(cuid())
+  pageId         String
+  page           Page                         @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  title          String
+  description    String                       @default("")
+  category       String
+  priceRwf       Int
+  madeToOrder    Boolean                      @default(false)
+  leadTimeDays   Int                          @default(0)
+  styles         String[]
+  occasions      String[]
+  fabric         String                       @default("")
+  status         ProductStatus                @default(DRAFT)
+  readiness      TryOnReadiness               @default(NOT_ASSESSED)
+  readinessNotes String[]
+  qualityScore   Float?
+  payoutTarget   PayoutTarget                 @default(PAGE)
+  featured       Boolean                      @default(false)
+  submittedById  String?
+  sizeChartId    String?
+  sizeChart      SizeChart?                   @relation(fields: [sizeChartId], references: [id])
+  embedding      Unsupported("vector(64)")?
+  createdAt      DateTime                     @default(now())
+  updatedAt      DateTime                     @updatedAt
+  variants       Variant[]
+  media          MediaAsset[]
+  makers         ProductMaker[]
+
+  @@index([pageId, status])
+}
+
+model ProductMaker {
+  productId    String
+  product      Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  coopMemberId String
+  coopMember   CoopMember @relation(fields: [coopMemberId], references: [id], onDelete: Cascade)
+
+  @@id([productId, coopMemberId])
+}
+
+model Variant {
+  id          String       @id @default(cuid())
+  productId   String
+  product     Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  colourName  String
+  colourHex   String
+  sizes       String[]
+  stock       Int          @default(0)
+  /// Garment cut-out used for try-on (path in the media store).
+  cutoutPath  String?
+  imagePath   String?
+  generations Generation[]
+}
+
+model MediaAsset {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  kind      String   @default("ORIGINAL")
+  path      String
+  width     Int      @default(0)
+  height    Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+/// Persistent photo twin (CR-02). Image bytes are AES-256-GCM encrypted at rest.
+model Twin {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  version     Int       @default(1)
+  encPath     String
+  iv          String
+  authTag     String
+  mime        String
+  size        String?
+  checks      Json
+  consentId   String
+  createdAt   DateTime  @default(now())
+  deletedAt   DateTime?
+}
+
+/// Append-only consent ledger with a hash chain (plan §17).
+model ConsentRecord {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  purpose       String
+  granted       Boolean
+  noticeVersion String
+  locale        String
+  prevHash      String
+  hash          String   @unique
+  createdAt     DateTime @default(now())
+}
+
+model IntentSession {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  input     String
+  source    String
+  intent    Json
+  createdAt DateTime @default(now())
+  looks     Look[]
+}
+
+model Look {
+  id              String         @id @default(cuid())
+  userId          String
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  intentSessionId String
+  intentSession   IntentSession  @relation(fields: [intentSessionId], references: [id], onDelete: Cascade)
+  productId       String
+  variantId       String
+  rank            Int
+  score           Float          @default(0)
+  generationId    String?
+  generation      Generation?    @relation(fields: [generationId], references: [id], onDelete: SetNull)
+  savedAt         DateTime?
+  createdAt       DateTime       @default(now())
+
+  @@index([userId, savedAt])
+}
+
+model Generation {
+  id           String           @id @default(cuid())
+  userId       String
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  variantId    String
+  variant      Variant          @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  twinVersion  Int
+  modelVersion String
+  tier         String           @default("PREVIEW")
+  cacheKey     String           @unique
+  status       GenerationStatus @default(QUEUED)
+  outputPath   String?
+  guard        Json?
+  c2pa         Json?
+  costRwf      Int              @default(0)
+  latencyMs    Int?
+  createdAt    DateTime         @default(now())
+  deliveredAt  DateTime?
+  looks        Look[]
+
+  @@index([userId, createdAt])
+}
+
+/// Metering for every billable AI action (FR-PLAN-02/03).
+model UsageEvent {
+  id        String   @id @default(cuid())
+  kind      String
+  source    String
+  units     Int      @default(1)
+  costRwf   Int      @default(0)
+  pageId    String?
+  page      Page?    @relation(fields: [pageId], references: [id], onDelete: SetNull)
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  refId     String?
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([pageId, createdAt])
+}
+
+model Plan {
+  code           String         @id
+  name           String
+  priceRwf       Int
+  maxProducts    Int
+  tryOnAllowance Int
+  staffSeats     Int
+  subscriptions  Subscription[]
+}
+
+model Subscription {
+  id          String   @id @default(cuid())
+  pageId      String   @unique
+  page        Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  planCode    String
+  plan        Plan     @relation(fields: [planCode], references: [code])
+  monthlyCap  Int
+  periodStart DateTime @default(now())
+  sponsor     String?
+}
+
+model Order {
+  id             String       @id @default(cuid())
+  code           String       @unique
+  pageId         String
+  page           Page         @relation(fields: [pageId], references: [id])
+  shopperId      String
+  shopper        User         @relation("ShopperOrders", fields: [shopperId], references: [id])
+  status         OrderStatus  @default(NEW)
+  totalRwf       Int
+  deliveryMode   String
+  deliveryFeeRwf Int          @default(0)
+  address        String       @default("")
+  wallet         String
+  payerPhone     String
+  payoutMsisdn   String
+  payoutLabel    String
+  idempotencyKey String       @unique
+  lookId         String?
+  readyBy        DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  items          OrderItem[]
+  events         OrderEvent[]
+  payments       Payment[]
+  review         Review?
+
+  @@index([pageId, createdAt])
+  @@index([shopperId, createdAt])
+}
+
+model OrderItem {
+  id           String @id @default(cuid())
+  orderId      String
+  order        Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId    String
+  variantId    String
+  title        String
+  colourName   String
+  size         String
+  qty          Int    @default(1)
+  unitPriceRwf Int
+  makerName    String @default("")
+}
+
+model OrderEvent {
+  id        String      @id @default(cuid())
+  orderId   String
+  order     Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  status    OrderStatus
+  note      String      @default("")
+  actorId   String?
+  createdAt DateTime    @default(now())
+}
+
+model Payment {
+  id          String    @id @default(cuid())
+  orderId     String
+  order       Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  provider    String
+  providerRef String    @unique
+  status      String    @default("PENDING")
+  amountRwf   Int
+  payerPhone  String
+  merchant    String
+  webhook     Json?
+  reconciled  Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  settledAt   DateTime?
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  orderId   String   @unique
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  pageId    String
+  rating    Int
+  text      String   @default("")
+  status    String   @default("PUBLISHED")
+  createdAt DateTime @default(now())
+}
+
+/// Outbox for WhatsApp / SMS / push messages (SI-03/04).
+model Notification {
+  id        String   @id @default(cuid())
+  channel   String
+  to        String
+  template  String
+  body      String
+  status    String   @default("SENT")
+  refId     String?
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?
+  pageId    String?
+  action    String
+  data      Json?
+  createdAt DateTime @default(now())
+
+  @@index([pageId, createdAt])
+}
+
+model ModerationItem {
+  id         String    @id @default(cuid())
+  kind       String
+  refId      String
+  pageId     String?
+  reason     String
+  status     String    @default("OPEN")
+  resolvedBy String?
+  createdAt  DateTime  @default(now())
+  resolvedAt DateTime?
+}
+
+model FeatureFlag {
+  key         String  @id
+  enabled     Boolean @default(false)
+  rollout     Int     @default(100)
+  description String  @default("")
+}
+
+model ModelVersion {
+  id        String   @id
+  provider  String
+  name      String
+  version   String
+  tier      String
+  status    String   @default("ACTIVE")
+  nlbScore  Float?
+  costRwf   Int
+  createdAt DateTime @default(now())
+}
+
+/// Deletion cascade jobs (FR-PRV, plan §17 twin protection).
+model DeletionJob {
+  id          String    @id @default(cuid())
+  userId      String
+  scope       String
+  status      String    @default("PENDING")
+  steps       Json
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+}

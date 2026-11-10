@@ -1,0 +1,21 @@
+[
+["intro","Nyambika Vision. A customer journey prototype for an AI powered fitting room, where every tailor, cooperative and seller keeps their own page."],
+["splash","The app opens with a simple language choice: Kinyarwanda, English, or French."],
+["home","Home is the Nyambika directory. Search, filter by tailors, cooperatives or sellers, and discover featured member pages."],
+["search","Aline searches for a kitenge dress, and filters to items that support virtual try-on. Every result shows the page that owns it."],
+["page","She opens Uwase Couture. This is the member's own page, with verification, reviews, services, and products."],
+["product","The product page shows price, colours, sizes and the maker, with one main action: Try it on me."],
+["consent","Before the first try-on, a clear consent screen explains that her photo is auto-deleted, and never shared with sellers."],
+["camera","The camera guides her pose. On-device checks confirm full body, good lighting, and one person, before anything is uploaded."],
+["generating","The AI generates her preview. Then a quality and fairness check verifies identity and skin tone, and content credentials are added."],
+["result","Here is her try-on, clearly labelled as an AI preview. She switches colours and compares looks side by side."],
+["wa","She shares the look with a friend on WhatsApp, with a watermark and a link back to the maker's page."],
+["viewer3d","In release two, products can be explored in 3D, and viewed life size in augmented reality."],
+["stylist","The AI stylist understands Kinyarwanda voice, and recommends real products from member pages, each ready to try on."],
+["size","Her saved measurements suggest size M. She chooses delivery and Mobile Money. Payment goes directly to the maker."],
+["momo","She approves the payment on her phone. The order is confirmed, and paid straight to Uwase Couture."],
+["track","Order tracking shows every step, with WhatsApp updates from the maker. After delivery, she leaves a review."],
+["privacy","In her fitting room and privacy centre, she controls saved looks and consents, and can delete her photos at any time."],
+["vr","In release three, a virtual reality showroom lets shoppers walk through member booths and fashion shows, using WebXR."],
+["outro","That is the structure: discover, member page, product, try-on, share, and order. Simple, private, and built around Rwandan makers."]
+]

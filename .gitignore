@@ -1,0 +1,21 @@
+node_modules/
+.next/
+dist/
+.turbo/
+coverage/
+*.tsbuildinfo
+.env
+.env.local
+.DS_Store
+.tmcode/
+# local runtime data (encrypted twins, uploads, generated looks)
+apps/api/storage/
+apps/ai/.venv/
+apps/ai/storage/
+__pycache__/
+*.pyc
+apps/web/test-results/
+apps/web/playwright-report/
+scripts/crawl-output/
+.cache/
+.pytest_cache/

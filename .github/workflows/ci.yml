@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web-api:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: nyambika
+          POSTGRES_PASSWORD: nyambika
+          POSTGRES_DB: nyambika_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U nyambika" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://nyambika:nyambika@localhost:5432/nyambika_test?schema=public
+      JWT_SECRET: ci-secret
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @nyambika/contracts build
+      - run: pnpm --filter @nyambika/api exec prisma migrate deploy
+      - run: pnpm --filter @nyambika/api exec prisma generate
+      - name: Typecheck
+        run: pnpm --filter @nyambika/api typecheck && pnpm --filter @nyambika/web typecheck
+      - name: API tests
+        run: pnpm --filter @nyambika/api test
+      - name: Web build
+        run: pnpm --filter @nyambika/web build
+
+  ai:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/ai
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: apps/ai/requirements.txt
+      - run: pip install -r requirements.txt
+      - run: pytest -q

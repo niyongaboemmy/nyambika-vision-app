@@ -1,0 +1,10 @@
+{
+  "name": "Nyambika Vision",
+  "short_name": "Nyambika",
+  "description": "Ask. See it on you. Hold to buy. Rwandan makers, on your twin.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0B0A0F",
+  "theme_color": "#0B0A0F",
+  "icons": [{ "src": "/icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }]
+}

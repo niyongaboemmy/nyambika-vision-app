@@ -1,0 +1,9 @@
+fastapi==0.162.4
+uvicorn[standard]==0.54.0
+pillow==13.0.0
+numpy==2.5.4
+python-multipart==0.0.33
+httpx==0.28.1
+pydantic==2.14.3
+pytest==9.2.0
+# optional: anthropic (only used when MUSE_LLM=1 and ANTHROPIC_API_KEY is set)

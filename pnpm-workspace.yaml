@@ -1,0 +1,13 @@
+packages:
+  - "apps/web"
+  - "apps/api"
+  - "apps/ai"
+  - "packages/*"
+allowBuilds:
+  "@prisma/client": true
+  "@prisma/engines": true
+  prisma: true
+  esbuild: true
+  sharp: true
+  "@nestjs/core": true
+  unrs-resolver: true
