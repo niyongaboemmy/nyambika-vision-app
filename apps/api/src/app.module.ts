@@ -15,6 +15,8 @@ import { CatalogueModule } from "./modules/catalogue/catalogue.module";
 import { CoopsModule } from "./modules/coops/coops.module";
 import { TwinModule } from "./modules/twin/twin.module";
 import { LooksModule } from "./modules/looks/looks.module";
+import { IntentModule } from "./modules/intent/intent.module";
+import { FlagsModule } from "./modules/flags/flags.module";
 
 @Controller()
 class HealthController {
@@ -43,6 +45,8 @@ class HealthController {
     CoopsModule,
     TwinModule,
     LooksModule,
+    IntentModule,
+    FlagsModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: AuthGuard }],
