@@ -27,7 +27,7 @@ export class AuthController {
     private access: Access,
   ) {}
 
-  /** FR-ACC-01: phone + OTP. Rate limited to 5 codes per phone per 15 minutes. */
+  /** FR-ACC-01: phone + OTP. Rate limited per phone per 15 minutes (OTP_MAX_PER_15M, default 5). */
   @Public()
   @Post("otp/request")
   @HttpCode(200)
@@ -36,7 +36,7 @@ export class AuthController {
     const recent = await this.prisma.otpChallenge.count({
       where: { phone, createdAt: { gte: new Date(Date.now() - 15 * 60_000) } },
     });
-    if (recent >= 5) throw new HttpException("Too many codes requested. Try again in 15 minutes.", 429);
+    if (recent >= config.otpMaxPer15m) throw new HttpException("Too many codes requested. Try again in 15 minutes.", 429);
     const code = String(randomInt(0, 1_000_000)).padStart(6, "0");
     await this.prisma.otpChallenge.create({
       data: { phone, codeHash: sha(`${phone}:${code}`), expiresAt: new Date(Date.now() + 5 * 60_000) },

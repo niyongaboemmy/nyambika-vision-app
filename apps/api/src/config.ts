@@ -20,4 +20,5 @@ export const config = {
   storageDir: req("STORAGE_DIR", "./storage"),
   freeWeeklyLooks: Number(process.env.FREE_WEEKLY_LOOKS ?? 30),
   signedUrlTtlSec: 300,
+  otpMaxPer15m: Number(process.env.OTP_MAX_PER_15M ?? 5),
 };

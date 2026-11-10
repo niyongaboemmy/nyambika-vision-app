@@ -5,6 +5,7 @@ const API = process.env.API_INTERNAL_URL ?? "http://localhost:4000";
 const nextConfig: NextConfig = {
   transpilePackages: ["@nyambika/i18n"],
   poweredByHeader: false,
+  devIndicators: false,
   async rewrites() {
     // Same-origin API so auth cookies stay first-party.
     return [{ source: "/api/:path*", destination: `${API}/:path*` }];

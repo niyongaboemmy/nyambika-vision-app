@@ -10,6 +10,9 @@ import { PrismaModule } from "./common/prisma.service";
 import { StorageModule } from "./common/storage.service";
 import { FilesModule } from "./modules/files/files.module";
 import { IdentityModule } from "./modules/identity/identity.module";
+import { PagesModule } from "./modules/pages/pages.module";
+import { CatalogueModule } from "./modules/catalogue/catalogue.module";
+import { CoopsModule } from "./modules/coops/coops.module";
 
 @Controller()
 class HealthController {
@@ -33,6 +36,9 @@ class HealthController {
     MeteringModule,
     FilesModule,
     IdentityModule,
+    PagesModule,
+    CatalogueModule,
+    CoopsModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: AuthGuard }],

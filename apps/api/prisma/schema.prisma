@@ -224,7 +224,6 @@ model Product {
   submittedById  String?
   sizeChartId    String?
   sizeChart      SizeChart?                   @relation(fields: [sizeChartId], references: [id])
-  embedding      Unsupported("vector(64)")?
   createdAt      DateTime                     @default(now())
   updatedAt      DateTime                     @updatedAt
   variants       Variant[]
@@ -254,6 +253,8 @@ model Variant {
   /// Garment cut-out used for try-on (path in the media store).
   cutoutPath  String?
   imagePath   String?
+  /// Snap visual-search embedding (pgvector, cosine).
+  embedding   Unsupported("vector(64)")?
   generations Generation[]
 }
 
