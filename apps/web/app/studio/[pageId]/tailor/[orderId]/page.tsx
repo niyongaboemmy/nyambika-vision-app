@@ -104,7 +104,7 @@ export default function TailorOrder() {
             <p><b>{o.buyer?.name ?? "Customer"}</b> · {o.buyer?.phone ? <a className="underline" href={`tel:${o.buyer.phone}`}>{o.buyer.phone}</a> : <span className="text-cocoa-2">no phone</span>}</p>
             {o.note && <p className="text-stone-700">“{o.note}”</p>}
             <p className="text-stone-600">Estimate <b>{rwf(o.estimateRwf)}</b></p>
-            {o.fitting && <p className="flex flex-wrap items-center gap-1"><Icon name="calendar" className="size-4 text-stone-500" /> Fitting <b>{kigaliTime(o.fitting.startsAt, { weekday: "long", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</b> · {o.fitting.location}</p>}
+            {o.fitting && <p className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5"><Icon name="calendar" className="size-4 text-stone-500" /> Fitting <b>{kigaliTime(o.fitting.startsAt, { weekday: "long", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</b><span className="inline-flex items-center gap-1 text-stone-600"><Icon name="pin" className="size-3.5" />{o.fitting.location}</span></p>}
           </Card>
         </div>
       </div>

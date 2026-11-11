@@ -177,7 +177,6 @@ function ShowsCard({ data, onNew, onChanged }: { data: VrStudio; onNew: () => vo
         <div className="mt-2 flex flex-wrap items-center gap-1.5">
           <Fact icon="sparkle">AI model</Fact>
           <Fact icon="mail">WhatsApp RSVP</Fact>
-          <Fact icon="bag">Hold to buy</Fact>
           <InfoTip label="About fashion shows">Your pieces walk in 3D on an AI runway model (never a real shopper). Shoppers RSVP for a WhatsApp reminder, react live and buy with one hold.</InfoTip>
         </div>
       </div>
