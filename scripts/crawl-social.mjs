@@ -74,7 +74,7 @@ console.log(`poll ${pollId} → ${owner.shareUrl}`);
 assert(owner.options.length >= 2, `poll has ${owner.options.length} looks`);
 
 await page.goto(`${BASE}${href}`);
-await page.getByText(/votes and comments appear here/i).waitFor();
+await page.getByText(/no votes yet/i).waitFor();
 await page.getByText("Live", { exact: true }).waitFor({ timeout: 8000 });
 await shot("owner-waiting");
 

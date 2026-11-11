@@ -168,7 +168,7 @@ await mute.click();
 // ── Trust centre: passkeys + voice privacy copy ───────────────────────────────
 await page.goto(`${BASE}/trust`);
 await page.getByText(/chrome on android/i).waitFor();
-assert(await page.getByText(/audio is never stored/i).isVisible(), "trust centre states that voice audio is never stored");
+assert(await page.getByText(/audio (is )?never stored/i).first().isVisible(), "trust centre states that voice audio is never stored");
 await page.getByRole("button", { name: /rename chrome on android/i }).click();
 await page.getByLabel(/passkey name/i).fill("My Pixel 7");
 await page.getByRole("button", { name: /^rename$/i }).click();
