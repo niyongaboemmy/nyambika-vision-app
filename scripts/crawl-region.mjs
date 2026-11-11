@@ -4,7 +4,7 @@
 // card checkout through the mock Stripe Payment Element → paid. Coop admin: DPP editor → new version → public
 // passport with QR + history. Kenyan maker: region & export studio. Host: country launch checklist.
 import { createRequire } from "node:module";
-import { BASE, signIn, start } from "./crawl-lib.mjs";
+import { BASE, isCrawlArtifact, signIn, start } from "./crawl-lib.mjs";
 
 const { devices } = createRequire(new URL("../apps/web/package.json", import.meta.url))("@playwright/test");
 const { browser, finish, issues } = await start("region");
@@ -20,7 +20,7 @@ let n = 0;
 async function ctx(label) {
   const c = await browser.newContext({ ...devices["Pixel 7"], locale: "en-US" });
   const p = await c.newPage();
-  p.on("console", (m) => m.type() === "error" && issues.push(`${label} console: ${m.text()}`));
+  p.on("console", (m) => m.type() === "error" && !isCrawlArtifact(m.text()) && issues.push(`${label} console: ${m.text()}`));
   p.on("pageerror", (e) => issues.push(`${label} pageerror: ${e.message}`));
   p.on("response", (r) => r.status() >= 500 && issues.push(`${label} HTTP ${r.status()} ${r.url()}`));
   // The pilot survey (Phase 2) may pop up for seeded shoppers; dismiss it whenever it blocks a step.

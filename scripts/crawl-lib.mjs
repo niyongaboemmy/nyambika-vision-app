@@ -9,6 +9,15 @@ export const BASE = process.env.BASE_URL ?? "http://localhost:3000";
 export const API_BASE = process.env.API_URL ?? BASE.replace(/:3(\d{3})\b/, ":4$1");
 /** Database for crawls that flip flags with psql: CRAWL_DB, else the one apps/api/.env points at. */
 export const CRAWL_DB = process.env.CRAWL_DB ?? dbFromEnv() ?? "nyambika_dev";
+/**
+ * Playwright screenshots hide the text caret by injecting `caret-color: transparent`; a screenshot taken while React
+ * is still hydrating then shows up as a hydration "mismatch" on that style alone. That is the crawler, not the app.
+ */
+export function isCrawlArtifact(text) {
+  if (!/hydrated but some attributes/i.test(text)) return false;
+  const diff = text.split("\n").filter((l) => /^\s*[+-]\s/.test(l));
+  return diff.length > 0 && diff.every((l) => /caret-color/.test(l));
+}
 function dbFromEnv() {
   try {
     const env = readFileSync(new URL("../apps/api/.env", import.meta.url), "utf8");
@@ -25,7 +34,7 @@ export async function start(name, launch = {}) {
   const context = await browser.newContext({ ...devices["Pixel 7"], locale: "en-US" });
   const page = await context.newPage();
   const issues = [];
-  page.on("console", (m) => m.type() === "error" && issues.push(`console: ${m.text()}`));
+  page.on("console", (m) => m.type() === "error" && !isCrawlArtifact(m.text()) && issues.push(`console: ${m.text()}`));
   page.on("pageerror", (e) => issues.push(`pageerror: ${e.message}`));
   page.on("response", (r) => (r.status() >= 500 || r.status() === 429) && issues.push(`HTTP ${r.status()} ${r.url()}`));
   let n = 0;
