@@ -83,8 +83,8 @@ describe("watermark", () => {
     let white = 0;
     for (let y = box.y; y < box.y + box.h; y++) for (let x = box.x; x < box.x + box.w; x++) if (px(x, y).every((c) => c > 200)) white++;
     expect(white).toBeGreaterThan(20);
-    // Nyambika mark: bottom-right corner is changed too.
-    const [mr, mg, mb] = px(info.width - Math.round(30 * box.s), info.height - Math.round(5 * box.s) - Math.round(box.h / 2));
+    // Nyambika mark: bottom-left corner is changed too.
+    const [mr, mg, mb] = px(Math.round(30 * box.s), info.height - Math.round(6 * box.s) - Math.round(box.h / 2));
     expect(Math.abs(mr - 60) + Math.abs(mg - 140) + Math.abs(mb - 200)).toBeGreaterThan(40);
   });
 
