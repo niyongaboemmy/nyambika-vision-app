@@ -140,7 +140,7 @@ export function RegionBuy({ maker, product, variantIndex, commerce }: { maker: M
         headers: { "idempotency-key": key.current },
         json: { variantId: v.id, size, method, payerPhone: method === "CARD" ? undefined : phone, delivery, shipCountry: delivery === "SHIP" ? shipCountry : undefined, address, discountCode: code.trim() || undefined, displayCurrency: prefs.displayCurrency },
       });
-      track("region_checkout_started", { pageId: maker.id, productId: product.id, method, currency: commerce.currency });
+      track("hold_started", { orderId: r.orderId, pageId: maker.id, productId: product.id, method, currency: commerce.currency });
       if (r.stripe) setCard(r);
       else router.push(`/orders/${r.orderId}?fresh=1`);
     } catch (e) {

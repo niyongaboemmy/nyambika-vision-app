@@ -13,6 +13,7 @@ export function MenuSheet({ open, onClose }: { open: boolean; onClose: () => voi
   const manages = me?.roles.some((r) => r.page);
   const items = [
     { href: "/mirror", icon: "🪞", label: "My twin" },
+    { href: "/mirror/3d", icon: "🧊", label: t("twin3d.title") },
     { href: "/saved", icon: "♥", label: "Saved looks" },
     { href: "/wardrobe", icon: "👗", label: "Wardrobe" },
     { href: "/bag", icon: "🛍️", label: t("bag.title") },

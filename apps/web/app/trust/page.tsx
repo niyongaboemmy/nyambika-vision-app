@@ -23,6 +23,7 @@ const PURPOSE: Record<string, { title: string; body: string }> = {
   TRYON_GENERATION: { title: "Render looks on my twin", body: "Use my twin to create AI previews. Off = looks pause." },
   VOICE_PROCESSING: { title: "Voice Muse", body: "Turn my voice into text. The recording is deleted as soon as the text comes back; it is never stored." },
   MARKETING: { title: "News from makers I follow", body: "WhatsApp updates about new collections." },
+  AVATAR_3D: { title: "Keep my private 3D twin", body: "Build and store my encrypted 3D twin. Off = it is deleted." },
 };
 
 /** Trust centre (prototype v2 structure · FR-PRV): consents, data, deletion. */

@@ -4,7 +4,7 @@ import { AuthUser, CurrentUser, Public } from "../../common/auth";
 import { PrismaService } from "../../common/prisma.service";
 import { ExperimentsService } from "../pilot/pilot.service";
 
-const PUBLIC_FLAGS = ["muse.voice_beta", "muse.voice"];
+const PUBLIC_FLAGS = ["muse.voice_beta", "muse.voice", "ar.mirror_pilot"];
 
 /** Client-visible feature flags (plan §3.1: deploy daily, release deliberately). */
 @Controller("flags")

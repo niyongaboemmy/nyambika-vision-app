@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type CSSProperties, type DetailedHTMLProps, type HTMLAttributes } from "react";
 import { createPortal } from "react-dom";
+import { TryIn3d } from "@/components/twin3d-card";
 import { useSession } from "@/lib/session";
 import { fmtM, hasWebGL2, loadModelViewer, prefersReducedMotion, type Garment3d } from "@/lib/xr";
 
@@ -31,7 +32,7 @@ const START_ORBIT = "25deg 78deg 115%";
  * motion, colour switch across variants, AR "View in your space" (WebXR / Scene Viewer / Quick Look;
  * the button only appears where AR can start), poster fallback when WebGL2 is missing.
  */
-export function GarmentViewer({ assets, title, initialVariantId, variantId, className = "", tall = false }: { assets: Garment3d[]; title: string; initialVariantId?: string; /** Controlled colour (the host shows its own swatches). */ variantId?: string; className?: string; tall?: boolean }) {
+export function GarmentViewer({ assets, title, initialVariantId, variantId, className = "", tall = false, onVariantChange }: { assets: Garment3d[]; title: string; initialVariantId?: string; /** Controlled colour (the host shows its own swatches). */ variantId?: string; className?: string; tall?: boolean; onVariantChange?: (variantId: string) => void }) {
   const { t } = useSession();
   const [vid, setVid] = useState(() => (assets.some((a) => a.variantId === initialVariantId) ? initialVariantId! : assets[0]?.variantId));
   const [ready, setReady] = useState(false);
@@ -94,6 +95,7 @@ export function GarmentViewer({ assets, title, initialVariantId, variantId, clas
     setLoaded(false);
     setProgress(0);
     setVid(id);
+    onVariantChange?.(id);
     navigator.vibrate?.(8);
   };
 
@@ -214,6 +216,7 @@ function ArIcon() {
 /** Full-screen immersive stage for the look rail (portalled above everything). */
 export function XrStage({ open, onClose, title, subtitle, assets, initialVariantId }: { open: boolean; onClose: () => void; title: string; subtitle?: string; assets: Garment3d[]; initialVariantId?: string }) {
   const [mounted, setMounted] = useState(false);
+  const [vid, setVid] = useState<string | undefined>(undefined);
   const closeRef = useRef<HTMLButtonElement>(null);
   useEffect(() => setMounted(true), []);
   useEffect(() => {
@@ -235,7 +238,8 @@ export function XrStage({ open, onClose, title, subtitle, assets, initialVariant
             {subtitle && <p className="truncate text-xs text-mut">{subtitle}</p>}
           </div>
         </div>
-        <GarmentViewer assets={assets} title={title} initialVariantId={initialVariantId} tall />
+        <GarmentViewer assets={assets} title={title} initialVariantId={initialVariantId} tall onVariantChange={setVid} />
+        <TryIn3d variantId={vid ?? initialVariantId ?? assets[0]?.variantId} />
         <p className="mt-3 text-center text-[11px] text-mut">AI builds this 3D preview from the maker&apos;s photo. Shape and drape are approximate.</p>
       </div>
     </div>,
