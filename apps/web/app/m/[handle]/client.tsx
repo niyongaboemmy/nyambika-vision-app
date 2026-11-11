@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui";
+import { Button } from "@/components/button";
 import { Price } from "@/components/region";
 import { useDrag } from "@/lib/drag";
 import { api, rwf } from "@/lib/api";
