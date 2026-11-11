@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { TwinDrapePanel } from "@/components/drape-spike";
 import { TurnCapture } from "@/components/twin3d-capture";
 import { Twin3dViewer } from "@/components/twin3d-viewer";
 import { Button, ErrorNote, Screen, Sheet, TopBar } from "@/components/ui";
@@ -473,6 +474,8 @@ function Viewer({
         <Button variant="glass" onClick={onAdjust}>📏 Adjust body</Button>
         <Button variant="glass" onClick={() => setMenu(true)}>⋯ My 3D twin</Button>
       </div>
+
+      <TwinDrapePanel bodySize={avatar.bodySize ?? null} />
 
       <nav aria-label="Mirror mode" className="fixed inset-x-0 bottom-[max(env(safe-area-inset-bottom),14px)] z-30 flex justify-center">
         <div className="glass flex rounded-full p-1.5 shadow-[0_12px_40px_rgba(0,0,0,.45)]">

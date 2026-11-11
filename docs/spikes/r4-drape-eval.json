@@ -1,0 +1,3164 @@
+{
+ "kind": "DRAPE_SPIKE",
+ "model_id": "drape-pbd-cpu@0.1",
+ "solver": "drape-pbd-cpu@0.1",
+ "pattern_version": "pattern-grade@0.1",
+ "passed": false,
+ "gate": {
+  "stability": false,
+  "runtime": false,
+  "agreement": true
+ },
+ "thresholds": {
+  "stability": 0.95,
+  "runtime_p95_s": 5.0,
+  "agreement": 0.85,
+  "max_penetration_m": 0.005,
+  "seam_gap_p95_m": 0.01,
+  "strain_p99": 0.2
+ },
+ "summary": {
+  "runs": 84,
+  "stability": 0.881,
+  "runtime_p50_s": 2.72,
+  "runtime_p95_s": 10.52,
+  "runtime_max_s": 19.25,
+  "agreement": 0.969,
+  "assessed_lines": 96,
+  "one_size_down_reads_tight": 0.833,
+  "max_penetration_m": 0.0056,
+  "seam_gap_p95_max_m": 0.0097,
+  "by_garment": {
+   "a_line_dress": {
+    "runs": 28,
+    "stability": 0.964,
+    "runtime_p95_s": 12.58,
+    "agreement": 0.969
+   },
+   "shirt": {
+    "runs": 28,
+    "stability": 0.821,
+    "runtime_p95_s": 10.26,
+    "agreement": 1.0
+   },
+   "wrap_skirt": {
+    "runs": 28,
+    "stability": 0.857,
+    "runtime_p95_s": 5.85,
+    "agreement": 0.938
+   }
+  },
+  "by_fabric": {
+   "cotton": {
+    "runs": 18,
+    "stability": 0.944,
+    "hem_cm_mean": {
+     "a_line_dress": 131.2,
+     "shirt": 114.6,
+     "wrap_skirt": 78.7
+    }
+   },
+   "jersey": {
+    "runs": 18,
+    "stability": 0.722,
+    "hem_cm_mean": {
+     "a_line_dress": 128.6,
+     "shirt": 114.3,
+     "wrap_skirt": 67.8
+    }
+   },
+   "kitenge": {
+    "runs": 18,
+    "stability": 0.944,
+    "hem_cm_mean": {
+     "a_line_dress": 132.7,
+     "shirt": 115.2,
+     "wrap_skirt": 80.8
+    }
+   }
+  },
+  "quality": "standard",
+  "wall_s": 322.2
+ },
+ "runs": [
+  {
+   "body": "S",
+   "garment": "a_line_dress",
+   "fabric": "cotton",
+   "size": "S",
+   "stable": true,
+   "hem_cm": 113.1,
+   "runtime_s": 2.335,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.0074,
+   "strain_p99": 0.1017,
+   "strain_max": 1.2616,
+   "vertices": 1484,
+   "share": {
+    "tight": 0.042,
+    "ok": 0.379,
+    "loose": 0.208,
+    "drape": 0.371
+   }
+  },
+  {
+   "body": "S",
+   "garment": "a_line_dress",
+   "fabric": "kitenge",
+   "size": "S",
+   "stable": true,
+   "hem_cm": 114.3,
+   "runtime_s": 2.33,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00724,
+   "strain_p99": 0.1037,
+   "strain_max": 1.2575,
+   "vertices": 1484,
+   "share": {
+    "tight": 0.049,
+    "ok": 0.365,
+    "loose": 0.215,
+    "drape": 0.371
+   }
+  },
+  {
+   "body": "S",
+   "garment": "a_line_dress",
+   "fabric": "jersey",
+   "size": "S",
+   "stable": true,
+   "hem_cm": 109.4,
+   "runtime_s": 2.528,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00519,
+   "strain_p99": 0.1497,
+   "strain_max": 1.2653,
+   "vertices": 1484,
+   "share": {
+    "tight": 0.052,
+    "ok": 0.425,
+    "loose": 0.125,
+    "drape": 0.399
+   }
+  },
+  {
+   "body": "S",
+   "garment": "a_line_dress",
+   "fabric": "cotton",
+   "size": "XS",
+   "stable": true,
+   "hem_cm": 110.2,
+   "runtime_s": 2.51,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00361,
+   "strain_p99": 0.1097,
+   "strain_max": 0.9174,
+   "vertices": 1384,
+   "share": {
+    "tight": 0.076,
+    "ok": 0.429,
+    "loose": 0.144,
+    "drape": 0.351
+   }
+  },
+  {
+   "body": "S",
+   "garment": "a_line_dress",
+   "fabric": "cotton",
+   "size": "L",
+   "stable": true,
+   "hem_cm": 118.4,
+   "runtime_s": 2.75,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.0034,
+   "strain_p99": 0.1035,
+   "strain_max": 0.5915,
+   "vertices": 1719,
+   "share": {
+    "tight": 0.028,
+    "ok": 0.207,
+    "loose": 0.362,
+    "drape": 0.403
+   }
+  },
+  {
+   "body": "S",
+   "garment": "wrap_skirt",
+   "fabric": "cotton",
+   "size": "S",
+   "stable": true,
+   "hem_cm": 78.4,
+   "runtime_s": 2.615,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.0,
+   "strain_p99": 0.1163,
+   "strain_max": 0.5115,
+   "vertices": 1591,
+   "share": {
+    "tight": 0.092,
+    "ok": 0.113,
+    "loose": 0.02,
+    "drape": 0.776
+   }
+  },
+  {
+   "body": "S",
+   "garment": "wrap_skirt",
+   "fabric": "kitenge",
+   "size": "S",
+   "stable": true,
+   "hem_cm": 80.9,
+   "runtime_s": 2.717,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.0,
+   "strain_p99": 0.1154,
+   "strain_max": 0.4959,
+   "vertices": 1591,
+   "share": {
+    "tight": 0.097,
+    "ok": 0.105,
+    "loose": 0.023,
+    "drape": 0.775
+   }
+  },
+  {
+   "body": "S",
+   "garment": "wrap_skirt",
+   "fabric": "jersey",
+   "size": "S",
+   "stable": true,
+   "hem_cm": 69.4,
+   "runtime_s": 2.215,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.0,
+   "strain_p99": 0.133,
+   "strain_max": 0.5897,
+   "vertices": 1591,
+   "share": {
+    "tight": 0.097,
+    "ok": 0.098,
+    "loose": 0.017,
+    "drape": 0.788
+   }
+  },
+  {
+   "body": "S",
+   "garment": "wrap_skirt",
+   "fabric": "cotton",
+   "size": "XS",
+   "stable": true,
+   "hem_cm": 61.5,
+   "runtime_s": 2.143,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.0,
+   "strain_p99": 0.1013,
+   "strain_max": 0.5202,
+   "vertices": 1516,
+   "share": {
+    "tight": 0.057,
+    "ok": 0.144,
+    "loose": 0.036,
+    "drape": 0.763
+   }
+  },
+  {
+   "body": "S",
+   "garment": "wrap_skirt",
+   "fabric": "cotton",
+   "size": "L",
+   "stable": true,
+   "hem_cm": 98.9,
+   "runtime_s": 2.753,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.0,
+   "strain_p99": 0.1245,
+   "strain_max": 0.509,
+   "vertices": 1824,
+   "share": {
+    "tight": 0.087,
+    "ok": 0.146,
+    "loose": 0.012,
+    "drape": 0.756
+   }
+  },
+  {
+   "body": "S",
+   "garment": "shirt",
+   "fabric": "cotton",
+   "size": "S",
+   "stable": true,
+   "hem_cm": 94.4,
+   "runtime_s": 2.404,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00519,
+   "strain_p99": 0.1234,
+   "strain_max": 0.5471,
+   "vertices": 1284,
+   "share": {
+    "tight": 0.063,
+    "ok": 0.656,
+    "loose": 0.281,
+    "drape": 0.0
+   }
+  },
+  {
+   "body": "S",
+   "garment": "shirt",
+   "fabric": "kitenge",
+   "size": "S",
+   "stable": true,
+   "hem_cm": 94.5,
+   "runtime_s": 2.736,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00594,
+   "strain_p99": 0.1368,
+   "strain_max": 0.5961,
+   "vertices": 1284,
+   "share": {
+    "tight": 0.074,
+    "ok": 0.63,
+    "loose": 0.296,
+    "drape": 0.0
+   }
+  },
+  {
+   "body": "S",
+   "garment": "shirt",
+   "fabric": "jersey",
+   "size": "S",
+   "stable": true,
+   "hem_cm": 94.2,
+   "runtime_s": 2.874,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00426,
+   "strain_p99": 0.1345,
+   "strain_max": 0.5575,
+   "vertices": 1284,
+   "share": {
+    "tight": 0.086,
+    "ok": 0.698,
+    "loose": 0.209,
+    "drape": 0.007
+   }
+  },
+  {
+   "body": "S",
+   "garment": "shirt",
+   "fabric": "cotton",
+   "size": "XS",
+   "stable": true,
+   "hem_cm": 92.0,
+   "runtime_s": 10.581,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00487,
+   "strain_p99": 0.1065,
+   "strain_max": 0.5811,
+   "vertices": 1199,
+   "share": {
+    "tight": 0.106,
+    "ok": 0.713,
+    "loose": 0.181,
+    "drape": 0.0
+   }
+  },
+  {
+   "body": "S",
+   "garment": "shirt",
+   "fabric": "cotton",
+   "size": "L",
+   "stable": true,
+   "hem_cm": 100.4,
+   "runtime_s": 19.246,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00637,
+   "strain_p99": 0.1064,
+   "strain_max": 1.2166,
+   "vertices": 1426,
+   "share": {
+    "tight": 0.062,
+    "ok": 0.46,
+    "loose": 0.453,
+    "drape": 0.025
+   }
+  },
+  {
+   "body": "M",
+   "garment": "a_line_dress",
+   "fabric": "cotton",
+   "size": "M",
+   "stable": true,
+   "hem_cm": 119.0,
+   "runtime_s": 16.669,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00293,
+   "strain_p99": 0.107,
+   "strain_max": 0.6115,
+   "vertices": 1603,
+   "share": {
+    "tight": 0.019,
+    "ok": 0.402,
+    "loose": 0.21,
+    "drape": 0.369
+   }
+  },
+  {
+   "body": "M",
+   "garment": "a_line_dress",
+   "fabric": "kitenge",
+   "size": "M",
+   "stable": true,
+   "hem_cm": 121.6,
+   "runtime_s": 11.509,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00308,
+   "strain_p99": 0.1121,
+   "strain_max": 0.6099,
+   "vertices": 1603,
+   "share": {
+    "tight": 0.028,
+    "ok": 0.364,
+    "loose": 0.241,
+    "drape": 0.367
+   }
+  },
+  {
+   "body": "M",
+   "garment": "a_line_dress",
+   "fabric": "jersey",
+   "size": "M",
+   "stable": true,
+   "hem_cm": 116.6,
+   "runtime_s": 7.794,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00299,
+   "strain_p99": 0.1462,
+   "strain_max": 0.6115,
+   "vertices": 1603,
+   "share": {
+    "tight": 0.039,
+    "ok": 0.427,
+    "loose": 0.137,
+    "drape": 0.397
+   }
+  },
+  {
+   "body": "M",
+   "garment": "a_line_dress",
+   "fabric": "cotton",
+   "size": "S",
+   "stable": true,
+   "hem_cm": 113.6,
+   "runtime_s": 13.152,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00784,
+   "strain_p99": 0.1331,
+   "strain_max": 1.2532,
+   "vertices": 1484,
+   "share": {
+    "tight": 0.117,
+    "ok": 0.445,
+    "loose": 0.097,
+    "drape": 0.341
+   }
+  },
+  {
+   "body": "M",
+   "garment": "a_line_dress",
+   "fabric": "cotton",
+   "size": "XL",
+   "stable": true,
+   "hem_cm": 127.2,
+   "runtime_s": 8.594,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00407,
+   "strain_p99": 0.1037,
+   "strain_max": 0.4261,
+   "vertices": 1850,
+   "share": {
+    "tight": 0.037,
+    "ok": 0.217,
+    "loose": 0.356,
+    "drape": 0.389
+   }
+  },
+  {
+   "body": "M",
+   "garment": "wrap_skirt",
+   "fabric": "cotton",
+   "size": "M",
+   "stable": true,
+   "hem_cm": 73.8,
+   "runtime_s": 5.289,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.0,
+   "strain_p99": 0.124,
+   "strain_max": 0.4925,
+   "vertices": 1729,
+   "share": {
+    "tight": 0.077,
+    "ok": 0.138,
+    "loose": 0.026,
+    "drape": 0.759
+   }
+  },
+  {
+   "body": "M",
+   "garment": "wrap_skirt",
+   "fabric": "kitenge",
+   "size": "M",
+   "stable": true,
+   "hem_cm": 74.4,
+   "runtime_s": 6.15,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.0,
+   "strain_p99": 0.1221,
+   "strain_max": 0.4844,
+   "vertices": 1729,
+   "share": {
+    "tight": 0.079,
+    "ok": 0.13,
+    "loose": 0.027,
+    "drape": 0.763
+   }
+  },
+  {
+   "body": "M",
+   "garment": "wrap_skirt",
+   "fabric": "jersey",
+   "size": "M",
+   "stable": true,
+   "hem_cm": 62.3,
+   "runtime_s": 4.953,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.0,
+   "strain_p99": 0.1606,
+   "strain_max": 0.6699,
+   "vertices": 1729,
+   "share": {
+    "tight": 0.079,
+    "ok": 0.132,
+    "loose": 0.023,
+    "drape": 0.765
+   }
+  },
+  {
+   "body": "M",
+   "garment": "wrap_skirt",
+   "fabric": "cotton",
+   "size": "S",
+   "stable": true,
+   "hem_cm": 72.4,
+   "runtime_s": 2.922,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.0,
+   "strain_p99": 0.1017,
+   "strain_max": 0.43,
+   "vertices": 1591,
+   "share": {
+    "tight": 0.082,
+    "ok": 0.133,
+    "loose": 0.03,
+    "drape": 0.755
+   }
+  },
+  {
+   "body": "M",
+   "garment": "wrap_skirt",
+   "fabric": "cotton",
+   "size": "XL",
+   "stable": true,
+   "hem_cm": 98.7,
+   "runtime_s": 10.163,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.0,
+   "strain_p99": 0.1515,
+   "strain_max": 0.5708,
+   "vertices": 1962,
+   "share": {
+    "tight": 0.084,
+    "ok": 0.178,
+    "loose": 0.017,
+    "drape": 0.722
+   }
+  },
+  {
+   "body": "M",
+   "garment": "shirt",
+   "fabric": "cotton",
+   "size": "M",
+   "stable": true,
+   "hem_cm": 101.5,
+   "runtime_s": 9.669,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00364,
+   "strain_p99": 0.1162,
+   "strain_max": 0.5358,
+   "vertices": 1334,
+   "share": {
+    "tight": 0.098,
+    "ok": 0.651,
+    "loose": 0.251,
+    "drape": 0.0
+   }
+  },
+  {
+   "body": "M",
+   "garment": "shirt",
+   "fabric": "kitenge",
+   "size": "M",
+   "stable": true,
+   "hem_cm": 101.7,
+   "runtime_s": 3.215,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00421,
+   "strain_p99": 0.1257,
+   "strain_max": 0.5313,
+   "vertices": 1334,
+   "share": {
+    "tight": 0.11,
+    "ok": 0.612,
+    "loose": 0.277,
+    "drape": 0.0
+   }
+  },
+  {
+   "body": "M",
+   "garment": "shirt",
+   "fabric": "jersey",
+   "size": "M",
+   "stable": true,
+   "hem_cm": 101.3,
+   "runtime_s": 2.608,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00273,
+   "strain_p99": 0.1256,
+   "strain_max": 0.6044,
+   "vertices": 1334,
+   "share": {
+    "tight": 0.124,
+    "ok": 0.663,
+    "loose": 0.212,
+    "drape": 0.0
+   }
+  },
+  {
+   "body": "M",
+   "garment": "shirt",
+   "fabric": "cotton",
+   "size": "S",
+   "stable": true,
+   "hem_cm": 98.9,
+   "runtime_s": 2.771,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00615,
+   "strain_p99": 0.1315,
+   "strain_max": 0.6245,
+   "vertices": 1284,
+   "share": {
+    "tight": 0.208,
+    "ok": 0.681,
+    "loose": 0.111,
+    "drape": 0.0
+   }
+  },
+  {
+   "body": "M",
+   "garment": "shirt",
+   "fabric": "cotton",
+   "size": "XL",
+   "stable": true,
+   "hem_cm": 106.6,
+   "runtime_s": 2.641,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.0053,
+   "strain_p99": 0.1259,
+   "strain_max": 0.407,
+   "vertices": 1513,
+   "share": {
+    "tight": 0.056,
+    "ok": 0.471,
+    "loose": 0.455,
+    "drape": 0.019
+   }
+  },
+  {
+   "body": "L",
+   "garment": "a_line_dress",
+   "fabric": "cotton",
+   "size": "L",
+   "stable": true,
+   "hem_cm": 125.1,
+   "runtime_s": 2.671,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00522,
+   "strain_p99": 0.1068,
+   "strain_max": 0.5775,
+   "vertices": 1719,
+   "share": {
+    "tight": 0.022,
+    "ok": 0.392,
+    "loose": 0.223,
+    "drape": 0.363
+   }
+  },
+  {
+   "body": "L",
+   "garment": "a_line_dress",
+   "fabric": "kitenge",
+   "size": "L",
+   "stable": true,
+   "hem_cm": 129.0,
+   "runtime_s": 2.717,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00546,
+   "strain_p99": 0.1028,
+   "strain_max": 0.5603,
+   "vertices": 1719,
+   "share": {
+    "tight": 0.024,
+    "ok": 0.377,
+    "loose": 0.238,
+    "drape": 0.361
+   }
+  },
+  {
+   "body": "L",
+   "garment": "a_line_dress",
+   "fabric": "jersey",
+   "size": "L",
+   "stable": true,
+   "hem_cm": 122.0,
+   "runtime_s": 2.693,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00371,
+   "strain_p99": 0.1495,
+   "strain_max": 0.5694,
+   "vertices": 1719,
+   "share": {
+    "tight": 0.023,
+    "ok": 0.446,
+    "loose": 0.14,
+    "drape": 0.391
+   }
+  },
+  {
+   "body": "L",
+   "garment": "a_line_dress",
+   "fabric": "cotton",
+   "size": "M",
+   "stable": true,
+   "hem_cm": 119.2,
+   "runtime_s": 2.53,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00325,
+   "strain_p99": 0.1258,
+   "strain_max": 0.9586,
+   "vertices": 1603,
+   "share": {
+    "tight": 0.117,
+    "ok": 0.43,
+    "loose": 0.108,
+    "drape": 0.344
+   }
+  },
+  {
+   "body": "L",
+   "garment": "a_line_dress",
+   "fabric": "cotton",
+   "size": "XXL",
+   "stable": true,
+   "hem_cm": 128.0,
+   "runtime_s": 2.281,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00351,
+   "strain_p99": 0.1088,
+   "strain_max": 0.3349,
+   "vertices": 1997,
+   "share": {
+    "tight": 0.028,
+    "ok": 0.228,
+    "loose": 0.373,
+    "drape": 0.371
+   }
+  },
+  {
+   "body": "L",
+   "garment": "wrap_skirt",
+   "fabric": "cotton",
+   "size": "L",
+   "stable": true,
+   "hem_cm": 73.2,
+   "runtime_s": 2.235,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.0,
+   "strain_p99": 0.1445,
+   "strain_max": 0.7912,
+   "vertices": 1824,
+   "share": {
+    "tight": 0.082,
+    "ok": 0.135,
+    "loose": 0.044,
+    "drape": 0.738
+   }
+  },
+  {
+   "body": "L",
+   "garment": "wrap_skirt",
+   "fabric": "kitenge",
+   "size": "L",
+   "stable": true,
+   "hem_cm": 72.5,
+   "runtime_s": 2.23,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.0,
+   "strain_p99": 0.1162,
+   "strain_max": 0.6024,
+   "vertices": 1824,
+   "share": {
+    "tight": 0.071,
+    "ok": 0.152,
+    "loose": 0.026,
+    "drape": 0.751
+   }
+  },
+  {
+   "body": "L",
+   "garment": "wrap_skirt",
+   "fabric": "jersey",
+   "size": "L",
+   "stable": false,
+   "hem_cm": 66.3,
+   "runtime_s": 2.555,
+   "exploded": true,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.0,
+   "strain_p99": 0.2683,
+   "strain_max": 1.4014,
+   "vertices": 1824,
+   "share": {
+    "tight": 0.101,
+    "ok": 0.124,
+    "loose": 0.037,
+    "drape": 0.737
+   }
+  },
+  {
+   "body": "L",
+   "garment": "wrap_skirt",
+   "fabric": "cotton",
+   "size": "M",
+   "stable": true,
+   "hem_cm": 66.0,
+   "runtime_s": 2.337,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.0,
+   "strain_p99": 0.0962,
+   "strain_max": 0.4932,
+   "vertices": 1729,
+   "share": {
+    "tight": 0.064,
+    "ok": 0.14,
+    "loose": 0.029,
+    "drape": 0.767
+   }
+  },
+  {
+   "body": "L",
+   "garment": "wrap_skirt",
+   "fabric": "cotton",
+   "size": "XXL",
+   "stable": true,
+   "hem_cm": 104.5,
+   "runtime_s": 2.973,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.0,
+   "strain_p99": 0.1227,
+   "strain_max": 0.4485,
+   "vertices": 2097,
+   "share": {
+    "tight": 0.124,
+    "ok": 0.127,
+    "loose": 0.014,
+    "drape": 0.736
+   }
+  },
+  {
+   "body": "L",
+   "garment": "shirt",
+   "fabric": "cotton",
+   "size": "L",
+   "stable": true,
+   "hem_cm": 108.7,
+   "runtime_s": 2.54,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00689,
+   "strain_p99": 0.1318,
+   "strain_max": 1.1773,
+   "vertices": 1426,
+   "share": {
+    "tight": 0.079,
+    "ok": 0.67,
+    "loose": 0.25,
+    "drape": 0.0
+   }
+  },
+  {
+   "body": "L",
+   "garment": "shirt",
+   "fabric": "kitenge",
+   "size": "L",
+   "stable": true,
+   "hem_cm": 108.9,
+   "runtime_s": 2.456,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00737,
+   "strain_p99": 0.157,
+   "strain_max": 1.2165,
+   "vertices": 1426,
+   "share": {
+    "tight": 0.1,
+    "ok": 0.626,
+    "loose": 0.273,
+    "drape": 0.0
+   }
+  },
+  {
+   "body": "L",
+   "garment": "shirt",
+   "fabric": "jersey",
+   "size": "L",
+   "stable": true,
+   "hem_cm": 108.3,
+   "runtime_s": 2.805,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00618,
+   "strain_p99": 0.1377,
+   "strain_max": 1.2114,
+   "vertices": 1426,
+   "share": {
+    "tight": 0.103,
+    "ok": 0.668,
+    "loose": 0.229,
+    "drape": 0.0
+   }
+  },
+  {
+   "body": "L",
+   "garment": "shirt",
+   "fabric": "cotton",
+   "size": "M",
+   "stable": true,
+   "hem_cm": 105.9,
+   "runtime_s": 2.708,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.0062,
+   "strain_p99": 0.1278,
+   "strain_max": 0.5466,
+   "vertices": 1334,
+   "share": {
+    "tight": 0.288,
+    "ok": 0.645,
+    "loose": 0.067,
+    "drape": 0.0
+   }
+  },
+  {
+   "body": "L",
+   "garment": "shirt",
+   "fabric": "cotton",
+   "size": "XXL",
+   "stable": true,
+   "hem_cm": 114.2,
+   "runtime_s": 2.669,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00699,
+   "strain_p99": 0.1189,
+   "strain_max": 2.1012,
+   "vertices": 1618,
+   "share": {
+    "tight": 0.075,
+    "ok": 0.421,
+    "loose": 0.504,
+    "drape": 0.0
+   }
+  },
+  {
+   "body": "XL",
+   "garment": "a_line_dress",
+   "fabric": "cotton",
+   "size": "XL",
+   "stable": true,
+   "hem_cm": 135.6,
+   "runtime_s": 3.049,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00523,
+   "strain_p99": 0.1167,
+   "strain_max": 0.9092,
+   "vertices": 1850,
+   "share": {
+    "tight": 0.031,
+    "ok": 0.398,
+    "loose": 0.216,
+    "drape": 0.355
+   }
+  },
+  {
+   "body": "XL",
+   "garment": "a_line_dress",
+   "fabric": "kitenge",
+   "size": "XL",
+   "stable": true,
+   "hem_cm": 138.1,
+   "runtime_s": 2.931,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00562,
+   "strain_p99": 0.1174,
+   "strain_max": 0.9038,
+   "vertices": 1850,
+   "share": {
+    "tight": 0.037,
+    "ok": 0.373,
+    "loose": 0.235,
+    "drape": 0.355
+   }
+  },
+  {
+   "body": "XL",
+   "garment": "a_line_dress",
+   "fabric": "jersey",
+   "size": "XL",
+   "stable": true,
+   "hem_cm": 131.2,
+   "runtime_s": 3.48,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00369,
+   "strain_p99": 0.1497,
+   "strain_max": 0.7444,
+   "vertices": 1850,
+   "share": {
+    "tight": 0.029,
+    "ok": 0.448,
+    "loose": 0.151,
+    "drape": 0.372
+   }
+  },
+  {
+   "body": "XL",
+   "garment": "a_line_dress",
+   "fabric": "cotton",
+   "size": "L",
+   "stable": true,
+   "hem_cm": 126.6,
+   "runtime_s": 3.136,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00634,
+   "strain_p99": 0.1557,
+   "strain_max": 1.0149,
+   "vertices": 1719,
+   "share": {
+    "tight": 0.19,
+    "ok": 0.418,
+    "loose": 0.055,
+    "drape": 0.337
+   }
+  },
+  {
+   "body": "XL",
+   "garment": "a_line_dress",
+   "fabric": "cotton",
+   "size": "3XL",
+   "stable": true,
+   "hem_cm": 142.2,
+   "runtime_s": 2.766,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00401,
+   "strain_p99": 0.1089,
+   "strain_max": 0.6853,
+   "vertices": 2150,
+   "share": {
+    "tight": 0.018,
+    "ok": 0.243,
+    "loose": 0.387,
+    "drape": 0.352
+   }
+  },
+  {
+   "body": "XL",
+   "garment": "wrap_skirt",
+   "fabric": "cotton",
+   "size": "XL",
+   "stable": true,
+   "hem_cm": 80.1,
+   "runtime_s": 2.529,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.0,
+   "strain_p99": 0.1812,
+   "strain_max": 0.7206,
+   "vertices": 1962,
+   "share": {
+    "tight": 0.095,
+    "ok": 0.129,
+    "loose": 0.055,
+    "drape": 0.721
+   }
+  },
+  {
+   "body": "XL",
+   "garment": "wrap_skirt",
+   "fabric": "kitenge",
+   "size": "XL",
+   "stable": true,
+   "hem_cm": 79.4,
+   "runtime_s": 2.291,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.0,
+   "strain_p99": 0.1459,
+   "strain_max": 0.5912,
+   "vertices": 1962,
+   "share": {
+    "tight": 0.085,
+    "ok": 0.137,
+    "loose": 0.045,
+    "drape": 0.733
+   }
+  },
+  {
+   "body": "XL",
+   "garment": "wrap_skirt",
+   "fabric": "jersey",
+   "size": "XL",
+   "stable": false,
+   "hem_cm": 72.0,
+   "runtime_s": 2.246,
+   "exploded": true,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.0,
+   "strain_p99": 0.3585,
+   "strain_max": 1.5167,
+   "vertices": 1962,
+   "share": {
+    "tight": 0.112,
+    "ok": 0.131,
+    "loose": 0.043,
+    "drape": 0.714
+   }
+  },
+  {
+   "body": "XL",
+   "garment": "wrap_skirt",
+   "fabric": "cotton",
+   "size": "L",
+   "stable": true,
+   "hem_cm": 61.2,
+   "runtime_s": 2.024,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.0,
+   "strain_p99": 0.1169,
+   "strain_max": 0.6519,
+   "vertices": 1824,
+   "share": {
+    "tight": 0.071,
+    "ok": 0.155,
+    "loose": 0.044,
+    "drape": 0.73
+   }
+  },
+  {
+   "body": "XL",
+   "garment": "wrap_skirt",
+   "fabric": "cotton",
+   "size": "3XL",
+   "stable": true,
+   "hem_cm": 107.0,
+   "runtime_s": 2.401,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.0,
+   "strain_p99": 0.1322,
+   "strain_max": 0.6682,
+   "vertices": 2248,
+   "share": {
+    "tight": 0.125,
+    "ok": 0.129,
+    "loose": 0.017,
+    "drape": 0.73
+   }
+  },
+  {
+   "body": "XL",
+   "garment": "shirt",
+   "fabric": "cotton",
+   "size": "XL",
+   "stable": true,
+   "hem_cm": 118.0,
+   "runtime_s": 2.288,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00664,
+   "strain_p99": 0.1412,
+   "strain_max": 0.4612,
+   "vertices": 1513,
+   "share": {
+    "tight": 0.096,
+    "ok": 0.664,
+    "loose": 0.239,
+    "drape": 0.0
+   }
+  },
+  {
+   "body": "XL",
+   "garment": "shirt",
+   "fabric": "kitenge",
+   "size": "XL",
+   "stable": true,
+   "hem_cm": 118.4,
+   "runtime_s": 2.281,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00737,
+   "strain_p99": 0.1575,
+   "strain_max": 0.4624,
+   "vertices": 1513,
+   "share": {
+    "tight": 0.124,
+    "ok": 0.64,
+    "loose": 0.236,
+    "drape": 0.0
+   }
+  },
+  {
+   "body": "XL",
+   "garment": "shirt",
+   "fabric": "jersey",
+   "size": "XL",
+   "stable": true,
+   "hem_cm": 117.4,
+   "runtime_s": 2.327,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00527,
+   "strain_p99": 0.156,
+   "strain_max": 0.3982,
+   "vertices": 1513,
+   "share": {
+    "tight": 0.116,
+    "ok": 0.683,
+    "loose": 0.202,
+    "drape": 0.0
+   }
+  },
+  {
+   "body": "XL",
+   "garment": "shirt",
+   "fabric": "cotton",
+   "size": "L",
+   "stable": true,
+   "hem_cm": 115.1,
+   "runtime_s": 2.41,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00813,
+   "strain_p99": 0.1768,
+   "strain_max": 1.1551,
+   "vertices": 1426,
+   "share": {
+    "tight": 0.316,
+    "ok": 0.642,
+    "loose": 0.043,
+    "drape": 0.0
+   }
+  },
+  {
+   "body": "XL",
+   "garment": "shirt",
+   "fabric": "cotton",
+   "size": "3XL",
+   "stable": true,
+   "hem_cm": 124.1,
+   "runtime_s": 2.267,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00499,
+   "strain_p99": 0.1212,
+   "strain_max": 0.9986,
+   "vertices": 1727,
+   "share": {
+    "tight": 0.067,
+    "ok": 0.456,
+    "loose": 0.477,
+    "drape": 0.0
+   }
+  },
+  {
+   "body": "XXL",
+   "garment": "a_line_dress",
+   "fabric": "cotton",
+   "size": "XXL",
+   "stable": true,
+   "hem_cm": 143.7,
+   "runtime_s": 2.542,
+   "exploded": false,
+   "max_penetration_m": 0.00024,
+   "seam_gap_p95_m": 0.00463,
+   "strain_p99": 0.1321,
+   "strain_max": 0.6027,
+   "vertices": 1997,
+   "share": {
+    "tight": 0.037,
+    "ok": 0.418,
+    "loose": 0.204,
+    "drape": 0.342
+   }
+  },
+  {
+   "body": "XXL",
+   "garment": "a_line_dress",
+   "fabric": "kitenge",
+   "size": "XXL",
+   "stable": true,
+   "hem_cm": 144.8,
+   "runtime_s": 2.456,
+   "exploded": false,
+   "max_penetration_m": 0.0006,
+   "seam_gap_p95_m": 0.0046,
+   "strain_p99": 0.1453,
+   "strain_max": 0.6011,
+   "vertices": 1997,
+   "share": {
+    "tight": 0.047,
+    "ok": 0.374,
+    "loose": 0.238,
+    "drape": 0.341
+   }
+  },
+  {
+   "body": "XXL",
+   "garment": "a_line_dress",
+   "fabric": "jersey",
+   "size": "XXL",
+   "stable": true,
+   "hem_cm": 141.2,
+   "runtime_s": 2.553,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.0033,
+   "strain_p99": 0.1666,
+   "strain_max": 0.5456,
+   "vertices": 1997,
+   "share": {
+    "tight": 0.032,
+    "ok": 0.473,
+    "loose": 0.132,
+    "drape": 0.363
+   }
+  },
+  {
+   "body": "XXL",
+   "garment": "a_line_dress",
+   "fabric": "cotton",
+   "size": "XL",
+   "stable": true,
+   "hem_cm": 136.5,
+   "runtime_s": 3.011,
+   "exploded": false,
+   "max_penetration_m": 0.00173,
+   "seam_gap_p95_m": 0.00654,
+   "strain_p99": 0.1725,
+   "strain_max": 1.472,
+   "vertices": 1850,
+   "share": {
+    "tight": 0.246,
+    "ok": 0.386,
+    "loose": 0.031,
+    "drape": 0.336
+   }
+  },
+  {
+   "body": "XXL",
+   "garment": "wrap_skirt",
+   "fabric": "cotton",
+   "size": "XXL",
+   "stable": true,
+   "hem_cm": 84.0,
+   "runtime_s": 2.346,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.0,
+   "strain_p99": 0.1423,
+   "strain_max": 0.6097,
+   "vertices": 2097,
+   "share": {
+    "tight": 0.084,
+    "ok": 0.155,
+    "loose": 0.025,
+    "drape": 0.736
+   }
+  },
+  {
+   "body": "XXL",
+   "garment": "wrap_skirt",
+   "fabric": "kitenge",
+   "size": "XXL",
+   "stable": true,
+   "hem_cm": 85.0,
+   "runtime_s": 2.302,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.0,
+   "strain_p99": 0.1256,
+   "strain_max": 0.5031,
+   "vertices": 2097,
+   "share": {
+    "tight": 0.081,
+    "ok": 0.144,
+    "loose": 0.031,
+    "drape": 0.744
+   }
+  },
+  {
+   "body": "XXL",
+   "garment": "wrap_skirt",
+   "fabric": "jersey",
+   "size": "XXL",
+   "stable": false,
+   "hem_cm": 69.1,
+   "runtime_s": 2.791,
+   "exploded": true,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.0,
+   "strain_p99": 0.2798,
+   "strain_max": 0.9582,
+   "vertices": 2097,
+   "share": {
+    "tight": 0.114,
+    "ok": 0.12,
+    "loose": 0.042,
+    "drape": 0.723
+   }
+  },
+  {
+   "body": "XXL",
+   "garment": "wrap_skirt",
+   "fabric": "cotton",
+   "size": "XL",
+   "stable": true,
+   "hem_cm": 60.4,
+   "runtime_s": 2.42,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.0,
+   "strain_p99": 0.175,
+   "strain_max": 0.6703,
+   "vertices": 1962,
+   "share": {
+    "tight": 0.1,
+    "ok": 0.137,
+    "loose": 0.049,
+    "drape": 0.714
+   }
+  },
+  {
+   "body": "XXL",
+   "garment": "shirt",
+   "fabric": "cotton",
+   "size": "XXL",
+   "stable": true,
+   "hem_cm": 128.3,
+   "runtime_s": 2.843,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00911,
+   "strain_p99": 0.1658,
+   "strain_max": 2.0808,
+   "vertices": 1618,
+   "share": {
+    "tight": 0.162,
+    "ok": 0.593,
+    "loose": 0.245,
+    "drape": 0.0
+   }
+  },
+  {
+   "body": "XXL",
+   "garment": "shirt",
+   "fabric": "kitenge",
+   "size": "XXL",
+   "stable": true,
+   "hem_cm": 128.7,
+   "runtime_s": 2.679,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00958,
+   "strain_p99": 0.1954,
+   "strain_max": 2.1977,
+   "vertices": 1618,
+   "share": {
+    "tight": 0.187,
+    "ok": 0.533,
+    "loose": 0.28,
+    "drape": 0.0
+   }
+  },
+  {
+   "body": "XXL",
+   "garment": "shirt",
+   "fabric": "jersey",
+   "size": "XXL",
+   "stable": true,
+   "hem_cm": 127.6,
+   "runtime_s": 2.724,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00863,
+   "strain_p99": 0.1635,
+   "strain_max": 2.0315,
+   "vertices": 1618,
+   "share": {
+    "tight": 0.178,
+    "ok": 0.611,
+    "loose": 0.211,
+    "drape": 0.0
+   }
+  },
+  {
+   "body": "XXL",
+   "garment": "shirt",
+   "fabric": "cotton",
+   "size": "XL",
+   "stable": false,
+   "hem_cm": 124.5,
+   "runtime_s": 2.765,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00969,
+   "strain_p99": 0.2167,
+   "strain_max": 0.5629,
+   "vertices": 1513,
+   "share": {
+    "tight": 0.388,
+    "ok": 0.562,
+    "loose": 0.05,
+    "drape": 0.0
+   }
+  },
+  {
+   "body": "3XL",
+   "garment": "a_line_dress",
+   "fabric": "cotton",
+   "size": "3XL",
+   "stable": true,
+   "hem_cm": 150.7,
+   "runtime_s": 2.82,
+   "exploded": false,
+   "max_penetration_m": 0.00128,
+   "seam_gap_p95_m": 0.00633,
+   "strain_p99": 0.1604,
+   "strain_max": 0.7639,
+   "vertices": 2150,
+   "share": {
+    "tight": 0.051,
+    "ok": 0.425,
+    "loose": 0.193,
+    "drape": 0.331
+   }
+  },
+  {
+   "body": "3XL",
+   "garment": "a_line_dress",
+   "fabric": "kitenge",
+   "size": "3XL",
+   "stable": true,
+   "hem_cm": 148.6,
+   "runtime_s": 2.806,
+   "exploded": false,
+   "max_penetration_m": 0.00189,
+   "seam_gap_p95_m": 0.00653,
+   "strain_p99": 0.1822,
+   "strain_max": 0.776,
+   "vertices": 2150,
+   "share": {
+    "tight": 0.06,
+    "ok": 0.39,
+    "loose": 0.219,
+    "drape": 0.331
+   }
+  },
+  {
+   "body": "3XL",
+   "garment": "a_line_dress",
+   "fabric": "jersey",
+   "size": "3XL",
+   "stable": true,
+   "hem_cm": 151.3,
+   "runtime_s": 3.183,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00445,
+   "strain_p99": 0.1901,
+   "strain_max": 1.0183,
+   "vertices": 2150,
+   "share": {
+    "tight": 0.046,
+    "ok": 0.459,
+    "loose": 0.136,
+    "drape": 0.36
+   }
+  },
+  {
+   "body": "3XL",
+   "garment": "a_line_dress",
+   "fabric": "cotton",
+   "size": "XXL",
+   "stable": false,
+   "hem_cm": 146.3,
+   "runtime_s": 3.175,
+   "exploded": false,
+   "max_penetration_m": 0.00556,
+   "seam_gap_p95_m": 0.00574,
+   "strain_p99": 0.2153,
+   "strain_max": 1.1038,
+   "vertices": 1997,
+   "share": {
+    "tight": 0.248,
+    "ok": 0.422,
+    "loose": 0.0,
+    "drape": 0.329
+   }
+  },
+  {
+   "body": "3XL",
+   "garment": "wrap_skirt",
+   "fabric": "cotton",
+   "size": "3XL",
+   "stable": true,
+   "hem_cm": 82.9,
+   "runtime_s": 2.804,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.0,
+   "strain_p99": 0.1955,
+   "strain_max": 0.8562,
+   "vertices": 2248,
+   "share": {
+    "tight": 0.117,
+    "ok": 0.109,
+    "loose": 0.055,
+    "drape": 0.719
+   }
+  },
+  {
+   "body": "3XL",
+   "garment": "wrap_skirt",
+   "fabric": "kitenge",
+   "size": "3XL",
+   "stable": true,
+   "hem_cm": 92.5,
+   "runtime_s": 3.308,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.0,
+   "strain_p99": 0.1419,
+   "strain_max": 0.7428,
+   "vertices": 2248,
+   "share": {
+    "tight": 0.095,
+    "ok": 0.119,
+    "loose": 0.05,
+    "drape": 0.736
+   }
+  },
+  {
+   "body": "3XL",
+   "garment": "wrap_skirt",
+   "fabric": "jersey",
+   "size": "3XL",
+   "stable": false,
+   "hem_cm": 67.6,
+   "runtime_s": 2.714,
+   "exploded": true,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.0,
+   "strain_p99": 0.3576,
+   "strain_max": 1.3146,
+   "vertices": 2248,
+   "share": {
+    "tight": 0.139,
+    "ok": 0.103,
+    "loose": 0.047,
+    "drape": 0.711
+   }
+  },
+  {
+   "body": "3XL",
+   "garment": "wrap_skirt",
+   "fabric": "cotton",
+   "size": "XXL",
+   "stable": true,
+   "hem_cm": 59.4,
+   "runtime_s": 2.243,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.0,
+   "strain_p99": 0.1395,
+   "strain_max": 0.6537,
+   "vertices": 2097,
+   "share": {
+    "tight": 0.102,
+    "ok": 0.133,
+    "loose": 0.052,
+    "drape": 0.712
+   }
+  },
+  {
+   "body": "3XL",
+   "garment": "shirt",
+   "fabric": "cotton",
+   "size": "3XL",
+   "stable": false,
+   "hem_cm": 136.5,
+   "runtime_s": 2.856,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00775,
+   "strain_p99": 0.2133,
+   "strain_max": 1.5914,
+   "vertices": 1727,
+   "share": {
+    "tight": 0.231,
+    "ok": 0.555,
+    "loose": 0.214,
+    "drape": 0.0
+   }
+  },
+  {
+   "body": "3XL",
+   "garment": "shirt",
+   "fabric": "kitenge",
+   "size": "3XL",
+   "stable": false,
+   "hem_cm": 139.2,
+   "runtime_s": 2.862,
+   "exploded": false,
+   "max_penetration_m": 4e-05,
+   "seam_gap_p95_m": 0.00827,
+   "strain_p99": 0.2378,
+   "strain_max": 1.5838,
+   "vertices": 1727,
+   "share": {
+    "tight": 0.261,
+    "ok": 0.492,
+    "loose": 0.247,
+    "drape": 0.0
+   }
+  },
+  {
+   "body": "3XL",
+   "garment": "shirt",
+   "fabric": "jersey",
+   "size": "3XL",
+   "stable": false,
+   "hem_cm": 137.0,
+   "runtime_s": 3.11,
+   "exploded": false,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.00593,
+   "strain_p99": 0.2107,
+   "strain_max": 1.8101,
+   "vertices": 1727,
+   "share": {
+    "tight": 0.235,
+    "ok": 0.565,
+    "loose": 0.2,
+    "drape": 0.0
+   }
+  },
+  {
+   "body": "3XL",
+   "garment": "shirt",
+   "fabric": "cotton",
+   "size": "XXL",
+   "stable": false,
+   "hem_cm": 135.9,
+   "runtime_s": 3.142,
+   "exploded": true,
+   "max_penetration_m": 0.0,
+   "seam_gap_p95_m": 0.0097,
+   "strain_p99": 0.2737,
+   "strain_max": 2.2418,
+   "vertices": 1618,
+   "share": {
+    "tight": 0.474,
+    "ok": 0.489,
+    "loose": 0.036,
+    "drape": 0.0
+   }
+  }
+ ],
+ "sizing": [
+  {
+   "body": "S",
+   "garment": "a_line_dress",
+   "size": "S",
+   "lines": {
+    "bust": {
+     "ease_cm": 4.0,
+     "expected": [
+      "ok"
+     ],
+     "reading": "ok",
+     "agree": true,
+     "measured_ease_cm": -1.0
+    },
+    "hips": {
+     "ease_cm": 4.0,
+     "expected": [
+      "ok"
+     ],
+     "reading": "ok",
+     "agree": true,
+     "measured_ease_cm": 3.1
+    }
+   }
+  },
+  {
+   "body": "S",
+   "garment": "a_line_dress",
+   "size": "XS",
+   "lines": {
+    "bust": {
+     "ease_cm": -1.0,
+     "expected": [
+      "ok",
+      "tight"
+     ],
+     "reading": "tight",
+     "agree": true,
+     "measured_ease_cm": -6.2
+    },
+    "hips": {
+     "ease_cm": 0.0,
+     "expected": [
+      "ok",
+      "tight"
+     ],
+     "reading": "ok",
+     "agree": true,
+     "measured_ease_cm": 0.5
+    }
+   }
+  },
+  {
+   "body": "S",
+   "garment": "a_line_dress",
+   "size": "L",
+   "lines": {
+    "bust": {
+     "ease_cm": 18.0,
+     "expected": [
+      "loose"
+     ],
+     "reading": "loose",
+     "agree": true,
+     "measured_ease_cm": 13.4
+    },
+    "hips": {
+     "ease_cm": 18.0,
+     "expected": [
+      "loose"
+     ],
+     "reading": "loose",
+     "agree": true,
+     "measured_ease_cm": 10.6
+    }
+   }
+  },
+  {
+   "body": "S",
+   "garment": "wrap_skirt",
+   "size": "S",
+   "lines": {
+    "waist": {
+     "ease_cm": 1.5,
+     "expected": [
+      "ok",
+      "tight"
+     ],
+     "reading": "tight",
+     "agree": true,
+     "measured_ease_cm": null
+    },
+    "hips": {
+     "ease_cm": 4.7,
+     "expected": [
+      "ok"
+     ],
+     "reading": "tight",
+     "agree": false,
+     "measured_ease_cm": 1.1
+    }
+   }
+  },
+  {
+   "body": "S",
+   "garment": "wrap_skirt",
+   "size": "XS",
+   "lines": {
+    "waist": {
+     "ease_cm": 1.5,
+     "expected": [
+      "ok",
+      "tight"
+     ],
+     "reading": "tight",
+     "agree": true,
+     "measured_ease_cm": null
+    },
+    "hips": {
+     "ease_cm": 8.0,
+     "expected": [
+      "ok"
+     ],
+     "reading": "ok",
+     "agree": true,
+     "measured_ease_cm": 2.0
+    }
+   }
+  },
+  {
+   "body": "S",
+   "garment": "wrap_skirt",
+   "size": "L",
+   "lines": {
+    "waist": {
+     "ease_cm": 1.5,
+     "expected": [
+      "ok",
+      "tight"
+     ],
+     "reading": "tight",
+     "agree": true,
+     "measured_ease_cm": null
+    },
+    "hips": {
+     "ease_cm": 0.0,
+     "expected": [
+      "ok",
+      "tight"
+     ],
+     "reading": "tight",
+     "agree": true,
+     "measured_ease_cm": 2.6
+    }
+   }
+  },
+  {
+   "body": "S",
+   "garment": "shirt",
+   "size": "S",
+   "lines": {
+    "bust": {
+     "ease_cm": 6.0,
+     "expected": [
+      "ok"
+     ],
+     "reading": "ok",
+     "agree": true,
+     "measured_ease_cm": 7.8
+    },
+    "hips": {
+     "ease_cm": 4.0,
+     "expected": [
+      "ok"
+     ],
+     "reading": "ok",
+     "agree": true,
+     "measured_ease_cm": 2.1
+    }
+   }
+  },
+  {
+   "body": "S",
+   "garment": "shirt",
+   "size": "XS",
+   "lines": {
+    "bust": {
+     "ease_cm": 1.0,
+     "expected": [
+      "ok",
+      "tight"
+     ],
+     "reading": "ok",
+     "agree": true,
+     "measured_ease_cm": 4.6
+    },
+    "hips": {
+     "ease_cm": 0.0,
+     "expected": [
+      "ok",
+      "tight"
+     ],
+     "reading": "tight",
+     "agree": true,
+     "measured_ease_cm": -0.4
+    }
+   }
+  },
+  {
+   "body": "S",
+   "garment": "shirt",
+   "size": "L",
+   "lines": {
+    "bust": {
+     "ease_cm": 20.0,
+     "expected": [
+      "loose"
+     ],
+     "reading": "loose",
+     "agree": true,
+     "measured_ease_cm": 14.1
+    },
+    "hips": {
+     "ease_cm": 18.0,
+     "expected": [
+      "loose"
+     ],
+     "reading": "loose",
+     "agree": true,
+     "measured_ease_cm": 13.2
+    }
+   }
+  },
+  {
+   "body": "M",
+   "garment": "a_line_dress",
+   "size": "M",
+   "lines": {
+    "bust": {
+     "ease_cm": 4.0,
+     "expected": [
+      "ok"
+     ],
+     "reading": "ok",
+     "agree": true,
+     "measured_ease_cm": 0.4
+    },
+    "hips": {
+     "ease_cm": 4.0,
+     "expected": [
+      "ok"
+     ],
+     "reading": "ok",
+     "agree": true,
+     "measured_ease_cm": 2.9
+    }
+   }
+  },
+  {
+   "body": "M",
+   "garment": "a_line_dress",
+   "size": "S",
+   "lines": {
+    "bust": {
+     "ease_cm": -3.0,
+     "expected": [
+      "tight"
+     ],
+     "reading": "tight",
+     "agree": true,
+     "measured_ease_cm": -7.7
+    },
+    "hips": {
+     "ease_cm": -3.0,
+     "expected": [
+      "tight"
+     ],
+     "reading": "tight",
+     "agree": true,
+     "measured_ease_cm": -0.3
+    }
+   }
+  },
+  {
+   "body": "M",
+   "garment": "a_line_dress",
+   "size": "XL",
+   "lines": {
+    "bust": {
+     "ease_cm": 20.0,
+     "expected": [
+      "loose"
+     ],
+     "reading": "loose",
+     "agree": true,
+     "measured_ease_cm": 12.2
+    },
+    "hips": {
+     "ease_cm": 20.0,
+     "expected": [
+      "loose"
+     ],
+     "reading": "loose",
+     "agree": true,
+     "measured_ease_cm": 11.3
+    }
+   }
+  },
+  {
+   "body": "M",
+   "garment": "wrap_skirt",
+   "size": "M",
+   "lines": {
+    "waist": {
+     "ease_cm": 1.5,
+     "expected": [
+      "ok",
+      "tight"
+     ],
+     "reading": "tight",
+     "agree": true,
+     "measured_ease_cm": -23.6
+    },
+    "hips": {
+     "ease_cm": 4.7,
+     "expected": [
+      "ok"
+     ],
+     "reading": "ok",
+     "agree": true,
+     "measured_ease_cm": 1.6
+    }
+   }
+  },
+  {
+   "body": "M",
+   "garment": "wrap_skirt",
+   "size": "S",
+   "lines": {
+    "waist": {
+     "ease_cm": 1.5,
+     "expected": [
+      "ok",
+      "tight"
+     ],
+     "reading": "tight",
+     "agree": true,
+     "measured_ease_cm": null
+    },
+    "hips": {
+     "ease_cm": 6.1,
+     "expected": [
+      "ok"
+     ],
+     "reading": "ok",
+     "agree": true,
+     "measured_ease_cm": 1.4
+    }
+   }
+  },
+  {
+   "body": "M",
+   "garment": "wrap_skirt",
+   "size": "XL",
+   "lines": {
+    "waist": {
+     "ease_cm": 1.5,
+     "expected": [
+      "ok",
+      "tight"
+     ],
+     "reading": "tight",
+     "agree": true,
+     "measured_ease_cm": -11.8
+    },
+    "hips": {
+     "ease_cm": -1.5,
+     "expected": [
+      "ok",
+      "tight"
+     ],
+     "reading": "ok",
+     "agree": true,
+     "measured_ease_cm": 3.2
+    }
+   }
+  },
+  {
+   "body": "M",
+   "garment": "shirt",
+   "size": "M",
+   "lines": {
+    "bust": {
+     "ease_cm": 6.0,
+     "expected": [
+      "ok"
+     ],
+     "reading": "ok",
+     "agree": true,
+     "measured_ease_cm": 2.6
+    },
+    "hips": {
+     "ease_cm": 4.0,
+     "expected": [
+      "ok"
+     ],
+     "reading": "ok",
+     "agree": true,
+     "measured_ease_cm": 1.1
+    }
+   }
+  },
+  {
+   "body": "M",
+   "garment": "shirt",
+   "size": "S",
+   "lines": {
+    "bust": {
+     "ease_cm": -1.0,
+     "expected": [
+      "ok",
+      "tight"
+     ],
+     "reading": "ok",
+     "agree": true,
+     "measured_ease_cm": -4.8
+    },
+    "hips": {
+     "ease_cm": -3.0,
+     "expected": [
+      "tight"
+     ],
+     "reading": "tight",
+     "agree": true,
+     "measured_ease_cm": -0.4
+    }
+   }
+  },
+  {
+   "body": "M",
+   "garment": "shirt",
+   "size": "XL",
+   "lines": {
+    "bust": {
+     "ease_cm": 22.0,
+     "expected": [
+      "loose"
+     ],
+     "reading": "loose",
+     "agree": true,
+     "measured_ease_cm": 12.8
+    },
+    "hips": {
+     "ease_cm": 20.0,
+     "expected": [
+      "loose"
+     ],
+     "reading": "loose",
+     "agree": true,
+     "measured_ease_cm": 14.5
+    }
+   }
+  },
+  {
+   "body": "L",
+   "garment": "a_line_dress",
+   "size": "L",
+   "lines": {
+    "bust": {
+     "ease_cm": 4.0,
+     "expected": [
+      "ok"
+     ],
+     "reading": "ok",
+     "agree": true,
+     "measured_ease_cm": 1.2
+    },
+    "hips": {
+     "ease_cm": 4.0,
+     "expected": [
+      "ok"
+     ],
+     "reading": "ok",
+     "agree": true,
+     "measured_ease_cm": 1.5
+    }
+   }
+  },
+  {
+   "body": "L",
+   "garment": "a_line_dress",
+   "size": "M",
+   "lines": {
+    "bust": {
+     "ease_cm": -3.0,
+     "expected": [
+      "tight"
+     ],
+     "reading": "tight",
+     "agree": true,
+     "measured_ease_cm": -1.7
+    },
+    "hips": {
+     "ease_cm": -3.0,
+     "expected": [
+      "tight"
+     ],
+     "reading": "tight",
+     "agree": true,
+     "measured_ease_cm": -0.4
+    }
+   }
+  },
+  {
+   "body": "L",
+   "garment": "a_line_dress",
+   "size": "XXL",
+   "lines": {
+    "bust": {
+     "ease_cm": 23.0,
+     "expected": [
+      "loose"
+     ],
+     "reading": "loose",
+     "agree": true,
+     "measured_ease_cm": 15.4
+    },
+    "hips": {
+     "ease_cm": 23.0,
+     "expected": [
+      "loose"
+     ],
+     "reading": "loose",
+     "agree": true,
+     "measured_ease_cm": 18.0
+    }
+   }
+  },
+  {
+   "body": "L",
+   "garment": "wrap_skirt",
+   "size": "L",
+   "lines": {
+    "waist": {
+     "ease_cm": 1.5,
+     "expected": [
+      "ok",
+      "tight"
+     ],
+     "reading": "tight",
+     "agree": true,
+     "measured_ease_cm": -19.1
+    },
+    "hips": {
+     "ease_cm": 4.7,
+     "expected": [
+      "ok"
+     ],
+     "reading": "ok",
+     "agree": true,
+     "measured_ease_cm": 3.3
+    }
+   }
+  },
+  {
+   "body": "L",
+   "garment": "wrap_skirt",
+   "size": "M",
+   "lines": {
+    "waist": {
+     "ease_cm": 1.5,
+     "expected": [
+      "ok",
+      "tight"
+     ],
+     "reading": "tight",
+     "agree": true,
+     "measured_ease_cm": null
+    },
+    "hips": {
+     "ease_cm": 8.8,
+     "expected": [
+      "ok"
+     ],
+     "reading": "ok",
+     "agree": true,
+     "measured_ease_cm": 1.3
+    }
+   }
+  },
+  {
+   "body": "L",
+   "garment": "wrap_skirt",
+   "size": "XXL",
+   "lines": {
+    "waist": {
+     "ease_cm": 1.5,
+     "expected": [
+      "ok",
+      "tight"
+     ],
+     "reading": "tight",
+     "agree": true,
+     "measured_ease_cm": -38.7
+    },
+    "hips": {
+     "ease_cm": -0.5,
+     "expected": [
+      "ok",
+      "tight"
+     ],
+     "reading": "tight",
+     "agree": true,
+     "measured_ease_cm": 3.1
+    }
+   }
+  },
+  {
+   "body": "L",
+   "garment": "shirt",
+   "size": "L",
+   "lines": {
+    "bust": {
+     "ease_cm": 6.0,
+     "expected": [
+      "ok"
+     ],
+     "reading": "ok",
+     "agree": true,
+     "measured_ease_cm": 4.5
+    },
+    "hips": {
+     "ease_cm": 4.0,
+     "expected": [
+      "ok"
+     ],
+     "reading": "ok",
+     "agree": true,
+     "measured_ease_cm": -4.1
+    }
+   }
+  },
+  {
+   "body": "L",
+   "garment": "shirt",
+   "size": "M",
+   "lines": {
+    "bust": {
+     "ease_cm": -1.0,
+     "expected": [
+      "ok",
+      "tight"
+     ],
+     "reading": "ok",
+     "agree": true,
+     "measured_ease_cm": -1.5
+    },
+    "hips": {
+     "ease_cm": -3.0,
+     "expected": [
+      "tight"
+     ],
+     "reading": "tight",
+     "agree": true,
+     "measured_ease_cm": -0.5
+    }
+   }
+  },
+  {
+   "body": "L",
+   "garment": "shirt",
+   "size": "XXL",
+   "lines": {
+    "bust": {
+     "ease_cm": 25.0,
+     "expected": [
+      "loose"
+     ],
+     "reading": "loose",
+     "agree": true,
+     "measured_ease_cm": 18.4
+    },
+    "hips": {
+     "ease_cm": 23.0,
+     "expected": [
+      "loose"
+     ],
+     "reading": "loose",
+     "agree": true,
+     "measured_ease_cm": 12.7
+    }
+   }
+  },
+  {
+   "body": "XL",
+   "garment": "a_line_dress",
+   "size": "XL",
+   "lines": {
+    "bust": {
+     "ease_cm": 4.0,
+     "expected": [
+      "ok"
+     ],
+     "reading": "ok",
+     "agree": true,
+     "measured_ease_cm": 1.9
+    },
+    "hips": {
+     "ease_cm": 4.0,
+     "expected": [
+      "ok"
+     ],
+     "reading": "ok",
+     "agree": true,
+     "measured_ease_cm": 3.5
+    }
+   }
+  },
+  {
+   "body": "XL",
+   "garment": "a_line_dress",
+   "size": "L",
+   "lines": {
+    "bust": {
+     "ease_cm": -5.0,
+     "expected": [
+      "tight"
+     ],
+     "reading": "tight",
+     "agree": true,
+     "measured_ease_cm": -0.7
+    },
+    "hips": {
+     "ease_cm": -5.0,
+     "expected": [
+      "tight"
+     ],
+     "reading": "tight",
+     "agree": true,
+     "measured_ease_cm": -0.5
+    }
+   }
+  },
+  {
+   "body": "XL",
+   "garment": "a_line_dress",
+   "size": "3XL",
+   "lines": {
+    "bust": {
+     "ease_cm": 25.0,
+     "expected": [
+      "loose"
+     ],
+     "reading": "loose",
+     "agree": true,
+     "measured_ease_cm": 15.8
+    },
+    "hips": {
+     "ease_cm": 25.0,
+     "expected": [
+      "loose"
+     ],
+     "reading": "loose",
+     "agree": true,
+     "measured_ease_cm": 18.4
+    }
+   }
+  },
+  {
+   "body": "XL",
+   "garment": "wrap_skirt",
+   "size": "XL",
+   "lines": {
+    "waist": {
+     "ease_cm": 1.5,
+     "expected": [
+      "ok",
+      "tight"
+     ],
+     "reading": "tight",
+     "agree": true,
+     "measured_ease_cm": -8.6
+    },
+    "hips": {
+     "ease_cm": 4.6,
+     "expected": [
+      "ok"
+     ],
+     "reading": "ok",
+     "agree": true,
+     "measured_ease_cm": 5.2
+    }
+   }
+  },
+  {
+   "body": "XL",
+   "garment": "wrap_skirt",
+   "size": "L",
+   "lines": {
+    "waist": {
+     "ease_cm": 1.5,
+     "expected": [
+      "ok",
+      "tight"
+     ],
+     "reading": "tight",
+     "agree": true,
+     "measured_ease_cm": -14.2
+    },
+    "hips": {
+     "ease_cm": 7.7,
+     "expected": [
+      "ok"
+     ],
+     "reading": "ok",
+     "agree": true,
+     "measured_ease_cm": 3.0
+    }
+   }
+  },
+  {
+   "body": "XL",
+   "garment": "wrap_skirt",
+   "size": "3XL",
+   "lines": {
+    "waist": {
+     "ease_cm": 1.5,
+     "expected": [
+      "ok",
+      "tight"
+     ],
+     "reading": "tight",
+     "agree": true,
+     "measured_ease_cm": -28.9
+    },
+    "hips": {
+     "ease_cm": -0.5,
+     "expected": [
+      "ok",
+      "tight"
+     ],
+     "reading": "tight",
+     "agree": true,
+     "measured_ease_cm": 3.1
+    }
+   }
+  },
+  {
+   "body": "XL",
+   "garment": "shirt",
+   "size": "XL",
+   "lines": {
+    "bust": {
+     "ease_cm": 6.0,
+     "expected": [
+      "ok"
+     ],
+     "reading": "ok",
+     "agree": true,
+     "measured_ease_cm": 4.2
+    },
+    "hips": {
+     "ease_cm": 4.0,
+     "expected": [
+      "ok"
+     ],
+     "reading": "ok",
+     "agree": true,
+     "measured_ease_cm": 2.7
+    }
+   }
+  },
+  {
+   "body": "XL",
+   "garment": "shirt",
+   "size": "L",
+   "lines": {
+    "bust": {
+     "ease_cm": -3.0,
+     "expected": [
+      "tight"
+     ],
+     "reading": "tight",
+     "agree": true,
+     "measured_ease_cm": -6.4
+    },
+    "hips": {
+     "ease_cm": -5.0,
+     "expected": [
+      "tight"
+     ],
+     "reading": "tight",
+     "agree": true,
+     "measured_ease_cm": -12.7
+    }
+   }
+  },
+  {
+   "body": "XL",
+   "garment": "shirt",
+   "size": "3XL",
+   "lines": {
+    "bust": {
+     "ease_cm": 27.0,
+     "expected": [
+      "loose"
+     ],
+     "reading": "loose",
+     "agree": true,
+     "measured_ease_cm": 18.8
+    },
+    "hips": {
+     "ease_cm": 25.0,
+     "expected": [
+      "loose"
+     ],
+     "reading": "loose",
+     "agree": true,
+     "measured_ease_cm": 13.9
+    }
+   }
+  },
+  {
+   "body": "XXL",
+   "garment": "a_line_dress",
+   "size": "XXL",
+   "lines": {
+    "bust": {
+     "ease_cm": 4.0,
+     "expected": [
+      "ok"
+     ],
+     "reading": "ok",
+     "agree": true,
+     "measured_ease_cm": 1.2
+    },
+    "hips": {
+     "ease_cm": 4.0,
+     "expected": [
+      "ok"
+     ],
+     "reading": "ok",
+     "agree": true,
+     "measured_ease_cm": 3.5
+    }
+   }
+  },
+  {
+   "body": "XXL",
+   "garment": "a_line_dress",
+   "size": "XL",
+   "lines": {
+    "bust": {
+     "ease_cm": -6.0,
+     "expected": [
+      "tight"
+     ],
+     "reading": "tight",
+     "agree": true,
+     "measured_ease_cm": -0.6
+    },
+    "hips": {
+     "ease_cm": -6.0,
+     "expected": [
+      "tight"
+     ],
+     "reading": "tight",
+     "agree": true,
+     "measured_ease_cm": -0.3
+    }
+   }
+  },
+  {
+   "body": "XXL",
+   "garment": "wrap_skirt",
+   "size": "XXL",
+   "lines": {
+    "waist": {
+     "ease_cm": 1.5,
+     "expected": [
+      "ok",
+      "tight"
+     ],
+     "reading": "tight",
+     "agree": true,
+     "measured_ease_cm": -21.4
+    },
+    "hips": {
+     "ease_cm": 4.6,
+     "expected": [
+      "ok"
+     ],
+     "reading": "ok",
+     "agree": true,
+     "measured_ease_cm": 3.1
+    }
+   }
+  },
+  {
+   "body": "XXL",
+   "garment": "wrap_skirt",
+   "size": "XL",
+   "lines": {
+    "waist": {
+     "ease_cm": 1.5,
+     "expected": [
+      "ok",
+      "tight"
+     ],
+     "reading": "tight",
+     "agree": true,
+     "measured_ease_cm": -8.4
+    },
+    "hips": {
+     "ease_cm": 7.7,
+     "expected": [
+      "ok"
+     ],
+     "reading": "ok",
+     "agree": true,
+     "measured_ease_cm": 3.4
+    }
+   }
+  },
+  {
+   "body": "XXL",
+   "garment": "shirt",
+   "size": "XXL",
+   "lines": {
+    "bust": {
+     "ease_cm": 6.0,
+     "expected": [
+      "ok"
+     ],
+     "reading": "ok",
+     "agree": true,
+     "measured_ease_cm": 1.0
+    },
+    "hips": {
+     "ease_cm": 4.0,
+     "expected": [
+      "ok"
+     ],
+     "reading": "ok",
+     "agree": true,
+     "measured_ease_cm": 2.4
+    }
+   }
+  },
+  {
+   "body": "XXL",
+   "garment": "shirt",
+   "size": "XL",
+   "lines": {
+    "bust": {
+     "ease_cm": -4.0,
+     "expected": [
+      "tight"
+     ],
+     "reading": "tight",
+     "agree": true,
+     "measured_ease_cm": -0.2
+    },
+    "hips": {
+     "ease_cm": -6.0,
+     "expected": [
+      "tight"
+     ],
+     "reading": "tight",
+     "agree": true,
+     "measured_ease_cm": -1.6
+    }
+   }
+  },
+  {
+   "body": "3XL",
+   "garment": "a_line_dress",
+   "size": "3XL",
+   "lines": {
+    "bust": {
+     "ease_cm": 4.0,
+     "expected": [
+      "ok"
+     ],
+     "reading": "tight",
+     "agree": false,
+     "measured_ease_cm": 1.8
+    },
+    "hips": {
+     "ease_cm": 4.0,
+     "expected": [
+      "ok"
+     ],
+     "reading": "ok",
+     "agree": true,
+     "measured_ease_cm": 3.5
+    }
+   }
+  },
+  {
+   "body": "3XL",
+   "garment": "a_line_dress",
+   "size": "XXL",
+   "lines": {
+    "bust": {
+     "ease_cm": -7.0,
+     "expected": [
+      "tight"
+     ],
+     "reading": "tight",
+     "agree": true,
+     "measured_ease_cm": -0.2
+    },
+    "hips": {
+     "ease_cm": -7.0,
+     "expected": [
+      "tight"
+     ],
+     "reading": "tight",
+     "agree": true,
+     "measured_ease_cm": -2.6
+    }
+   }
+  },
+  {
+   "body": "3XL",
+   "garment": "wrap_skirt",
+   "size": "3XL",
+   "lines": {
+    "waist": {
+     "ease_cm": 1.5,
+     "expected": [
+      "ok",
+      "tight"
+     ],
+     "reading": "tight",
+     "agree": true,
+     "measured_ease_cm": -8.4
+    },
+    "hips": {
+     "ease_cm": 4.6,
+     "expected": [
+      "ok"
+     ],
+     "reading": "tight",
+     "agree": false,
+     "measured_ease_cm": 6.5
+    }
+   }
+  },
+  {
+   "body": "3XL",
+   "garment": "wrap_skirt",
+   "size": "XXL",
+   "lines": {
+    "waist": {
+     "ease_cm": 1.5,
+     "expected": [
+      "ok",
+      "tight"
+     ],
+     "reading": "tight",
+     "agree": true,
+     "measured_ease_cm": -10.0
+    },
+    "hips": {
+     "ease_cm": 7.6,
+     "expected": [
+      "ok"
+     ],
+     "reading": "ok",
+     "agree": true,
+     "measured_ease_cm": 4.6
+    }
+   }
+  },
+  {
+   "body": "3XL",
+   "garment": "shirt",
+   "size": "3XL",
+   "lines": {
+    "bust": {
+     "ease_cm": 6.0,
+     "expected": [
+      "ok"
+     ],
+     "reading": "ok",
+     "agree": true,
+     "measured_ease_cm": 3.9
+    },
+    "hips": {
+     "ease_cm": 4.0,
+     "expected": [
+      "ok"
+     ],
+     "reading": "ok",
+     "agree": true,
+     "measured_ease_cm": 2.2
+    }
+   }
+  },
+  {
+   "body": "3XL",
+   "garment": "shirt",
+   "size": "XXL",
+   "lines": {
+    "bust": {
+     "ease_cm": -5.0,
+     "expected": [
+      "tight"
+     ],
+     "reading": "tight",
+     "agree": true,
+     "measured_ease_cm": -0.2
+    },
+    "hips": {
+     "ease_cm": -7.0,
+     "expected": [
+      "tight"
+     ],
+     "reading": "tight",
+     "agree": true,
+     "measured_ease_cm": -2.5
+    }
+   }
+  }
+ ],
+ "disagreements": [
+  {
+   "body": "S",
+   "garment": "wrap_skirt",
+   "size": "S",
+   "line": "hips",
+   "ease_cm": 4.7,
+   "expected": [
+    "ok"
+   ],
+   "reading": "tight",
+   "agree": false,
+   "measured_ease_cm": 1.1
+  },
+  {
+   "body": "3XL",
+   "garment": "a_line_dress",
+   "size": "3XL",
+   "line": "bust",
+   "ease_cm": 4.0,
+   "expected": [
+    "ok"
+   ],
+   "reading": "tight",
+   "agree": false,
+   "measured_ease_cm": 1.8
+  },
+  {
+   "body": "3XL",
+   "garment": "wrap_skirt",
+   "size": "3XL",
+   "line": "hips",
+   "ease_cm": 4.6,
+   "expected": [
+    "ok"
+   ],
+   "reading": "tight",
+   "agree": false,
+   "measured_ease_cm": 6.5
+  }
+ ],
+ "expert_checklist": [
+  {
+   "id": "silhouette",
+   "question": "Does the overall silhouette match how this cut hangs on a real body of this size?",
+   "scale": "1-5"
+  },
+  {
+   "id": "length",
+   "question": "Do hem and sleeve lengths land where you would expect for the pattern?",
+   "scale": "1-5"
+  },
+  {
+   "id": "tight_zones",
+   "question": "Are the zones shown tight the ones you would expect to pull or need letting out?",
+   "scale": "1-5"
+  },
+  {
+   "id": "loose_zones",
+   "question": "Are the zones shown loose the ones you would take in?",
+   "scale": "1-5"
+  },
+  {
+   "id": "fabric",
+   "question": "Does the drape differ between cotton, kitenge and jersey as the real fabrics would?",
+   "scale": "1-5"
+  },
+  {
+   "id": "seams",
+   "question": "Do seams sit where they should (shoulder, side, armhole)?",
+   "scale": "yes/no + note"
+  },
+  {
+   "id": "decision",
+   "question": "Would this preview change a quote, an alteration or a size recommendation?",
+   "scale": "yes/no + note"
+  },
+  {
+   "id": "trust",
+   "question": "Would you show this to a customer with the 'visual guidance only' label?",
+   "scale": "yes/no + note"
+  }
+ ],
+ "synthetic": true,
+ "licence": "in-house (numpy, no third-party solver or pattern data)",
+ "commercial_use": true,
+ "scope": "full"
+}

@@ -23,7 +23,7 @@ import numpy as np
 from .pattern import Pattern, finished_for_body
 from .solver import DrapeResult
 
-TIGHT_STRETCH = 0.025
+TIGHT_STRETCH = 0.02
 CONTACT = 0.012
 LOOSE_GAP = 0.035
 LOOSE_EASE = 0.09  # measured girth ease (m) of a horizontal slab above which off-body cloth reads loose
