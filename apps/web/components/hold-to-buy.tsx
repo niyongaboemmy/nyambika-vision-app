@@ -39,7 +39,7 @@ export function HoldToBuy({ look, autoOpen = false }: { look: Look; /** E35: ope
   const commerce = useCommerce(look.maker.handle);
   const regional = commerce && commerce.currency !== "RWF" ? commerce : null;
 
-  // E32: profile ↔ size chart recommendation (falls back to the twin estimate server-side).
+  // E32: profile vs size chart recommendation (falls back to the twin estimate server-side).
   const rec = useSizeRecommendation(look.product.id, look.variant.id, open);
   const recSize = rec && look.variant.sizes.includes(rec.size) ? rec.size : null;
   const picked = useRef(false);

@@ -135,7 +135,7 @@ export function LookView({ look, index, total, intentLabel, onSave, onVariant, p
       }
       setDx(0);
     },
-    { axis: "x", filterTaps: true, pointer: { touch: true } },
+    { axis: "x", filterTaps: true },
   );
 
   const share = async () => {
@@ -196,8 +196,8 @@ export function LookView({ look, index, total, intentLabel, onSave, onVariant, p
       <div aria-hidden className={`pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-gradient-to-t from-black/80 via-black/35 to-transparent ${chromeCls}`} />
 
       {/* Top: back · page dots · chips (one line) */}
-      <div inert={!chrome} className={`absolute inset-x-0 top-0 z-10 px-3 pt-[max(env(safe-area-inset-top),12px)] ${chromeCls}`}>
-        <div className="grid grid-cols-[44px_1fr_44px] items-center">
+      <div className="absolute inset-x-0 top-0 z-10 px-3 pt-[max(env(safe-area-inset-top),12px)]">
+        <div inert={!chrome} className={`grid grid-cols-[44px_1fr_44px] items-center ${chromeCls}`}>
           <Link href="/" aria-label="Back to Muse" className={`hit grid size-10 place-items-center rounded-full text-white transition-transform active:scale-90 ${MATERIAL}`}>
             <Icon name="back" className="size-5" />
           </Link>
@@ -206,27 +206,27 @@ export function LookView({ look, index, total, intentLabel, onSave, onVariant, p
         </div>
         <div className="mt-2 flex min-w-0 items-center gap-1.5">
           {intentLabel && (
-            <span className={`inline-flex min-w-0 max-w-[55%] items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-semibold text-white ${MATERIAL}`}>
+            <span className={`inline-flex min-w-0 max-w-[55%] items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-semibold text-white ${MATERIAL} ${chromeCls}`}>
               <Icon name={intentIcon(intentLabel)} className="size-3.5 shrink-0 text-gold" />
               <span className="truncate">{intentLabel.replace(/^For:\s*/, "")}</span>
             </span>
           )}
-          {/* In-app AI label (always visible); opens content credentials. */}
+          {/* In-app AI label: stays visible even when the chrome is hidden; opens content credentials. */}
           <button
             type="button"
             onClick={() => setAbout(true)}
-            aria-label={look.onTwin ? t("looks.onTwin") : t("looks.onModel")}
+            aria-label={`AI preview · C2PA — ${look.onTwin ? t("looks.onTwin") : t("looks.onModel")}`}
             className={`hit inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-semibold text-white transition-transform active:scale-95 ${MATERIAL}`}
           >
             <Icon name="sparkle" className="size-3.5 text-gold" />
-            AI preview
+            AI preview{" "}
             <span className="text-white/70">· C2PA</span>
           </button>
         </div>
       </div>
 
       {/* Right edge hint: the Maker Space is one swipe left (grows into a peek while dragging). */}
-      <div aria-hidden className={`pointer-events-none absolute right-0 top-[34%] z-10 flex items-center ${chromeCls}`}>
+      <div aria-hidden className={`pointer-events-none absolute right-0 top-[calc(max(env(safe-area-inset-top),12px)+118px)] z-10 flex items-center ${chromeCls}`}>
         <span
           className={`flex items-center gap-1.5 rounded-l-full py-2 pl-2.5 text-xs font-semibold text-white ${MAT_BASE} bg-black/45`}
           style={{ paddingRight: 6 + pull * 10, opacity: coach || pull > 0 ? 1 : 0.85, transition: dx ? "none" : `padding 300ms ${SPRING}` }}
@@ -274,7 +274,7 @@ export function LookView({ look, index, total, intentLabel, onSave, onVariant, p
         style={enter}
       >
         <div className={`rounded-t-[28px] px-4 pb-[max(env(safe-area-inset-bottom),14px)] pt-3.5 ${MAT_BASE} border-x-0 border-b-0 bg-black/55`} style={{ minHeight: "max(13dvh, 128px)" }}>
-          <Link href={makerHref} className="flex min-w-0 items-center gap-3 rounded-2xl outline-offset-4">
+          <Link href={makerHref} className="flex min-h-11 min-w-0 items-center gap-3 rounded-2xl outline-offset-4">
             <Avatar name={look.maker.name} size={40} ring />
             <span className="min-w-0 flex-1">
               <span className="flex min-w-0 items-center gap-1.5 font-display text-[17px] font-black leading-tight text-white">
@@ -335,7 +335,7 @@ export function LookView({ look, index, total, intentLabel, onSave, onVariant, p
       <CircleAsk look={look} open={ask} onClose={() => setAsk(false)} intentLabel={intentLabel} />
 
       {/* Content credentials */}
-      <Sheet open={about} onClose={() => setAbout(false)} title="About this image">
+      <Sheet open={about} onClose={() => setAbout(false)} title="Content credentials">
         <ul className="space-y-2.5 text-sm text-txt/90">
           <li className="flex items-center gap-2.5"><Icon name="sparkle" className="size-4 shrink-0 text-gold" />AI preview on {look.onTwin ? "your twin" : "an AI model"} · fit can differ</li>
           <li className="flex items-center gap-2.5"><Icon name="shield" className="size-4 shrink-0 text-gold" />Quality and fairness checked</li>

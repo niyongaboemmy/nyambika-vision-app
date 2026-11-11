@@ -6,7 +6,7 @@ import { Icon } from "@/components/studio";
 import { api } from "@/lib/api";
 import type { SizeRecommendation } from "@/lib/tailor";
 
-/** Size recommendation for a product (E32, FR-SIZE-02): profile ↔ size chart, else the twin estimate. */
+/** Size recommendation for a product (E32, FR-SIZE-02): profile vs size chart, else the twin estimate. */
 export function useSizeRecommendation(productId: string, variantId: string, enabled: boolean) {
   const [rec, setRec] = useState<SizeRecommendation | null>(null);
   useEffect(() => {
