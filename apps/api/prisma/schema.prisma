@@ -1374,6 +1374,178 @@ model MigrationOutreach {
   @@index([waveId, kind])
 }
 
+// ==== E40 Export & DPP readiness · E41 EAC multi-region (FR-ORD-08, FR-DPP-01..04, NFR-SCL-04) ====
+// Money in new tables is always integer minor units + ISO 4217 currency. Legacy *Rwf columns on
+// Order/Payment keep an RWF-equivalent for reporting only; the charged amount lives in OrderMoney.
+
+/// Per-country launch config (E41). Seeded for RW/KE/UG/TZ; RW is the only launched region.
+model RegionConfig {
+  code          String   @id
+  name          String
+  currency      String
+  wallets       String[]
+  dialCode      String
+  languages     String[]
+  vatRateBp     Int      @default(0)
+  taxNote       String   @default("")
+  legalEntity   String   @default("")
+  /// Data-residency targets (ADR-0006): object-store bucket and Postgres schema for this country.
+  storageBucket String
+  dbSchema      String
+  launched      Boolean  @default(false)
+  /// Manual launch checklist ticks: { itemKey: { done, by, at, note } }
+  checklist     Json     @default("{}")
+  updatedAt     DateTime @updatedAt
+}
+
+/// Region attribute per page (NFR-SCL-04) plus its regional/export payment settings. No row = RW defaults.
+model PageRegion {
+  pageId          String   @id
+  region          String   @default("RW")
+  currency        String   @default("RWF")
+  mpesaTill       String   @default("")
+  /// Maker opted in to selling to shoppers in other EAC countries.
+  crossBorder     Boolean  @default(false)
+  /// International card checkout via Stripe Connect (direct charges on the maker's account).
+  exportEnabled   Boolean  @default(false)
+  stripeAccountId String?
+  stripeStatus    String   @default("NONE")
+  updatedAt       DateTime @updatedAt
+
+  @@index([region])
+}
+
+/// Product price in the page's own currency. No row = Product.priceRwf in RWF.
+model ProductPrice {
+  productId   String   @id
+  pageId      String
+  currency    String
+  amountMinor Int
+  updatedAt   DateTime @updatedAt
+}
+
+/// Maker-defined international shipping, flat fee per zone (FR-ORD-08).
+model ShippingZone {
+  id        String   @id @default(cuid())
+  pageId    String
+  name      String
+  /// ISO 3166-1 alpha-2 codes, or "*" for rest of world.
+  countries String[]
+  currency  String
+  feeMinor  Int
+  etaDays   Int      @default(7)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@index([pageId])
+}
+
+/// FX rate: units of `quote` per 1 `base` (USD). Display-only; charges never convert silently.
+model FxRate {
+  id        String   @id @default(cuid())
+  base      String   @default("USD")
+  quote     String
+  rate      Decimal  @db.Decimal(24, 12)
+  source    String
+  fetchedAt DateTime @default(now())
+
+  @@index([quote, fetchedAt])
+}
+
+/// Shopper display-currency / country preferences (signed-in; anonymous shoppers use cookies).
+model ShopperPrefs {
+  userId          String   @id
+  displayCurrency String   @default("RWF")
+  country         String   @default("RW")
+  crossBorder     Boolean  @default(false)
+  updatedAt       DateTime @updatedAt
+}
+
+/// The charged amount of an order in the maker's currency, plus the "≈" display snapshot shown at checkout.
+model OrderMoney {
+  orderId           String    @id
+  pageId            String
+  currency          String
+  totalMinor        Int
+  itemsMinor        Int
+  deliveryMinor     Int       @default(0)
+  discountMinor     Int       @default(0)
+  /// MPESA | MTN_MOMO | AIRTEL_MONEY | CARD
+  method            String
+  shippingZoneId    String?
+  shipCountry       String?
+  displayCurrency   String?
+  displayTotalMinor Int?
+  fxRate            String?
+  fxSource          String?
+  fxAt              DateTime?
+  refundedMinor     Int       @default(0)
+  createdAt         DateTime  @default(now())
+
+  @@index([pageId, createdAt])
+}
+
+/// Regional wallet (M-Pesa) and Stripe payments, in minor units. MoMo/Airtel in RWF keep using Payment.
+model RegionPayment {
+  id               String    @id @default(cuid())
+  orderId          String
+  provider         String
+  providerRef      String    @unique
+  method           String
+  currency         String
+  amountMinor      Int
+  /// Stripe connected account (the maker) for direct charges.
+  connectedAccount String?
+  merchant         String    @default("")
+  payerPhone       String    @default("")
+  status           String    @default("PENDING")
+  refundedMinor    Int       @default(0)
+  raw              Json?
+  createdAt        DateTime  @default(now())
+  settledAt        DateTime?
+
+  @@index([orderId])
+  @@index([status, createdAt])
+}
+
+/// Processed Stripe webhook events (idempotency).
+model StripeEvent {
+  id          String   @id
+  type        String
+  account     String?
+  processedAt DateTime @default(now())
+}
+
+/// Digital Product Passport (FR-DPP-01..04): current published version.
+model ProductPassport {
+  productId      String    @id
+  pageId         String
+  version        Int
+  data           Json
+  gtin           String?   @unique
+  /// FR-DPP-04: host verified the "Made in …" and impact claims.
+  claimsVerified Boolean   @default(false)
+  verifiedById   String?
+  verifiedAt     DateTime?
+  updatedAt      DateTime  @updatedAt
+
+  @@index([pageId])
+}
+
+/// Immutable passport history; every publish adds a version.
+model ProductPassportVersion {
+  id        String   @id @default(cuid())
+  productId String
+  version   Int
+  data      Json
+  note      String   @default("")
+  changed   String[]
+  editorId  String
+  createdAt DateTime @default(now())
+
+  @@unique([productId, version])
+}
+
 // ==== E33 3D twin + E34 3D try-on / AR mirror ====
 
 /// Animatable 3D twin (FR-AVA-01..06). Separate AVATAR_3D consent. Capture frames, body parameters and the GLB are

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Chip, Sheet } from "@/components/ui";
 import { useSession } from "@/lib/session";
 
-const LABELS: Record<Locale, string> = { rw: "Kinyarwanda", en: "English", fr: "Français" };
+const LABELS: Record<Locale, string> = { rw: "Kinyarwanda", en: "English", fr: "Français", sw: "Kiswahili (beta)" };
 
 /** Edge menu replacing the tab bar (CR-01): everything else is one tap away from the Muse. */
 export function MenuSheet({ open, onClose }: { open: boolean; onClose: () => void }) {

@@ -7,6 +7,7 @@ import { Button, Chip, ErrorNote, Screen, Spinner, TopBar } from "@/components/u
 import { api, rwf } from "@/lib/api";
 import { ORDER_LABEL, type OrderView } from "@/lib/orders";
 import { useSession } from "@/lib/session";
+import { OrderMoneyPanel, useOrderMoney } from "@/components/region";
 import { useApi } from "@/lib/use-api";
 
 /** Order: MoMo approval → “Paid ✓ directly to the maker” → ambient timeline (prototype v2 · 15/16/17). */
@@ -15,6 +16,8 @@ function Order() {
   const fresh = useSearchParams().get("fresh") === "1";
   const { t } = useSession();
   const { data: o, setData, error } = useApi<OrderView>(`/orders/${id}`);
+  const money = useOrderMoney(id, o?.status); // E40/E41: charged currency + method (null for legacy RWF orders)
+  const amount = money ? money.total : o ? rwf(o.totalRwf) : "";
 
   useEffect(() => {
     if (!o || o.status !== "AWAITING_PAYMENT") return;
@@ -34,7 +37,7 @@ function Order() {
           <section className="glass flex flex-col items-center gap-3 rounded-3xl p-6 text-center" role="status">
             <span className="text-5xl">📲</span>
             <p className="font-display text-xl font-black">{t("buy.approve")}</p>
-            <p className="text-sm text-mut">{rwf(o.totalRwf)} to <b className="text-white">{o.payoutLabel}</b> · {o.wallet === "MTN_MOMO" ? "MTN MoMo" : "Airtel Money"}</p>
+            <p className="text-sm text-mut">{amount} to <b className="text-white">{o.payoutLabel}</b> · {money ? money.methodLabel : o.wallet === "MTN_MOMO" ? "MTN MoMo" : "Airtel Money"}</p>
             <Spinner />
             {process.env.NODE_ENV !== "production" && (
               <Link href="/dev/handset" target="_blank" className="text-xs text-gold underline">Open simulated handset (dev)</Link>
@@ -46,7 +49,7 @@ function Order() {
           <section className="flex animate-rise flex-col items-center gap-2 rounded-3xl bg-gradient-to-br from-mint/30 to-violet/20 p-6 text-center">
             <span className="grid size-20 place-items-center rounded-full bg-mint text-4xl text-ink">✓</span>
             <p className="font-display text-3xl font-black">{t("buy.paid")}</p>
-            <p className="text-sm">{t("buy.paidDirect")} <b>{o.payoutLabel}</b> · {rwf(o.totalRwf)}</p>
+            <p className="text-sm">{t("buy.paidDirect")} <b>{o.payoutLabel}</b> · {amount}</p>
             <p className="text-xs text-mut">Nyambika never holds your money. The maker has your order on WhatsApp.</p>
           </section>
         )}
@@ -62,10 +65,12 @@ function Order() {
                 <p className="text-sm text-mut">{o.item.colourName} · size {o.item.size}{o.item.makerName ? ` · made by ${o.item.makerName}` : ""}</p>
               </>
             )}
-            <p className="text-sm">{rwf(o.totalRwf)} · {o.deliveryMode === "DELIVERY" ? `delivery to ${o.address}` : "pickup"}</p>
+            <p className="text-sm">{amount} · {o.deliveryMode === "DELIVERY" ? `delivery to ${o.address}` : "pickup"}</p>
             <Link href={`/m/${o.page.handle}`} className="text-sm text-gold">{o.page.name} →</Link>
           </div>
         </section>
+
+        <OrderMoneyPanel money={money} payee={o.payoutLabel} onChange={async () => setData(await api<OrderView>(`/orders/${id}`))} />
 
         {/* Ambient: live activity style tracker */}
         <section className="glass rounded-3xl p-4">

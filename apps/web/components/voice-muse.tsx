@@ -136,7 +136,7 @@ export function TranscriptReview({ stt, value, onChange, onSend, onRetry }: { st
   );
 }
 
-const LANG_NAME: Record<Locale, string> = { rw: "Kinyarwanda", en: "English", fr: "Français" };
+const LANG_NAME: Record<Locale, string> = { rw: "Kinyarwanda", en: "English", fr: "Français", sw: "Kiswahili" };
 
 export function VoiceSettingsSheet({ open, onClose, prefs, setPrefs }: { open: boolean; onClose: () => void; prefs: VoicePrefs; setPrefs: (p: VoicePrefs) => void }) {
   const { t, locale } = useSession();
