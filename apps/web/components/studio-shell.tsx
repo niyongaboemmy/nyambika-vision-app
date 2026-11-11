@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
+import { ThemeToggle } from "@/components/kit";
 import { QrCode } from "@/components/qr";
 import { Badge, Icon, isNavActive, Monogram, SButton, StudioSheet, studioNav, type IconName } from "@/components/studio";
 import { useSession } from "@/lib/session";
@@ -49,13 +50,13 @@ export function ShareSheet({ open, onClose, page }: { open: boolean; onClose: ()
     <StudioSheet open={open} onClose={onClose} title="Share my page">
       <div className="space-y-4">
         <div className="st-hero rounded-[26px] p-5">
-          <div className="mx-auto w-full max-w-[220px] rounded-3xl bg-white p-3 shadow-[0_20px_40px_-20px_rgba(29,24,20,.45)]">
+          <div className="keep-white mx-auto w-full max-w-[220px] rounded-3xl bg-white p-3 shadow-[0_20px_40px_-20px_rgba(29,24,20,.45)]">
             <QrCode value={url} label={`QR code for ${url}`} className="block aspect-square w-full" />
           </div>
           <p className="mt-4 text-center font-display text-lg font-black text-cocoa">{page.name}</p>
           <p className="break-all text-center text-sm font-semibold text-cocoa-2">{url.replace(/^https?:\/\//, "")}</p>
         </div>
-        <p className="text-sm leading-relaxed text-cocoa-2">Print it for your stall or workshop, or show it on your phone. Shoppers scan it, see your pieces on their own twin and pay you directly.</p>
+        <ul aria-label="How shoppers use it" className="flex flex-wrap gap-1.5 text-xs font-bold text-cocoa-2"><li className="rounded-full bg-paper-2 px-2.5 py-1">Print it for your stall</li><li className="rounded-full bg-paper-2 px-2.5 py-1">They try it on their twin</li><li className="rounded-full bg-paper-2 px-2.5 py-1">Paid directly to you</li></ul>
         <div className="grid grid-cols-2 gap-2">
           <SButton
             variant="outline"
@@ -190,6 +191,7 @@ export function StudioShell({ page, pages, member, badges = {}, children }: { pa
           <a href="/" className="st-press flex min-h-11 items-center gap-3 rounded-2xl px-3 text-sm font-bold text-cocoa-2 hover:bg-white hover:text-cocoa">
             <Icon name="eye" className="size-5" /> Shopper view
           </a>
+          <ThemeToggle compact className="mt-2 flex w-full [&>button]:flex-1" />
         </div>
       </aside>
 
@@ -279,6 +281,10 @@ export function StudioShell({ page, pages, member, badges = {}, children }: { pa
           <SheetLink href={`/m/${page.handle}`} icon="store" label="Open my Maker Space" hint="What shoppers see" external onClick={close} />
           <SheetLink href="/studio" icon="grid" label="All my pages" onClick={close} />
           <SheetLink href="/" icon="eye" label="Shopper view" external onClick={close} />
+          <div className="flex min-h-14 items-center justify-between gap-3 rounded-2xl bg-white px-3.5 ring-1 ring-inset ring-hairline">
+            <span className="font-bold text-cocoa">Display</span>
+            <ThemeToggle />
+          </div>
           <button
             type="button"
             onClick={async () => {
