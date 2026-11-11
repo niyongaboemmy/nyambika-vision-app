@@ -8,7 +8,7 @@ from fastapi import FastAPI, HTTPException
 from PIL import Image, ImageDraw
 from pydantic import BaseModel, Field
 
-from . import c2pa, config, garment, guard, intent, listing, twin
+from . import c2pa, config, garment, guard, intent, listing, morph, twin
 from .embed import embed_image
 from .imaging import decode_b64, encode_png_b64
 from .providers import get_provider, registry
@@ -30,6 +30,7 @@ class TryOnIn(BaseModel):
     garment_category: str = "dress"
     tier: Literal["PREVIEW", "HD"] = "PREVIEW"
     request_id: str = Field(default_factory=lambda: uuid.uuid4().hex)
+    garment_frame: list[int] | None = Field(default=None, min_length=4, max_length=4)
 
 
 class IntentIn(BaseModel):
@@ -87,7 +88,8 @@ def tryon(body: TryOnIn):
     provider = get_provider(config.VTON_PROVIDER)
     garment_img = _image(body.garment_b64).convert("RGBA")
     try:
-        result = provider.generate(_image(body.twin_b64), garment_img, body.garment_category, body.tier)
+        result = provider.generate(_image(body.twin_b64), garment_img, body.garment_category, body.tier,
+                                   tuple(body.garment_frame) if body.garment_frame else None)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     labelled, label_box = _label(result.image)
@@ -129,3 +131,22 @@ class ListingIn(BaseModel):
 def listing_write(body: ListingIn):
     """AI listing writer: product title/description or page story in RW/EN/FR."""
     return listing.write(body.kind, body.fields, body.locale)
+
+
+class MorphIn(BaseModel):
+    cutout_b64: str
+    category: str = "dress"
+    hue: float | None = Field(default=None, ge=0, lt=360)
+    length: Literal["mini", "knee", "midi", "maxi"] | None = None
+    sleeve: Literal["sleeveless", "short", "elbow", "long"] | None = None
+    base_length: Literal["mini", "knee", "midi", "maxi"] = "knee"
+    base_sleeve: Literal["sleeveless", "short", "elbow", "long"] = "short"
+
+
+@app.post("/v1/garment/morph")
+def garment_morph(body: MorphIn):
+    """Live morph (E23): recolour / re-hem / re-sleeve a try-on cut-out. Returns a new cut-out + frame."""
+    r = morph.morph(_image(body.cutout_b64), body.category, body.hue, body.length, body.sleeve,
+                    body.base_length, body.base_sleeve)
+    return {"cutout_b64": encode_png_b64(r["cutout"]), "frame": r["frame"], "applied": r["applied"],
+            "base_hue": r["base_hue"]}

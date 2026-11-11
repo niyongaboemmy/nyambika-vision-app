@@ -141,7 +141,7 @@ export function StudioShell({ page, pages, member, badges = {}, children }: { pa
   const [switching, setSwitching] = useState(false);
   const [sharing, setSharing] = useState(false);
   const isCoop = page.memberType === "COOPERATIVE";
-  const nav = studioNav(page.id, isCoop, member);
+  const nav = studioNav(page.id, isCoop, member, page.memberType === "TAILOR");
   const dock = nav.filter((n) => !n.secondary);
   const multi = pages.length > 1;
   const close = () => setMore(false);

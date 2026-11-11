@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { serverApi } from "@/lib/server-api";
 import { THEMES, TYPE_LABEL, type MakerSpace } from "@/lib/maker";
 import { MakerActions, Collection } from "./client";
+import { TailorServices } from "@/components/tailor-services";
 
 type Props = { params: Promise<{ handle: string }> };
 
@@ -59,6 +60,7 @@ export default async function MakerSpacePage({ params }: Props) {
       </section>
 
       <Collection maker={m} />
+      <TailorServices maker={m} />
 
       {m.reviews.length > 0 && (
         <section className="mt-6 space-y-2 px-5">

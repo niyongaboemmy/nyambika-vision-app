@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { SizeNotes, useSizeRecommendation } from "@/components/size-hint";
 import { Chip, ErrorNote, Sheet, Spinner } from "@/components/ui";
 import { api, rwf } from "@/lib/api";
 import type { Look } from "@/lib/looks";
@@ -29,6 +30,11 @@ export function HoldToBuy({ look }: { look: Look }) {
   const key = useRef<string>("");
 
   useEffect(() => () => { if (raf.current) cancelAnimationFrame(raf.current); }, []);
+  // E32: profile ↔ size chart recommendation (falls back to the twin estimate server-side).
+  const rec = useSizeRecommendation(look.product.id, look.variant.id, open);
+  const recSize = rec && look.variant.sizes.includes(rec.size) ? rec.size : null;
+  const picked = useRef(false);
+  useEffect(() => { if (recSize && !picked.current) setSize(recSize); }, [recSize]);
 
   const total = look.product.priceRwf + (delivery === "DELIVERY" ? DELIVERY_FEE : 0);
   const eta = new Date(Date.now() + Math.max(1, look.product.leadTimeDays + (delivery === "DELIVERY" ? 1 : 0)) * 86400_000).toLocaleDateString("en-GB", { weekday: "short" });
@@ -88,9 +94,10 @@ export function HoldToBuy({ look }: { look: Look }) {
             <p className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-mut">Size</p>
             <div className="flex flex-wrap gap-2">
               {look.variant.sizes.map((s) => (
-                <Chip key={s} active={s === size} onClick={() => setSize(s)}>{s === twinSize ? `📏 ${s} · ${t("buy.sizeFromTwin")} ✓` : s}</Chip>
+                <Chip key={s} active={s === size} onClick={() => { picked.current = true; setSize(s); }}>{s === recSize ? `📏 ${s} · ${rec!.basis === "PROFILE" ? t("size.recommended") : t("buy.sizeFromTwin")} ✓` : s === twinSize && !recSize ? `📏 ${s} · ${t("buy.sizeFromTwin")} ✓` : s}</Chip>
               ))}
             </div>
+            <SizeNotes rec={recSize ? rec : null} size={size} />
           </div>
           <div className="flex flex-wrap gap-2">
             <Chip active={delivery === "DELIVERY"} onClick={() => setDelivery("DELIVERY")}>🛵 Delivery {eta} · +{rwf(DELIVERY_FEE)}</Chip>

@@ -10,6 +10,9 @@ import { parse } from "../../common/zod";
 import { TwinModule, TwinService } from "../twin/twin.module";
 import { CircleModule, CircleService } from "../circle/circle.module";
 import { WardrobeModule, WardrobeService } from "../wardrobe/wardrobe.module";
+import { TailorModule } from "../tailor/tailor.module";
+import { MeasurementsService } from "../tailor/measurements";
+import { CustomOrdersService } from "../tailor/custom-orders";
 
 /** Privacy centre (FR-PRV-01..07, CMP-01..05): consents, export, deletion cascade. */
 @Controller("privacy")
@@ -21,6 +24,8 @@ export class PrivacyController {
     private storage: StorageService,
     private circle: CircleService,
     private wardrobe: WardrobeService,
+    private measurements: MeasurementsService,
+    private customOrders: CustomOrdersService,
   ) {}
 
   @Get()
@@ -68,7 +73,8 @@ export class PrivacyController {
     res.setHeader("content-type", "application/json");
     res.setHeader("content-disposition", 'attachment; filename="nyambika-my-data.json"');
     const [circlePolls, wardrobe] = await Promise.all([this.circle.exportFor(user.id), this.wardrobe.exportFor(user.id)]);
-    res.send(JSON.stringify({ exportedAt: new Date(), note: "Twin and look images are available on request; they are encrypted at rest.", user: u, circlePolls, wardrobe }, null, 2));
+    const [measurements, customOrders] = await Promise.all([this.measurements.exportFor(user.id), this.customOrders.exportFor(user.id)]);
+    res.send(JSON.stringify({ exportedAt: new Date(), note: "Twin and look images are available on request; they are encrypted at rest.", user: u, circlePolls, wardrobe, measurements, customOrders }, null, 2));
   }
 
   /** Deletion cascade with a recorded job and per-step status. */
@@ -99,7 +105,13 @@ export class PrivacyController {
       await this.prisma.intentSession.deleteMany({ where: { userId: user.id } });
       steps.push({ step: "Generated looks and Muse history deleted", done: true, detail: `${gens.length} images` });
     }
+    if (scope === "LOOKS" || scope === "ACCOUNT") {
+      const previews = await this.customOrders.deleteFor(user.id);
+      steps.push({ step: "Previews shared with tailors deleted", done: true, detail: `${previews} images` });
+    }
     if (scope === "ACCOUNT") {
+      const m = await this.measurements.deleteFor(user.id);
+      steps.push({ step: "Measurement profile deleted; tailor shares ended", done: true, detail: `${m.sharesRevoked} active shares ended` });
       for (const p of CONSENT_PURPOSES) await this.consent.record(user.id, p, false, locale);
       await this.prisma.session.updateMany({ where: { userId: user.id }, data: { revokedAt: new Date() } });
       await this.prisma.follow.deleteMany({ where: { userId: user.id } });
@@ -111,5 +123,5 @@ export class PrivacyController {
   }
 }
 
-@Module({ imports: [TwinModule, CircleModule, WardrobeModule], controllers: [PrivacyController] })
+@Module({ imports: [TwinModule, CircleModule, WardrobeModule, TailorModule], controllers: [PrivacyController] })
 export class PrivacyModule {}

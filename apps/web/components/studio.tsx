@@ -157,12 +157,13 @@ export interface StudioNavItem {
 }
 
 /** One list drives the phone dock, the desktop sidebar and PageTabs. Add a studio section with one line here. */
-export function studioNav(pageId: string, isCoop: boolean, member?: boolean): StudioNavItem[] {
+export function studioNav(pageId: string, isCoop: boolean, member?: boolean, tailor?: boolean): StudioNavItem[] {
   const base = `/studio/${pageId}`;
   return [
     { href: base, label: "Home", icon: "home" },
     { href: `${base}/products`, label: member ? "My products" : "Products", icon: "hanger" },
     ...(member ? [] : [{ href: `${base}/orders`, label: "Orders", icon: "inbox" } as StudioNavItem]),
+    ...(tailor && !member ? [{ href: `${base}/tailor`, label: "Custom orders", icon: "scissors" } as StudioNavItem] : []),
     ...(isCoop && !member ? [{ href: `${base}/makers`, label: "Makers", icon: "users" } as StudioNavItem] : []),
     ...(member ? [] : [{ href: `${base}/settings`, label: "Settings", icon: "settings", secondary: true } as StudioNavItem]),
   ];

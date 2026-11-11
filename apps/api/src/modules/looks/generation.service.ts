@@ -19,6 +19,13 @@ interface TryOnResult {
   latency_ms: number;
 }
 
+/** Live morph (E23): render a morphed cut-out instead of the variant's own; part of the cache key. */
+export interface MorphRender {
+  key: string;
+  cutoutPath: string;
+  frame: number[];
+}
+
 const CONCURRENCY = Number(process.env.GENERATION_CONCURRENCY ?? 2);
 const QUEUE = "look-generation";
 
@@ -46,7 +53,7 @@ export class GenerationService implements OnModuleInit, OnModuleDestroy {
     const connection = { url: config.redisUrl, maxRetriesPerRequest: null };
     this.queue = new Queue(QUEUE, { connection });
     if (process.env.GENERATION_WORKER !== "0") {
-      this.worker = new Worker(QUEUE, (job) => this.run(job.data.id as string, job.data.persona as number), { connection, concurrency: CONCURRENCY });
+      this.worker = new Worker(QUEUE, (job) => this.run(job.data.id as string, job.data.persona as number, job.data.morph as MorphRender | undefined), { connection, concurrency: CONCURRENCY });
       this.worker.on("failed", (job, err) => this.log.error(`generation ${job?.data?.id} failed: ${err.message}`));
     }
   }
@@ -67,14 +74,14 @@ export class GenerationService implements OnModuleInit, OnModuleDestroy {
   }
 
   /** Return a cached generation or queue a new one. Re-views are free (cache key includes twin version). */
-  async ensure(userId: string, variantId: string, tier: "PREVIEW" | "HD" = "PREVIEW", persona = 2): Promise<Generation> {
+  async ensure(userId: string, variantId: string, tier: "PREVIEW" | "HD" = "PREVIEW", persona = 2, morph?: MorphRender): Promise<Generation> {
     const twin = await this.twins.current(userId);
     if (twin && !(await this.consent.has(userId, "TRYON_GENERATION"))) {
       throw new ForbiddenException({ message: "You paused looks on your twin. Turn them back on in the Trust centre.", code: "CONSENT_WITHDRAWN" });
     }
     const twinKey = twin ? `${twin.id}:v${twin.version}` : `persona-${persona}:v0`;
     const model = await this.model(tier);
-    const cacheKey = `${twinKey}|${variantId}|${model.id}`;
+    const cacheKey = `${twinKey}|${variantId}|${model.id}${morph ? `|morph:${morph.key}` : ""}`;
     const existing = await this.prisma.generation.findUnique({ where: { cacheKey } });
     if (existing && existing.status !== "FAILED") return existing;
     if (existing) await this.prisma.generation.delete({ where: { id: existing.id } });
@@ -85,11 +92,11 @@ export class GenerationService implements OnModuleInit, OnModuleDestroy {
       data: { userId, variantId, twinVersion: twin?.version ?? 0, modelVersion: model.id, tier, cacheKey, status: "QUEUED" },
     });
     // jobId = generation id: enqueueing the same generation twice is a no-op.
-    await this.queue.add("render", { id: gen.id, persona }, { jobId: gen.id, attempts: 1, removeOnComplete: 1000, removeOnFail: 5000 });
+    await this.queue.add("render", { id: gen.id, persona, morph }, { jobId: gen.id, attempts: 1, removeOnComplete: 1000, removeOnFail: 5000 });
     return gen;
   }
 
-  private async run(id: string, persona: number) {
+  private async run(id: string, persona: number, morph?: MorphRender) {
     const gen = await this.prisma.generation.update({
       where: { id },
       data: { status: "GENERATING" },
@@ -97,8 +104,9 @@ export class GenerationService implements OnModuleInit, OnModuleDestroy {
     });
     try {
       const src = await this.twins.renderSource(gen.userId, persona);
-      if (!gen.variant.cutoutPath) throw new Error("Variant has no try-on cut-out");
-      const garment = await this.storage.read(gen.variant.cutoutPath);
+      const cutoutPath = morph?.cutoutPath ?? gen.variant.cutoutPath;
+      if (!cutoutPath) throw new Error("Variant has no try-on cut-out");
+      const garment = await this.storage.read(cutoutPath);
       const started = Date.now();
       const r = await this.ai.post<TryOnResult>("/v1/tryon", {
         twin_b64: src.image.toString("base64"),
@@ -106,6 +114,7 @@ export class GenerationService implements OnModuleInit, OnModuleDestroy {
         garment_category: gen.variant.product.category,
         tier: gen.tier,
         request_id: gen.id,
+        ...(morph ? { garment_frame: morph.frame } : {}),
       });
       await this.prisma.generation.update({ where: { id }, data: { status: "GUARDING" } });
 

@@ -48,7 +48,8 @@ class LocalCompositor(VTONProvider):
         gw = int(torso_w * factor)
         return int(cx - gw / 2), int(y0 + top * h), gw, int((bottom - top) * h)
 
-    def generate(self, twin: Image.Image, garment: Image.Image, category: str, tier: str) -> VTONResult:
+    def generate(self, twin: Image.Image, garment: Image.Image, category: str, tier: str,
+                 frame: tuple[int, int, int, int] | None = None) -> VTONResult:
         target_h = TIER_HEIGHT.get(tier, 512)
         twin = twin.convert("RGB")
         twin = twin.resize((round(twin.width * target_h / twin.height), target_h), Image.LANCZOS)
@@ -58,10 +59,18 @@ class LocalCompositor(VTONProvider):
         gx, gy, gw, gh = self._placement(category, box, torso_run(mask, box))
 
         garment = garment.convert("RGBA")
-        gbox = bbox(np.asarray(garment)[..., 3] > 10)
-        if gbox:
-            garment = garment.crop(gbox)
-        garment = garment.resize((max(1, gw), max(1, gh)), Image.LANCZOS)
+        if frame:
+            # Morphed cut-out (E23): `frame` is where the original garment sits in this canvas, so
+            # map the frame onto the placement box and let a shorter/longer garment end higher/lower.
+            fx0, fy0, fx1, fy1 = frame
+            sx, sy = gw / max(1, fx1 - fx0), gh / max(1, fy1 - fy0)
+            gx, gy = int(round(gx - fx0 * sx)), int(round(gy - fy0 * sy))
+            garment = garment.resize((max(1, round(garment.width * sx)), max(1, round(garment.height * sy))), Image.LANCZOS)
+        else:
+            gbox = bbox(np.asarray(garment)[..., 3] > 10)
+            if gbox:
+                garment = garment.crop(gbox)
+            garment = garment.resize((max(1, gw), max(1, gh)), Image.LANCZOS)
 
         canvas = twin.convert("RGBA")
         shadow_alpha = garment.getchannel("A").point(lambda a: int(a * 0.45))
