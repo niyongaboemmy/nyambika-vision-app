@@ -5,6 +5,7 @@
 // Usage: BASE_URL=http://localhost:3104 node scripts/crawl-uiux.mjs [label]
 //   THEMES=light,dark   (default both)     VIEWPORTS=390,1280 (default; add 360 to also screenshot 360)
 //   ONLY=muse,bag       (substring filter on screen names)   AXE=0 to skip axe (quick visual runs)
+//   FULL=1 full-page screenshots (review)   STRICT_TARGETS=1 fail on tap targets under 44 px
 // Screenshots: scripts/crawl-output/uiux/<label>/<theme>-<vp>/<nn>-<screen>.png
 import { mkdirSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
@@ -218,7 +219,7 @@ for (const theme of THEMES) {
         }
         if (shoot) {
           n += 1;
-          await page.screenshot({ path: `${out}${String(n).padStart(2, "0")}-${name}.png`, caret: "initial" });
+          await page.screenshot({ path: `${out}${String(n).padStart(2, "0")}-${name}.png`, caret: "initial", fullPage: process.env.FULL === "1" });
         }
         if (AXE && vp === 390) {
           const res = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]).exclude("canvas").analyze();
