@@ -67,7 +67,7 @@ describe("watermark", () => {
       return [data[i], data[i + 1], data[i + 2]];
     };
     const box = labelBox(info.width, info.height);
-    // Inside the label: dark pill, far from the source blue; a top corner stays untouched.
+    // Inside the label: dark pill, far from the source blue; the top-left corner stays untouched.
     let changed = 0;
     let total = 0;
     for (let y = box.y + 2; y < box.y + box.h - 2; y += 3)
@@ -84,7 +84,7 @@ describe("watermark", () => {
     for (let y = box.y; y < box.y + box.h; y++) for (let x = box.x; x < box.x + box.w; x++) if (px(x, y).every((c) => c > 200)) white++;
     expect(white).toBeGreaterThan(20);
     // Nyambika mark: bottom-right corner is changed too.
-    const [mr, mg, mb] = px(info.width - Math.round(30 * box.s), box.y + Math.round(box.h / 2));
+    const [mr, mg, mb] = px(info.width - Math.round(30 * box.s), info.height - Math.round(5 * box.s) - Math.round(box.h / 2));
     expect(Math.abs(mr - 60) + Math.abs(mg - 140) + Math.abs(mb - 200)).toBeGreaterThan(40);
   });
 

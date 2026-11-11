@@ -8,12 +8,12 @@ export const escapeXml = (s: string) =>
 
 /** Geometry of the visible label, exposed so tests can check those pixels really changed. */
 export function labelBox(width: number, height: number) {
-  // Sized and placed to fully cover the gateway's own small "AI preview" tag (8px inset, 78x18 at 512px).
+  // Sized and placed to fully cover the gateway's own small "AI preview" tag (top-right, 8px inset, 78x18 at 512px).
   const s = height / 512;
   const w = Math.round(108 * s);
   const h = Math.round(28 * s);
-  const x = Math.round(5 * s);
-  const y = height - h - Math.round(5 * s);
+  const x = width - w - Math.round(5 * s);
+  const y = Math.round(5 * s);
   return { x, y, w, h, s, width };
 }
 
@@ -25,7 +25,7 @@ function overlaySvg(width: number, height: number) {
   const markFs = Math.max(9, Math.round(11 * s));
   const markW = Math.round(82 * s);
   const markX = width - Math.round(6 * s) - markW;
-  const markY = y;
+  const markY = height - h - Math.round(5 * s);
   return Buffer.from(
     `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
       <defs>

@@ -81,11 +81,11 @@ def twin_check(body: ImageIn):
 
 
 def _label(img: Image.Image) -> tuple[Image.Image, tuple[int, int, int, int]]:
-    """Visible AI label, bottom-left (AI-TR-02)."""
+    """Visible AI label, top-right (AI-TR-02): the app's own chips sit top-left and its maker card along the bottom."""
     img = img.convert("RGBA")
     scale = img.height / 512
     w, h = int(78 * scale), int(18 * scale)
-    x0, y0 = int(8 * scale), img.height - h - int(8 * scale)
+    x0, y0 = img.width - w - int(8 * scale), int(8 * scale)
     overlay = Image.new("RGBA", img.size, (0, 0, 0, 0))
     d = ImageDraw.Draw(overlay)
     d.rounded_rectangle((x0, y0, x0 + w, y0 + h), radius=int(6 * scale), fill=(0, 0, 0, 140))
