@@ -90,7 +90,7 @@ export function LookView({ look, index, total, intentLabel, onSave, onVariant, o
       </div>
 
       {/* Right rail */}
-      <div className="absolute right-3 bottom-[170px] z-10 flex flex-col items-center gap-4">
+      <div className="look-rail absolute right-3 bottom-[170px] z-10 flex flex-col items-center gap-4">
         <RailButton label={look.saved ? t("looks.saved") : t("looks.save")} onClick={onSave} active={look.saved}>♥</RailButton>
         {look.variants.length > 1 && <RailButton label={t("looks.colours")} onClick={() => setRing(true)}>🎨</RailButton>}
         <MorphRail look={look} />

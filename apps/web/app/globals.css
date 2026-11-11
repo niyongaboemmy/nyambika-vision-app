@@ -234,3 +234,13 @@ body {
   background-image: repeating-conic-gradient(#f1ebe3 0 25%, #fff 0 50%);
   background-size: 16px 16px;
 }
+
+/* Look rail: up to 7 actions must clear the back button and maker card on short phones (360x800). */
+@media (max-height: 860px) {
+  .look-rail { gap: 0.6rem; }
+  .look-rail button { font-size: 10px; gap: 2px; }
+  .look-rail button > span.glass { width: 2.5rem; height: 2.5rem; font-size: 1rem; }
+}
+@media (max-height: 700px) {
+  .look-rail button { font-size: 0; gap: 0; }
+}
