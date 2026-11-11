@@ -144,7 +144,7 @@ export function PilotSurvey() {
               <Button type="button" variant="ghost" className="flex-1" onClick={() => void send(true)}>{t("survey.later")}</Button>
               <Button className="flex-[2]" disabled={helped === null}>{t("survey.send")}</Button>
             </div>
-            <p className="text-center text-[11px] text-mut">Used only in pilot totals. Makers never see your answer.</p>
+            <p className="text-center text-[11px] text-mut">Pilot totals only · never shared with makers</p>
           </form>
         )}
       </div>

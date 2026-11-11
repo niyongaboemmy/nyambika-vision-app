@@ -239,7 +239,7 @@ export default function Muse() {
       ?? (window as unknown as { webkitSpeechRecognition?: new () => SpeechRec }).webkitSpeechRecognition;
     if (!Ctor) {
       holding.current = false;
-      setError("Voice isn't available in this browser yet. Type what you need instead.");
+      setError("Voice isn't available here · type instead");
       setPhase("typing");
       return;
     }

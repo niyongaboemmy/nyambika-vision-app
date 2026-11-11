@@ -120,8 +120,8 @@ export function CircleAsk({ look, open, onClose, intentLabel }: { look: Look; op
           </div>
           <ul className="mt-4 space-y-1.5 text-sm text-txt/90">
             <li>🖼️ {chosen.length} copies of these looks, each stamped <b>AI preview</b> + Nyambika mark. Your originals stay private.</li>
-            <li>🙈 Not your name, phone, twin photo or measurements.</li>
-            <li>⏳ The link closes by itself in 72 hours. You can take it down any time.</li>
+            <li>🙈 No name, phone, twin or measurements</li>
+            <li>⏳ Closes in 72 h · take it down anytime</li>
             <li>🧵 Makers never see polls.</li>
           </ul>
           <label className="glass mt-4 flex items-start gap-3 rounded-2xl p-3 text-sm">

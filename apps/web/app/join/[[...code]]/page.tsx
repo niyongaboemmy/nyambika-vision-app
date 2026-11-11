@@ -58,7 +58,7 @@ export default function Join() {
           ) : (
             <div className="mt-3 flex flex-wrap gap-1.5">
               <Fact icon="store">Rwandan makers</Fact>
-              <Fact icon="lock">On your private twin</Fact>
+              <Fact icon="lock">Private twin</Fact>
               <Fact icon="sparkle">Invite only</Fact>
             </div>
           )}

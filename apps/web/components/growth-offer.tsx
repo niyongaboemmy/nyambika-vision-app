@@ -102,7 +102,7 @@ export function CollectionAlerts({ maker }: { maker: MakerSpace }) {
       <span className="text-2xl" aria-hidden>💬</span>
       <span className="min-w-0 flex-1">
         <span className="block text-sm font-bold">New pieces on WhatsApp</span>
-        <span className="block text-xs text-mut">{on ? "You'll hear when they post a new collection. Reply STOP any time." : `Get ${maker.name}'s new collections. At most a few a week.`}</span>
+        <span className="block text-xs text-mut">{on ? "New collections only · reply STOP anytime" : `Get ${maker.name}'s new collections. At most a few a week.`}</span>
       </span>
       <button type="button" role="switch" aria-checked={on} aria-label="WhatsApp updates from this maker" onClick={toggle} className={`relative h-8 w-14 shrink-0 rounded-full transition ${on ? "bg-mint" : "bg-white/20"}`}>
         <span className={`absolute top-1 size-6 rounded-full bg-white shadow transition-all ${on ? "left-7" : "left-1"}`} />

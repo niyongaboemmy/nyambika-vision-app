@@ -108,7 +108,7 @@ export function HoldToBuy({ look, autoOpen = false }: { look: Look; /** E35: ope
               <DiscountField variantId={look.variant.id} open={open} onChange={setDiscount} />
               <p className="pt-2 text-center text-sm">🔐 {t("buy.paidTo")} <b>{look.maker.madeBy[0] ? `${look.maker.madeBy[0]}, ${look.maker.name}` : look.maker.name}</b> · {rwf(total)}</p>
               <ErrorNote error={error} />
-              <HoldRing label={`${t("buy.title")}: ${rwf(total)}`} disabled={busy || needsAddress} busy={busy} onHeld={submit} hint="Press and hold 1 second · then approve with your Mobile Money PIN" />
+              <HoldRing label={`${t("buy.title")}: ${rwf(total)}`} disabled={busy || needsAddress} busy={busy} onHeld={submit} hint="Press and hold 1 second · then your MoMo PIN" />
               {needsAddress && <p className="text-center text-xs text-gold">Add a delivery address to continue</p>}
               <AddToBag look={look} size={size} />
             </>
@@ -187,7 +187,7 @@ function RegionHold({ look, commerce, size, eta, busy, setBusy }: { look: Look; 
         disabled={busy || !method || !phoneOk || needsAddress}
         busy={busy}
         onHeld={submit}
-        hint={`Press and hold 1 second · then approve the ${method ? WALLET_LABEL[method] : "wallet"} prompt on your phone`}
+        hint={`Press and hold 1 second · then approve in ${method ? WALLET_LABEL[method] : "your wallet"}`}
       />
       {needsAddress && <p className="text-center text-xs text-gold">Add a delivery address to continue</p>}
       {commerce.taxNote && <p className="text-center text-[11px] text-mut">{commerce.taxNote}</p>}

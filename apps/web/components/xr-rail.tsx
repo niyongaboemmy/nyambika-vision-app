@@ -134,8 +134,8 @@ function MotionRail({ look, anchor }: { look: Look; anchor: React.RefObject<HTML
           </span>
         </div>
         <ul className="mt-3 space-y-1.5 text-xs text-mut">
-          <li>✨ AI motion preview, labelled and signed with Content Credentials (C2PA).</li>
-          <li>🛡️ Your face is never changed; every clip is checked before you see it.</li>
+          <li>✨ AI motion preview · C2PA signed</li>
+          <li>🛡️ Face never changed · every clip checked</li>
           <li>🔒 Private to you. Makers never receive it.</li>
         </ul>
         {state && !state.eligible && <p className="mt-3 text-sm text-gold">{state.reason}</p>}

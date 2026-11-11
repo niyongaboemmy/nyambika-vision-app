@@ -220,7 +220,7 @@ export function ShowClient({ initial }: { initial: ShowView }) {
         <header className="relative h-[58dvh] min-h-[360px]">
           {show.cover && <img loading="lazy" decoding="async" src={show.cover} alt="" className="absolute inset-0 size-full object-cover" />}
           <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-ink" />
-          <Link href={`/m/${show.maker.handle}`} aria-label={`Back to ${show.maker.name}`} className="glass absolute left-4 top-[max(env(safe-area-inset-top),14px)] grid size-11 place-items-center rounded-full">←</Link>
+          <Link href={`/m/${show.maker.handle}`} aria-label={`Back to ${show.maker.name}`} className="glass absolute left-4 top-[max(env(safe-area-inset-top),14px)] grid size-11 place-items-center rounded-full !bg-black/40 text-[#fff]">←</Link>
           <div className="absolute inset-x-5 bottom-4">
             <p className="text-[11px] font-bold uppercase tracking-[.22em] text-gold">{t("vr.fashionShow")} · {show.maker.name}</p>
             <h1 className="mt-1 font-display text-4xl font-black leading-[1.05]">{show.title}</h1>
@@ -254,7 +254,7 @@ export function ShowClient({ initial }: { initial: ShowView }) {
                   🔔 {me ? t("vr.rsvp") : `Sign in · ${t("vr.rsvp")}`}
                 </button>
               )}
-              <div className="mt-2 flex flex-wrap justify-center gap-1.5"><Fact icon="mail">1 WhatsApp · 1 h before</Fact><Fact icon="lock">Never shared with makers</Fact></div>
+              <div className="mt-2 flex flex-wrap justify-center gap-1.5"><Fact icon="mail">WhatsApp · 1 h before</Fact><Fact icon="lock">Never shared with makers</Fact></div>
             </div>
           )}
           {err && (isExpectedText(err) ? <LimitState error={err} /> : <p role="alert" className="text-sm text-terra">{err}</p>)}

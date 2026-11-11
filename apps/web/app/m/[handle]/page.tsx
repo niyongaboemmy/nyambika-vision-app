@@ -48,7 +48,7 @@ export default async function MakerSpacePage({ params }: Props) {
       <header className="relative h-[300px]" style={{ background: THEMES[m.theme] ?? THEMES.terra }}>
         <div className="absolute inset-0 opacity-25 [background-image:repeating-linear-gradient(45deg,#fff_0_2px,transparent_2px_26px),repeating-linear-gradient(-45deg,#fff_0_2px,transparent_2px_26px)]" />
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-ink" />
-        <a href="/" aria-label="Back to Muse" className="hit glass absolute left-4 top-[max(env(safe-area-inset-top),14px)] grid size-10 place-items-center rounded-full">←</a>
+        <a href="/" aria-label="Back to Muse" className="hit glass absolute left-4 top-[max(env(safe-area-inset-top),14px)] grid size-10 place-items-center rounded-full !bg-black/40 text-[#fff]">←</a>
         <RegionPill className="absolute right-4 top-[max(env(safe-area-inset-top),14px)]" />
       </header>
       <section className="relative -mt-24 px-5">

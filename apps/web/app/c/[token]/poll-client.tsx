@@ -67,7 +67,7 @@ export function PollClient({ token, meta }: { token: string; meta: PollMeta }) {
           <span className="orb mx-auto mb-5 block size-16 rounded-full opacity-80" />
           <h1 className="font-display text-3xl font-black">{state === "REVOKED" ? "Taken down" : "This poll has closed"}</h1>
           <p className="mt-2 text-txt/80">“{poll?.question ?? meta.question}”</p>
-          <p className="mt-2 text-sm text-mut">{state === "REVOKED" ? "The owner removed these previews." : "Polls close by themselves so the previews don't live forever."}</p>
+          <p className="mt-2 text-sm text-mut">{state === "REVOKED" ? "The owner removed these previews." : "Polls close by themselves"}</p>
           <Link href="/" className="grad-cta mt-6 inline-flex min-h-12 items-center rounded-2xl px-6 font-semibold">See looks on you · Nyambika</Link>
         </div>
       </main>

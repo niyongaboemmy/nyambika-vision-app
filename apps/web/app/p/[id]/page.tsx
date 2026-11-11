@@ -75,7 +75,9 @@ export default async function PassportPage({ params, searchParams }: Props) {
             <h1 className="font-display text-4xl font-black leading-[1.05] tracking-tight sm:text-5xl">{p.title}</h1>
             <p className="mt-3 text-lg leading-snug text-cocoa-2">
               {d.origin.handmade ? "Handmade" : "Made"} by <b className="text-cocoa">{makers}</b>
-              {d.origin.cooperative && d.origin.cooperative !== makers ? <> of {d.origin.cooperative}</> : null}, {[d.origin.district, COUNTRY[d.origin.country] ?? d.origin.country].filter(Boolean).join(", ")}.
+            </p>
+            <p className="mt-0.5 text-sm text-cocoa-2">
+              {[d.origin.cooperative && d.origin.cooperative !== makers ? d.origin.cooperative : null, d.origin.district, COUNTRY[d.origin.country] ?? d.origin.country].filter(Boolean).join(" · ")}
             </p>
             {d.claims.madeIn && (
               <p className="mt-4 inline-flex flex-wrap items-center gap-2">

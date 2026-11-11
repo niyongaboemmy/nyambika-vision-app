@@ -241,7 +241,7 @@ export function XrStage({ open, onClose, title, subtitle, assets, initialVariant
         </div>
         <GarmentViewer assets={assets} title={title} initialVariantId={initialVariantId} tall onVariantChange={setVid} />
         <TryIn3d variantId={vid ?? initialVariantId ?? assets[0]?.variantId} />
-        <p className="mt-3 text-center text-[11px] text-mut">AI builds this 3D preview from the maker&apos;s photo. Shape and drape are approximate.</p>
+        <p className="mt-3 text-center text-[11px] text-mut">AI 3D preview from the maker&apos;s photo · approximate</p>
       </div>
     </div>,
     document.body,

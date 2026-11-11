@@ -132,7 +132,7 @@ export function AskTailorSheet({ open, onClose, request }: { open: boolean; onCl
           <legend className="mb-1 text-xs font-semibold uppercase tracking-widest text-mut">What {first} will see</legend>
           <label className="glass flex items-start gap-3 rounded-2xl p-3">
             <input type="checkbox" checked={shareMeasurements} onChange={(e) => setShareMeasurements(e.target.checked)} className="mt-1 size-5 accent-[#f2b84b]" />
-            <span className="text-sm"><b>My measurements for 14 days</b><br /><span className="text-mut">Only for this order. You can stop sharing any time; it ends when the order does.</span></span>
+            <span className="text-sm"><b>My measurements for 14 days</b><br /><span className="text-mut">Only this order · stop sharing anytime</span></span>
           </label>
           {request.renderId && (
             <label className="glass flex items-start gap-3 rounded-2xl p-3">
@@ -146,7 +146,7 @@ export function AskTailorSheet({ open, onClose, request }: { open: boolean; onCl
         {needsProfile && (
           <fieldset className="mt-4 rounded-2xl border border-gold/30 bg-gold/10 p-3">
             <legend className="px-1 text-sm font-bold">Your measurements (cm)</legend>
-            <p className="mb-2 text-xs text-txt/80">{m?.prefill ? `Prefilled from your twin's size estimate (${m.twinSize}, ±3 cm). Adjust if you know better.` : "A soft tape measure helps. You can refine them later."}</p>
+            <p className="mb-2 text-xs text-txt/80">{m?.prefill ? `From your twin (${m.twinSize}, ±3 cm) · adjust if needed` : "A soft tape measure helps. You can refine them later."}</p>
             <div className="grid grid-cols-2 gap-2">
               {QUICK.map((k) => (
                 <label key={k} className="block">

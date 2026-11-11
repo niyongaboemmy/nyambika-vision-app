@@ -112,7 +112,7 @@ export function SharedRoom({ engine, room, signedIn, signInHref, seated, show }:
           navigator.vibrate?.([12, 40, 12]);
           return;
         case "reported":
-          setNote("Thanks. A moderator will look at it. You can also hide them for yourself.");
+          setNote("Thanks · a moderator will look · you can also hide them");
           return;
         case "error":
           setNote(e.msg);
@@ -259,10 +259,10 @@ export function SharedRoom({ engine, room, signedIn, signInHref, seated, show }:
         <h2 className="font-display text-2xl font-black">Shared room</h2>
         <p className="mt-1 inline-block rounded-full bg-violet/25 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide">Experimental test</p>
         <ul className="mt-3 space-y-2 text-sm text-txt/90">
-          <li>🎭 You appear as a simple synthetic avatar with a made-up name. Nobody sees your name, number, photo, twin or measurements.</li>
+          <li>🎭 Synthetic avatar, made-up name · nothing personal shown</li>
           <li>👏 No voice and no chat: only emoji reactions.</li>
-          <li>🫧 A personal-space bubble fades anyone who comes too close. You can hide or report anyone.</li>
-          <li>★ The maker hosts the room and can pause reactions or remove people.</li>
+          <li>🫧 Personal-space bubble · hide or report anyone</li>
+          <li>★ Hosted by the maker</li>
         </ul>
         {signedIn ? (
           <>
@@ -287,7 +287,7 @@ export function SharedRoom({ engine, room, signedIn, signInHref, seated, show }:
         {reporting ? (
           <fieldset>
             <legend className="font-display text-xl font-black">Report {reporting.nick}</legend>
-            <p className="mt-1 text-xs text-mut">Goes to Nyambika moderators with what just happened in the room. They won&apos;t know it was you.</p>
+            <p className="mt-1 text-xs text-mut">Sent to moderators · anonymous</p>
             <div className="mt-3 grid gap-2">
               {WHY.map((w) => (
                 <button
@@ -388,7 +388,7 @@ export function SharedRoom({ engine, room, signedIn, signInHref, seated, show }:
                 CC Captions
               </button>
             </fieldset>
-            <p className="mt-3 text-[11px] text-mut">Experimental shared room. Everyone is a synthetic avatar with a made-up name. No voice, no chat.</p>
+            <p className="mt-3 text-[11px] text-mut">Experimental shared room · synthetic avatars · no voice or chat</p>
           </>
         )}
       </Sheet>
