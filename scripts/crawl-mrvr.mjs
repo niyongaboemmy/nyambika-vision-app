@@ -173,6 +173,7 @@ try {
 
   // Host: mute guest 2, then remove guest 2, then start the runway.
   await host.p.getByRole("button", { name: /people in this shared room/ }).click();
+  await host.p.waitForTimeout(500); // sheet rise animation
   await host.snap("host-people-sheet-controls");
   await host.p.getByRole("button", { name: `Mute ${nick2}` }).click();
   await host.p.getByRole("button", { name: `Unmute ${nick2}` }).waitFor();
