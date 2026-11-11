@@ -37,7 +37,7 @@ export function ThemeToggle({ compact = false, className = "" }: { compact?: boo
               haptic("light");
               setPref(o.value);
             }}
-            className={`press inline-flex min-h-9 items-center justify-center gap-1.5 rounded-xl px-2.5 text-[13px] font-bold ${on ? "bg-surface-2 text-fg shadow-e1" : "text-fg-muted hover:text-fg"}`}
+            className={`hit press inline-flex min-h-9 items-center justify-center gap-1.5 rounded-xl px-2.5 text-[13px] font-bold ${on ? "bg-surface-2 text-fg shadow-e1" : "text-fg-muted hover:text-fg"}`}
           >
             <Icon name={o.icon} className="size-4" />
             {!compact && <span>{o.label}</span>}
@@ -117,7 +117,7 @@ export function InfoTip({ label, children, className = "" }: { label: string; ch
         aria-expanded={open}
         aria-controls={id}
         onClick={() => setOpen((o) => !o)}
-        className="press grid size-7 place-items-center rounded-full text-fg-muted hover:text-fg"
+        className="hit press grid size-7 place-items-center rounded-full text-fg-muted hover:text-fg"
       >
         <Icon name="info" className="size-[18px]" />
       </button>
@@ -140,7 +140,7 @@ export function InfoTip({ label, children, className = "" }: { label: string; ch
 export function LearnMore({ summary = "Learn more", children, className = "" }: { summary?: string; children: ReactNode; className?: string }) {
   return (
     <details className={`group rounded-2xl ${className}`}>
-      <summary className="press inline-flex min-h-9 cursor-pointer list-none items-center gap-1.5 rounded-xl text-[13px] font-bold text-fg-muted hover:text-fg [&::-webkit-details-marker]:hidden">
+      <summary className="hit press inline-flex min-h-11 cursor-pointer list-none items-center gap-1.5 rounded-xl text-[13px] font-bold text-fg-muted hover:text-fg [&::-webkit-details-marker]:hidden">
         <Icon name="info" className="size-4" />
         {summary}
         <Icon name="chevron" className="size-3.5 transition-transform group-open:rotate-90" />

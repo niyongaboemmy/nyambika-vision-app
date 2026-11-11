@@ -25,7 +25,7 @@ export function Screen({ children, className = "", aurora = true }: { children: 
 /** Consistent header: 40px round controls, centred title, safe-area aware. */
 export function TopBar({ title, back, right }: { title?: ReactNode; back?: string | true; right?: ReactNode }) {
   const router = useRouter();
-  const ctl = "glass press grid size-10 shrink-0 place-items-center rounded-full";
+  const ctl = "hit glass press grid size-10 shrink-0 place-items-center rounded-full";
   return (
     <div className="relative z-20 flex min-h-14 items-center justify-between gap-3 px-4 pt-[max(env(safe-area-inset-top),14px)] pb-2">
       {back ? (
@@ -65,16 +65,14 @@ export function Button({
   );
 }
 
+/** Toggle chip when it has an action; a plain (non-interactive) label chip otherwise — never a decorative button. */
 export function Chip({ children, active, onClick }: { children: ReactNode; active?: boolean; onClick?: () => void }) {
+  const cls = `inline-flex min-h-10 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-2xl border px-3.5 text-sm font-semibold ${
+    active ? "border-gold/70 bg-gold/20 text-txt" : "border-white/20 bg-white/10 text-txt/90"
+  }`;
+  if (!onClick) return <span className={cls}>{children}</span>;
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={onClick && active !== undefined ? active : undefined}
-      className={`press inline-flex min-h-10 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-2xl border px-3.5 text-sm font-semibold ${
-        active ? "border-gold/70 bg-gold/20 text-txt" : "border-white/20 bg-white/10 text-txt/90"
-      }`}
-    >
+    <button type="button" onClick={onClick} aria-pressed={active !== undefined ? active : undefined} className={`hit press ${cls}`}>
       {children}
     </button>
   );

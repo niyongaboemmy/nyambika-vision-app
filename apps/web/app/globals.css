@@ -581,3 +581,20 @@ body {
 
 /* Tabular figures for prices and counters. */
 .tabular { font-variant-numeric: tabular-nums; }
+
+/* ==== Copy & alignment pass ==== */
+/* Touch targets: `.hit` grows a control's hit area to at least 44×44 px with an invisible ::after, without changing
+   layout. Lives in the utilities layer with zero-specificity positioning, so `absolute`/`fixed`/`sticky` still win.
+   (The element must not clip its own overflow.) */
+@layer utilities {
+  :where(.hit) { position: relative; }
+  .hit::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: max(100%, 44px);
+    height: max(100%, 44px);
+    transform: translate(-50%, -50%);
+  }
+}

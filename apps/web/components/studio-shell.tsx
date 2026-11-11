@@ -230,7 +230,7 @@ export function StudioShell({ page, pages, member, badges = {}, children }: { pa
           </div>
         </header>
 
-        <main className="mx-auto max-w-6xl px-4 pb-36 pt-5 lg:px-8 lg:pb-14 lg:pt-7">{children}</main>
+        <main className="mx-auto max-w-6xl px-4 pb-[calc(env(safe-area-inset-bottom)+124px)] pt-5 lg:px-8 lg:pb-14 lg:pt-7">{children}</main>
       </div>
 
       {/* Phone: floating bottom dock */}

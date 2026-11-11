@@ -14,6 +14,7 @@ import {
   type TextareaHTMLAttributes,
 } from "react";
 import { createPortal } from "react-dom";
+import { InfoTip } from "./kit";
 import { isExpectedText, LimitState } from "./limit-state";
 
 /* Light, warm primitives for the member Page Manager and host admin (brief §4 "Tailor / member studio").
@@ -52,23 +53,50 @@ export function SLink({ href, variant = "primary", className = "", children, ...
   );
 }
 
-/** Single control: a wrapping <label>. Groups of buttons/checkboxes: pass `group` for <fieldset>/<legend>. */
+/** Hints up to this length stay inline under the control; longer ones become an ⓘ popover next to the label. */
+const SHORT_HINT = 28;
+
+/** Single control: a wrapping <label>. Groups of buttons/checkboxes: pass `group` for <fieldset>/<legend>.
+ *  Long hints render as an ⓘ InfoTip beside the label (outside the <label>, so it wraps only one control). */
 export function Field({ label, hint, children, group }: { label: string; hint?: string; children: ReactNode; group?: boolean }) {
+  const hintId = useId();
+  const long = Boolean(hint && hint.length > SHORT_HINT);
+  const inline = hint && !long ? <span className="block text-xs leading-relaxed text-cocoa-2">{hint}</span> : null;
+  const tip = long ? <InfoTip label={`About ${label}`}>{hint}</InfoTip> : null;
   if (group) {
     return (
-      <fieldset className="space-y-2">
-        <legend className="mb-2 text-[13px] font-bold text-cocoa">{label}</legend>
+      <fieldset className="space-y-2" aria-describedby={long ? hintId : undefined}>
+        <legend className="mb-2 flex items-center gap-1 text-[13px] font-bold text-cocoa">
+          {label}
+          {tip}
+        </legend>
+        {long && <span id={hintId} className="sr-only">{hint}</span>}
         {children}
-        {hint && <span className="block text-xs leading-relaxed text-cocoa-2">{hint}</span>}
+        {inline}
       </fieldset>
     );
   }
+  if (!long) {
+    return (
+      <label className="block space-y-1.5">
+        <span className="text-[13px] font-bold text-cocoa">{label}</span>
+        {children}
+        {inline}
+      </label>
+    );
+  }
+  // Visible label text + ⓘ in one row; the <label> keeps the accessible name (sr-only copy) and wraps one control.
   return (
-    <label className="block space-y-1.5">
-      <span className="text-[13px] font-bold text-cocoa">{label}</span>
-      {children}
-      {hint && <span className="block text-xs leading-relaxed text-cocoa-2">{hint}</span>}
-    </label>
+    <div className="space-y-1.5">
+      <span className="-my-1 flex items-center gap-0.5 text-[13px] font-bold text-cocoa">
+        <span aria-hidden>{label}</span>
+        {tip}
+      </span>
+      <label className="block">
+        <span className="sr-only">{label}</span>
+        {children}
+      </label>
+    </div>
   );
 }
 
@@ -289,7 +317,7 @@ export function Segmented<T extends string>({ label, options, value, onChange, c
             type="button"
             aria-pressed={on}
             onClick={() => onChange(o.value)}
-            className={`st-press inline-flex min-h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl px-3 text-sm font-bold ${on ? "bg-white text-cocoa shadow-sm" : "text-cocoa-2 hover:text-cocoa"}`}
+            className={`hit st-press inline-flex min-h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl px-3 text-sm font-bold ${on ? "bg-white text-cocoa shadow-sm" : "text-cocoa-2 hover:text-cocoa"}`}
           >
             {o.label}
             {o.count !== undefined && (
@@ -337,7 +365,7 @@ export function Kpi({ label, value, hint, spark, tone = "terra", warn, className
         {warn && <Icon name="alert" className="size-3.5 text-gold-ink" />}
         {label}
       </p>
-      <p className="font-display text-2xl font-black tracking-tight text-cocoa tabular-nums">{value}</p>
+      <p className="break-words font-display text-[clamp(1.25rem,5.5vw,1.5rem)] font-black leading-tight tracking-tight text-cocoa tabular-nums">{value}</p>
       {spark && spark.length > 1 && <Sparkline data={spark} tone={tone} className="mt-auto" />}
       {hint && <p className="text-xs text-cocoa-2">{hint}</p>}
     </div>
