@@ -49,12 +49,12 @@ def assess(img: Image.Image, category: str | None = None) -> dict:
     lum = luminance(rgb.astype(np.float32))
     mean_lum = float(lum.mean())
     clipped = float(((lum < 8) | (lum > 250)).mean())
-    checks["exposure"] = 60 <= mean_lum <= 240 and clipped < 0.35
+    checks["exposure"] = bool(60 <= mean_lum <= 240 and clipped < 0.35)
     if not checks["exposure"]:
         notes.append("Lighting is too dark or too bright; shoot in soft daylight.")
 
     _, spread = background_stats(rgb)
-    checks["background"] = spread < 18
+    checks["background"] = bool(spread < 18)
     if not checks["background"]:
         notes.append("Background is busy; place the garment on a plain wall or sheet.")
 
@@ -62,7 +62,7 @@ def assess(img: Image.Image, category: str | None = None) -> dict:
     alpha = np.asarray(cut)[..., 3] > 127
     coverage = float(alpha.mean())
     edge = np.concatenate([alpha[:3].ravel(), alpha[-3:].ravel(), alpha[:, :3].ravel(), alpha[:, -3:].ravel()])
-    checks["in_frame"] = edge.mean() < 0.02 and 0.08 <= coverage <= 0.9
+    checks["in_frame"] = bool(edge.mean() < 0.02 and 0.08 <= coverage <= 0.9)
     if not checks["in_frame"]:
         notes.append("Show the whole garment with some space around it.")
 

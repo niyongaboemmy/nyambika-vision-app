@@ -33,6 +33,9 @@ import { VoiceModule } from "./modules/voice/voice.module";
 import { PasskeysModule } from "./modules/passkeys/passkeys.module";
 import { CheckoutModule } from "./modules/checkout/checkout.module";
 import { AgentsModule } from "./modules/agents/agents.module";
+import { GrowthModule } from "./modules/growth/growth.module";
+import { CoopVoiceModule } from "./modules/coopvoice/coopvoice.module";
+import { NetworkMigrationModule } from "./modules/migration/network";
 
 @Controller()
 class HealthController {
@@ -79,6 +82,9 @@ class HealthController {
     PasskeysModule,
     CheckoutModule,
     AgentsModule,
+    GrowthModule,
+    CoopVoiceModule,
+    NetworkMigrationModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: AuthGuard }],

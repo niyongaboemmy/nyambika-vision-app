@@ -6,6 +6,7 @@ import { api, rwf } from "@/lib/api";
 import type { Maker } from "@/lib/types";
 import { useApi } from "@/lib/use-api";
 import { useManagedPage } from "../layout";
+import { MakerAccessPanel } from "@/components/coop-assist";
 
 const SEATS = 25;
 
@@ -93,6 +94,7 @@ export default function Makers() {
               label={`Show “Made by ${m.name}” to shoppers`}
               description="Only switch on when the maker has agreed."
             />
+            <MakerAccessPanel pageId={page.id} maker={m} />
           </li>
         ))}
       </ul>

@@ -149,6 +149,8 @@ export const HoldToBuyRequest = z.object({
   wallet: z.enum(["MTN_MOMO", "AIRTEL_MONEY"]),
   payerPhone: z.string().regex(/^\+?[0-9]{9,15}$/),
   address: z.string().max(200).optional().default(""),
+  /** E30: maker-funded discount code (automatic offers apply without one). */
+  discountCode: z.string().trim().max(20).optional(),
 });
 export type HoldToBuyRequest = z.infer<typeof HoldToBuyRequest>;
 
@@ -166,3 +168,4 @@ export * from "./tailor";
 export * from "./pilot";
 
 export * from "./agents";
+export * from "./growth";

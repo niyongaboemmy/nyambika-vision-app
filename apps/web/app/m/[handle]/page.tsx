@@ -4,6 +4,7 @@ import { serverApi } from "@/lib/server-api";
 import { THEMES, TYPE_LABEL, type MakerSpace } from "@/lib/maker";
 import { MakerActions, Collection } from "./client";
 import { TailorServices } from "@/components/tailor-services";
+import { CollectionAlerts } from "@/components/growth-offer";
 
 type Props = { params: Promise<{ handle: string }> };
 
@@ -60,6 +61,7 @@ export default async function MakerSpacePage({ params }: Props) {
       </section>
 
       <Collection maker={m} />
+      <CollectionAlerts maker={m} />
       <TailorServices maker={m} />
 
       {m.reviews.length > 0 && (
