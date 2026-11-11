@@ -79,6 +79,20 @@ const en = {
   "tailor.myOrders": "Tailor-made orders",
   "tailor.measurements": "My measurements",
   "size.recommended": "Recommended",
+  "survey.helped": "Did Nyambika help you decide?",
+  "survey.yes": "Yes, it helped",
+  "survey.no": "Not really",
+  "survey.nps": "How likely are you to recommend Nyambika to a friend?",
+  "survey.npsLow": "Not likely",
+  "survey.npsHigh": "Very likely",
+  "survey.send": "Send",
+  "survey.later": "Not now",
+  "survey.thanks": "Murakoze! Thank you for helping us improve.",
+  "pilot.join": "Join the pilot",
+  "pilot.code": "Invite code",
+  "pilot.haveCode": "Have a pilot invite code?",
+  "pilot.joined": "You're in the Nyambika pilot",
+  "twin.nudgeSoft": "Like these? See them on you",
 };
 
 type Messages = typeof en;
@@ -158,6 +172,20 @@ const rw: Messages = {
   "tailor.myOrders": "Ibyo nadodesheje",
   "tailor.measurements": "Ibipimo byanjye",
   "size.recommended": "Byagusabwe",
+  "survey.helped": "Nyambika yagufashije gufata icyemezo?",
+  "survey.yes": "Yego, yamfashije",
+  "survey.no": "Ntabwo cyane",
+  "survey.nps": "Ni mu rugero rungana iki wasaba inshuti yawe gukoresha Nyambika?",
+  "survey.npsLow": "Ntibishoboka",
+  "survey.npsHigh": "Rwose",
+  "survey.send": "Ohereza",
+  "survey.later": "Ubutaha",
+  "survey.thanks": "Murakoze kudufasha kunoza serivisi!",
+  "pilot.join": "Injira mu igerageza",
+  "pilot.code": "Kode y'ubutumire",
+  "pilot.haveCode": "Ufite kode y'ubutumire?",
+  "pilot.joined": "Winjiye mu igerageza rya Nyambika",
+  "twin.nudgeSoft": "Wabikunze? Birebe ubyambaye",
 };
 
 const fr: Messages = {
@@ -234,6 +262,20 @@ const fr: Messages = {
   "tailor.myOrders": "Commandes sur mesure",
   "tailor.measurements": "Mes mensurations",
   "size.recommended": "Recommandée",
+  "survey.helped": "Nyambika vous a-t-il aidé à décider ?",
+  "survey.yes": "Oui, ça m’a aidé",
+  "survey.no": "Pas vraiment",
+  "survey.nps": "Quelle est la probabilité que vous recommandiez Nyambika à un ami ?",
+  "survey.npsLow": "Peu probable",
+  "survey.npsHigh": "Très probable",
+  "survey.send": "Envoyer",
+  "survey.later": "Plus tard",
+  "survey.thanks": "Murakoze ! Merci de nous aider à nous améliorer.",
+  "pilot.join": "Rejoindre le pilote",
+  "pilot.code": "Code d’invitation",
+  "pilot.haveCode": "Vous avez un code d’invitation ?",
+  "pilot.joined": "Vous faites partie du pilote Nyambika",
+  "twin.nudgeSoft": "Ça vous plaît ? Voyez-les sur vous",
 };
 
 export const catalogues: Record<Locale, Messages> = { en, rw, fr };

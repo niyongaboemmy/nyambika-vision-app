@@ -24,6 +24,7 @@ import { Access, AuthUser, CurrentUser, Public } from "../../common/auth";
 import { MessagingService } from "../../common/messaging.service";
 import { PrismaService } from "../../common/prisma.service";
 import { parse } from "../../common/zod";
+import { serverEvent } from "../pilot/pilot.service";
 import { config } from "../../config";
 import { payments as paymentsMetric } from "../../common/metrics";
 import { MockMomoProvider, MtnMomoProvider, sign, type PaymentProvider, type PayRequest } from "./providers";
@@ -81,6 +82,7 @@ export class PaymentsService implements OnModuleInit, OnModuleDestroy {
     const order = payment.order;
     if (status === "SUCCESSFUL") {
       await this.prisma.order.update({ where: { id: order.id }, data: { status: "PAID" } });
+      await serverEvent(this.prisma, "order_paid", order.shopperId, { orderId: order.id, pageId: order.pageId });
       await this.prisma.orderEvent.create({ data: { orderId: order.id, status: "PAID", note: `Paid directly to ${order.payoutLabel} via ${order.wallet === "MTN_MOMO" ? "MTN MoMo" : "Airtel Money"}` } });
       const item = order.items[0];
       await this.messaging.send(

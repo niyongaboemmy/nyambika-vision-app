@@ -8,6 +8,7 @@ import { api, rwf } from "@/lib/api";
 import type { Look } from "@/lib/looks";
 import type { OrderView } from "@/lib/orders";
 import { useSession } from "@/lib/session";
+import { track } from "@/lib/track";
 
 const HOLD_MS = 1200;
 const DELIVERY_FEE = 2000;
@@ -68,6 +69,7 @@ export function HoldToBuy({ look }: { look: Look }) {
         headers: { "idempotency-key": key.current },
         json: { lookId: look.id, variantId: look.variant.id, size, delivery, wallet, payerPhone: me!.phone, address },
       });
+      track("hold_started", { lookId: look.id, orderId: o.id, pageId: look.maker.pageId });
       router.push(`/orders/${o.id}?fresh=1`);
     } catch (e) {
       setError((e as Error).message);
@@ -82,7 +84,7 @@ export function HoldToBuy({ look }: { look: Look }) {
   const c = 2 * Math.PI * r;
   return (
     <>
-      <button onClick={() => setOpen(true)} className="grad-cta shrink-0 rounded-2xl px-4 py-2 text-sm font-bold" disabled={!look.variant.inStock}>
+      <button onClick={() => { setOpen(true); track("buy_sheet_opened", { lookId: look.id }); }} className="grad-cta shrink-0 rounded-2xl px-4 py-2 text-sm font-bold" disabled={!look.variant.inStock}>
         ✋ {look.variant.inStock ? "Buy" : "Sold out"}
       </button>
       <Sheet open={open} onClose={() => !busy && setOpen(false)}>

@@ -162,3 +162,5 @@ export const LOOK_GUARDRAILS = {
 export const CONSENT_PURPOSES = ["TWIN_PROCESSING", "TRYON_GENERATION", "VOICE_PROCESSING", "MARKETING"] as const;
 export type ConsentPurpose = (typeof CONSENT_PURPOSES)[number];
 export * from "./tailor";
+
+export * from "./pilot";

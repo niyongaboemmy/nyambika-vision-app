@@ -5,10 +5,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { MenuSheet } from "@/components/menu";
+import { TwinNudge } from "@/components/twin-nudge";
 import { WardrobeAmbient } from "@/components/wardrobe-ambient";
 import { Button, Chip, ErrorNote, Screen, Sheet, Spinner } from "@/components/ui";
 import { api, rwf } from "@/lib/api";
 import { useSession } from "@/lib/session";
+import { track } from "@/lib/track";
 
 type Phase = "idle" | "listening" | "typing" | "thinking" | "understood" | "snapping";
 
@@ -66,8 +68,10 @@ export default function Muse() {
     setPhase("thinking");
     setTouched(false);
     setSession(null);
+    track("muse_ask", { source, locale });
     try {
       const parsed = await api<Intent>("/intent/parse", { method: "POST", json: { text: input, source, locale } });
+      track("intent_parsed", { source, parser: parsed.parser, hasOccasion: Boolean(parsed.occasion) });
       setIntent(parsed);
       setPhase("understood");
       if (!me) return;
@@ -157,9 +161,7 @@ export default function Muse() {
         <p className="mt-6 text-txt/80">{t("home.greeting")}{name ? ` ${name}` : ""} 👋</p>
         <h1 className="font-display text-[34px] font-black leading-tight text-grad">{t("muse.question")}</h1>
 
-        {me && !me.hasTwin && (
-          <Link href="/mirror" className="glass mt-3 rounded-2xl px-4 py-2 text-sm">🪞 Create your private twin to see looks on <b>you</b> →</Link>
-        )}
+        <TwinNudge place="home" />
         {me && phase === "idle" && <WardrobeAmbient />}
 
         <div className="relative my-6 grid size-56 place-items-center">
@@ -223,6 +225,7 @@ export default function Muse() {
         )}
 
         <div className="mt-3 w-full"><ErrorNote error={error} /></div>
+        {error?.includes("closed pilot") && <Link href="/join" className="glass mt-3 rounded-2xl px-4 py-2 text-sm font-semibold">🎟️ {t("pilot.haveCode")} →</Link>}
       </main>
 
       <footer className="sticky bottom-0 z-20 px-6 pb-[max(env(safe-area-inset-bottom),18px)] pt-3">

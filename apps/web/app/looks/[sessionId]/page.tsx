@@ -5,9 +5,11 @@ import { useParams, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { HoldToBuy } from "@/components/hold-to-buy";
 import { LookView } from "@/components/look-view";
+import { TwinNudge } from "@/components/twin-nudge";
 import { ErrorNote, Screen, Spinner } from "@/components/ui";
 import { api } from "@/lib/api";
 import { isRendering, type Look } from "@/lib/looks";
+import { track, trackOnce } from "@/lib/track";
 
 interface SessionData {
   id: string;
@@ -65,6 +67,12 @@ function Stream() {
     return () => el.removeEventListener("scroll", onScroll);
   }, [data]);
 
+  // Pilot funnel: a look counts as viewed once it is on screen and rendered.
+  const current = data?.looks[index];
+  useEffect(() => {
+    if (current && !isRendering(current.status)) trackOnce(`look:${current.id}`, "look_viewed", { lookId: current.id, sessionId, index, onTwin: current.onTwin });
+  }, [current, sessionId, index]);
+
   const replace = (l: Look) => setData((d) => (d ? { ...d, looks: d.looks.map((x) => (x.id === l.id ? l : x)) } : d));
 
   if (error && !data) return <Screen><div className="p-6 pt-20"><ErrorNote error={error} /></div></Screen>;
@@ -81,7 +89,11 @@ function Stream() {
             index={i}
             total={data.looks.length}
             intentLabel={label}
-            onSave={async () => replace(await api<Look>(`/looks/${look.id}/save`, { method: "POST" }))}
+            onSave={async () => {
+              const saved = await api<Look>(`/looks/${look.id}/save`, { method: "POST" });
+              if (saved.saved) track("look_saved", { lookId: look.id, index: i });
+              replace(saved);
+            }}
             onVariant={async (variantId) => {
               replace(await api<Look>(`/looks/${look.id}/variant`, { method: "POST", json: { variantId } }));
               setTimeout(() => void load(), 900);
@@ -94,6 +106,7 @@ function Stream() {
           )}
         </section>
       ))}
+      <TwinNudge place="stream" index={index} />
       {error && <div className="fixed inset-x-4 top-20 z-40"><ErrorNote error={error} /></div>}
     </div>
   );

@@ -21,20 +21,23 @@ interface Overview {
   openModeration: number;
 }
 
-const TABS = ["Overview", "Verify", "Moderation", "Migration", "Flags & models", "Outbox", "Audit"] as const;
+const TABS = ["Overview", "Verify", "Moderation", "Migration", "Flags & models", "Outbox", "Audit", "Pilot"] as const;
 
 /** Host admin console (FR-ADM). Host roles only. */
 export default function Admin() {
   const { me, loading } = useSession();
   const router = useRouter();
-  const [tab, setTab] = useState<(typeof TABS)[number]>("Overview");
+  const [tab, setTab] = useState<(typeof TABS)[number]>(() => {
+    const q = typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("tab");
+    return (TABS as readonly string[]).includes(q ?? "") && q !== "Pilot" ? (q as (typeof TABS)[number]) : "Overview";
+  });
   useEffect(() => {
     if (!loading && !me?.isHost) router.replace("/signin?next=/admin");
   }, [loading, me, router]);
   const { data: counts } = useApi<Overview>(me?.isHost ? "/admin/overview" : null);
   if (!me?.isHost) return null;
   return (
-    <AdminShell tabs={TABS} tab={tab} onTab={setTab} counts={{ Verify: counts?.pages.PENDING_VERIFICATION ?? 0, Moderation: counts?.openModeration ?? 0 }}>
+    <AdminShell tabs={TABS} tab={tab} onTab={(t) => (t === "Pilot" ? router.push("/admin/pilot") : setTab(t))} counts={{ Verify: counts?.pages.PENDING_VERIFICATION ?? 0, Moderation: counts?.openModeration ?? 0 }}>
         {tab === "Overview" && <OverviewTab />}
         {tab === "Verify" && <VerifyTab />}
         {tab === "Moderation" && <ModerationTab />}

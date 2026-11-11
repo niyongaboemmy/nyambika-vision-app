@@ -12,6 +12,7 @@ const ICONS: Record<string, IconName> = {
   "Flags & models": "server",
   Outbox: "mail",
   Audit: "list",
+  Pilot: "trend",
 };
 
 /**

@@ -820,3 +820,111 @@ model AppointmentSlot {
   @@index([pageId, startsAt])
   @@index([bookedById])
 }
+
+// ==== Phase 2 Pilot and evaluation (plan §8, §21, Gate 3) ====
+
+/// A/B experiment. Assignment is deterministic: hash(userId + ":" + key) → weighted variant.
+model Experiment {
+  key           String    @id
+  name          String
+  description   String    @default("")
+  /// [{ key, weight }]; the first variant is the control.
+  variants      Json
+  /// DRAFT | RUNNING | PAUSED | STOPPED. Only RUNNING inside [startsAt, endsAt) assigns.
+  status        String    @default("DRAFT")
+  primaryMetric String
+  startsAt      DateTime?
+  endsAt        DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+/// First exposure of a user to an experiment arm (operational, never shared outside aggregates).
+model ExperimentExposure {
+  id            String   @id @default(cuid())
+  experimentKey String
+  userId        String
+  variant       String
+  synthetic     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+
+  @@unique([experimentKey, userId])
+  @@index([experimentKey, variant])
+}
+
+/// Pseudonymised product analytics event. `pseudoId` = HMAC(user or device id); props are allow-listed, no PII.
+model Event {
+  id         String   @id @default(cuid())
+  name       String
+  pseudoId   String
+  authed     Boolean  @default(false)
+  props      Json
+  synthetic  Boolean  @default(false)
+  occurredAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+
+  @@index([name, occurredAt])
+  @@index([pseudoId, name])
+}
+
+/// In-app micro-survey ("Did this help you decide?" + NPS), at most once per user per trigger.
+model SurveyResponse {
+  id        String   @id @default(cuid())
+  userId    String
+  trigger   String
+  helped    Boolean?
+  nps       Int?
+  dismissed Boolean  @default(false)
+  synthetic Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, trigger])
+  @@index([trigger, createdAt])
+}
+
+model PilotCohort {
+  id       String   @id @default(cuid())
+  key      String   @unique
+  name     String
+  startsAt DateTime
+  endsAt   DateTime
+}
+
+/// Cohort membership. `subjectId` is a Page id (kind PAGE) or a User id (kind SHOPPER).
+model PilotMember {
+  id         String   @id @default(cuid())
+  cohortId   String
+  kind       String
+  subjectId  String
+  source     String   @default("ADMIN")
+  inviteCode String?
+  synthetic  Boolean  @default(false)
+  joinedAt   DateTime @default(now())
+
+  @@unique([cohortId, kind, subjectId])
+  @@index([kind, subjectId])
+}
+
+model PilotInvite {
+  code      String    @id
+  cohortId  String
+  kind      String
+  maxUses   Int       @default(1)
+  uses      Int       @default(0)
+  note      String    @default("")
+  createdBy String?
+  expiresAt DateTime?
+  createdAt DateTime  @default(now())
+}
+
+/// Hypercare incident log (plan §8.2). PRIVACY incidents feed the Gate 3 "zero privacy incidents" criterion.
+model PilotIncident {
+  id         String    @id @default(cuid())
+  kind       String
+  summary    String
+  createdBy  String?
+  resolvedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([kind, createdAt])
+}
