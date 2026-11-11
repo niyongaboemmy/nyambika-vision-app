@@ -150,6 +150,11 @@ export default function Settings() {
           </div>
           <Field label="MoMo merchant number" hint="Hold-to-buy payments go straight to this account."><Input inputMode="tel" value={f.momoMerchant} onChange={(e) => setF({ ...f, momoMerchant: e.target.value })} /></Field>
           <Switch checked={f.allowanceOn} onChange={(v) => setF({ ...f, allowanceOn: v })} label="Share my try-on allowance" description="Let shoppers use my plan's try-on allowance after their free looks." />
+          <a href={`/studio/${page.id}/region`} className="st-press flex min-h-14 items-center gap-3 rounded-2xl bg-white px-4 ring-1 ring-inset ring-hairline hover:ring-cocoa-3">
+            <Icon name="globe" className="size-5 text-violet-ink" />
+            <span className="min-w-0 flex-1"><span className="block text-sm font-bold text-cocoa">Country, currency &amp; export</span><span className="block text-xs text-cocoa-2">M-Pesa, card payments for international buyers, shipping zones</span></span>
+            <Icon name="chevron" className="size-4 text-cocoa-2" />
+          </a>
         </Card>
 
         {dirty && (

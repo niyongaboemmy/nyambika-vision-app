@@ -15,6 +15,8 @@ async function bootstrap() {
   app.use("/v1/partner", json({ limit: "15mb" }));
   // Video try-on (E39) sends the shopper clip as ≤ 24 device-extracted frames.
   app.use("/video", json({ limit: "6mb" }));
+  // E40: Stripe webhook signatures are computed over the raw body.
+  app.use("/stripe/webhook", json({ limit: "1mb", verify: (req, _res, buf) => void ((req as Request & { rawBody?: Buffer }).rawBody = buf) }));
   app.use(json({ limit: "2mb" }));
   app.use(cookieParser());
   app.use((req: Request, res: Response, next: NextFunction) => {

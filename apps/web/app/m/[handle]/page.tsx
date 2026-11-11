@@ -5,6 +5,8 @@ import { THEMES, TYPE_LABEL, type MakerSpace } from "@/lib/maker";
 import { MakerActions, Collection } from "./client";
 import { TailorServices } from "@/components/tailor-services";
 import { CollectionAlerts } from "@/components/growth-offer";
+import { RegionPill } from "@/components/region";
+import type { Commerce } from "@/lib/region";
 
 type Props = { params: Promise<{ handle: string }> };
 
@@ -26,12 +28,13 @@ export default async function MakerSpacePage({ params }: Props) {
   const { handle } = await params;
   const m = await serverApi<MakerSpace>(`/pages/by-handle/${handle}`, 10);
   if (!m) notFound();
+  const commerce = await serverApi<Commerce>(`/region/pages/by-handle/${handle}/commerce`, 10); // E40/E41
   const initials = m.name.split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "ClothingStore",
     name: m.name,
-    address: { "@type": "PostalAddress", addressLocality: m.sector, addressRegion: m.district, addressCountry: "RW" },
+    address: { "@type": "PostalAddress", addressLocality: m.sector, addressRegion: m.district, addressCountry: commerce?.region ?? "RW" },
     aggregateRating: m.reviewCount ? { "@type": "AggregateRating", ratingValue: m.rating, reviewCount: m.reviewCount } : undefined,
   };
 
@@ -42,6 +45,7 @@ export default async function MakerSpacePage({ params }: Props) {
         <div className="absolute inset-0 opacity-25 [background-image:repeating-linear-gradient(45deg,#fff_0_2px,transparent_2px_26px),repeating-linear-gradient(-45deg,#fff_0_2px,transparent_2px_26px)]" />
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-ink" />
         <a href="/" aria-label="Back to Muse" className="glass absolute left-4 top-[max(env(safe-area-inset-top),14px)] grid size-10 place-items-center rounded-full">←</a>
+        <RegionPill className="absolute right-4 top-[max(env(safe-area-inset-top),14px)]" />
       </header>
       <section className="relative -mt-24 px-5">
         <div className="flex items-end gap-4">
@@ -51,7 +55,7 @@ export default async function MakerSpacePage({ params }: Props) {
               {m.name} {m.verified && <span className="text-mint" title="Verified member">✓</span>}
             </h1>
             <p className="text-sm text-txt/80">
-              {TYPE_LABEL[m.memberType]} · {m.sector} · ★ {m.rating.toFixed(1)} · {m.reviewCount} reviews
+              {commerce && commerce.region !== "RW" ? `${commerce.flag} ` : ""}{TYPE_LABEL[m.memberType]} · {m.sector} · ★ {m.rating.toFixed(1)} · {m.reviewCount} reviews
             </p>
           </div>
         </div>
@@ -60,7 +64,7 @@ export default async function MakerSpacePage({ params }: Props) {
         </p>
       </section>
 
-      <Collection maker={m} />
+      <Collection maker={m} commerce={commerce} />
       <CollectionAlerts maker={m} />
       <TailorServices maker={m} />
 

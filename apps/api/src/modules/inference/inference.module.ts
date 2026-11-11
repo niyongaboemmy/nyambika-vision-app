@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Module, Param, Post, Put } from "@nestjs/common";
+import { RegionCode } from "@nyambika/contracts";
 import { z } from "zod";
 import { Access, AuthUser, CurrentUser } from "../../common/auth";
 import { parse } from "../../common/zod";
@@ -30,8 +31,8 @@ export class InferenceController {
   @Post("inference/probe")
   async probe(@CurrentUser() user: AuthUser, @Body() body: unknown) {
     await this.access.requireHost(user.id);
-    const { route, n } = parse(z.object({ route: z.enum(["tryon", "stt", "llm", "avatar"]), n: z.number().int().min(1).max(50).default(10) }), body);
-    return this.inference.probe(user.id, route, n);
+    const { route, n, region } = parse(z.object({ route: z.enum(["tryon", "stt", "llm", "avatar"]), n: z.number().int().min(1).max(50).default(10), region: RegionCode.optional() }), body);
+    return this.inference.probe(user.id, route, n, region);
   }
 
   @Post("inference/health")

@@ -119,6 +119,8 @@ class VideoRequest:
     fps: int = FPS
     frames: list[Image.Image] | None = None
     twin: Image.Image | None = None
+    # Data-residency region of the data subject (E41 region code, e.g. "RW"); the router keeps the job in it.
+    region: str | None = None
     _inputs: list[Image.Image] | None = field(default=None, repr=False)
 
     def frames_in(self) -> list[Image.Image]:
@@ -284,7 +286,7 @@ class PoolVideoProvider(VideoTryOnProvider):
         if not self.configured():
             raise NotConfigured("pool video provider needs INFERENCE_POOL_URL")
         progress(25)
-        result, info = get_router().call("video", {"request": req, "progress": progress})
+        result, info = get_router().call("video", {"request": req, "progress": progress}, req.region)
         if isinstance(result, VideoFrames):
             result.routing = info.view()
             return result
@@ -476,6 +478,7 @@ class VideoIn(BaseModel):
     garment_category: str = "dress"
     fps: int = Field(default=FPS, ge=4, le=12)
     request_id: str = Field(default_factory=lambda: uuid.uuid4().hex)
+    region: str | None = Field(default=None, max_length=8)
 
 
 def _gc() -> None:
@@ -524,11 +527,11 @@ def video_tryon(body: VideoIn):
             if len(body.frames_b64) < 6:
                 raise HTTPException(422, "A clip needs at least 6 frames")
             req = VideoRequest("CLIP", garment, body.garment_category, body.request_id, body.fps,
-                               frames=[decode_b64(f) for f in body.frames_b64])
+                               frames=[decode_b64(f) for f in body.frames_b64], region=body.region)
         else:
             if not body.twin_b64:
                 raise HTTPException(422, "TURNAROUND needs twin_b64")
-            req = VideoRequest("TURNAROUND", garment, body.garment_category, body.request_id, body.fps, twin=decode_b64(body.twin_b64))
+            req = VideoRequest("TURNAROUND", garment, body.garment_category, body.request_id, body.fps, twin=decode_b64(body.twin_b64), region=body.region)
     except HTTPException:
         raise
     except Exception as exc:  # noqa: BLE001

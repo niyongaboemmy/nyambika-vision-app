@@ -2,6 +2,7 @@
  * E39 "See it on video" pure rules: pricing, availability, clip validation, served-model check.
  * Free of Nest/Prisma so they are unit-tested.
  */
+import { isRegion, type RegionCode } from "@nyambika/contracts";
 import { motionCostRwf, pickVideoSource, quoteLabel, type UsageSource } from "../xr/xr-rules";
 
 /** Premium credit action like E28 motion (FR-VID-04), but heavier: a per-frame try-on of a whole clip. */
@@ -67,6 +68,16 @@ export function validateClip(frames: string[] | undefined): string[] {
 /** NLB: only the exact activated model may reach a shopper; a result from any other version is discarded. */
 export function servedByActivatedModel(activeModelId: string, reportedVersion: string | undefined) {
   return reportedVersion === activeModelId;
+}
+
+/**
+ * E42 × E41: data-residency region for the inference router. The data subject is the shopper, so their country
+ * (ShopperPrefs) wins; otherwise the page's region attribute; otherwise the home region. E41 region codes.
+ */
+export function residencyRegion(shopperCountry: string | null | undefined, pageRegion: string | null | undefined): RegionCode {
+  if (shopperCountry && isRegion(shopperCountry)) return shopperCountry;
+  if (pageRegion && isRegion(pageRegion)) return pageRegion;
+  return "RW";
 }
 
 export function mapGatewayStatus(s: string): "GENERATING" | "DELIVERED" | "WITHHELD" | "FAILED" {

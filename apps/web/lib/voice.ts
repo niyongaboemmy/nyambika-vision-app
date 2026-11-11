@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 /** Voice Muse GA (E22): hold-to-speak capture with a live input level, and spoken replies. */
 
 export const MAX_RECORD_MS = 30_000;
-export const SPEECH_LANG: Record<Locale, string> = { rw: "rw-RW", en: "en-US", fr: "fr-FR" };
+export const SPEECH_LANG: Record<Locale, string> = { rw: "rw-RW", en: "en-US", fr: "fr-FR", sw: "sw-KE" };
 const BARS = 28;
 
 export interface SttResult {

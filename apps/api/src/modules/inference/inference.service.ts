@@ -168,8 +168,8 @@ export class InferenceService implements OnModuleInit, OnModuleDestroy {
     return Promise.all(vs.map(async (v) => ({ b64: (await this.storage.read(v.cutoutPath!)).toString("base64"), category: v.product.category })));
   }
 
-  async probe(userId: string, route: "tryon" | "stt" | "llm" | "avatar", n: number) {
-    const body: Record<string, unknown> = { route, n };
+  async probe(userId: string, route: "tryon" | "stt" | "llm" | "avatar", n: number, region?: string) {
+    const body: Record<string, unknown> = { route, n, region };
     if (route === "tryon") {
       const [g] = await this.garments(1);
       body.twin_b64 = (await this.persona(2)).toString("base64");

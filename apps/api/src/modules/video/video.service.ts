@@ -11,7 +11,7 @@ import { config } from "../../config";
 import { GenerationService } from "../looks/generation.service";
 import { TwinService } from "../twin/twin.module";
 import { personaFromCacheKey } from "../xr/xr-rules";
-import { mapGatewayStatus, servedByActivatedModel, validateClip, VIDEO_JOB, VIDEO_RENDERING, VIDEO_TRYON, videoAvailable, videoCostRwf, videoEligibility, videoQuote } from "./video-rules";
+import { mapGatewayStatus, residencyRegion, servedByActivatedModel, validateClip, VIDEO_JOB, VIDEO_RENDERING, VIDEO_TRYON, videoAvailable, videoCostRwf, videoEligibility, videoQuote } from "./video-rules";
 
 interface GatewayJob {
   status: string;
@@ -163,6 +163,15 @@ export class VideoTryOnService implements OnModuleInit, OnModuleDestroy {
     return this.view(row);
   }
 
+  /** E41 region of the shopper (else the page) → the router keeps self-hosted/hosted inference in that region. */
+  private async region(userId: string, pageId: string) {
+    const [prefs, page] = await Promise.all([
+      this.prisma.shopperPrefs.findUnique({ where: { userId } }).catch(() => null),
+      this.prisma.pageRegion.findUnique({ where: { pageId } }).catch(() => null),
+    ]);
+    return residencyRegion(prefs?.country, page?.region);
+  }
+
   private async deleteClip(row: Pick<VideoTryOn, "id" | "clipPath" | "clipDeletedAt">) {
     if (!row.clipPath || row.clipDeletedAt) return;
     await this.storage.remove(row.clipPath);
@@ -184,6 +193,7 @@ export class VideoTryOnService implements OnModuleInit, OnModuleDestroy {
         garment_b64: (await this.storage.read(gen.variant.cutoutPath)).toString("base64"),
         garment_category: gen.variant.product.category,
         request_id: `video-${id}`,
+        region: await this.region(row.userId, row.pageId),
       };
       if (row.source === "CLIP") {
         if (!row.clipPath || !row.clipIv || !row.clipTag) throw new Error("Clip missing");
