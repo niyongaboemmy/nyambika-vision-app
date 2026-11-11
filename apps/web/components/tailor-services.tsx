@@ -1,9 +1,11 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-import { AskTailorSheet } from "@/components/ask-tailor";
 import { api, rwf } from "@/lib/api";
 import { MEASUREMENT_LABEL, type TailorServiceView } from "@/lib/tailor";
+
+const AskTailorSheet = dynamic(() => import("@/components/ask-tailor").then((m) => m.AskTailorSheet), { ssr: false }); // opens on "Request this"
 
 /** Tailor services on the Maker Space (FR-CAT-07): starting price, lead time, what to measure. */
 export function TailorServices({ maker }: { maker: { id: string; name: string; memberType: string } }) {

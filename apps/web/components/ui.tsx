@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState, type ButtonHTMLAttributes, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { isExpectedText, LimitState } from "./limit-state";
-import { Icon } from "@/components/studio";
+import { Icon } from "@/components/icons";
 
 /* Shopper primitives (aurora). Exported names and props are stable (other screens import them); everything
  * styles itself with theme tokens so it reads right in both light and dark (docs/design/ui-audit.md). */
