@@ -5,13 +5,15 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button, Sheet } from "@/components/ui";
 import { Garment3dSection } from "@/components/xr-maker";
+import { PassportLink, Price, RegionBuy } from "@/components/region";
 import { api, rwf } from "@/lib/api";
 import { waLink, type MakerProduct, type MakerSpace } from "@/lib/maker";
+import type { Commerce } from "@/lib/region";
 import { useSession } from "@/lib/session";
 import { track, trackOnce } from "@/lib/track";
 
 /** 2D coverflow collection (Maker Space v1). Swipe to browse, tap to open. */
-export function Collection({ maker }: { maker: MakerSpace }) {
+export function Collection({ maker, commerce }: { maker: MakerSpace; commerce?: Commerce | null }) {
   const [i, setI] = useState(0);
   const [open, setOpen] = useState<MakerProduct | null>(null);
   const items = maker.products;
@@ -50,7 +52,7 @@ export function Collection({ maker }: { maker: MakerSpace }) {
               {img && <img src={img} alt="" draggable={false} className="h-[200px] w-full object-cover" style={{ filter: `brightness(${1 - Math.abs(d) * 0.3})` }} />}
               <div className="p-2 text-left">
                 <p className="truncate text-sm font-semibold">{p.title}</p>
-                <p className="text-xs text-gold">{rwf(p.priceRwf)}</p>
+                <p className="text-xs text-gold">{commerce && commerce.prices[p.id] != null ? <Price minor={commerce.prices[p.id]!} currency={commerce.currency} approxClassName="block text-txt/70" /> : rwf(p.priceRwf)}</p>
               </div>
             </button>
           );
@@ -59,12 +61,12 @@ export function Collection({ maker }: { maker: MakerSpace }) {
       <p className="mt-2 text-center text-xs text-mut">
         {i + 1} / {items.length} · swipe to browse · tap to try on your twin
       </p>
-      <ProductSheet maker={maker} product={open} onClose={() => setOpen(null)} />
+      <ProductSheet maker={maker} product={open} commerce={commerce} onClose={() => setOpen(null)} />
     </section>
   );
 }
 
-function ProductSheet({ maker, product, onClose }: { maker: MakerSpace; product: MakerProduct | null; onClose: () => void }) {
+function ProductSheet({ maker, product, commerce, onClose }: { maker: MakerSpace; product: MakerProduct | null; commerce?: Commerce | null; onClose: () => void }) {
   const router = useRouter();
   const [vi, setVi] = useState(0);
   if (!product) return null;
@@ -76,7 +78,7 @@ function ProductSheet({ maker, product, onClose }: { maker: MakerSpace; product:
         {v.image && <img src={v.image} alt={product.title} className="h-40 w-32 rounded-2xl object-cover" />}
         <div className="min-w-0 flex-1 space-y-1">
           <h3 className="font-display text-xl font-black">{product.title}</h3>
-          <p className="font-semibold text-gold">{rwf(product.priceRwf)}{product.madeToOrder ? " · made to measure" : ""}</p>
+          <p className="font-semibold text-gold">{commerce && commerce.prices[product.id] != null ? <Price minor={commerce.prices[product.id]!} currency={commerce.currency} approxClassName="block text-sm text-txt/70" /> : rwf(product.priceRwf)}{product.madeToOrder ? " · made to measure" : ""}</p>
           {product.makers.length > 0 && <p className="text-sm text-mut">Made by {product.makers.join(", ")}, {maker.name}</p>}
           <p className="text-sm text-mut">{product.madeToOrder ? `Ready in ${product.leadTimeDays} days` : v.inStock ? "In stock" : "Out of stock"}</p>
           <div className="flex flex-wrap gap-2 pt-1" role="radiogroup" aria-label="Colour">
@@ -99,6 +101,10 @@ function ProductSheet({ maker, product, onClose }: { maker: MakerSpace; product:
         </a>
       </div>
       {product.readiness !== "READY" && <p className="mt-2 text-center text-xs text-mut">Try-on isn't available for this item yet.</p>}
+      {commerce && (commerce.wallets.length > 0 || commerce.card.enabled) && commerce.prices[product.id] != null && (
+        <div className="mt-2 grid grid-cols-2 gap-2"><RegionBuy maker={maker} product={product} variantIndex={vi} commerce={commerce} /></div>
+      )}
+      {commerce?.passports.includes(product.id) && <div className="mt-3"><PassportLink productId={product.id} /></div>}
       <Garment3dSection productId={product.id} title={product.title} variantId={v.id} />
       {product.studio.length > 0 && (
         <div className="no-scrollbar mt-4 flex gap-2 overflow-x-auto">
