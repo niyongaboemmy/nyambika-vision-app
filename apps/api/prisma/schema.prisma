@@ -1373,3 +1373,73 @@ model MigrationOutreach {
   @@index([itemId])
   @@index([waveId, kind])
 }
+
+// ==== E33 3D twin + E34 3D try-on / AR mirror ====
+
+/// Animatable 3D twin (FR-AVA-01..06). Separate AVATAR_3D consent. Capture frames, body parameters and the GLB are
+/// AES-256-GCM encrypted at rest and served to the owner only through short-lived signed URLs; never to makers.
+model Avatar3d {
+  id           String    @id @default(cuid())
+  userId       String
+  version      Int       @default(1)
+  /// TURNAROUND (camera turn capture) | PERSONA (synthetic turnaround, non-production) | MEASUREMENTS (body-shape only, FR-AVA-06)
+  source       String
+  persona      Int?
+  /// QUEUED | BUILDING | READY | REJECTED | WITHHELD | FAILED
+  status       String    @default("QUEUED")
+  progress     Int       @default(0)
+  framesPath   String?
+  framesIv     String?
+  framesTag    String?
+  frameCount   Int       @default(0)
+  /// Sealed JSON { measurements, skin_rgb, size_estimate } used to (re)build and dress the avatar.
+  paramsSealed String?
+  glbPath      String?
+  glbIv        String?
+  glbTag       String?
+  posterPath   String?
+  posterIv     String?
+  posterTag    String?
+  bytes        Int?
+  triangles    Int?
+  joints       Int?
+  checks       Json?
+  eval         Json?
+  provider     String    @default("parametric-cpu")
+  modelVersion String    @default("")
+  gatewayJob   String?
+  consentId    String
+  error        String?
+  createdAt    DateTime  @default(now())
+  readyAt      DateTime?
+  deletedAt    DateTime?
+
+  @@index([userId, createdAt])
+}
+
+/// A garment fitted on a 3D twin (FR-FIT-01): one per avatar version + variant + size. Private like the avatar.
+model AvatarFit3d {
+  id           String   @id @default(cuid())
+  avatarId     String
+  userId       String
+  variantId    String
+  productId    String
+  size         String
+  /// QUEUED | READY | FAILED
+  status       String   @default("QUEUED")
+  glbPath      String?
+  glbIv        String?
+  glbTag       String?
+  posterPath   String?
+  posterIv     String?
+  posterTag    String?
+  bytes        Int?
+  triangles    Int?
+  fit          Json?
+  modelVersion String   @default("")
+  error        String?
+  createdAt    DateTime @default(now())
+
+  @@unique([avatarId, variantId, size])
+  @@index([userId])
+}
