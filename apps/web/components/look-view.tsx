@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState, type ReactNode } from "react";
 import { CircleAsk } from "@/components/circle-ask";
+import { MorphRail } from "@/components/morph-sheet";
 import { Avatar, Sheet } from "@/components/ui";
 import { rwf } from "@/lib/api";
 import { isRendering, TYPE_ICON, type Look } from "@/lib/looks";
@@ -91,6 +92,7 @@ export function LookView({ look, index, total, intentLabel, onSave, onVariant, o
       <div className="absolute right-3 bottom-[170px] z-10 flex flex-col items-center gap-4">
         <RailButton label={look.saved ? t("looks.saved") : t("looks.save")} onClick={onSave} active={look.saved}>♥</RailButton>
         {look.variants.length > 1 && <RailButton label={t("looks.colours")} onClick={() => setRing(true)}>🎨</RailButton>}
+        <MorphRail look={look} />
         <RailButton label="Ask" onClick={() => setAsk(true)}>👥</RailButton>
         <RailButton label={t("looks.share")} onClick={share}>↗</RailButton>
       </div>

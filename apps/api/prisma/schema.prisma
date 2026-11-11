@@ -675,3 +675,148 @@ model WardrobeOutfit {
 
   @@index([userId, createdAt])
 }
+
+// ==== E23 Live morph · E24 Tailor custom orders · E32 Size recommendation (FR-TRY-16, FR-SIZE-01..07, FR-CAT-07) ====
+
+/// Private measurement profile. Every value is AES-256-GCM encrypted on its own (field-level, TWIN_KEY).
+model MeasurementProfile {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  /// { bustCm: "v1:<iv>:<tag>:<ciphertext>", ... }
+  fields    Json
+  /// TWIN_ESTIMATE | MANUAL
+  source    String   @default("MANUAL")
+  consentId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// Time-limited, revocable share of the measurement profile with one tailor page for one custom order.
+model MeasurementShare {
+  id            String    @id @default(cuid())
+  userId        String
+  pageId        String
+  customOrderId String?
+  consentId     String
+  expiresAt     DateTime
+  revokedAt     DateTime?
+  createdAt     DateTime  @default(now())
+
+  @@index([userId, createdAt])
+  @@index([pageId, expiresAt])
+}
+
+/// Tailor template that makes a product customizable in the live morph (option deltas in RWF).
+model MorphTemplate {
+  productId String   @id
+  pageId    String
+  /// MorphTemplateInput (contracts)
+  options   Json
+  updatedAt DateTime @updatedAt
+
+  @@index([pageId])
+}
+
+/// Cache of morphed cut-outs (one per variant + quantized spec), shared by every shopper.
+model GarmentMorph {
+  id         String   @id @default(cuid())
+  variantId  String
+  specKey    String
+  cutoutPath String
+  /// [x0, y0, x1, y1] of the original garment inside the morphed canvas
+  frame      Json
+  createdAt  DateTime @default(now())
+
+  @@unique([variantId, specKey])
+}
+
+/// Services a tailor offers on the Maker Space (FR-CAT-07).
+model TailorService {
+  id                   String   @id @default(cuid())
+  pageId               String
+  title                String
+  description          String   @default("")
+  startingPriceRwf     Int
+  leadTimeDays         Int      @default(7)
+  requiredMeasurements String[]
+  active               Boolean  @default(true)
+  createdAt            DateTime @default(now())
+
+  @@index([pageId, active])
+}
+
+/// A custom (tailor-made) order: request → quote → deposit → fittings → progress → balance → delivered.
+model CustomOrder {
+  id            String               @id @default(cuid())
+  code          String               @unique
+  pageId        String
+  shopperId     String
+  productId     String?
+  variantId     String?
+  serviceId     String?
+  /// MorphSpec { hue, length, sleeve }
+  spec          Json
+  title         String
+  estimateRwf   Int                  @default(0)
+  size          String?
+  note          String               @default("")
+  /// Shared copy of the preview (only when the shopper explicitly shared it)
+  previewPath   String?
+  status        String               @default("REQUESTED")
+  quotePriceRwf Int?
+  depositPct    Int?
+  leadTimeDays  Int?
+  quoteNote     String?
+  quotedAt      DateTime?
+  depositRwf    Int?
+  balanceRwf    Int?
+  /// Backing Order (payout to the tailor's merchant account; holds the Mobile Money payments)
+  orderId       String?              @unique
+  readyBy       DateTime?
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  events        CustomOrderEvent[]
+  payments      CustomOrderPayment[]
+
+  @@index([pageId, createdAt])
+  @@index([shopperId, createdAt])
+}
+
+model CustomOrderEvent {
+  id            String      @id @default(cuid())
+  customOrderId String
+  customOrder   CustomOrder @relation(fields: [customOrderId], references: [id], onDelete: Cascade)
+  status        String
+  note          String      @default("")
+  actorId       String?
+  createdAt     DateTime    @default(now())
+}
+
+/// Links a Mobile Money Payment (on the backing Order) to a custom-order stage.
+model CustomOrderPayment {
+  id            String      @id @default(cuid())
+  customOrderId String
+  customOrder   CustomOrder @relation(fields: [customOrderId], references: [id], onDelete: Cascade)
+  paymentId     String      @unique
+  /// DEPOSIT | BALANCE
+  stage         String
+  amountRwf     Int
+  createdAt     DateTime    @default(now())
+}
+
+/// Fitting slots a tailor publishes; a shopper books one for a custom order (FR-SIZE-07).
+model AppointmentSlot {
+  id             String    @id @default(cuid())
+  pageId         String
+  startsAt       DateTime
+  durationMin    Int       @default(30)
+  location       String    @default("")
+  bookedById     String?
+  customOrderId  String?
+  bookedAt       DateTime?
+  reminderSentAt DateTime?
+  createdAt      DateTime  @default(now())
+
+  @@index([pageId, startsAt])
+  @@index([bookedById])
+}

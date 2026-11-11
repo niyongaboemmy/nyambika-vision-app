@@ -26,6 +26,7 @@ import { MigrationModule } from "./modules/migration/migration.module";
 import { MetricsModule } from "./modules/metrics/metrics.module";
 import { CircleModule } from "./modules/circle/circle.module";
 import { WardrobeModule } from "./modules/wardrobe/wardrobe.module";
+import { TailorModule } from "./modules/tailor/tailor.module";
 
 @Controller()
 class HealthController {
@@ -65,6 +66,7 @@ class HealthController {
     MetricsModule,
     CircleModule,
     WardrobeModule,
+    TailorModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: AuthGuard }],

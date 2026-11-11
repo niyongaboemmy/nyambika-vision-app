@@ -42,7 +42,7 @@ export default function PageLayout({ children }: { children: React.ReactNode }) 
         </div>
         <Badge value={page.status} />
       </div>
-      <PageTabs pageId={page.id} isCoop={page.memberType === "COOPERATIVE"} member={page.myAccess === "MEMBER"} />
+      <PageTabs pageId={page.id} isCoop={page.memberType === "COOPERATIVE"} member={page.myAccess === "MEMBER"} tailor={page.memberType === "TAILOR"} />
       {children}
     </Ctx.Provider>
   );

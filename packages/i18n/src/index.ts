@@ -69,6 +69,16 @@ const en = {
   "circle.addComment": "Add a comment",
   "wardrobe.title": "Your wardrobe",
   "wardrobe.restyle": "Restyle for an event",
+  "morph.action": "Morph",
+  "morph.title": "Live morph",
+  "morph.length": "Length",
+  "morph.sleeves": "Sleeves",
+  "morph.colourHint": "Drag the ring to any colour · the print stays",
+  "morph.ask": "Ask {maker} to sew this",
+  "morph.sew": "Sew",
+  "tailor.myOrders": "Tailor-made orders",
+  "tailor.measurements": "My measurements",
+  "size.recommended": "Recommended",
 };
 
 type Messages = typeof en;
@@ -138,6 +148,16 @@ const rw: Messages = {
   "circle.addComment": "Ongeraho igitekerezo",
   "wardrobe.title": "Imyenda yawe",
   "wardrobe.restyle": "Tegura imyambarire y'ibirori",
+  "morph.action": "Hindura",
+  "morph.title": "Hindura ako kanya",
+  "morph.length": "Uburebure",
+  "morph.sleeves": "Amaboko",
+  "morph.colourHint": "Kurura uruziga ku ibara ushaka · igishushanyo kigumaho",
+  "morph.ask": "Saba {maker} kukudodera",
+  "morph.sew": "Dodesha",
+  "tailor.myOrders": "Ibyo nadodesheje",
+  "tailor.measurements": "Ibipimo byanjye",
+  "size.recommended": "Byagusabwe",
 };
 
 const fr: Messages = {
@@ -204,6 +224,16 @@ const fr: Messages = {
   "circle.addComment": "Ajouter un commentaire",
   "wardrobe.title": "Votre garde-robe",
   "wardrobe.restyle": "Relooker pour un événement",
+  "morph.action": "Modifier",
+  "morph.title": "Retouche en direct",
+  "morph.length": "Longueur",
+  "morph.sleeves": "Manches",
+  "morph.colourHint": "Faites glisser l'anneau sur n'importe quelle couleur · le motif reste",
+  "morph.ask": "Demander à {maker} de la coudre",
+  "morph.sew": "Coudre",
+  "tailor.myOrders": "Commandes sur mesure",
+  "tailor.measurements": "Mes mensurations",
+  "size.recommended": "Recommandée",
 };
 
 export const catalogues: Record<Locale, Messages> = { en, rw, fr };

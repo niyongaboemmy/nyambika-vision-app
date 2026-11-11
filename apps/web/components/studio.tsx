@@ -78,12 +78,13 @@ export function Badge({ value, label }: { value: string; label?: string }) {
   return <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${BADGE[value] ?? "bg-stone-200 text-stone-700"}`}>{label ?? value.replace(/_/g, " ").toLowerCase()}</span>;
 }
 
-export function PageTabs({ pageId, isCoop, member }: { pageId: string; isCoop: boolean; member?: boolean }) {
+export function PageTabs({ pageId, isCoop, member, tailor }: { pageId: string; isCoop: boolean; member?: boolean; tailor?: boolean }) {
   const path = usePathname();
   const tabs = [
     { href: `/studio/${pageId}`, label: "Overview" },
     { href: `/studio/${pageId}/products`, label: member ? "My products" : "Products" },
     ...(member ? [] : [{ href: `/studio/${pageId}/orders`, label: "Orders" }]),
+    ...(tailor && !member ? [{ href: `/studio/${pageId}/tailor`, label: "Custom orders" }] : []),
     ...(isCoop && !member ? [{ href: `/studio/${pageId}/makers`, label: "Makers" }] : []),
     ...(member ? [] : [{ href: `/studio/${pageId}/settings`, label: "Settings" }]),
   ];

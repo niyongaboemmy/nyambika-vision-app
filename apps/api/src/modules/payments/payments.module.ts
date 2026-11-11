@@ -39,6 +39,12 @@ export class PaymentsService implements OnModuleInit, OnModuleDestroy {
     private messaging: MessagingService,
   ) {}
 
+  /** Extension point: a hook that returns true has fully handled the settlement (e.g. custom-order stages, E24). */
+  private settleHooks: ((payment: { id: string; orderId: string }, status: "SUCCESSFUL" | "FAILED") => Promise<boolean>)[] = [];
+  onSettle(hook: (payment: { id: string; orderId: string }, status: "SUCCESSFUL" | "FAILED") => Promise<boolean>) {
+    this.settleHooks.push(hook);
+  }
+
   provider(): PaymentProvider {
     return config.paymentsProvider === "mtn" ? new MtnMomoProvider() : this.mock;
   }
@@ -71,6 +77,7 @@ export class PaymentsService implements OnModuleInit, OnModuleDestroy {
     });
     if (updated.count === 0) return payment;
     paymentsMetric.inc({ provider: payment.provider, status });
+    for (const hook of this.settleHooks) if (await hook(payment, status)) return payment;
     const order = payment.order;
     if (status === "SUCCESSFUL") {
       await this.prisma.order.update({ where: { id: order.id }, data: { status: "PAID" } });

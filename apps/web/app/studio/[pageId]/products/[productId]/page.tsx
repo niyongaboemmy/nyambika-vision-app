@@ -3,6 +3,7 @@
 import { useParams, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { Badge, Card, Note, SButton } from "@/components/studio";
+import { MorphOptions } from "@/components/morph-options";
 import { api, rwf } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import type { StudioProduct, StudioVariant } from "@/lib/types";
@@ -60,6 +61,7 @@ function ProductDetail() {
         </div>
       </Card>
       <StudioCard p={p} onChange={reload} />
+      {page.memberType === "TAILOR" && canManage && <MorphOptions productId={p.id} />}
       <h3 className="font-bold">Colours and photos</h3>
       {p.variants.map((v) => <VariantRow key={v.id} v={v} onChange={reload} />)}
     </div>
