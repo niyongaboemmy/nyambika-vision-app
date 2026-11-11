@@ -5,6 +5,8 @@ import { THEMES, TYPE_LABEL, type MakerSpace } from "@/lib/maker";
 import { MakerActions, Collection } from "./client";
 import { TailorServices } from "@/components/tailor-services";
 import { CollectionAlerts } from "@/components/growth-offer";
+import { Shelf3d } from "@/components/vr-shelf";
+import type { Shelf } from "@/lib/vr";
 
 type Props = { params: Promise<{ handle: string }> };
 
@@ -26,6 +28,7 @@ export default async function MakerSpacePage({ params }: Props) {
   const { handle } = await params;
   const m = await serverApi<MakerSpace>(`/pages/by-handle/${handle}`, 10);
   if (!m) notFound();
+  const shelf = await serverApi<Shelf>(`/vr/public/pages/${handle}/shelf`, 10);
   const initials = m.name.split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
   const jsonLd = {
     "@context": "https://schema.org",
@@ -61,6 +64,7 @@ export default async function MakerSpacePage({ params }: Props) {
       </section>
 
       <Collection maker={m} />
+      {shelf && shelf.items.length > 0 && <Shelf3d shelf={shelf} brand={m.name} />}
       <CollectionAlerts maker={m} />
       <TailorServices maker={m} />
 
