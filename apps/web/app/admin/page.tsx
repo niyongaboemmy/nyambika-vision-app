@@ -406,7 +406,7 @@ function MigrationTab() {
       {waves?.length === 0 && <Empty icon="swap" title="No waves yet">Import a bundle.</Empty>}
       {waves?.map((w) => (
         <section key={w.id} className="space-y-2">
-          <h3 className="font-display text-lg font-black text-cocoa">{w.name} <span className="text-sm font-semibold text-cocoa-2">· {new Date(w.createdAt).toLocaleString()}</span></h3>
+          <h3 className="font-display text-lg font-black text-cocoa">{w.name}<span className="block text-xs font-semibold text-cocoa-2">{new Date(w.createdAt).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span></h3>
           <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
             {w.items.map((i) => {
               const at = i.status === "ROLLED_BACK" ? -1 : MIG_STEPS.indexOf(i.status === "CHANGES_REQUESTED" ? "IN_REVIEW" : i.status);
