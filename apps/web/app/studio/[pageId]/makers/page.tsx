@@ -61,7 +61,7 @@ export default function Makers() {
       {loading && !data && <ScreenSkeleton variant="list" />}
       {data?.length === 0 && (
         <Empty icon="users" title="No makers yet" action={<SButton onClick={() => setAdding(true)}>Add your first maker</SButton>}>
-          Add the members who sew for your cooperative. With a phone number they can sign in and submit their own pieces.
+          The members who sew for your cooperative.
         </Empty>
       )}
       <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -76,7 +76,7 @@ export default function Makers() {
                 </p>
                 <p className="truncate text-xs text-cocoa-2">{m.phone || "no phone"} · MoMo {m.momoMerchant || "—"}</p>
               </div>
-              <SButton variant={m.active ? "ghost" : "outline"} className="min-h-10 px-3" onClick={() => patch(m.id, { active: !m.active })}>{m.active ? "Deactivate" : "Activate"}</SButton>
+              <SButton variant={m.active ? "ghost" : "outline"} className="-my-1 px-3" onClick={() => patch(m.id, { active: !m.active })}>{m.active ? "Deactivate" : "Activate"}</SButton>
             </div>
             <dl className="grid grid-cols-2 gap-2">
               <div className="rounded-2xl bg-paper p-2.5 ring-1 ring-inset ring-hairline">
@@ -91,8 +91,8 @@ export default function Makers() {
             <Switch
               checked={m.attributionConsent}
               onChange={(v) => patch(m.id, { attributionConsent: v })}
-              label={`Show “Made by ${m.name}” to shoppers`}
-              description="Only switch on when the maker has agreed."
+              label={`Show “Made by ${m.name}”`}
+              description="Only with the maker's OK"
             />
             <MakerAccessPanel pageId={page.id} maker={m} />
           </li>
@@ -102,8 +102,8 @@ export default function Makers() {
       <StudioSheet open={adding} onClose={() => setAdding(false)} title="Add a maker">
         <form onSubmit={add} className="space-y-4">
           <Field label="Name"><Input required value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} data-autofocus /></Field>
-          <Field label="Phone" hint="Optional. With a phone the maker can sign in and submit their own products."><Input inputMode="tel" value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} /></Field>
-          <Field label="MoMo merchant number" hint="Used when a product pays the maker directly."><Input inputMode="tel" value={f.momoMerchant} onChange={(e) => setF({ ...f, momoMerchant: e.target.value })} /></Field>
+          <Field label="Phone" hint="Optional · lets them sign in"><Input inputMode="tel" value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} /></Field>
+          <Field label="MoMo merchant number" hint="For direct payouts"><Input inputMode="tel" value={f.momoMerchant} onChange={(e) => setF({ ...f, momoMerchant: e.target.value })} /></Field>
           <Note error={err} />
           <SButton className="min-h-12 w-full">Add maker</SButton>
         </form>

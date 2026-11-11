@@ -2,7 +2,7 @@
 
 import { MEASUREMENT_FIELDS } from "@nyambika/contracts";
 import { useState } from "react";
-import { Card, Empty, Field, Input, Note, SButton, Textarea } from "@/components/studio";
+import { Card, Empty, Field, Icon, Input, Note, SButton, Textarea } from "@/components/studio";
 import { DeskNav } from "@/components/tailor-studio";
 import { api, rwf } from "@/lib/api";
 import { useApi } from "@/lib/use-api";
@@ -21,16 +21,16 @@ export default function Services() {
   const { data, reload } = useApi<TailorServiceView[]>(`/pages/${page.id}/services`);
   const [editing, setEditing] = useState<Partial<TailorServiceView> | null>(null);
   return (
-    <div className="space-y-4 pb-28">
+    <div className="space-y-4">
       <DeskNav pageId={page.id} />
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-black">Services on your page</h2>
-        <SButton onClick={() => setEditing({ requiredMeasurements: ["bustCm", "waistCm", "hipsCm"], leadTimeDays: 7, active: true })}>+ New service</SButton>
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-lg font-black">Services{data?.length ? <span className="ml-1.5 text-sm font-bold text-stone-500 tabular-nums">{data.length}</span> : null}</h2>
+        <SButton onClick={() => setEditing({ requiredMeasurements: ["bustCm", "waistCm", "hipsCm"], leadTimeDays: 7, active: true })}><Icon name="plus" className="size-4" /> New service</SButton>
       </div>
       {editing && <ServiceForm pageId={page.id} initial={editing} onDone={async () => { setEditing(null); await reload(); }} onCancel={() => setEditing(null)} />}
       {data?.length === 0 && !editing && (
-        <Empty>
-          <p className="mb-3">Tell shoppers what you can make for them. ✨ Start from an idea:</p>
+        <Empty icon="scissors" title="No services yet">
+          <p className="mb-3">✨ Start from an idea</p>
           <div className="flex flex-wrap justify-center gap-2">
             {IDEAS.map((i) => <SButton key={i.title} variant="outline" onClick={() => setEditing({ ...i, requiredMeasurements: ["bustCm", "waistCm", "hipsCm"], active: true })}>{i.title}</SButton>)}
           </div>
@@ -45,8 +45,14 @@ export default function Services() {
             </div>
             <p className="mt-1 text-sm text-stone-600">{s.description}</p>
             <p className="mt-2 text-sm"><b>from {rwf(s.startingPriceRwf)}</b> · {s.leadTimeDays} days</p>
-            {s.requiredMeasurements.length > 0 && <p className="mt-1 text-xs text-stone-500">Needs {s.requiredMeasurements.map((m) => MEASUREMENT_LABEL[m]?.label.toLowerCase()).join(", ")}</p>}
-            <div className="mt-3 flex gap-2">
+            {s.requiredMeasurements.length > 0 && (
+              <p className="mt-2 flex flex-wrap items-center gap-1">
+                <Icon name="ruler" className="size-3.5 text-stone-500" />
+                <span className="sr-only">Needs</span>
+                {s.requiredMeasurements.map((m) => <span key={m} className="rounded-full bg-stone-100 px-2 py-0.5 text-[11px] font-semibold text-stone-700">{MEASUREMENT_LABEL[m]?.label ?? m}</span>)}
+              </p>
+            )}
+            <div className="mt-auto flex gap-2 pt-3">
               <SButton variant="outline" onClick={() => setEditing(s)}>Edit</SButton>
               <SButton variant="ghost" onClick={async () => { await api(`/pages/${page.id}/services/${s.id}`, { method: "PATCH", json: { active: !s.active } }); await reload(); }}>{s.active ? "Hide" : "Show"}</SButton>
             </div>

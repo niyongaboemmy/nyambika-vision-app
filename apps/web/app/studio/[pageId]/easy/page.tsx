@@ -136,7 +136,7 @@ function Easy() {
     <div className="mx-auto max-w-xl space-y-5 pb-6">
       {assist && (
         <p className="flex items-center gap-2 rounded-2xl bg-violet-50 p-3 text-sm font-bold text-violet-ink ring-1 ring-inset ring-violet-200">
-          <span aria-hidden>🤝</span> Helping {data.maker.name} with their consent{data.grant ? ` · until ${new Date(data.grant.expiresAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}` : ""} · every step is logged
+          <span aria-hidden>🤝</span> Helping {data.maker.name} with their consent{data.grant ? ` · until ${new Date(data.grant.expiresAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}` : ""} · logged
         </p>
       )}
       {screen === "home" && (
@@ -156,7 +156,7 @@ function Easy() {
           {!assist && (
             <button
               type="button"
-              className="mx-auto block text-sm font-bold text-cocoa-2 underline"
+              className="mx-auto flex min-h-11 items-center px-4 text-sm font-bold text-cocoa-2 underline underline-offset-4"
               onClick={() => {
                 try {
                   sessionStorage.setItem("nya_easy_off", "1");

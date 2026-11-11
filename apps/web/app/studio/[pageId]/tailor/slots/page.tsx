@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Card, Field, Input, Note, SButton, Select } from "@/components/studio";
+import { Card, Chip, Field, Icon, Input, Note, SButton, Select } from "@/components/studio";
 import { DeskNav } from "@/components/tailor-studio";
 import { api } from "@/lib/api";
 import { useApi } from "@/lib/use-api";
@@ -21,6 +21,7 @@ interface Slot {
 
 const TIMES = ["08:00", "09:00", "10:00", "11:00", "12:00", "14:00", "15:00", "16:00", "17:00", "18:00"];
 const DAY = 86400_000;
+const SLOT_PREVIEW = 6;
 
 /** Kigali is UTC+2 all year: build the instant for a local date + time. */
 function kigaliInstant(dayStartUtc: number, hhmm: string) {
@@ -48,6 +49,7 @@ export default function Slots() {
   const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [showAll, setShowAll] = useState(false);
 
   const days = useMemo(() => Array.from({ length: 7 }, (_, i) => start + i * DAY), [start]);
   const dayKey = (iso: string | number) => kigaliTime(iso, { year: "numeric", month: "2-digit", day: "2-digit" });
@@ -64,7 +66,7 @@ export default function Slots() {
       const slots = targets.flatMap((d) => picked.map((t) => ({ startsAt: kigaliInstant(d, t).toISOString(), durationMin: duration, location }))).filter((s) => new Date(s.startsAt).getTime() > Date.now());
       if (!slots.length) throw new Error("Pick times in the future");
       const r = await api<{ created: number }>(`/pages/${page.id}/slots`, { method: "POST", json: { slots } });
-      setMsg(`${r.created} fitting time${r.created === 1 ? "" : "s"} published. Customers can book them now.`);
+      setMsg(`${r.created} time${r.created === 1 ? "" : "s"} published · bookable now`);
       setPicked([]);
       await reload();
     } catch (e) {
@@ -75,12 +77,12 @@ export default function Slots() {
   }
 
   return (
-    <div className="space-y-4 pb-28">
+    <div className="space-y-4">
       <DeskNav pageId={page.id} />
       <div className="flex items-center justify-between">
-        <SButton variant="outline" aria-label="Previous week" disabled={week === 0} onClick={() => { setWeek(week - 1); setDay(0); }}>←</SButton>
+        <SButton variant="outline" className="w-11 px-0" aria-label="Previous week" disabled={week === 0} onClick={() => { setWeek(week - 1); setDay(0); }}><Icon name="back" className="size-4" /></SButton>
         <p className="font-bold">{week === 0 ? "This week" : week === 1 ? "Next week" : `In ${week} weeks`}</p>
-        <SButton variant="outline" aria-label="Next week" onClick={() => { setWeek(week + 1); setDay(0); }}>→</SButton>
+        <SButton variant="outline" className="w-11 px-0" aria-label="Next week" onClick={() => { setWeek(week + 1); setDay(0); }}><Icon name="arrowRight" className="size-4" /></SButton>
       </div>
 
       <div className="grid grid-cols-7 gap-1.5" role="tablist" aria-label="Day">
@@ -99,12 +101,20 @@ export default function Slots() {
         })}
       </div>
 
-      <Card className="space-y-2">
-        <h3 className="font-bold">{new Date(days[day]).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" })}</h3>
+      <Card className="space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 className="font-bold">{new Date(days[day]).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" })}</h3>
+          {data && todays.length > 0 && (
+            <span className="flex gap-1.5">
+              <Chip tone="violet">{todays.filter((s) => s.booked).length} booked</Chip>
+              <Chip>{todays.filter((s) => !s.booked).length} open</Chip>
+            </span>
+          )}
+        </div>
         {!data && <div className="h-16 animate-pulse rounded-2xl bg-stone-100" />}
-        {data && todays.length === 0 && <p className="text-sm text-stone-600">No fitting times yet. Tap times below to publish some.</p>}
+        {data && todays.length === 0 && <p className="text-sm text-stone-600">No times yet</p>}
         <ul className="space-y-2">
-          {todays.map((s) => (
+          {(showAll ? todays : todays.slice(0, SLOT_PREVIEW)).map((s) => (
             <li key={s.id} className={`flex items-center gap-3 rounded-2xl p-3 ${s.booked ? "bg-fuchsia-50 ring-1 ring-fuchsia-200" : "bg-stone-50 ring-1 ring-stone-200"}`}>
               <span className="w-14 text-lg font-black">{kigaliTime(s.startsAt, { hour: "2-digit", minute: "2-digit", hour12: false })}</span>
               <div className="min-w-0 flex-1 text-sm">
@@ -123,6 +133,12 @@ export default function Slots() {
             </li>
           ))}
         </ul>
+        {todays.length > SLOT_PREVIEW && (
+          <button type="button" aria-expanded={showAll} onClick={() => setShowAll(!showAll)} className="st-press inline-flex min-h-11 w-full items-center justify-center gap-1 rounded-2xl text-sm font-semibold text-stone-600 hover:text-stone-900">
+            {showAll ? "Show less" : `Show all ${todays.length}`}
+            <Icon name="chevron" className={`size-3.5 transition-transform ${showAll ? "-rotate-90" : "rotate-90"}`} />
+          </button>
+        )}
       </Card>
 
       <Card className="space-y-3">
@@ -151,8 +167,8 @@ export default function Slots() {
           </Field>
         </div>
         <Note error={err} ok={msg} />
-        <div className="flex flex-wrap gap-2">
-          <SButton className="min-h-12 flex-1" disabled={busy || !picked.length} onClick={() => publish(false)}>Publish {picked.length || ""} time{picked.length === 1 ? "" : "s"}</SButton>
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <SButton className="min-h-12" disabled={busy || !picked.length} onClick={() => publish(false)}>Publish {picked.length || ""} time{picked.length === 1 ? "" : "s"}</SButton>
           <SButton variant="outline" className="min-h-12" disabled={busy || !picked.length} onClick={() => publish(true)}>Same times rest of week</SButton>
         </div>
       </Card>
