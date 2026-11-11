@@ -93,6 +93,7 @@ function Stream() {
       {data.looks.map((look, i) => (
         <section key={look.id} className="relative h-dvh snap-start snap-always" aria-label={`Look ${i + 1} of ${data.looks.length}`}>
           <LookView
+            paused={error != null}
             look={look}
             index={i}
             total={data.looks.length}
@@ -117,7 +118,7 @@ function Stream() {
       <TwinNudge place="stream" index={index} />
       {/* Daily cap, kill switch, consent…: a calm card over the feed (centred while the current look can't render). */}
       {error != null && (
-        <div className={`fixed inset-x-4 z-40 mx-auto max-w-[448px] ${current && !current.image ? "top-1/3" : "top-20"}`}>
+        <div className={`fixed left-4 right-20 z-40 mx-auto max-w-[448px] sm:inset-x-4 ${current && !current.image ? "top-1/3" : "top-20"}`}>
           <LimitState error={error} onRetry={retry} onDismiss={() => setError(null)} />
         </div>
       )}

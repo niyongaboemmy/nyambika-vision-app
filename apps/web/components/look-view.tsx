@@ -22,11 +22,13 @@ interface Props {
   onSave: () => void;
   onVariant: (variantId: string) => void;
   onHold?: () => void;
+  /** A limit card (daily cap, kill switch…) is showing: don't animate a render that isn't coming. */
+  paused?: boolean;
   children?: ReactNode;
 }
 
 /** One full-screen look rendered on the shopper's twin (prototype v2 · 06-looks-on-you). */
-export function LookView({ look, index, total, intentLabel, onSave, onVariant, onHold, children }: Props) {
+export function LookView({ look, index, total, intentLabel, onSave, onVariant, onHold, paused, children }: Props) {
   const { t } = useSession();
   const router = useRouter();
   const [ring, setRing] = useState(false);
@@ -66,6 +68,8 @@ export function LookView({ look, index, total, intentLabel, onSave, onVariant, o
       <div className="absolute inset-x-0 top-[96px] bottom-[150px] flex items-center justify-center" onClick={tap}>
         {look.status === "DELIVERED" && look.image ? (
           <img src={look.image} alt={`${look.product.title} in ${look.variant.colourName}, AI preview on ${look.onTwin ? "your twin" : "an AI model"}`} className="h-full w-full animate-rise object-contain" draggable={false} />
+        ) : isRendering(look.status) && paused ? (
+          <div aria-hidden className="h-[60vh] max-h-[460px] w-[54vw] max-w-[250px] rounded-[40px] bg-white/[.04]" />
         ) : isRendering(look.status) ? (
           <div className="flex flex-col items-center gap-4" role="status">
             <div className="relative h-[60vh] max-h-[460px] w-[54vw] max-w-[250px] overflow-hidden rounded-[40px] skeleton">
