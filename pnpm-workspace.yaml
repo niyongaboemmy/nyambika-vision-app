@@ -2,6 +2,7 @@ packages:
   - "apps/web"
   - "apps/api"
   - "apps/ai"
+  - "apps/native"
   - "packages/*"
 allowBuilds:
   "@prisma/client": true

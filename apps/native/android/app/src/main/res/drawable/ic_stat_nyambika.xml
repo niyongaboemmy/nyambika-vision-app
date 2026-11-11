@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Status-bar icon: a thread spool, white on transparent (Android tints it). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M6,3h12v2.5h-1.5v13H18V21H6v-2.5h1.5v-13H6V3zM9.5,6.5v11h5v-11h-5zM10.5,8h3v1.2h-3zM10.5,10.4h3v1.2h-3zM10.5,12.8h3V14h-3z" />
+</vector>

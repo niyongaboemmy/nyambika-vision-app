@@ -22,6 +22,7 @@ import { timingSafeEqual } from "node:crypto";
 import { z } from "zod";
 import { Access, AuthUser, CurrentUser, Public } from "../../common/auth";
 import { MessagingService } from "../../common/messaging.service";
+import { PushService } from "../../common/push/push.service";
 import { PrismaService } from "../../common/prisma.service";
 import { parse } from "../../common/zod";
 import { serverEvent } from "../pilot/pilot.service";
@@ -38,6 +39,7 @@ export class PaymentsService implements OnModuleInit, OnModuleDestroy {
   constructor(
     private prisma: PrismaService,
     private messaging: MessagingService,
+    private push: PushService,
   ) {}
 
   /** Extension point: a hook that returns true has fully handled the settlement (e.g. custom-order stages, E24). */
@@ -94,12 +96,14 @@ export class PaymentsService implements OnModuleInit, OnModuleDestroy {
         order.id,
       );
       await this.messaging.send("WHATSAPP", order.shopper.phone, "order_paid_shopper", `Murakoze! ${order.code} is paid directly to ${order.payoutLabel}. We will keep you posted here.`, order.id);
+      await this.push.orderUpdate(order.id); // E38: "Paid ✓" alert + live activity start
     } else {
       await this.prisma.order.update({ where: { id: order.id }, data: { status: "CANCELLED" } });
       await this.prisma.orderEvent.create({ data: { orderId: order.id, status: "CANCELLED", note: "Payment was declined or timed out. No money was taken." } });
       for (const it of order.items) {
         await this.prisma.variant.updateMany({ where: { id: it.variantId, product: { madeToOrder: false } }, data: { stock: { increment: it.qty } } });
       }
+      await this.push.orderUpdate(order.id); // E38: ends any live activity
     }
     return payment;
   }

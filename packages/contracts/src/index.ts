@@ -169,4 +169,5 @@ export * from "./pilot";
 
 export * from "./agents";
 export * from "./growth";
+export * from "./ambient";
 export * from "./region";

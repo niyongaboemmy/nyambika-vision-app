@@ -36,6 +36,7 @@ import { AgentsModule } from "./modules/agents/agents.module";
 import { GrowthModule } from "./modules/growth/growth.module";
 import { CoopVoiceModule } from "./modules/coopvoice/coopvoice.module";
 import { NetworkMigrationModule } from "./modules/migration/network";
+import { PushModule } from "./common/push/push.module";
 import { RegionModule } from "./modules/region/region.module";
 import { Twin3dModule } from "./modules/twin3d/twin3d.module";
 
@@ -87,6 +88,7 @@ class HealthController {
     GrowthModule,
     CoopVoiceModule,
     NetworkMigrationModule,
+    PushModule,
     RegionModule,
     Twin3dModule,
   ],

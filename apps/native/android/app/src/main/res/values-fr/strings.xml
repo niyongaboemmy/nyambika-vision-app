@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="channel_orders">Suivi de commande</string>
+    <string name="channel_orders_desc">Mises à jour en direct, du paiement à la livraison.</string>
+    <string name="channel_general">Nyambika</string>
+    <string name="widget_label">Look du jour · commande</string>
+    <string name="widget_description">Votre commande en route, ou le look du jour.</string>
+</resources>

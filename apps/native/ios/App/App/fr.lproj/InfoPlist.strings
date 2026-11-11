@@ -1,0 +1,3 @@
+"NSCameraUsageDescription" = "Nyambika utilise l'appareil photo pour créer votre jumeau privé et photographier vos produits. Les photos restent chiffrées et ne sont jamais partagées avec les artisans.";
+"NSMicrophoneUsageDescription" = "Maintenez le micro pour parler à la Muse. L'enregistrement est transcrit puis supprimé aussitôt.";
+"NSPhotoLibraryUsageDescription" = "Choisissez une photo pour votre jumeau ou vos produits. Seule la photo choisie est utilisée.";

@@ -7,6 +7,7 @@ import { ConsentService } from "../../common/consent.service";
 import { PrismaService } from "../../common/prisma.service";
 import { StorageService } from "../../common/storage.service";
 import { parse } from "../../common/zod";
+import { PushService } from "../../common/push/push.service";
 import { TwinModule, TwinService } from "../twin/twin.module";
 import { CircleModule, CircleService } from "../circle/circle.module";
 import { WardrobeModule, WardrobeService } from "../wardrobe/wardrobe.module";
@@ -32,6 +33,7 @@ export class PrivacyController {
     private customOrders: CustomOrdersService,
     private checkout: CheckoutService,
     private passkeys: PasskeysService,
+    private push: PushService,
     private twin3d: Twin3dService,
   ) {}
 
@@ -81,9 +83,9 @@ export class PrivacyController {
     res.setHeader("content-disposition", 'attachment; filename="nyambika-my-data.json"');
     const [circlePolls, wardrobe] = await Promise.all([this.circle.exportFor(user.id), this.wardrobe.exportFor(user.id)]);
     const [measurements, customOrders] = await Promise.all([this.measurements.exportFor(user.id), this.customOrders.exportFor(user.id)]);
-    const [bagAndAddresses, passkeys] = await Promise.all([this.checkout.exportFor(user.id), this.passkeys.exportFor(user.id)]);
+    const [bagAndAddresses, passkeys, notifications] = await Promise.all([this.checkout.exportFor(user.id), this.passkeys.exportFor(user.id), this.push.exportFor(user.id)]);
     const twin3d = await this.twin3d.exportFor(user.id);
-    res.send(JSON.stringify({ exportedAt: new Date(), note: "Twin and look images are available on request; they are encrypted at rest. Voice recordings are never stored.", user: u, circlePolls, wardrobe, measurements, customOrders, ...bagAndAddresses, passkeys, twin3d }, null, 2));
+    res.send(JSON.stringify({ exportedAt: new Date(), note: "Twin and look images are available on request; they are encrypted at rest. Voice recordings are never stored.", user: u, circlePolls, wardrobe, measurements, customOrders, ...bagAndAddresses, passkeys, twin3d, ...notifications }, null, 2));
   }
 
   /** Deletion cascade with a recorded job and per-step status. */
@@ -126,6 +128,8 @@ export class PrivacyController {
       steps.push({ step: "Measurement profile deleted; tailor shares ended", done: true, detail: `${m.sharesRevoked} active shares ended` });
       const [bag, keys] = await Promise.all([this.checkout.deleteFor(user.id), this.passkeys.deleteFor(user.id)]);
       steps.push({ step: "Saved addresses, bag and passkeys deleted", done: true, detail: `${bag.addresses} addresses, ${bag.bagItems} bag items, ${keys} passkeys` });
+      const devices = await this.push.deleteFor(user.id);
+      steps.push({ step: "Push tokens and notification settings deleted", done: true, detail: `${devices} devices will stop receiving notifications` });
       for (const p of CONSENT_PURPOSES) await this.consent.record(user.id, p, false, locale);
       await this.prisma.session.updateMany({ where: { userId: user.id }, data: { revokedAt: new Date() } });
       await this.prisma.follow.deleteMany({ where: { userId: user.id } });

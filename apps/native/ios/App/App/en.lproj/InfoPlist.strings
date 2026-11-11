@@ -1,0 +1,3 @@
+"NSCameraUsageDescription" = "Nyambika uses the camera to capture your private twin and product photos. Photos stay encrypted and are never shared with makers.";
+"NSMicrophoneUsageDescription" = "Hold the mic to ask the Muse by voice. Your recording is turned into text and deleted straight away.";
+"NSPhotoLibraryUsageDescription" = "Choose a photo for your twin or your products. Only the photo you pick is used.";

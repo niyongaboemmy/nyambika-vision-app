@@ -3,8 +3,11 @@
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
+import { AmbientOrder } from "@/components/ambient-order";
+import { PushAsk } from "@/components/push-ask";
 import { Button, Chip, ErrorNote, Screen, Spinner, TopBar } from "@/components/ui";
 import { api, rwf } from "@/lib/api";
+import { haptic } from "@/lib/native";
 import { ORDER_LABEL, type OrderView } from "@/lib/orders";
 import { useSession } from "@/lib/session";
 import { OrderMoneyPanel, useOrderMoney } from "@/components/region";
@@ -25,6 +28,11 @@ function Order() {
     return () => clearTimeout(tm);
   }, [o, id, setData]);
 
+  const paidNow = fresh && o?.status === "PAID";
+  useEffect(() => {
+    if (paidNow) haptic("success");
+  }, [paidNow]);
+
   if (error) return <Screen><div className="p-6 pt-20"><ErrorNote error={error} /></div></Screen>;
   if (!o) return <Screen><div className="grid min-h-dvh place-items-center"><Spinner /></div></Screen>;
 
@@ -44,6 +52,7 @@ function Order() {
             )}
           </section>
         )}
+        {o.status === "AWAITING_PAYMENT" && <PushAsk moment="paid" />}
 
         {justPaid && (
           <section className="flex animate-rise flex-col items-center gap-2 rounded-3xl bg-gradient-to-br from-mint/30 to-violet/20 p-6 text-center">
@@ -72,16 +81,11 @@ function Order() {
 
         <OrderMoneyPanel money={money} payee={o.payoutLabel} onChange={async () => setData(await api<OrderView>(`/orders/${id}`))} />
 
-        {/* Ambient: live activity style tracker */}
+        {/* Ambient: the same state model as push, the iOS Live Activity and the Android Live Update (E38). */}
+        {o.status !== "AWAITING_PAYMENT" && <AmbientOrder order={o} />}
+        {["PAID", "ACCEPTED", "IN_PREPARATION"].includes(o.status) && <PushAsk moment="live" />}
         <section className="glass rounded-3xl p-4">
-          <div className="flex items-center justify-between">
-            <p className="font-semibold">{ORDER_LABEL[o.status] ?? o.status}</p>
-            {o.readyBy && !["CANCELLED", "DELIVERED", "COMPLETED"].includes(o.status) && (
-              <span className="text-xs text-mut">ready by {new Date(o.readyBy).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}</span>
-            )}
-          </div>
-          <Progress status={o.status} />
-          <ol className="mt-4 space-y-3 border-l border-white/15 pl-4">
+          <ol className="space-y-3 border-l border-white/15 pl-4">
             {o.events.map((e, i) => (
               <li key={i} className="relative">
                 <span className="absolute -left-[21px] top-1 size-2.5 rounded-full bg-gold" />
@@ -104,16 +108,6 @@ function Order() {
         {o.review && <p className="text-center text-sm text-mut">You rated {"★".repeat(o.review.rating)}</p>}
       </main>
     </Screen>
-  );
-}
-
-const STEPS = ["PAID", "ACCEPTED", "IN_PREPARATION", "SHIPPED", "DELIVERED"];
-function Progress({ status }: { status: string }) {
-  const idx = status === "READY" ? 3 : status === "COMPLETED" ? 4 : STEPS.indexOf(status);
-  return (
-    <div className="mt-3 flex gap-1.5" aria-hidden>
-      {STEPS.map((s, i) => <span key={s} className={`h-1.5 flex-1 rounded-full ${i <= idx ? "bg-gradient-to-r from-terra to-gold" : "bg-white/15"}`} />)}
-    </div>
   );
 }
 
