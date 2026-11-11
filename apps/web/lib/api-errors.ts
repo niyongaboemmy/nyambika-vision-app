@@ -134,7 +134,9 @@ export function describeError(e: unknown, locale: Locale = currentLocale()): Des
     return make("payment", tr(locale, "err.payment.title"), tr(locale, "err.payment.body"));
   if (status === 429) {
     const otp = /code/i.test(raw) && /request/i.test(raw);
-    return make("rate", tr(locale, "err.rate.title"), tr(locale, otp ? "err.otp.body" : "err.rate.body"));
+    // Allowance codes carry a specific, human reason (e.g. today's video allowance): keep it.
+    const specific = code && ["VIDEO_NOT_ALLOWED", "MOTION_NOT_ALLOWED", "QUOTA_EXCEEDED", "SANDBOX_DAILY_CAP"].includes(code) && raw;
+    return make("rate", tr(locale, "err.rate.title"), specific || tr(locale, otp ? "err.otp.body" : "err.rate.body"));
   }
   if (status === 401) return make("auth", tr(locale, "err.auth.title"), "");
   if (status === 503 || status === 502 || status === 504 || status >= 500 || (status >= 400 && typeof body === "string" && /<html|<!doctype/i.test(body)))

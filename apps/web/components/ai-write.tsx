@@ -1,5 +1,6 @@
 "use client";
 
+import { isExpectedText, LimitState } from "@/components/limit-state";
 import { useState } from "react";
 import { api } from "@/lib/api";
 
@@ -33,7 +34,7 @@ export function AiWrite<T>({ pageId, kind, fields, onResult }: { pageId: string;
         </button>
       ))}
       <span className="w-full px-0.5 text-[11px] text-violet-ink">A draft from your details. Check it before saving.</span>
-      {err && <span className="text-xs text-red-700">{err}</span>}
+      {err && (isExpectedText(err) ? <LimitState error={err} tone="light" /> : <span className="text-xs text-red-700">{err}</span>)}
     </div>
   );
 }

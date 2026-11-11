@@ -1,5 +1,6 @@
 "use client";
 
+import { isExpectedText, LimitState } from "@/components/limit-state";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { Button, Sheet } from "@/components/ui";
@@ -276,7 +277,7 @@ export function VideoRail({ look }: { look: Look }) {
             {state && !state.eligible && state.reason && <p className="mt-3 text-sm text-gold">{state.reason}</p>}
             {job?.status === "WITHHELD" && <p className="mt-3 text-sm text-gold">That video didn't pass our checks, so we didn't show it or charge you. Try again.</p>}
             {job?.error && <p className="mt-3 text-sm text-gold">{job.error}</p>}
-            {error && <p className="mt-3 text-sm text-red-300" role="alert">{error}</p>}
+            {error && (isExpectedText(error) ? <LimitState error={error} /> : <p className="mt-3 text-sm text-red-300" role="alert">{error}</p>)}
             <Button className="mt-4 w-full" onClick={start} disabled={Boolean(busy) || !ready || (state ? !state.eligible : false)}>
               {busy === "start" ? "Starting…" : `🎬 ${t("video.title")}`}
             </Button>

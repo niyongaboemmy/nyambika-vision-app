@@ -35,7 +35,7 @@ await shot("studio-new-product");
 await page.getByRole("button", { name: /save and add photos/i }).click();
 await page.getByText(/now add a clear photo/i).waitFor();
 await page.locator("input[type=file]").setInputFiles(photo);
-await page.getByText(/try-on cut-out/i).waitFor();
+await page.getByText(/try-on cut-out \(auto\)/i).waitFor(); // the 3D panel also mentions the cut-out
 await page.locator('img[alt="Teal cut-out"]').waitFor({ timeout: 20000 });
 await shot("studio-photo-assessed");
 await page.getByRole("button", { name: "Publish" }).click();

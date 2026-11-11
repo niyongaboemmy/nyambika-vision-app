@@ -1,5 +1,6 @@
 "use client";
 
+import { isExpectedText, LimitState } from "@/components/limit-state";
 import { useEffect, useState } from "react";
 import { api, rwf } from "@/lib/api";
 import type { MakerSpace } from "@/lib/maker";
@@ -77,7 +78,7 @@ export function DiscountField({ variantId, open, onChange }: { variantId: string
         ) : (
           <button type="button" onClick={() => setEditing(true)} className="text-xs font-semibold text-white/70 underline underline-offset-2">Have a code from the maker?</button>
         ))}
-      {err && <p className="text-xs text-gold" role="status">{err}</p>}
+      {err && (isExpectedText(err) ? <LimitState error={err} /> : <p className="text-xs text-gold" role="status">{err}</p>)}
     </div>
   );
 }
