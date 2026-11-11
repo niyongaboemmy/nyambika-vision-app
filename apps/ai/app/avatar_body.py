@@ -141,7 +141,8 @@ class Body:
         return a, float(max(r, (z / np.sqrt(inside)).max())), 0.0
 
 
-def build_body(measurements: dict, skin_srgb) -> Body:
+def build_body(measurements: dict, skin_srgb, a_pose_deg: float = A_POSE_DEG) -> Body:
+    """a_pose_deg: arm abduction; the R4 drape spike uses a wider A-pose so cloth fits between arm and torso."""
     m = measurements
     b = Body(m=m, skin_srgb=tuple(float(c) for c in skin_srgb))
     H = m["heightCm"] / 100
@@ -204,7 +205,7 @@ def build_body(measurements: dict, skin_srgb) -> Body:
     leg_c = np.array([0.6, 0.58, 0.5, 0.4, 0.37, 0.36, 0.24, 0.22]) * hc
     b.leg = {"x": leg_x, "ys": leg_ys, "r": leg_c / (2 * np.pi)}
 
-    alpha = np.radians(A_POSE_DEG)
+    alpha = np.radians(a_pose_deg)
     upper, fore, hand = 0.186 * H, 0.146 * H, 0.1 * H
     sh_y = y_sh - 0.03 * s
     joints = {
