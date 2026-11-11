@@ -128,7 +128,7 @@ export function TrainingDataConsent({ pageId }: { pageId: string }) {
             <li key={p.id} className="overflow-hidden rounded-[20px] bg-paper ring-1 ring-inset ring-hairline">
               <div className="relative aspect-[4/5] bg-white">
                 {p.image ? <img src={p.image} alt="" className="size-full object-cover" /> : <span className="grid size-full place-items-center text-cocoa-3"><Icon name="camera" className="size-6" /></span>}
-                <span className={`absolute left-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-black ${p.included ? "bg-mint-ink text-white" : "bg-white/90 text-cocoa-2"}`}>{p.included ? "Shared" : "Private"}</span>
+                <span className={`absolute left-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-black ${p.included ? "bg-mint-ink text-white" : p.waitingForMaker ? "bg-amber-100 text-gold-ink" : "bg-white/90 text-cocoa-2"}`}>{p.included ? "Shared" : p.waitingForMaker ? "Waiting" : "Private"}</span>
                 {p.inDataset && <span className="absolute bottom-2 left-2 rounded-full bg-violet-ink/90 px-2 py-0.5 text-[10px] font-black text-white">In dataset</span>}
               </div>
               <div className="space-y-1.5 p-2.5">
@@ -142,12 +142,12 @@ export function TrainingDataConsent({ pageId }: { pageId: string }) {
                 <button
                   type="button"
                   disabled={busy}
-                  aria-pressed={p.included}
-                  aria-label={`${p.included ? "Keep private" : "Share"}: ${p.title}`}
-                  onClick={() => put(`/pages/${pageId}/training-data/products/${p.id}`, { included: !p.included }, p.included ? `${p.title} is private again.` : `${p.title} is shared.`)}
-                  className={`st-press min-h-11 w-full rounded-xl text-sm font-bold ring-1 ring-inset disabled:opacity-50 ${p.included ? "bg-white text-cocoa ring-hairline" : "bg-violet-ink text-white ring-violet-ink"}`}
+                  aria-pressed={(p.included || p.waitingForMaker)}
+                  aria-label={`${(p.included || p.waitingForMaker) ? "Keep private" : "Share"}: ${p.title}`}
+                  onClick={() => put(`/pages/${pageId}/training-data/products/${p.id}`, { included: !(p.included || p.waitingForMaker) }, (p.included || p.waitingForMaker) ? `${p.title} is private again.` : `${p.title} is shared.`)}
+                  className={`st-press min-h-11 w-full rounded-xl text-sm font-bold ring-1 ring-inset disabled:opacity-50 ${(p.included || p.waitingForMaker) ? "bg-white text-cocoa ring-hairline" : "bg-violet-ink text-white ring-violet-ink"}`}
                 >
-                  {p.included ? "Keep private" : "Share"}
+                  {(p.included || p.waitingForMaker) ? "Keep private" : "Share"}
                 </button>
               </div>
             </li>
