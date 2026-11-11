@@ -179,7 +179,7 @@ export default function Home() {
               <>
                 <div className="flex items-baseline justify-between gap-2">
                   <h2 id="plan-title" className="font-extrabold text-cocoa">{a.plan.name} plan</h2>
-                  <Link href={`${base}/settings#plan`} className="text-xs font-bold text-violet-ink underline-offset-2 hover:underline">Manage plan</Link>
+                  <Link href={`${base}/settings#plan`} className="hit text-xs font-bold text-violet-ink underline-offset-2 hover:underline">Manage plan</Link>
                 </div>
                 <p className="mb-2 mt-0.5 text-xs text-cocoa-2">Try-ons this month</p>
                 <Meter value={a.plan.allowanceUsed} max={a.plan.monthlyCap} label="Try-on allowance used" />
@@ -191,7 +191,7 @@ export default function Home() {
               <>
                 <h2 id="plan-title" className="font-extrabold text-cocoa">Free plan</h2>
                 <p className="mt-1 text-sm text-cocoa-2">Shoppers use their own looks</p>
-                <Link href={`${base}/settings#plan`} className="mt-2 inline-block text-sm font-bold text-violet-ink">See plans</Link>
+                <Link href={`${base}/settings#plan`} className="mt-2 inline-flex min-h-11 items-center text-sm font-bold text-violet-ink">See plans</Link>
               </>
             ) : (
               <Skeleton className="h-20" />
