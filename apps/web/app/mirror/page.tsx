@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Twin3dCard } from "@/components/twin3d-card";
 import { Button, ErrorNote, Screen, Spinner, TopBar } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { useSession } from "@/lib/session";
@@ -128,6 +129,7 @@ export default function Mirror() {
                 ))}
               </div>
             </details>
+            <Link href="/mirror/3d" className="block text-center text-sm text-gold">🧊 Prefer 3D? Make a 3D twin →</Link>
           </div>
         </main>
       )}
@@ -164,6 +166,7 @@ export default function Mirror() {
             <p className="mt-1 text-mut">Size estimate {twin.size ?? "—"} · encrypted · only you see it</p>
           </div>
           <div className="w-full space-y-2">
+            <Twin3dCard />
             <Link href="/" className="block"><Button className="w-full">✨ Ask the Muse</Button></Link>
             <Link href="/trust" className="block text-sm text-mut underline">Manage or delete my twin</Link>
             <button onClick={() => setStep("intro")} className="text-sm text-mut underline">Retake twin</button>

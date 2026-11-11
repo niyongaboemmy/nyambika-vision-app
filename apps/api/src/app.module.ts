@@ -37,6 +37,7 @@ import { GrowthModule } from "./modules/growth/growth.module";
 import { CoopVoiceModule } from "./modules/coopvoice/coopvoice.module";
 import { NetworkMigrationModule } from "./modules/migration/network";
 import { PushModule } from "./common/push/push.module";
+import { Twin3dModule } from "./modules/twin3d/twin3d.module";
 
 @Controller()
 class HealthController {
@@ -87,6 +88,7 @@ class HealthController {
     CoopVoiceModule,
     NetworkMigrationModule,
     PushModule,
+    Twin3dModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: AuthGuard }],

@@ -204,6 +204,12 @@ const en = {
   "push.none": "No devices yet. WhatsApp updates still come.",
   "push.unsupported": "This browser can't receive notifications. Add Nyambika to your home screen or use the app.",
   "ambient.live": "Live",
+  "twin3d.title": "3D twin",
+  "twin3d.ar": "AR mirror",
+  "twin3d.tryIn3d": "Try on my 3D twin",
+  "twin3d.disclaimer": "Visual guidance only. Actual fit may differ.",
+  "twin3d.consentTitle": "Private 3D twin",
+  "twin3d.consentBody": "Build and keep my encrypted 3D twin. Only I see it; delete anytime.",
 };
 
 type Messages = typeof en;
@@ -408,6 +414,12 @@ const rw: Messages = {
   "push.none": "Nta gikoresho kirimo. Amakuru ya WhatsApp arakomeza.",
   "push.unsupported": "Iyi mushakisha ntishobora kwakira imenyesha. Shyira Nyambika kuri ecran cyangwa ukoreshe app.",
   "ambient.live": "Ubu",
+  "twin3d.title": "Impanga ya 3D",
+  "twin3d.ar": "Indorerwamo ya AR",
+  "twin3d.tryIn3d": "Gerageza ku mpanga yanjye ya 3D",
+  "twin3d.disclaimer": "Ni icyerekezo gusa. Uko umwambaro uzakubera bishobora gutandukana.",
+  "twin3d.consentTitle": "Impanga ya 3D yihariye",
+  "twin3d.consentBody": "Kora kandi ubike impanga yanjye ya 3D mu ibanga. Ni jye wenyine uyibona; nshobora kuyisiba igihe cyose.",
 };
 
 const fr: Messages = {
@@ -609,6 +621,12 @@ const fr: Messages = {
   "push.none": "Aucun appareil. Les mises à jour WhatsApp continuent.",
   "push.unsupported": "Ce navigateur ne reçoit pas de notifications. Ajoutez Nyambika à l'écran d'accueil ou utilisez l'app.",
   "ambient.live": "En direct",
+  "twin3d.title": "Jumeau 3D",
+  "twin3d.ar": "Miroir AR",
+  "twin3d.tryIn3d": "Essayer sur mon jumeau 3D",
+  "twin3d.disclaimer": "Indication visuelle uniquement. L'ajustement réel peut varier.",
+  "twin3d.consentTitle": "Jumeau 3D privé",
+  "twin3d.consentBody": "Créer et conserver mon jumeau 3D chiffré. Moi seul·e le vois ; suppression à tout moment.",
 };
 
 export const catalogues: Record<Locale, Messages> = { en, rw, fr };

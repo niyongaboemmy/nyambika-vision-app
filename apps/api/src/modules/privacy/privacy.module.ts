@@ -16,6 +16,8 @@ import { MeasurementsService } from "../tailor/measurements";
 import { CustomOrdersService } from "../tailor/custom-orders";
 import { CheckoutModule, CheckoutService } from "../checkout/checkout.module";
 import { PasskeysModule, PasskeysService } from "../passkeys/passkeys.module";
+import { Twin3dModule } from "../twin3d/twin3d.module";
+import { Twin3dService } from "../twin3d/twin3d.service";
 
 /** Privacy centre (FR-PRV-01..07, CMP-01..05): consents, export, deletion cascade. */
 @Controller("privacy")
@@ -32,6 +34,7 @@ export class PrivacyController {
     private checkout: CheckoutService,
     private passkeys: PasskeysService,
     private push: PushService,
+    private twin3d: Twin3dService,
   ) {}
 
   @Get()
@@ -81,7 +84,8 @@ export class PrivacyController {
     const [circlePolls, wardrobe] = await Promise.all([this.circle.exportFor(user.id), this.wardrobe.exportFor(user.id)]);
     const [measurements, customOrders] = await Promise.all([this.measurements.exportFor(user.id), this.customOrders.exportFor(user.id)]);
     const [bagAndAddresses, passkeys, notifications] = await Promise.all([this.checkout.exportFor(user.id), this.passkeys.exportFor(user.id), this.push.exportFor(user.id)]);
-    res.send(JSON.stringify({ exportedAt: new Date(), note: "Twin and look images are available on request; they are encrypted at rest. Voice recordings are never stored.", user: u, circlePolls, wardrobe, measurements, customOrders, ...bagAndAddresses, passkeys, ...notifications }, null, 2));
+    const twin3d = await this.twin3d.exportFor(user.id);
+    res.send(JSON.stringify({ exportedAt: new Date(), note: "Twin and look images are available on request; they are encrypted at rest. Voice recordings are never stored.", user: u, circlePolls, wardrobe, measurements, customOrders, ...bagAndAddresses, passkeys, twin3d, ...notifications }, null, 2));
   }
 
   /** Deletion cascade with a recorded job and per-step status. */
@@ -99,6 +103,9 @@ export class PrivacyController {
       await this.consent.record(user.id, "TWIN_PROCESSING", false, locale);
       steps.push({ step: "Twin image deleted from storage", done: true, detail: `${removed} looks rendered from it removed` });
       steps.push({ step: "Provider zero-retention confirmed", done: true, detail: "Local gateway keeps no copies" });
+      const avatars = await this.twin3d.deleteFor(user.id);
+      await this.consent.record(user.id, "AVATAR_3D", false, locale);
+      steps.push({ step: "3D twin deleted", done: true, detail: `${avatars} version(s) with capture frames, body parameters and fitted garments` });
     }
     // Polls and restyled outfits are rendered from the twin and looks, so every scope removes them.
     const polls = await this.circle.deleteFor(user.id);
@@ -134,5 +141,5 @@ export class PrivacyController {
   }
 }
 
-@Module({ imports: [TwinModule, CircleModule, WardrobeModule, TailorModule, CheckoutModule, PasskeysModule], controllers: [PrivacyController] })
+@Module({ imports: [TwinModule, CircleModule, WardrobeModule, TailorModule, CheckoutModule, PasskeysModule, Twin3dModule], controllers: [PrivacyController] })
 export class PrivacyModule {}
