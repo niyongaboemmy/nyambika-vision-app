@@ -1,6 +1,6 @@
 "use client";
 
-import { depositSplit, PROGRESS_STEPS, type Measurements } from "@nyambika/contracts";
+import { depositSplit, PROGRESS_STEPS, type Measurements } from "@nyambika/contracts/tailor-data";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";

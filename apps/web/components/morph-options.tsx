@@ -1,6 +1,6 @@
 "use client";
 
-import { MORPH_LENGTHS, MORPH_SLEEVES, morphPrice, type MorphTemplateInput } from "@nyambika/contracts";
+import { MORPH_LENGTHS, MORPH_SLEEVES, morphPrice, type MorphTemplateInput } from "@nyambika/contracts/tailor-data";
 import { useEffect, useState } from "react";
 import { InfoTip } from "@/components/kit";
 import { Card, Chip, Field, Input, Note, SButton, Select } from "@/components/studio";

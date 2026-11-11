@@ -1,15 +1,17 @@
 "use client";
 
-import { useDrag } from "@use-gesture/react";
+import { useDrag } from "@/lib/drag";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { Price } from "@/components/region";
-import { XrStage } from "@/components/xr-viewer";
 import { rwf } from "@/lib/api";
 import { useRegion, type Commerce } from "@/lib/region";
 import { useSession } from "@/lib/session";
 import { countdown, fmtWhen, type Shelf, type ShelfItemView } from "@/lib/vr";
 import { hasWebGL2, load3d, loadModelViewer, prefersReducedMotion, type Garment3d } from "@/lib/xr";
+
+const XrStage = dynamic(() => import("@/components/xr-viewer").then((m) => m.XrStage), { ssr: false }); // full viewer on tap
 
 /**
  * E35 Maker Space 3D shelf: a lit glass shelf of the page's approved 3D pieces. Poster-first; once the shelf is

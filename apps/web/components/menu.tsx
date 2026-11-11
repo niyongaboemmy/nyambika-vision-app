@@ -3,7 +3,7 @@
 import { LOCALES, type Locale } from "@nyambika/i18n";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/kit";
-import { Icon, type IconName } from "@/components/studio";
+import { Icon, type IconName } from "@/components/icons";
 import { Chip, Sheet } from "@/components/ui";
 import { useSession } from "@/lib/session";
 

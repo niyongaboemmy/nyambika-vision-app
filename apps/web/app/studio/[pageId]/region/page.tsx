@@ -1,6 +1,7 @@
 "use client";
 
-import { formatMoney, REGIONS, toMajorString, WALLET_LABEL, type CurrencyCode, type RegionCode, type Wallet } from "@nyambika/contracts";
+import { formatMoney, toMajorString, type CurrencyCode } from "@nyambika/contracts/money";
+import { REGIONS, WALLET_LABEL, type RegionCode, type Wallet } from "@nyambika/contracts/region-data";
 import { useState } from "react";
 import { Fact, InfoTip } from "@/components/kit";
 import { Card, Chip, Field, Icon, Input, Note, ScreenSkeleton, SButton, SectionTitle, SLink, StudioSheet, Switch } from "@/components/studio";

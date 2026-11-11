@@ -1,6 +1,6 @@
 "use client";
 
-import { formatMoney, type CurrencyCode } from "@nyambika/contracts";
+import { formatMoney, type CurrencyCode } from "@nyambika/contracts/money";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";

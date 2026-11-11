@@ -1,6 +1,6 @@
 "use client";
 
-import { useDrag } from "@use-gesture/react";
+import { useDrag } from "@/lib/drag";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
@@ -120,16 +120,19 @@ export function LookView({ look, index, total, intentLabel, onSave, onVariant, p
   }
 
   // Swipe left anywhere on the look → Maker Space (rubber-band follow + edge peek; vertical scroll stays native).
+  // lib/drag.ts (JS budget pass) reports first/last/movement only; a flick = short, fast leftward swipe.
+  const dragT0 = useRef(0);
   const bind = useDrag(
-    ({ active: dragging, movement: [mx], velocity: [vx], direction: [dirX], tap: isTap, cancel }) => {
+    ({ first, last, movement: [mx], tap: isTap }) => {
       if (isTap) return;
+      if (first) dragT0.current = performance.now();
       setCoach(false);
-      if (dragging) {
-        if (mx > 40) cancel();
+      if (!last) {
         setDx(Math.min(0, mx));
         return;
       }
-      if (mx < -70 || (vx > 0.6 && dirX < 0 && mx < -24)) {
+      const ms = Math.max(1, performance.now() - dragT0.current);
+      if (mx < -70 || (mx < -24 && -mx / ms > 0.6)) {
         haptic("medium");
         router.push(makerHref);
       }

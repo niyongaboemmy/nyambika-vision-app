@@ -6,7 +6,7 @@ import { useState } from "react";
 import { AddressesCard } from "@/components/bag";
 import { NotificationPrefsCard } from "@/components/notification-prefs";
 import { PasskeysCard } from "@/components/passkeys";
-import { Icon, type IconName } from "@/components/studio";
+import { Icon, type IconName } from "@/components/icons";
 import { Button, ErrorNote, Fact, LearnMore, Screen, Sheet, TopBar } from "@/components/ui";
 import { api } from "@/lib/api";
 import { useSession } from "@/lib/session";

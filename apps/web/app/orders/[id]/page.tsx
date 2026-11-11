@@ -11,7 +11,7 @@ import { api, rwf } from "@/lib/api";
 import { haptic } from "@/lib/native";
 import { ORDER_LABEL, type OrderView } from "@/lib/orders";
 import { useSession } from "@/lib/session";
-import { OrderMoneyPanel, useOrderMoney } from "@/components/region";
+import { OrderMoneyPanel, useOrderMoney } from "@/components/region-pay";
 import { useApi } from "@/lib/use-api";
 
 /** Order: MoMo approval → “Paid ✓ directly to the maker” → ambient timeline (prototype v2 · 15/16/17). */

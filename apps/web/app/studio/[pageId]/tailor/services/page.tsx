@@ -1,6 +1,6 @@
 "use client";
 
-import { MEASUREMENT_FIELDS } from "@nyambika/contracts";
+import { MEASUREMENT_FIELDS } from "@nyambika/contracts/tailor-data";
 import { useState } from "react";
 import { Card, Empty, Field, Icon, Input, Note, SButton, Textarea } from "@/components/studio";
 import { DeskNav } from "@/components/tailor-studio";

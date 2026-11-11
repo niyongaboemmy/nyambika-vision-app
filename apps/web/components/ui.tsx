@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useId, useRef, useState, type ButtonHTMLAttributes, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { isExpectedText, LimitState } from "./limit-state";
-import { Icon } from "@/components/studio";
+import { Icon } from "@/components/icons";
 
 /* Shopper primitives (aurora). Exported names and props are stable (other screens import them); everything
  * styles itself with theme tokens so it reads right in both light and dark (docs/design/ui-audit.md). */
@@ -46,24 +46,8 @@ export function TopBar({ title, back, right }: { title?: ReactNode; back?: strin
   );
 }
 
-export function Button({
-  variant = "primary",
-  className = "",
-  ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: "primary" | "glass" | "ghost" | "danger" }) {
-  const styles = {
-    primary: "grad-cta text-white shadow-[0_10px_30px_rgba(139,92,246,.35)]",
-    glass: "glass text-white",
-    ghost: "text-txt/80 hover:text-txt",
-    danger: "bg-red-600 text-white",
-  }[variant];
-  return (
-    <button
-      {...props}
-      className={`press inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl px-5 font-semibold disabled:opacity-50 ${styles} ${className}`}
-    />
-  );
-}
+// Button lives in button.tsx (no client code: pages can import it without the rest of this kit, JS budget pass).
+export { Button } from "./button";
 
 /** Toggle chip when it has an action; a plain (non-interactive) label chip otherwise — never a decorative button. */
 export function Chip({ children, active, onClick }: { children: ReactNode; active?: boolean; onClick?: () => void }) {
