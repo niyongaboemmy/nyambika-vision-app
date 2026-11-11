@@ -17,6 +17,8 @@ import { CheckoutModule, CheckoutService } from "../checkout/checkout.module";
 import { PasskeysModule, PasskeysService } from "../passkeys/passkeys.module";
 import { Twin3dModule } from "../twin3d/twin3d.module";
 import { Twin3dService } from "../twin3d/twin3d.service";
+import { VrModule } from "../vr/vr.module";
+import { VrService } from "../vr/vr.service";
 
 /** Privacy centre (FR-PRV-01..07, CMP-01..05): consents, export, deletion cascade. */
 @Controller("privacy")
@@ -33,6 +35,7 @@ export class PrivacyController {
     private checkout: CheckoutService,
     private passkeys: PasskeysService,
     private twin3d: Twin3dService,
+    private vr: VrService,
   ) {}
 
   @Get()
@@ -83,7 +86,8 @@ export class PrivacyController {
     const [measurements, customOrders] = await Promise.all([this.measurements.exportFor(user.id), this.customOrders.exportFor(user.id)]);
     const [bagAndAddresses, passkeys] = await Promise.all([this.checkout.exportFor(user.id), this.passkeys.exportFor(user.id)]);
     const twin3d = await this.twin3d.exportFor(user.id);
-    res.send(JSON.stringify({ exportedAt: new Date(), note: "Twin and look images are available on request; they are encrypted at rest. Voice recordings are never stored.", user: u, circlePolls, wardrobe, measurements, customOrders, ...bagAndAddresses, passkeys, twin3d }, null, 2));
+    const fashionShowRsvps = await this.vr.exportFor(user.id);
+    res.send(JSON.stringify({ exportedAt: new Date(), note: "Twin and look images are available on request; they are encrypted at rest. Voice recordings are never stored.", user: u, circlePolls, wardrobe, measurements, customOrders, ...bagAndAddresses, passkeys, twin3d, fashionShowRsvps }, null, 2));
   }
 
   /** Deletion cascade with a recorded job and per-step status. */
@@ -125,6 +129,8 @@ export class PrivacyController {
       const m = await this.measurements.deleteFor(user.id);
       steps.push({ step: "Measurement profile deleted; tailor shares ended", done: true, detail: `${m.sharesRevoked} active shares ended` });
       const [bag, keys] = await Promise.all([this.checkout.deleteFor(user.id), this.passkeys.deleteFor(user.id)]);
+      const rsvps = await this.vr.deleteFor(user.id);
+      steps.push({ step: "Fashion show RSVPs deleted", done: true, detail: `${rsvps} RSVPs` });
       steps.push({ step: "Saved addresses, bag and passkeys deleted", done: true, detail: `${bag.addresses} addresses, ${bag.bagItems} bag items, ${keys} passkeys` });
       for (const p of CONSENT_PURPOSES) await this.consent.record(user.id, p, false, locale);
       await this.prisma.session.updateMany({ where: { userId: user.id }, data: { revokedAt: new Date() } });
@@ -137,5 +143,5 @@ export class PrivacyController {
   }
 }
 
-@Module({ imports: [TwinModule, CircleModule, WardrobeModule, TailorModule, CheckoutModule, PasskeysModule, Twin3dModule], controllers: [PrivacyController] })
+@Module({ imports: [TwinModule, CircleModule, WardrobeModule, TailorModule, CheckoutModule, PasskeysModule, Twin3dModule, VrModule], controllers: [PrivacyController] })
 export class PrivacyModule {}

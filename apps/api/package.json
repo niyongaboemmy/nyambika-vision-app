@@ -13,6 +13,7 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:seed:pilot": "tsx prisma/seed-pilot.ts",
     "db:seed:3d": "tsx prisma/seed-3d.ts",
+    "db:seed:vr": "tsx prisma/seed-vr.ts",
     "db:seed:agents": "tsx prisma/seed-agents.ts",
     "db:reset": "prisma migrate reset --force"
   },
