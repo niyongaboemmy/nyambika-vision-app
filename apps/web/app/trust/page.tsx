@@ -34,7 +34,7 @@ const PROMISES: { icon: IconName; label: string }[] = [
   { icon: "shield", label: "Makers never get your twin or looks" },
   { icon: "sparkle", label: "AI looks labelled · C2PA" },
   { icon: "wallet", label: "Paid directly to the maker" },
-  { icon: "mic", label: "Voice turned to text, audio deleted" },
+  { icon: "mic", label: "Audio is never stored · voice becomes text" },
 ];
 
 /** Trust centre (prototype v2 structure · FR-PRV): consents, data, deletion. */
@@ -88,7 +88,7 @@ export default function Trust() {
               <li>Makers never receive your twin or your looks, only what you order.</li>
               <li>Every AI look is labelled and carries Content Credentials (C2PA).</li>
               <li>You pay makers directly. Nyambika never holds your money.</li>
-              <li>When you speak to the Muse, your recording is turned into text and deleted straight away. Audio is never stored.</li>
+              <li>When you speak to the Muse, your recording is turned into text and deleted straight away; no audio is kept.</li>
             </ul>
           </LearnMore>
         </section>

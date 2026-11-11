@@ -112,7 +112,7 @@ assert(tampered.status() === 403, "tampered motion link is refused");
 
 // ── Maker Space: 3D section in the product sheet ─────────────────────────────
 await page.goto(`${BASE}/m/uwase-couture`);
-const option = page.getByRole("option", { name: new RegExp(seeded.title) });
+const option = page.getByRole("listbox", { name: "Collection" }).getByRole("option", { name: new RegExp(seeded.title) });
 await option.waitFor();
 for (let i = 0; i < 8 && (await option.getAttribute("aria-selected")) !== "true"; i++) {
   await option.click();

@@ -166,7 +166,8 @@ assert(final.measurementShare && !final.measurementShare.active, "measurement sh
 // ── Studio: slots, services, product morph options ────────────────────────────
 await tailor.goto(`${BASE}/studio/${uwase.id}/tailor/slots`);
 await tailor.getByText("Add fitting times").waitFor();
-await tailor.getByRole("button", { name: "17:00" }).click();
+// First free time (17:00 is often already published on a reused dev database).
+await tailor.locator("button[aria-pressed]:not([disabled])").filter({ hasText: /^\d\d:\d\d$/ }).first().click();
 await tailor.waitForTimeout(200);
 await tailor.screenshot({ path: `${out}70-tailor-slots.png`, fullPage: true });
 await tailor.goto(`${BASE}/studio/${uwase.id}/tailor/services`);

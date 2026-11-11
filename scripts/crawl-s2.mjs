@@ -32,7 +32,7 @@ await shot("mirror-twin-ready");
 
 // Maker Space → try on → guarded, labelled look on the twin
 await page.goto(`${BASE}/m/uwase-couture`);
-await page.getByRole("option", { selected: true }).click();
+await page.getByRole("listbox", { name: "Collection" }).getByRole("option", { selected: true }).click();
 await page.getByRole("button", { name: /try on me/i }).click();
 await page.waitForURL(/looks\/try/);
 await page.locator('img[alt*="AI preview on your twin"]').waitFor({ timeout: 30000 });

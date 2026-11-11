@@ -14,7 +14,8 @@ await page.getByText("Uwase Couture").first().click();
 await page.waitForURL(/\/m\/uwase-couture/);
 await page.getByRole("listbox", { name: "Collection" }).waitFor();
 await shot("maker-space");
-await page.getByRole("option", { selected: true }).click();
+// Scope to the 2D collection: the 3D shelf above it is a second listbox with its own selected option.
+await page.getByRole("listbox", { name: "Collection" }).getByRole("option", { selected: true }).click();
 await page.getByText(/order on whatsapp/i).waitFor();
 await shot("maker-product-sheet");
 

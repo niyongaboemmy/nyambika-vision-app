@@ -41,10 +41,10 @@ await page.waitForTimeout(11000);
 await page.goto(`${BASE}/m/uwase-couture`);
 await page.reload();
 // First tap centres a side card in the coverflow, the second opens it.
-const card = page.getByRole("option", { name: new RegExp(title.slice(0, 12)) }).first();
+const card = page.getByRole("listbox", { name: "Collection" }).getByRole("option", { name: new RegExp(title.slice(0, 12)) }).first();
 await card.click();
 await page.waitForTimeout(400);
-await page.getByRole("option", { selected: true }).click();
+await page.getByRole("listbox", { name: "Collection" }).getByRole("option", { selected: true }).click();
 await page.getByRole("dialog").waitFor();
 await page.locator('img[alt*="on an AI model"]').first().waitFor({ timeout: 10000 });
 await shot("maker-space-studio-gallery");

@@ -130,7 +130,7 @@ export function InferencePanel() {
       {note && <Note ok={note.ok ?? null} error={note.error ?? null} />}
 
       {/* Controls: synthetic traffic + dev chaos */}
-      <div className="st-card grid gap-4 rounded-[24px] p-4 lg:grid-cols-2">
+      <div className="st-card grid grid-cols-1 gap-4 rounded-[24px] p-4 lg:grid-cols-2 [&>*]:min-w-0">
         <div className="space-y-2">
           <p className="text-[13px] font-bold text-cocoa">Test traffic (synthetic personas only)</p>
           <Segmented label="Route for test traffic" value={probeRoute} onChange={setProbeRoute} options={(["tryon", "llm", "stt", "avatar"] as const).map((r) => ({ value: r, label: ROUTE_LABEL[r] }))} />
