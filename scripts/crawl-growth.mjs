@@ -81,7 +81,7 @@ await signIn(S.p, shopperPhone);
 await api(S.p, "/twin/persona", { persona: 2, consent: true });
 await S.p.goto(`${BASE}/m/uwase-couture?src=wa_status&utm_source=whatsapp`);
 await S.p.getByRole("switch", { name: /whatsapp updates/i }).click();
-await S.p.getByText(/you'll hear when they post/i).waitFor();
+await S.p.getByText(/reply STOP any ?time/i).waitFor();
 await S.snap("maker-space-optin", true);
 const product = uwase.products.find((p) => p.readiness === "READY" && (p.madeToOrder || p.variants.some((v) => v.inStock)));
 const variant = product.variants.find((v) => product.madeToOrder || v.inStock);

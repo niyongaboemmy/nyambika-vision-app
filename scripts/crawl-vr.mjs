@@ -169,10 +169,10 @@ assert((await viewers(page)).startsWith("2 ") && (await viewers(viewerB)).starts
 await page.waitForTimeout(7000); // past the intro: first look on the runway
 await page.getByRole("button", { name: /^React: Fire/ }).click();
 await page.getByRole("button", { name: /^React: Love it/ }).click();
-await viewerB.waitForFunction(() => /Fire 1/.test(document.body.innerText) && /Love it 1/.test(document.body.innerText), null, { timeout: 8000 });
+await viewerB.waitForFunction(() => /Fire\s*1/.test(document.body.innerText) && /Love it\s*1/.test(document.body.innerText), null, { timeout: 8000 });
 assert(true, "viewer B sees viewer A's reactions live");
 await viewerB.getByRole("button", { name: /^React: Applause/ }).click();
-await page.waitForFunction(() => /Applause 1/.test(document.body.innerText), null, { timeout: 8000 });
+await page.waitForFunction(() => /Applause\s*1/.test(document.body.innerText), null, { timeout: 8000 });
 await page.waitForTimeout(600);
 await shot("live-show-viewer-a");
 await viewerB.screenshot({ path: new URL("./crawl-output/vr/30-live-show-viewer-b.png", import.meta.url).pathname });

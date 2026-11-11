@@ -82,7 +82,7 @@ try {
   await page.waitForTimeout(1500);
   await shot("mr-preview-synthetic-body");
   assert(await page.getByText("Experimental", { exact: true }).first().isVisible(), "labelled experimental");
-  assert(await page.getByText(/never receives camera images/).isVisible(), "privacy note: camera frames never reach the page");
+  assert(await page.getByText(/never receives camera images/).first().isVisible(), "privacy note: camera frames never reach the page");
   assert(await page.getByRole("button", { name: /Use a virtual room instead/ }).isVisible(), "VR fallback offered when immersive-vr is also supported");
   const swatches = page.locator('fieldset:has(legend:text-matches("Colour")) button');
   if ((await swatches.count()) > 1) {
