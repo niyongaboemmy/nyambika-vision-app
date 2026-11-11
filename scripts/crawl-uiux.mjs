@@ -6,7 +6,7 @@
 //   THEMES=light,dark   (default both)     VIEWPORTS=390,1280 (default; add 360 to also screenshot 360)
 //   ONLY=muse,bag       (substring filter on screen names)   AXE=0 to skip axe (quick visual runs)
 // Screenshots: scripts/crawl-output/uiux/<label>/<theme>-<vp>/<nn>-<screen>.png
-import { mkdirSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { BASE, signIn } from "./crawl-lib.mjs";
 
@@ -23,6 +23,10 @@ const root = new URL(`./crawl-output/uiux/${label}/`, import.meta.url).pathname;
 const browser = await chromium.launch({ args: ["--enable-unsafe-swiftshader", "--use-gl=angle", "--use-angle=swiftshader", "--use-fake-ui-for-media-stream", "--use-fake-device-for-media-stream"] });
 const issues = [];
 const axeSummary = [];
+// Copy & alignment pass: per-screen words, paragraphs taller than 2 lines and small tap targets at 390 px.
+// STRICT_TARGETS=1 turns tap targets under 44 px into failures.
+const metrics = {};
+const STRICT = process.env.STRICT_TARGETS === "1";
 
 const vpOpts = (w) =>
   w >= 1000
@@ -136,6 +140,42 @@ async function settle(page) {
   await page.waitForTimeout(400);
 }
 
+/** Visible words; paragraphs taller than 2 lines (closed LearnMore details are hidden, so not counted); and
+ *  interactive elements whose hit area (own box, wrapping <label>, or a `.hit` ::after expansion) is under 44 px. */
+async function copyMetrics(page) {
+  return page.evaluate(() => {
+    const vis = (el) => {
+      const r = el.getBoundingClientRect();
+      const cs = getComputedStyle(el);
+      return r.width > 0 && r.height > 0 && cs.visibility !== "hidden" && cs.display !== "none" && !el.closest("[aria-hidden=true],.sr-only");
+    };
+    const words = (document.body.innerText.match(/[\p{L}\p{N}][\p{L}\p{N}'’.-]*/gu) ?? []).length;
+    const paras = [];
+    for (const el of document.querySelectorAll("p,li,span,div,dd,figcaption,small,label,legend")) {
+      if (!vis(el) || el.closest("input,textarea,select,code,pre,[role=log],[data-allow-prose]")) continue;
+      const own = [...el.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join("").trim();
+      if (own.length < 40) continue;
+      const cs = getComputedStyle(el);
+      const lh = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.4;
+      const lines = Math.round(el.getBoundingClientRect().height / lh);
+      if (lines > 2) paras.push({ lines, text: el.innerText.slice(0, 90) });
+    }
+    const small = [];
+    for (const el of document.querySelectorAll("a[href],button,[role=button],[role=switch],[role=tab],[role=option],select,summary,input:not([type=hidden]),textarea")) {
+      if (!vis(el) || el.disabled) continue;
+      if (el.tagName === "A" && getComputedStyle(el).display === "inline" && el.parentElement?.closest("p,li")) continue; // inline text link
+      const r = el.getBoundingClientRect();
+      const hr = (el.closest("label") ?? el).getBoundingClientRect();
+      const af = getComputedStyle(el, "::after");
+      const exp = af.content !== "none" && af.position === "absolute";
+      const w = Math.max(r.width, hr.width, exp ? parseFloat(af.width) || 0 : 0);
+      const h = Math.max(r.height, hr.height, exp ? parseFloat(af.height) || 0 : 0);
+      if (w < 43.5 || h < 43.5) small.push(`${el.tagName.toLowerCase()} ${Math.round(w)}x${Math.round(h)} "${(el.getAttribute("aria-label") ?? el.innerText ?? "").trim().slice(0, 30)}"`);
+    }
+    return { words, longParas: paras.length, paras: paras.sort((a, b) => b.lines - a.lines).slice(0, 8), smallTargets: small.length, small: small.slice(0, 12) };
+  });
+}
+
 async function overflow(page, name) {
   const w = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   if (w > 1) issues.push(`[360] horizontal overflow ${w}px on ${name}`);
@@ -171,6 +211,11 @@ for (const theme of THEMES) {
         await settle(page);
         if (action) { await action(page); await page.waitForTimeout(500); }
         if (vp === 360) await overflow(page, name);
+        if (vp === 390) {
+          const m = await copyMetrics(page);
+          (metrics[name] ??= {})[theme] = m;
+          if (STRICT && m.smallTargets) issues.push(`${tag} ${m.smallTargets} tap target(s) under 44px e.g. ${m.small.slice(0, 3).join(", ")}`);
+        }
         if (shoot) {
           n += 1;
           await page.screenshot({ path: `${out}${String(n).padStart(2, "0")}-${name}.png`, caret: "initial" });
@@ -192,6 +237,13 @@ for (const theme of THEMES) {
 }
 
 await browser.close();
+mkdirSync(root, { recursive: true });
+writeFileSync(`${root}metrics.json`, JSON.stringify(metrics, null, 1));
+console.log(`\ncopy metrics (390, ${THEMES[0]}): screen · words · paragraphs >2 lines · tap targets <44px`);
+for (const [name, m] of Object.entries(metrics)) {
+  const x = m[THEMES[0]];
+  if (x) console.log(` - ${name.padEnd(24)} ${String(x.words).padStart(4)} · ${x.longParas} · ${x.smallTargets}`);
+}
 if (AXE) console.log(`\naxe (390px):\n${axeSummary.map((s) => ` - ${s}`).join("\n")}`);
 console.log(`\nscreens: ${S.length} · themes: ${THEMES.join("/")} · viewports: ${VPS.join("/")} (+360 overflow) · output ${root}`);
 if (issues.length) {
