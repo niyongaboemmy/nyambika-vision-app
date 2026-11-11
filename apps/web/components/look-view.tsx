@@ -8,6 +8,7 @@ import { CircleAsk } from "@/components/circle-ask";
 import { MorphRail } from "@/components/morph-sheet";
 import { XrRail } from "@/components/xr-rail";
 import { VideoRail } from "@/components/video-tryon";
+import { LookPrice } from "@/components/region";
 import { Avatar, Sheet } from "@/components/ui";
 import { rwf } from "@/lib/api";
 import { isRendering, TYPE_ICON, type Look } from "@/lib/looks";
@@ -111,7 +112,7 @@ export function LookView({ look, index, total, intentLabel, onSave, onVariant, o
               <p className="truncate text-sm text-txt/80">{TYPE_ICON[look.maker.memberType]} · {look.maker.sector}{look.maker.madeBy.length ? ` · by ${look.maker.madeBy.join(", ")}` : ""}</p>
             </div>
           </Link>
-          <p className="mt-2 font-display text-lg font-black">{rwf(look.product.priceRwf)} · <span className="font-sans text-base font-semibold">{look.product.madeToOrder ? "made to measure" : look.product.title}</span></p>
+          <p className="mt-2 font-display text-lg font-black"><LookPrice handle={look.maker.handle} productId={look.product.id} priceRwf={look.product.priceRwf} /> · <span className="font-sans text-base font-semibold">{look.product.madeToOrder ? "made to measure" : look.product.title}</span></p>
           <div className="mt-1 flex items-center justify-between gap-2">
             <p className="text-xs text-mut">← swipe for Maker Space · ✋ hold to buy</p>
             {children}

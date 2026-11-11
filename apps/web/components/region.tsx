@@ -5,9 +5,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button, Chip, ErrorNote, Sheet, Spinner } from "@/components/ui";
-import { api } from "@/lib/api";
+import { api, rwf } from "@/lib/api";
 import type { MakerProduct, MakerSpace } from "@/lib/maker";
-import { COUNTRY_NAMES, useRegion, type Commerce, type OrderMoney } from "@/lib/region";
+import { COUNTRY_NAMES, useCommerce, useRegion, type Commerce, type OrderMoney } from "@/lib/region";
 import { useSession } from "@/lib/session";
 import { track } from "@/lib/track";
 
@@ -49,6 +49,15 @@ export function Price({ minor, currency, className = "", approxClassName = "text
       {d.approx && <span className={`${approxClassName.includes("block") ? "" : "ml-1.5 "}text-[0.85em] font-medium ${approxClassName}`}>{d.approx}</span>}
     </span>
   );
+}
+
+/** A look's price in its maker's currency (hardening pass 1: KES/UGX/TZS pages no longer show an RWF figure in the Looks feed). */
+export function LookPrice({ handle, productId, priceRwf }: { handle: string; productId: string; priceRwf: number }) {
+  const c = useCommerce(handle);
+  if (c === undefined) return <span className="inline-block h-4 w-24 animate-pulse rounded bg-white/10 align-middle" aria-hidden />;
+  if (!c || c.currency === "RWF") return <>{rwf(priceRwf)}</>;
+  const minor = c.prices[productId];
+  return minor == null ? <>{c.currency} · ask the maker</> : <Price minor={minor} currency={c.currency} />;
 }
 
 /** Pill that opens the country / display-currency / cross-border sheet. */
