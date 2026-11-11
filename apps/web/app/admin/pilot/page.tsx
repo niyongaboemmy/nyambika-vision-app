@@ -390,6 +390,8 @@ function Hypercare({ h, reload }: { h: Summary["hypercare"]; reload: () => Promi
         <Kpi label="Open incidents" value={h.incidents.filter((i) => !i.resolvedAt).length} warn={h.incidents.some((i) => !i.resolvedAt)} hint={`${h.incidents.length} logged in 14 days`} />
       </div>
       <Card className="overflow-x-auto">
+        {/* Keyboard users can scroll the wide table (focusable region, WCAG 2.1.1). */}
+        <div role="region" aria-label="Daily AI cost table" tabIndex={0} className="overflow-x-auto rounded-xl">
         <table className="w-full min-w-[520px] text-sm">
           <caption className="sr-only">Daily AI cost and guard failures</caption>
           <thead><tr className="text-left text-xs text-cocoa-2"><th className="py-1 font-bold">Day</th><th className="font-bold">AI cost</th><th className="text-right font-bold">Gens</th><th className="text-right font-bold">Withheld</th><th className="text-right font-bold">Guard</th><th className="text-right font-bold">Incidents</th></tr></thead>
@@ -411,6 +413,7 @@ function Hypercare({ h, reload }: { h: Summary["hypercare"]; reload: () => Promi
             ))}
           </tbody>
         </table>
+        </div>
       </Card>
       <Card className="space-y-3">
         <h3 className="font-extrabold text-cocoa">Incident log</h3>
@@ -500,7 +503,7 @@ function CohortPanel() {
           </div>
           {codes.length > 0 && <p aria-label="New invite codes" className="rounded-2xl bg-emerald-50 p-3 font-mono text-sm text-mint-ink">{codes.join("  ")}</p>}
           <ul className="flex flex-wrap gap-2">
-            {data.invites.map((i) => <Chip key={i.code} tone={i.uses >= i.maxUses ? "stone" : "sky"}><span className="font-mono">{i.code}</span> · {i.kind === "PAGE" ? "member" : "shopper"} · {i.uses}/{i.maxUses}</Chip>)}
+            {data.invites.map((i) => <li key={i.code}><Chip tone={i.uses >= i.maxUses ? "stone" : "sky"}><span className="font-mono">{i.code}</span> · {i.kind === "PAGE" ? "member" : "shopper"} · {i.uses}/{i.maxUses}</Chip></li>)}
           </ul>
         </Card>
         <Card className="space-y-2">

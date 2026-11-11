@@ -223,7 +223,8 @@ function HoldRing({ label, disabled, busy, onHeld, hint }: { label: string; disa
   const r = 52;
   const c = 2 * Math.PI * r;
   return (
-    <div className="mt-2 flex flex-col items-center gap-2">
+    // Visual only: the ring stays pinned at the bottom of the scrolling sheet so the primary action is always in reach.
+    <div className="sticky bottom-0 z-10 -mx-5 mt-2 flex flex-col items-center gap-2 bg-gradient-to-t from-ink-2 from-60% to-transparent px-5 pb-1 pt-5">
       <button
         aria-label={label}
         onPointerDown={begin}

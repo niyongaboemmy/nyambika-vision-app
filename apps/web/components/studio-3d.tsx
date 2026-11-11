@@ -135,7 +135,7 @@ export function Garment3dCard({ productId, title, canManage }: { productId: stri
       </div>
 
       <StudioSheet open={preview} onClose={() => setPreview(false)} title={`${title} in 3D`}>
-        <div className="-mx-1 rounded-[30px] bg-ink p-2 text-txt">
+        <div className="-mx-1 rounded-[30px] bg-surface-3 p-2 text-fg">
           {preview && <GarmentViewer assets={viewerAssets} title={title} />}
         </div>
         <p className="mt-3 text-xs text-cocoa-2">This is what shoppers see after you approve it. On phones with AR they can also place it in their room at true size.</p>

@@ -1,14 +1,17 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
-import { GrowthInsights } from "@/components/growth-insights";
 import { Badge, Chip, Empty, Field, Icon, Input, Meter, Note, ScreenSkeleton, SButton, SectionTitle, Segmented, Select, Skeleton, StudioSheet, Switch, Textarea } from "@/components/studio";
 import { api, rwf } from "@/lib/api";
 import type { BroadcastState, Discount, PromoCard } from "@/lib/growth";
 import type { StudioProduct } from "@/lib/types";
 import { useApi } from "@/lib/use-api";
 import { useManagedPage } from "../layout";
+
+// Lazy (below the fold / on demand): keeps this route's first-load JS small.
+const GrowthInsights = dynamic(() => import("@/components/growth-insights").then((m) => m.GrowthInsights), { ssr: false, loading: () => <Skeleton className="h-72" /> });
 
 type Tab = "share" | "offers" | "broadcast" | "insights";
 const TABS: { value: Tab; label: string }[] = [
@@ -65,11 +68,10 @@ function ProductPicker({ products, value, onChange, label }: { products: StudioP
               key={p.id}
               type="button"
               aria-pressed={on}
-              aria-label={`${p.title}, ${rwf(p.priceRwf)}`}
               onClick={() => onChange(p.id)}
               className={`st-press relative w-[104px] shrink-0 overflow-hidden rounded-2xl bg-white text-left ring-2 ring-inset transition ${on ? "ring-violet-ink shadow-[0_8px_20px_-10px_rgba(98,57,201,.6)]" : "ring-hairline"}`}
             >
-              <span className="block aspect-[4/5] bg-paper-2">{img ? <img src={img} alt="" className="size-full object-cover" /> : <Icon name="hanger" className="m-auto mt-8 size-6 text-cocoa-3" />}</span>
+              <span className="block aspect-[4/5] bg-paper-2">{img ? <img loading="lazy" decoding="async" src={img} alt="" className="size-full object-cover" /> : <Icon name="hanger" className="m-auto mt-8 size-6 text-cocoa-3" />}</span>
               <span className="block truncate px-2 pt-1.5 text-xs font-bold text-cocoa">{p.title}</span>
               <span className="block px-2 pb-2 text-[11px] font-semibold text-cocoa-2">{rwf(p.priceRwf)}</span>
               {on && <span className="absolute right-1.5 top-1.5 grid size-6 place-items-center rounded-full bg-violet-ink text-white"><Icon name="check" className="size-3.5" /></span>}

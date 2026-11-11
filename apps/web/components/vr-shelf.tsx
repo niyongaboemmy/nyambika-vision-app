@@ -88,6 +88,8 @@ export function Shelf3d({ shelf, brand, commerce }: { shelf: Shelf; brand: strin
         <p className="pb-1 text-xs text-mut" aria-live="polite">{i + 1} / {count}</p>
       </div>
 
+      {/* The shelf is a lit 3D stage (stays dark in both themes); its controls sit beside the listbox, not inside it. */}
+      <div className="theme-media relative mx-3 mt-3 text-txt">
       <div
         ref={ref}
         {...bind()}
@@ -102,7 +104,7 @@ export function Shelf3d({ shelf, brand, commerce }: { shelf: Shelf; brand: strin
           if (e.key === "End") setI(count - 1);
           if (e.key === "Enter" || e.key === " ") (e.preventDefault(), void open(focus));
         }}
-        className="relative mx-3 mt-3 h-[330px] touch-pan-y select-none overflow-hidden rounded-[30px] border border-white/10 outline-none [perspective:1000px] focus-visible:ring-2 focus-visible:ring-gold"
+        className="relative h-[330px] touch-pan-y select-none overflow-hidden rounded-[30px] border border-white/10 outline-none [perspective:1000px] focus-visible:ring-2 focus-visible:ring-gold"
         style={{ background: "radial-gradient(70% 60% at 50% 30%, rgba(139,92,246,.26), transparent 70%), radial-gradient(60% 40% at 50% 100%, rgba(224,112,63,.30), transparent 70%), linear-gradient(180deg,#15111f,#0a090e)" }}
       >
         {/* The glass shelf: a lit edge with a soft reflection under the pieces. */}
@@ -146,15 +148,16 @@ export function Shelf3d({ shelf, brand, commerce }: { shelf: Shelf; brand: strin
                   style={{ width: 190, height: 240, background: "transparent", pointerEvents: "none", "--poster-color": "transparent", "--progress-bar-color": "transparent" } as CSSProperties}
                 />
               ) : it.poster ? (
-                <img src={it.poster} alt="" draggable={false} className="max-h-full max-w-full object-contain drop-shadow-[0_18px_24px_rgba(0,0,0,.55)]" />
+                <img loading="lazy" decoding="async" src={it.poster} alt="" draggable={false} className="max-h-full max-w-full object-contain drop-shadow-[0_18px_24px_rgba(0,0,0,.55)]" />
               ) : (
                 <div className="skeleton h-full w-full rounded-[40px]" />
               )}
             </div>
           );
         })}
+      </div>
 
-        <div className="absolute inset-x-0 bottom-3 flex items-center justify-between gap-2 px-3">
+        <div className="absolute inset-x-0 bottom-3 z-20 flex items-center justify-between gap-2 px-3">
           <ShelfButton label="Previous piece" disabled={i === 0} onClick={() => go(-1)}>‹</ShelfButton>
           <button onClick={() => void open(focus)} className="min-w-0 flex-1 rounded-2xl px-2 py-1 text-center">
             <span className="block truncate text-sm font-bold">{focus.title}</span>
@@ -162,7 +165,7 @@ export function Shelf3d({ shelf, brand, commerce }: { shelf: Shelf; brand: strin
           </button>
           <ShelfButton label="Next piece" disabled={i === count - 1} onClick={() => go(1)}>›</ShelfButton>
         </div>
-        <span className="pointer-events-none absolute left-3 top-3 rounded-full border border-white/15 bg-black/55 px-2.5 py-1 text-[11px] font-semibold backdrop-blur">✨ {t("xr.aiLabel")}</span>
+        <span className="pointer-events-none absolute left-3 top-3 z-20 rounded-full border border-white/15 bg-black/55 px-2.5 py-1 text-[11px] font-semibold backdrop-blur">✨ {t("xr.aiLabel")}</span>
       </div>
 
       <div className="mt-3 grid gap-2 px-4">
@@ -183,7 +186,7 @@ export function Shelf3d({ shelf, brand, commerce }: { shelf: Shelf; brand: strin
         )}
         {shelf.shows.map((s) => (
           <Link key={s.id} href={`/m/${shelf.handle}/shows/${s.id}`} className="glass flex items-center gap-3 rounded-[22px] p-2.5 pr-4">
-            {s.cover ? <img src={s.cover} alt="" className="size-14 shrink-0 rounded-2xl object-cover" /> : <span className="size-14 shrink-0 rounded-2xl bg-white/10" />}
+            {s.cover ? <img loading="lazy" decoding="async" src={s.cover} alt="" className="size-14 shrink-0 rounded-2xl object-cover" /> : <span className="size-14 shrink-0 rounded-2xl bg-white/10" />}
             <span className="min-w-0 flex-1">
               <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest">
                 {s.phase === "LIVE" ? <span className="rounded-full bg-terra px-2 py-0.5 text-white">● {t("vr.live")}</span> : <span className="text-gold">{t("vr.fashionShow")}</span>}

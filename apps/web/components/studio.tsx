@@ -546,6 +546,26 @@ const PATHS = {
   refresh: "M21 12a9 9 0 1 1-2.6-6.4L21 8M21 3v5h-5",
   qr: "M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2v2h-2zM18 14h2v2h-2zM14 18h2v2h-2zM18 18h2v2h-2z",
   globe: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18",
+  // UI/UX modernisation: shared with shopper screens (controls use SVG icons; emoji stay as expressive content).
+  sun: "M12 17a5 5 0 1 0 0-10 5 5 0 0 0 0 10M12 1.5v2M12 20.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M1.5 12h2M20.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4",
+  moon: "M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11",
+  monitor: "M3 4h18v12H3zM8 20h8M12 16v4",
+  mic: "M12 15a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v7a3 3 0 0 0 3 3M19 11a7 7 0 0 1-14 0M12 18v3",
+  keyboard: "M3 6h18v12H3zM7 10h.01M11 10h.01M15 10h.01M7 14h10",
+  menu: "M4 7h16M4 12h16M4 17h16",
+  volume: "M4 9v6h4l5 4V5L8 9zM16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12",
+  mute: "M4 9v6h4l5 4V5L8 9zM17 9l5 5M22 9l-5 5",
+  heart: "M12 20s-7.5-4.6-9.3-9.1A5 5 0 0 1 12 6a5 5 0 0 1 9.3 4.9C19.5 15.4 12 20 12 20",
+  bag: "M5 8h14l-1 12H6zM9 8V6a3 3 0 0 1 6 0v2",
+  box: "M21 8 12 3 3 8v8l9 5 9-5zM3 8l9 5 9-5M12 13v8",
+  ruler: "M3 17 17 3l4 4L7 21zM7 13l2 2M10 10l2 2M13 7l2 2",
+  cube: "M12 2 3 7v10l9 5 9-5V7zM3 7l9 5 9-5M12 12v10",
+  mirror: "M12 3c3.9 0 7 3.6 7 8s-3.1 8-7 8-7-3.6-7-8 3.1-8 7-8M12 19v3M8 22h8",
+  lock: "M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4",
+  info: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18M12 11v5M12 8h.01",
+  needle: "M20 4 9 15M7 17l-3 3M14 4h6v6M9 15l-2 2 1 1",
+  search: "M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14M21 21l-4.3-4.3",
+  arrowRight: "M5 12h14M13 6l6 6-6 6",
 } as const;
 
 export type IconName = keyof typeof PATHS;

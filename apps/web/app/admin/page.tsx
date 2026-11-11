@@ -1,13 +1,17 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AdminShell } from "@/components/admin-shell";
-import { InferencePanel } from "@/components/inference-panel";
-import { Badge, Card, Chip, Empty, Icon, Kpi, Meter, Monogram, Note, ScreenSkeleton, SButton, Switch } from "@/components/studio";
+import { Badge, Card, Chip, Empty, Icon, Kpi, Meter, Monogram, Note, ScreenSkeleton, SButton, Skeleton, Switch } from "@/components/studio";
 import { api, rwf } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { useApi } from "@/lib/use-api";
+import { LearnMore } from "@/components/kit";
+
+// Lazy (below the fold / on demand): keeps this route's first-load JS small.
+const InferencePanel = dynamic(() => import("@/components/inference-panel").then((m) => m.InferencePanel), { ssr: false, loading: () => <Skeleton className="h-72" /> });
 
 interface Overview {
   pages: Record<string, number>;
@@ -271,7 +275,7 @@ function OutboxTab() {
             <span className="min-w-0 break-all text-cocoa-2">· {n.template}</span>
             <span className="ml-auto text-cocoa-2">{new Date(n.createdAt).toLocaleString()}</span>
           </div>
-          <p className="rounded-2xl rounded-tl-md bg-paper p-3 text-sm leading-relaxed break-words text-cocoa ring-1 ring-inset ring-hairline">{n.body.replace(/code: \d{6}/, "code: ••••••")}</p>
+          <p className="break-words rounded-2xl rounded-tl-md bg-paper p-3 text-sm leading-relaxed text-cocoa ring-1 ring-inset ring-hairline [overflow-wrap:anywhere]">{n.body.replace(/code: \d{6}/, "code: ••••••")}</p>
         </li>
       ))}
     </ul>
@@ -351,7 +355,8 @@ function MigrationTab() {
           <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-paper-2 text-cocoa"><Icon name="upload" className="size-5" /></span>
           <div>
             <p className="font-extrabold text-cocoa">Import a wave</p>
-            <p className="text-sm text-cocoa-2">JSON bundle from the legacy export (format in docs/migration.md). Pages are imported hidden; photos go through the readiness pipeline.</p>
+            <p className="text-sm text-cocoa-2">Legacy JSON bundle · imported hidden</p>
+            <LearnMore>JSON bundle from the legacy export (format in docs/migration.md). Pages are imported hidden; photos go through the readiness pipeline.</LearnMore>
             <a href="/admin/network" className="mt-1 inline-block text-sm font-bold text-violet-ink underline">Whole network (waves, outreach, cut-over) →</a>
           </div>
         </div>

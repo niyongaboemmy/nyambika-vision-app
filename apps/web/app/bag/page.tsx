@@ -49,7 +49,7 @@ export default function BagPage() {
 
   return (
     <Screen>
-      <TopBar back="/" title={<span className="font-display text-xl font-black">🛍️ {t("bag.title")}</span>} />
+      <TopBar back="/" title={t("bag.title")} />
       <main className="space-y-4 px-4 pb-40">
         <ErrorNote error={error} />
         {bag === null ? (
@@ -80,7 +80,7 @@ export default function BagPage() {
                 <ul className="space-y-2">
                   {g.lines.map((l) => (
                     <li key={l.id} className="flex items-center gap-3">
-                      {l.image ? <img src={l.image} alt="" className="h-20 w-16 shrink-0 rounded-2xl bg-white/5 object-cover" /> : <span className="h-20 w-16 shrink-0 rounded-2xl bg-white/10" />}
+                      {l.image ? <img loading="lazy" decoding="async" src={l.image} alt="" className="h-20 w-16 shrink-0 rounded-2xl bg-white/5 object-cover" /> : <span className="h-20 w-16 shrink-0 rounded-2xl bg-white/10" />}
                       <div className="min-w-0 flex-1">
                         <p className="truncate font-semibold">{l.title}</p>
                         <p className="truncate text-xs text-mut">{l.colourName} · size {l.size}{l.madeToOrder ? " · tailor-made" : ""}</p>

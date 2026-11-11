@@ -7,7 +7,7 @@ import { HoldToBuy } from "@/components/hold-to-buy";
 import { LookView } from "@/components/look-view";
 import { TwinNudge } from "@/components/twin-nudge";
 import { LimitState } from "@/components/limit-state";
-import { Screen, Spinner } from "@/components/ui";
+import { Screen, ShopperSkeleton } from "@/components/ui";
 import { api } from "@/lib/api";
 import { isRendering, type Look } from "@/lib/looks";
 import { track, trackOnce } from "@/lib/track";
@@ -84,7 +84,7 @@ function Stream() {
     void load().catch(setError);
   };
   if (error && !data) return <Screen><div className="p-6 pt-20"><LimitState error={error} onRetry={retry} /></div></Screen>;
-  if (!data) return <Screen><div className="grid min-h-dvh place-items-center"><Spinner /></div></Screen>;
+  if (!data) return <div className="theme-media"><ShopperSkeleton variant="media" title={false} /></div>;
   if (!data.looks.length) return <Screen><p className="p-6 pt-24 text-center text-mut">No matching looks yet. Try asking differently.</p></Screen>;
 
   const label = intentLabel(data, snap);

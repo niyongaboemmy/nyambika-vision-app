@@ -84,7 +84,7 @@ export default function PollOwner() {
           return (
             <div key={o.id} className="text-center">
               <div className={`relative aspect-[9/16] overflow-hidden rounded-[22px] border bg-white/[.06] transition duration-500 ${leading ? "border-gold/80 shadow-[0_0_30px_rgba(242,184,75,.3)]" : "border-white/15"} ${flash && leading ? "scale-[1.03]" : ""}`}>
-                {o.image ? <img src={o.image} alt={`${o.label} look`} className="h-full w-full object-cover" /> : <div className="skeleton h-full" />}
+                {o.image ? <img loading="lazy" decoding="async" src={o.image} alt={`${o.label} look`} className="h-full w-full object-cover" /> : <div className="skeleton h-full" />}
                 {leading && <span className="absolute left-1/2 top-2 -translate-x-1/2 text-lg" aria-label="Leading">👑</span>}
               </div>
               <p className="mt-2 truncate text-sm font-bold">{o.label}</p>

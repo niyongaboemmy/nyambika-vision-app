@@ -1,11 +1,14 @@
 "use client";
 
-import { EXPERIMENTS } from "@nyambika/contracts";
+import type { EXPERIMENTS } from "@nyambika/contracts";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useExperiment } from "@/lib/experiments";
 import { useSession } from "@/lib/session";
 import { track } from "@/lib/track";
+
+// Literal (type-checked against the contract) so this shell-level nudge does not pull zod into the home route.
+const TWIN_NUDGE: (typeof EXPERIMENTS)["twinNudge"] = "twin.nudge";
 
 /**
  * Pilot experiment "twin vs no-twin nudge" (plan §8.1).
@@ -14,7 +17,7 @@ import { track } from "@/lib/track";
  */
 export function TwinNudge({ place, index = 0 }: { place: "home" | "stream"; index?: number }) {
   const { me, t } = useSession();
-  const arm = useExperiment(EXPERIMENTS.twinNudge);
+  const arm = useExperiment(TWIN_NUDGE);
   const [closed, setClosed] = useState(false);
   const modelFirst = arm === "model_first";
   const show = Boolean(me && !me.hasTwin && arm !== undefined && !closed && (place === "home" ? !modelFirst : modelFirst && index >= 2));

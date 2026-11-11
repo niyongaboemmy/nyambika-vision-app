@@ -1,11 +1,10 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Icon, Kpi, Meter, ScreenSkeleton, Skeleton, type IconName } from "@/components/studio";
 import { ShareSheet } from "@/components/studio-shell";
-import { GrowthHomeCard } from "@/components/growth-insights";
-import { TrendsCard } from "@/components/mlspike-trends";
 import { VoiceModeGate } from "@/components/coop-assist";
 import { rwf } from "@/lib/api";
 import type { OrderView } from "@/lib/orders";
@@ -13,6 +12,10 @@ import { useSession } from "@/lib/session";
 import type { StudioProduct } from "@/lib/types";
 import { useApi } from "@/lib/use-api";
 import { NEEDS_MAKER, useManagedPage } from "./layout";
+const TrendsCard = dynamic(() => import("@/components/mlspike-trends").then((m) => m.TrendsCard), { ssr: false, loading: () => <Skeleton className="h-48" /> });
+
+// Lazy (below the fold / on demand): keeps this route's first-load JS small.
+const GrowthHomeCard = dynamic(() => import("@/components/growth-insights").then((m) => m.GrowthHomeCard), { ssr: false, loading: () => <Skeleton className="h-48" /> });
 
 interface Analytics {
   periodDays: number;

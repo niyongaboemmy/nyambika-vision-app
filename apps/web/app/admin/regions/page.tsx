@@ -9,6 +9,7 @@ import { Badge, Card, Chip, Field, Icon, Input, Kpi, Meter, Note, ScreenSkeleton
 import { api } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { useApi } from "@/lib/use-api";
+import { Fact, LearnMore } from "@/components/kit";
 
 const TABS = ["Overview", "Verify", "Moderation", "Migration", "Flags & models", "Outbox", "Audit", "Pilot", "Agents & partners", "Regions"] as const;
 
@@ -71,7 +72,11 @@ export default function RegionsAdmin() {
         <ScreenSkeleton />
       ) : (
         <>
-          <p className="-mt-2 max-w-2xl text-sm text-cocoa-2">Prepare each EAC country before launch. Makers are paid directly in their own currency; Nyambika never collects. Residency routes decide where a country's data will live.</p>
+          <div className="-mt-2 flex flex-wrap items-center gap-2">
+            <Fact icon="globe">EAC launch prep</Fact>
+            <Fact icon="wallet">Paid directly · local currency</Fact>
+            <LearnMore>Prepare each EAC country before launch. Makers are paid directly in their own currency; Nyambika never collects. Residency routes decide where a country&apos;s data will live.</LearnMore>
+          </div>
           <Segmented label="Region" value={code} onChange={setCode} options={data.regions.map((x) => ({ value: x.code, label: `${x.flag} ${x.name}` }))} />
           <Note error={err} ok={msg} />
 

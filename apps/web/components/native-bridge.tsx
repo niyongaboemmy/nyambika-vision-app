@@ -3,7 +3,8 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { api } from "@/lib/api";
-import { installationId, installNativeShims, isNative, liveActivityPlugin, plugin, setStatusBar, themeForPath } from "@/lib/native";
+import { installationId, installNativeShims, isNative, liveActivityPlugin, plugin, setStatusBar } from "@/lib/native";
+import { useResolvedTheme } from "@/lib/theme";
 import { syncPush } from "@/lib/push";
 import { useSession } from "@/lib/session";
 
@@ -62,9 +63,11 @@ export function NativeBridge() {
     };
   }, [router]);
 
+  // Status bar follows the resolved light/dark theme (both shopper and studio now have both).
+  const theme = useResolvedTheme();
   useEffect(() => {
-    if (isNative()) setStatusBar(themeForPath(path));
-  }, [path]);
+    if (isNative()) setStatusBar(theme);
+  }, [path, theme]);
 
   // Signed in inside the app: refresh the push token and report live-activity tokens to the API.
   useEffect(() => {

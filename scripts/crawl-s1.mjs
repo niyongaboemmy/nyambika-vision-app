@@ -69,11 +69,12 @@ await admin.getByText("Abahizi Sewing Cooperative").click();
 await admin.getByRole("navigation", { name: "Studio" }).getByRole("link", { name: "Products" }).click();
 await admin.getByText(/waiting for approval/i).waitFor();
 await admin.screenshot({ path: new URL("./crawl-output/s1/91-admin-approval-queue.png", import.meta.url).pathname });
-const approve = admin.getByRole("link", { name: skirt }).locator("xpath=ancestor::*[.//button[normalize-space()='Approve']][1]").getByRole("button", { name: "Approve" });
-const approved = admin.waitForResponse((r) => /\/api\/products\/[^/]+\/status$/.test(r.url()) && r.request().method() === "POST");
-await approve.click();
-if (!(await approved).ok()) throw new Error("approval failed");
-await admin.waitForLoadState("networkidle");
+// Approve the queue (earlier runs on a reused slot DB may have left items waiting too).
+for (let i = 0; i < 12 && (await admin.getByRole("button", { name: "Approve" }).count()); i++) {
+  await admin.getByRole("button", { name: "Approve" }).first().click();
+  await admin.waitForTimeout(600);
+}
+await admin.getByText(/waiting for approval/i).waitFor({ state: "detached" });
 await admin.getByRole("navigation", { name: "Studio" }).getByRole("link", { name: "Makers" }).click();
 await admin.getByRole("heading", { name: /Makers \(/ }).waitFor();
 await admin.screenshot({ path: new URL("./crawl-output/s1/92-coop-makers.png", import.meta.url).pathname });

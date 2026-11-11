@@ -6,6 +6,7 @@ import { AdminShell } from "@/components/admin-shell";
 import { Card, Chip, Empty, Icon, Kpi, Note, ScreenSkeleton, SButton, Select } from "@/components/studio";
 import { api } from "@/lib/api";
 import { useApi } from "@/lib/use-api";
+import { LearnMore } from "@/components/kit";
 
 const TABS = ["Overview", "Verify", "Moderation", "Migration", "Flags & models", "Outbox", "Audit", "Pilot"] as const;
 
@@ -120,7 +121,8 @@ export default function NetworkMigration() {
               <input type="file" accept="application/json,.json" className="sr-only" disabled={!!busy} onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} />
             </label>
           </div>
-          <p className="text-xs text-cocoa-2">Up to 2,000 pages per bundle. Pages import on the queue with this many in flight; owners keep their old page until they sign off. Synthetic network: <code className="rounded bg-paper-2 px-1">scripts/migration/make-network.py</code>.</p>
+          <p className="text-xs font-semibold text-cocoa-2">≤ 2,000 pages per bundle · owners keep their old page until sign-off</p>
+          <LearnMore><p className="text-xs">Up to 2,000 pages per bundle. Pages import on the queue with this many in flight; owners keep their old page until they sign off. Synthetic network: <code className="rounded bg-paper-2 px-1">scripts/migration/make-network.py</code>.</p></LearnMore>
           {runs && runs.length > 0 && (
             <label className="block space-y-1.5">
               <span className="text-[13px] font-bold text-cocoa">Wave</span>

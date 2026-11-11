@@ -123,7 +123,12 @@ await approveOnHandset("31-handset-deposit");
 await page.getByText("Book a fitting").waitFor({ timeout: 15000 });
 assert((await api(page, `/custom-orders/${coId}`)).status === "DEPOSIT_PAID", "deposit paid to the tailor");
 
-// Fitting slot
+// Fitting slot (a pilot survey sheet may pop up after the deposit when the pilot is running on this DB)
+const survey = page.getByRole("dialog").getByRole("button", { name: /not now/i });
+if (await survey.waitFor({ timeout: 3000 }).then(() => true, () => false)) {
+  await survey.click();
+  await page.getByRole("dialog").waitFor({ state: "detached" });
+}
 await page.locator('[role="tablist"][aria-label="Day"] button').first().click();
 const time = page.locator("section", { hasText: "Book a fitting" }).locator("button", { hasText: /^\d\d:\d\d$/ }).first();
 await time.click();

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Button, ErrorNote } from "@/components/ui";
+import { Button, EmptyState, ErrorNote } from "@/components/ui";
 import { api } from "@/lib/api";
 import type { Bag, SavedAddress } from "@/lib/bag";
 import type { Look } from "@/lib/looks";
@@ -89,11 +89,10 @@ export function AddressesCard() {
 export function EmptyBag() {
   const { t } = useSession();
   return (
-    <div className="flex flex-col items-center gap-4 pt-16 text-center">
-      <span className="orb size-24 animate-[orb-spin_24s_linear_infinite] rounded-full shadow-[0_0_60px_rgba(139,92,246,.45)]" aria-hidden />
-      <h2 className="font-display text-2xl font-black">{t("bag.empty")}</h2>
-      <p className="max-w-xs text-mut">{t("bag.emptyBody")}</p>
-      <Link href="/" className="grad-cta inline-flex min-h-12 items-center justify-center rounded-2xl px-5 font-semibold text-white">✨ {t("bag.keepLooking")}</Link>
+    <div className="pt-6">
+      <EmptyState icon="bag" title={t("bag.empty")} action={<Link href="/" className="grad-cta press inline-flex min-h-12 items-center justify-center rounded-2xl px-5 font-semibold text-white">✨ {t("bag.keepLooking")}</Link>}>
+        {t("bag.emptyBody")}
+      </EmptyState>
     </div>
   );
 }

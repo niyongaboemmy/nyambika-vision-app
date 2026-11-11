@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { ThemeToggle } from "@/components/kit";
 import { Icon, type IconName } from "@/components/studio";
 import { Brand } from "@/components/studio-shell";
 
@@ -51,18 +52,24 @@ export function AdminShell<T extends string>({ tabs, tab, onTab, counts = {}, ch
             );
           })}
         </nav>
-        <a href="/" className="st-press mt-auto flex min-h-11 items-center gap-3 rounded-2xl px-3 text-sm font-bold text-cocoa-2 hover:bg-white hover:text-cocoa">
-          <Icon name="eye" className="size-5" /> Shopper view
-        </a>
+        <div className="mt-auto space-y-2">
+          <a href="/" className="st-press flex min-h-11 items-center gap-3 rounded-2xl px-3 text-sm font-bold text-cocoa-2 hover:bg-white hover:text-cocoa">
+            <Icon name="eye" className="size-5" /> Shopper view
+          </a>
+          <ThemeToggle compact className="flex w-full [&>button]:flex-1" />
+        </div>
       </aside>
 
       <div className="min-w-0 flex-1">
         <header className="st-glass-light sticky top-0 z-30 border-b border-hairline/70 lg:hidden">
           <div className="flex items-center justify-between px-4 pb-2 pt-[max(env(safe-area-inset-top),10px)]">
             <Brand label="Host admin" />
-            <a href="/" aria-label="Shopper view" className="st-press grid size-11 place-items-center rounded-2xl bg-white text-cocoa ring-1 ring-inset ring-hairline">
-              <Icon name="eye" className="size-5" />
-            </a>
+            <span className="flex items-center gap-2">
+              <ThemeToggle compact />
+              <a href="/" aria-label="Shopper view" className="st-press grid size-11 place-items-center rounded-2xl bg-white text-cocoa ring-1 ring-inset ring-hairline">
+                <Icon name="eye" className="size-5" />
+              </a>
+            </span>
           </div>
           <nav aria-label="Admin sections" className="no-scrollbar flex gap-1.5 overflow-x-auto px-4 pb-2.5">
             {tabs.map((t) => {

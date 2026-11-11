@@ -1,5 +1,329 @@
 @import "tailwindcss";
 
+/* ════════════════════════════════════════════════════════════════════════════════════════════════════════════
+   Nyambika theme system (UI/UX modernisation, docs/design/ui-audit.md §Tokens)
+
+   One set of semantic tokens, two families × two modes:
+     shopper  = default scope (aurora). Dark on :root, warm "daylight aurora" under [data-theme=light].
+     studio   = .theme-light scope (member Page Manager, host admin, migrate, passport). Warm paper by default,
+                refined "workshop at night" dark under [data-theme=dark].
+     .theme-media pins a subtree to shopper-dark in both modes (camera, AR/MR/VR, full-bleed look media).
+   <html data-theme> is set before first paint by the inline script in app/layout.tsx (cookie `nv-theme`,
+   system preference by default). The legacy palette names (ink, txt, mut, paper, cocoa, white, stone-*, …)
+   are re-pointed per mode, so existing utilities follow the theme; new code should prefer the semantic
+   utilities: bg-surface/-2/-3, text-fg, text-fg-muted, border-border, text-accent, ring-focus, shadow-e1..e3.
+   ════════════════════════════════════════════════════════════════════════════════════════════════════════════ */
+
+@theme inline {
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-focus: var(--focus);
+  --shadow-e1: var(--elev-1);
+  --shadow-e2: var(--elev-2);
+  --shadow-e3: var(--elev-3);
+}
+
+/* 4/8-pt rhythm + radii (Tailwind spacing is already 4px-based; these name the steps we use for anatomy). */
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-xl: 28px;
+  --ease-spring: cubic-bezier(0.3, 1.4, 0.5, 1);
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --grad-cta: linear-gradient(120deg, #c0562b 0%, #a24a8f 55%, #7347e0 100%);
+}
+
+/* ── shopper · dark (default) ─────────────────────────────────────────────────────────────────────────────── */
+:root,
+.theme-media {
+  color-scheme: dark;
+  --surface: #0b0a0f;
+  --surface-2: #15131b;
+  --surface-3: #1f1c26;
+  --fg: #f5efe8;
+  --fg-muted: #a79e96;
+  --border: rgb(255 255 255 / 0.16);
+  --accent: #f2b84b;
+  --accent-fg: #0b0a0f;
+  --focus: #f2b84b;
+  --glass-bg: rgb(255 255 255 / 0.09);
+  --glass-border: rgb(255 255 255 / 0.16);
+  --glass-shadow: none;
+  --scrim: rgb(0 0 0 / 0.6);
+  --skel-a: rgb(255 255 255 / 0.04);
+  --skel-b: rgb(255 255 255 / 0.12);
+  --elev-1: 0 1px 2px rgb(0 0 0 / 0.4);
+  --elev-2: 0 12px 30px -12px rgb(0 0 0 / 0.6);
+  --elev-3: 0 24px 60px -20px rgb(0 0 0 / 0.75);
+  --text-grad: linear-gradient(90deg, #fff 0%, #ffe7c7 60%, #f2b84b 100%);
+  --aurora:
+    radial-gradient(60% 40% at 15% 15%, rgb(224 112 63 / 0.45), transparent 70%),
+    radial-gradient(60% 45% at 90% 35%, rgb(139 92 246 / 0.4), transparent 70%),
+    radial-gradient(70% 40% at 50% 100%, rgb(242 184 75 / 0.25), transparent 70%),
+    #0b0a0f;
+  --backdrop-3d: radial-gradient(80% 60% at 50% 30%, #2a2433 0%, #0b0a0f 75%);
+  --bg: var(--surface);
+  /* legacy palette, dark meaning */
+  --color-ink: #0b0a0f;
+  --color-ink-2: #15131b;
+  --color-ink-3: #1f1c26;
+  --color-txt: #f5efe8;
+  --color-mut: #a79e96;
+  --color-line: rgb(255 255 255 / 0.16);
+  --color-white: #fff;
+  --color-black: #000;
+  --color-terra: #e0703f;
+  --color-gold: #f2b84b;
+  --color-violet: #8b5cf6;
+  --color-sky: #38bdf8;
+  --color-mint: #34d399;
+}
+
+/* ── shopper · light: warm daylight aurora, ink on cream, deeper accents for AA ───────────────────────────── */
+[data-theme="light"] {
+  color-scheme: light;
+  --surface: #fbf6f0;
+  --surface-2: #ffffff;
+  --surface-3: #f2e9df;
+  --fg: #1c1714;
+  --fg-muted: #5c5148;
+  --border: rgb(28 23 20 / 0.14);
+  --accent: #8a5a00;
+  --accent-fg: #fff;
+  --focus: #6239c9;
+  --glass-bg: rgb(255 255 255 / 0.72);
+  --glass-border: rgb(28 23 20 / 0.1);
+  --glass-shadow: 0 1px 2px rgb(28 23 20 / 0.05), 0 8px 24px -14px rgb(28 23 20 / 0.25);
+  --scrim: rgb(28 23 20 / 0.45);
+  --skel-a: #efe6db;
+  --skel-b: #f9f4ee;
+  --elev-1: 0 1px 2px rgb(28 23 20 / 0.06);
+  --elev-2: 0 1px 2px rgb(28 23 20 / 0.05), 0 12px 30px -16px rgb(28 23 20 / 0.28);
+  --elev-3: 0 30px 60px -24px rgb(28 23 20 / 0.4);
+  --text-grad: linear-gradient(90deg, #1c1714 0%, #6b2f14 55%, #a8481f 100%);
+  --aurora:
+    radial-gradient(60% 40% at 12% 10%, rgb(224 112 63 / 0.26), transparent 70%),
+    radial-gradient(60% 45% at 92% 30%, rgb(139 92 246 / 0.2), transparent 70%),
+    radial-gradient(70% 40% at 50% 100%, rgb(242 184 75 / 0.3), transparent 70%),
+    #fbf6f0;
+  --backdrop-3d: radial-gradient(80% 60% at 50% 30%, #ffffff 0%, #efe4d8 80%);
+  --color-ink: #fbf6f0;
+  --color-ink-2: #ffffff;
+  --color-ink-3: #f2e9df;
+  --color-txt: #1c1714;
+  --color-mut: #5c5148;
+  --color-line: rgb(28 23 20 / 0.14);
+  --color-white: #1c1714;
+  --color-terra: #b4532a;
+  --color-gold: #8a5a00;
+  --color-violet: #6239c9;
+  --color-sky: #0369a1;
+  --color-mint: #047857;
+}
+/* Light text tints written for a dark canvas → their deep counterparts on cream. */
+[data-theme="light"] :is(.text-red-100, .text-red-200, .text-red-300, .text-rose-100, .text-rose-300):not(.theme-media *) { color: #9f1239; }
+[data-theme="light"] :is(.text-amber-100, .text-amber-200, .text-amber-300, .text-yellow-300):not(.theme-media *) { color: #7a4a00; }
+[data-theme="light"] :is(.text-emerald-200, .text-emerald-300, .text-teal-100):not(.theme-media *) { color: #065f46; }
+[data-theme="light"] :is(.text-sky-200, .text-sky-300, .text-violet-100, .text-violet-200, .text-violet-300):not(.theme-media *) { color: #4c1d95; }
+/* Solid colour fills, photo scrims and media keep white type in the light theme. */
+/* Low-opacity black "wells" (inset panels on the dark aurora) become soft ink tints on cream. */
+[data-theme="light"] :is([class~="bg-black/10"], [class~="bg-black/20"], [class~="bg-black/25"], [class~="bg-black/30"], [class~="bg-black/35"]):not(.theme-media *) {
+  background-color: rgb(28 23 20 / 0.06);
+}
+[data-theme="light"] :is(.grad-cta, .orb, [class~="bg-terra"], [class~="bg-terra/70"], [class~="bg-violet"], [class~="bg-violet/70"], [class*="bg-red-5"], [class~="bg-red-600"], [class~="bg-emerald-600"], [class~="bg-black/40"], [class~="bg-black/45"], [class~="bg-black/50"], [class~="bg-black/55"], [class~="bg-black/60"], [class~="bg-black/65"], [class~="bg-black/70"], [class~="bg-black/75"], [class~="bg-black/80"], [class~="bg-black/85"], [class~="bg-black/90"], [class*="from-black"]) {
+  --color-white: #fff;
+  --color-txt: #f5efe8;
+  --color-mut: #d9d0c7;
+}
+
+/* ── studio · light (default for .theme-light) ───────────────────────────────────────────────────────────── */
+.theme-light {
+  color-scheme: light;
+  --surface: #fbf7f2;
+  --surface-2: #ffffff;
+  --surface-3: #f4ede4;
+  --fg: #1d1814;
+  --fg-muted: #5c524a;
+  --border: #e8dfd4;
+  --accent: #a8481f;
+  --accent-fg: #fff;
+  --focus: #6239c9;
+  --scrim: rgb(29 24 20 / 0.4);
+  --skel-a: #efe7dc;
+  --skel-b: #f8f3ec;
+  --elev-1: 0 1px 2px rgb(29 24 20 / 0.04), 0 10px 30px -18px rgb(29 24 20 / 0.18);
+  --elev-2: 0 1px 2px rgb(29 24 20 / 0.05), 0 18px 36px -18px rgb(29 24 20 / 0.28);
+  --elev-3: 0 18px 40px -16px rgb(29 24 20 / 0.35), 0 2px 6px rgb(29 24 20 / 0.06);
+  --st-card: #fff;
+  --st-card-border: rgb(29 24 20 / 0.07);
+  --st-dock: rgb(255 255 255 / 0.88);
+  --st-glass: rgb(251 247 242 / 0.84);
+  --st-hero:
+    radial-gradient(120% 140% at 0% 0%, #f7c9a6 0%, transparent 55%),
+    radial-gradient(120% 140% at 100% 0%, #dccbff 0%, transparent 55%),
+    radial-gradient(120% 140% at 50% 120%, #ffe2a8 0%, transparent 60%),
+    #fff6ec;
+  --st-wash:
+    radial-gradient(70% 320px at 0% 0%, rgb(224 112 63 / 0.1), transparent 70%),
+    radial-gradient(60% 300px at 100% 0%, rgb(139 92 246 / 0.08), transparent 70%),
+    radial-gradient(50% 260px at 50% 0%, rgb(242 184 75 / 0.1), transparent 70%);
+  --st-checker-a: #fff;
+  --st-checker-b: #f1ebe3;
+  --backdrop-3d: radial-gradient(80% 60% at 50% 30%, #ffffff 0%, #efe4d8 80%);
+  --bg: var(--surface);
+  --fg-legacy: #1d1814;
+  --color-white: #fff;
+  --color-black: #000;
+  --color-paper: #fbf7f2;
+  --color-paper-2: #f4ede4;
+  --color-paper-3: #ebe2d6;
+  --color-cocoa: #1d1814;
+  --color-cocoa-2: #5c524a;
+  --color-cocoa-3: #7a6f65;
+  --color-hairline: #e8dfd4;
+  --color-terra-ink: #a8481f;
+  --color-violet-ink: #6239c9;
+  --color-gold-ink: #7a5200;
+  --color-mint-ink: #0f6b47;
+  --color-terra: #e0703f;
+  --color-gold: #f2b84b;
+  --color-violet: #8b5cf6;
+  --color-sky: #38bdf8;
+  --color-mint: #34d399;
+}
+
+/* ── studio · dark: warm charcoal, lifted cards, the same accents re-inked for AA on dark ─────────────────── */
+[data-theme="dark"] .theme-light {
+  color-scheme: dark;
+  --surface: #13100e;
+  --surface-2: #1c1815;
+  --surface-3: #25201c;
+  --fg: #f4ede6;
+  --fg-muted: #c9bcb0;
+  --border: #3a312b;
+  --accent: #f0936a;
+  --accent-fg: #1b1714;
+  --focus: #c4b1ff;
+  --scrim: rgb(0 0 0 / 0.6);
+  --skel-a: #221d19;
+  --skel-b: #2e2722;
+  --elev-1: 0 1px 2px rgb(0 0 0 / 0.5), 0 10px 30px -18px rgb(0 0 0 / 0.7);
+  --elev-2: 0 1px 2px rgb(0 0 0 / 0.5), 0 18px 36px -18px rgb(0 0 0 / 0.8);
+  --elev-3: 0 18px 40px -16px rgb(0 0 0 / 0.8);
+  --st-card: #1c1815;
+  --st-card-border: rgb(255 255 255 / 0.07);
+  --st-dock: rgb(32 27 24 / 0.9);
+  --st-glass: rgb(19 16 14 / 0.84);
+  --st-hero:
+    radial-gradient(120% 140% at 0% 0%, rgb(224 112 63 / 0.32) 0%, transparent 55%),
+    radial-gradient(120% 140% at 100% 0%, rgb(139 92 246 / 0.3) 0%, transparent 55%),
+    radial-gradient(120% 140% at 50% 120%, rgb(242 184 75 / 0.22) 0%, transparent 60%),
+    #1f1915;
+  --st-wash:
+    radial-gradient(70% 320px at 0% 0%, rgb(224 112 63 / 0.14), transparent 70%),
+    radial-gradient(60% 300px at 100% 0%, rgb(139 92 246 / 0.12), transparent 70%),
+    radial-gradient(50% 260px at 50% 0%, rgb(242 184 75 / 0.08), transparent 70%);
+  --st-checker-a: #1c1815;
+  --st-checker-b: #25201c;
+  --backdrop-3d: radial-gradient(80% 60% at 50% 30%, #2d2621 0%, #13100e 80%);
+  --color-white: #1c1815;
+  --color-black: #000;
+  --color-paper: #13100e;
+  --color-paper-2: #25201c;
+  --color-paper-3: #362e28;
+  --color-cocoa: #f4ede6;
+  --color-cocoa-2: #c9bcb0;
+  --color-cocoa-3: #a19488;
+  --color-hairline: #3a312b;
+  --color-terra-ink: #f0936a;
+  --color-violet-ink: #c4b1ff;
+  --color-gold-ink: #f2c46b;
+  --color-mint-ink: #6ee0ae;
+  /* Tailwind tints used as light chip backgrounds / deep chip text → night equivalents. */
+  --color-stone-50: #1d1916;
+  --color-stone-100: #262019;
+  --color-stone-200: #352d27;
+  --color-stone-300: #4a403a;
+  --color-stone-400: #7a6e65;
+  --color-stone-500: #a89a8e;
+  --color-stone-600: #c2b5a9;
+  --color-stone-700: #d8ccc1;
+  --color-stone-800: #e9dfd5;
+  --color-stone-900: #f4ede6;
+  --color-emerald-50: #0f241b;
+  --color-emerald-100: #133125;
+  --color-emerald-200: #1f4d3a;
+  --color-emerald-300: #2c6b51;
+  --color-emerald-800: #8ee8bf;
+  --color-emerald-900: #b5f2d6;
+  --color-amber-50: #2a1f0c;
+  --color-amber-100: #36280f;
+  --color-amber-200: #5a4214;
+  --color-amber-300: #7a5a1c;
+  --color-amber-800: #f7d48b;
+  --color-amber-900: #fbe2ad;
+  --color-amber-950: #fdecc8;
+  --color-sky-50: #0c1f2b;
+  --color-sky-100: #10293a;
+  --color-sky-200: #1b4560;
+  --color-sky-300: #27617f;
+  --color-sky-800: #9bd8f7;
+  --color-sky-900: #bfe6fa;
+  --color-red-50: #2c1212;
+  --color-red-100: #3a1616;
+  --color-red-200: #5c2323;
+  --color-red-300: #7d3030;
+  --color-red-800: #fca5a5;
+  --color-red-900: #fecaca;
+  --color-violet-50: #1d1630;
+  --color-violet-100: #261c40;
+  --color-violet-200: #3c2d66;
+  --color-violet-300: #574390;
+  --color-violet-900: #d9ccff;
+  --color-rose-100: #3a1622;
+  --color-rose-300: #7d3048;
+  --color-rose-700: #fda4bc;
+  --color-rose-900: #fecdd8;
+  --color-teal-100: #0f2a28;
+  --color-teal-300: #2a6b66;
+  --color-teal-900: #a7f0e6;
+  --color-fuchsia-50: #26102a;
+  --color-fuchsia-100: #331537;
+  --color-fuchsia-200: #4f2155;
+  --color-fuchsia-300: #6e2f77;
+  --color-fuchsia-900: #f5c6fb;
+  --color-orange-50: #2a170c;
+  --color-orange-100: #36200f;
+  --color-orange-200: #5a3414;
+}
+/* Gradient fills and destructive buttons keep white type at night. */
+[data-theme="dark"] .theme-light :is(.st-cta, .grad-cta, [class~="bg-red-700"], [class~="bg-red-600"], [class~="bg-red-800"], [class*="bg-black/"], [class*="from-black"]),
+[data-theme="dark"] .theme-light [class*="bg-gradient-to-"][class~="text-white"] {
+  --color-white: #fff;
+}
+/* Inverted pills (light fill at night) always carry dark type, even inside a white-restoring scope. */
+[data-theme="dark"] .theme-light :is([class~="bg-cocoa"], [class~="bg-violet-ink"], [class~="bg-terra-ink"], [class~="bg-mint-ink"], [class~="bg-stone-900"]) {
+  --color-white: #1c1815;
+}
+[data-theme="dark"] .theme-light .text-red-700 { color: #fca5a5; }
+/* Studio's fixed-white photo frames (cutouts, QR) stay white so garments and codes read true. */
+[data-theme="dark"] .theme-light .keep-white { background-color: #fff; color: #1d1814; }
+
+
 /* Nyambika v2 design tokens (prototype v2 aurora palette). */
 @theme {
   --color-terra: #e0703f;
@@ -38,12 +362,6 @@
   to { background-position: 200% 0; }
 }
 
-:root {
-  color-scheme: dark;
-  --bg: var(--color-ink);
-  --fg: var(--color-txt);
-}
-
 html,
 body {
   background: var(--bg);
@@ -57,48 +375,47 @@ body {
   overscroll-behavior-y: none;
 }
 
-/* The member Page Manager and host admin use a light, high-contrast theme
-   for readability outdoors and long working sessions. */
+/* Shopper screens are a phone-width column; on wide screens the aurora fills the viewport behind it. */
+@media (min-width: 640px) {
+  body { background: var(--aurora) fixed; }
+}
+
 .theme-light {
-  color-scheme: light;
-  --bg: #faf7f3;
-  --fg: #1c1917;
   background: var(--bg);
   color: var(--fg);
 }
 
 .aurora {
-  background:
-    radial-gradient(60% 40% at 15% 15%, rgb(224 112 63 / 0.45), transparent 70%),
-    radial-gradient(60% 45% at 90% 35%, rgb(139 92 246 / 0.4), transparent 70%),
-    radial-gradient(70% 40% at 50% 100%, rgb(242 184 75 / 0.25), transparent 70%),
-    var(--color-ink);
+  background: var(--aurora);
 }
 
 .glass {
-  background: rgb(255 255 255 / 0.09);
-  border: 1px solid rgb(255 255 255 / 0.16);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
 }
 
+/* Brand orb keeps its literal hues in every theme. */
 .orb {
-  background: conic-gradient(from 0deg, var(--color-terra), var(--color-gold), var(--color-violet), var(--color-sky), var(--color-terra));
+  background: conic-gradient(from 0deg, #e0703f, #f2b84b, #8b5cf6, #38bdf8, #e0703f);
 }
 
 .grad-cta {
-  background: linear-gradient(120deg, var(--color-terra), var(--color-violet));
+  background: var(--grad-cta);
+  color: #fff;
 }
 
 .text-grad {
-  background: linear-gradient(90deg, #fff 0%, #ffe7c7 60%, var(--color-gold) 100%);
+  background: var(--text-grad);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
 .skeleton {
-  background: linear-gradient(90deg, rgb(255 255 255 / 0.04), rgb(255 255 255 / 0.12), rgb(255 255 255 / 0.04));
+  background: linear-gradient(90deg, var(--skel-a), var(--skel-b), var(--skel-a));
   background-size: 200% 100%;
   animation: var(--animate-shimmer);
 }
@@ -107,7 +424,7 @@ body {
 .no-scrollbar { scrollbar-width: none; }
 
 :focus-visible {
-  outline: 2px solid var(--color-gold);
+  outline: 2.5px solid var(--focus);
   outline-offset: 2px;
 }
 
@@ -155,56 +472,44 @@ body {
   to { transform: none; opacity: 1; }
 }
 
-.theme-light {
-  --bg: var(--color-paper);
-  --fg: var(--color-cocoa);
-}
-
 /* Warm paper with a faint aurora wash at the top, like daylight on fabric. */
 .st-app {
-  background:
-    radial-gradient(70% 320px at 0% 0%, rgb(224 112 63 / 0.1), transparent 70%),
-    radial-gradient(60% 300px at 100% 0%, rgb(139 92 246 / 0.08), transparent 70%),
-    radial-gradient(50% 260px at 50% 0%, rgb(242 184 75 / 0.1), transparent 70%),
-    var(--color-paper);
+  background: var(--st-wash), var(--surface);
   background-repeat: no-repeat;
 }
 
 .st-card {
-  background: #fff;
-  border: 1px solid rgb(29 24 20 / 0.07);
-  box-shadow: 0 1px 2px rgb(29 24 20 / 0.04), 0 10px 30px -18px rgb(29 24 20 / 0.18);
+  background: var(--st-card);
+  border: 1px solid var(--st-card-border);
+  box-shadow: var(--elev-1);
 }
 
 .st-cta {
   background: linear-gradient(120deg, #b4532a 0%, #9a3f7a 55%, #6239c9 100%);
+  color: #fff;
   box-shadow: 0 10px 24px -10px rgb(98 57 201 / 0.55), inset 0 1px 0 rgb(255 255 255 / 0.18);
 }
 
 .st-hero {
-  background:
-    radial-gradient(120% 140% at 0% 0%, #f7c9a6 0%, transparent 55%),
-    radial-gradient(120% 140% at 100% 0%, #dccbff 0%, transparent 55%),
-    radial-gradient(120% 140% at 50% 120%, #ffe2a8 0%, transparent 60%),
-    #fff6ec;
+  background: var(--st-hero);
 }
 
 .st-dock {
-  background: rgb(255 255 255 / 0.88);
-  border: 1px solid rgb(29 24 20 / 0.08);
-  box-shadow: 0 18px 40px -16px rgb(29 24 20 / 0.35), 0 2px 6px rgb(29 24 20 / 0.06);
+  background: var(--st-dock);
+  border: 1px solid var(--st-card-border);
+  box-shadow: var(--elev-3);
   backdrop-filter: blur(18px) saturate(1.4);
   -webkit-backdrop-filter: blur(18px) saturate(1.4);
 }
 
 .st-glass-light {
-  background: rgb(251 247 242 / 0.84);
+  background: var(--st-glass);
   backdrop-filter: blur(14px) saturate(1.3);
   -webkit-backdrop-filter: blur(14px) saturate(1.3);
 }
 
 .st-skel {
-  background: linear-gradient(90deg, #efe7dc, #f8f3ec, #efe7dc);
+  background: linear-gradient(90deg, var(--skel-a), var(--skel-b), var(--skel-a));
   background-size: 200% 100%;
   animation: var(--animate-shimmer);
 }
@@ -216,7 +521,7 @@ body {
 @media (hover: hover) {
   .st-lift:hover {
     transform: translateY(-2px);
-    box-shadow: 0 1px 2px rgb(29 24 20 / 0.05), 0 18px 36px -18px rgb(29 24 20 / 0.28);
+    box-shadow: var(--elev-2);
   }
 }
 
@@ -225,13 +530,13 @@ body {
 
 /* Gold focus rings vanish on paper; the light theme uses a high-contrast violet ring (WCAG 2.4.11). */
 .theme-light :focus-visible {
-  outline: 2.5px solid var(--color-violet-ink);
+  outline: 2.5px solid var(--focus);
   outline-offset: 2px;
 }
 
 .st-checker {
-  background-color: #fff;
-  background-image: repeating-conic-gradient(#f1ebe3 0 25%, #fff 0 50%);
+  background-color: var(--st-checker-a);
+  background-image: repeating-conic-gradient(var(--st-checker-b) 0 25%, var(--st-checker-a) 0 50%);
   background-size: 16px 16px;
 }
 
@@ -252,3 +557,27 @@ body {
   100% { transform: translateY(-46dvh) translateX(-18px) scale(.9); opacity: 0; }
 }
 .vr-float { animation: vr-float 2.5s cubic-bezier(.2,.7,.3,1) forwards; }
+
+/* ==== UI/UX modernisation: motion + interaction primitives ==== */
+.press {
+  transition: transform 0.18s var(--ease-spring), background-color 0.2s, color 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+.press:active { transform: scale(0.96); }
+
+/* Theme switches cross-fade via document.startViewTransition (lib/theme.ts); no-op where unsupported. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.22s;
+  animation-timing-function: var(--ease-out);
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) { animation: none !important; }
+}
+
+/* Bottom action bars fade the page out behind them (theme-aware). */
+.fade-bottom { background: linear-gradient(transparent, color-mix(in oklab, var(--surface) 92%, transparent) 45%); }
+
+/* Tabular figures for prices and counters. */
+.tabular { font-variant-numeric: tabular-nums; }

@@ -140,7 +140,7 @@ export function MrMirror({ pieces, wardrobe, twin, arPilot, initial }: { pieces:
 
   return (
     <div className="space-y-4">
-      <section aria-label="Mirror preview" className="relative overflow-hidden rounded-[32px] border border-white/10" style={{ background: "radial-gradient(70% 55% at 50% 30%, #8b5cf633, transparent 70%), radial-gradient(60% 40% at 50% 100%, #f0b42922, transparent 70%), #0d0b13" }}>
+      <section aria-label="Mirror preview" className="theme-media relative overflow-hidden text-txt rounded-[32px] border border-white/10" style={{ background: "radial-gradient(70% 55% at 50% 30%, #8b5cf633, transparent 70%), radial-gradient(60% 40% at 50% 100%, #f0b42922, transparent 70%), #0d0b13" }}>
         {webgl ? (
           <canvas ref={canvas} className="block h-[50dvh] max-h-[520px] w-full touch-none" aria-label={`Preview of the fitting mirror: ${piece?.title ?? "no piece"} on ${body === "twin" ? "your 3D twin" : "a synthetic body"}. Drag to turn.`} />
         ) : (

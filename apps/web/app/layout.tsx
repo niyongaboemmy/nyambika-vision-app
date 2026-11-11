@@ -1,8 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Nunito, Plus_Jakarta_Sans } from "next/font/google";
 import { ErrorToaster } from "@/components/error-toaster";
-import { NativeBridge } from "@/components/native-bridge";
-import { PilotSurvey } from "@/components/pilot-survey";
+import { Toaster } from "@/components/kit";
+import { DeferredGlobals } from "@/components/deferred-globals";
+import { ThemeScript } from "@/components/theme-script";
 import { SessionProvider } from "@/lib/session";
 import "./globals.css";
 
@@ -21,17 +22,24 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#0B0A0F",
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#0B0A0F" },
+    { media: "(prefers-color-scheme: light)", color: "#FBF6F0" },
+  ],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${body.variable} ${display.variable}`}>
+    // <html data-theme> is set before first paint by ThemeScript (cookie `nv-theme`, else the OS preference). It is
+    // deliberately not a JSX prop, so a client re-render of the shell (e.g. a not-found boundary) never resets it.
+    <html lang="en" className={`${body.variable} ${display.variable}`} suppressHydrationWarning>
       <body className="antialiased">
+        {/* Next "preventing flash" pattern via useServerInsertedHTML: in the first HTML only, never in a client render. */}
+        <ThemeScript />
         <SessionProvider>
           {children}
-          <PilotSurvey />
-          <NativeBridge />
+          <Toaster />
+          <DeferredGlobals />
           <ErrorToaster />
         </SessionProvider>
       </body>

@@ -199,7 +199,7 @@ export function ArMirror({ items, initial }: { items: WardrobeItem[]; initial: s
 
   return (
     <div className="relative">
-      <div className="relative isolate h-[min(70dvh,620px)] overflow-hidden rounded-[32px] bg-black" data-testid="ar-stage">
+      <div className="theme-media relative isolate h-[min(70dvh,620px)] overflow-hidden rounded-[32px] bg-black text-txt" data-testid="ar-stage">
         <video ref={video} playsInline muted className="hidden" />
         {mode === "live" || mode === "starting" ? (
           <canvas ref={canvas} className="h-full w-full" aria-label={`Live mirror with ${sel?.title ?? "the garment"} overlaid on your body`} role="img" />
@@ -212,7 +212,7 @@ export function ArMirror({ items, initial }: { items: WardrobeItem[]; initial: s
           </div>
         )}
         <div className="pointer-events-none absolute inset-x-3 top-3 flex flex-col items-start gap-2">
-          <span className="rounded-full bg-[#e5395f] px-3 py-1.5 text-xs font-black tracking-wide text-white shadow-lg">● {mode === "live" ? "LIVE AR MIRROR" : "AR MIRROR"} · PILOT</span>
+          <span className="rounded-full bg-[#c81e4a] px-3 py-1.5 text-xs font-black tracking-wide text-[#fff] shadow-lg">● {mode === "live" ? "LIVE AR MIRROR" : "AR MIRROR"} · PILOT</span>
           <span className="rounded-full bg-black/60 px-3 py-1.5 text-xs font-semibold backdrop-blur" role="status" aria-live="polite">
             {mode === "live" ? status : "Body tracking runs on-device · video never leaves your phone"}
           </span>

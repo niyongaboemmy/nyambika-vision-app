@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ErrorNote, Screen, TopBar } from "@/components/ui";
+import { EmptyState, ErrorNote, Screen, TopBar } from "@/components/ui";
 import { timeLeft, type PollState } from "@/lib/social";
 import { useApi } from "@/lib/use-api";
 
@@ -23,12 +23,9 @@ export default function MyPolls() {
         <ErrorNote error={error} />
         {data === null && !error && [0, 1].map((i) => <div key={i} className="skeleton h-20 rounded-3xl" />)}
         {data?.length === 0 && (
-          <div className="glass rounded-3xl p-6 text-center">
-            <p className="text-3xl">👥</p>
-            <p className="mt-2 font-display text-lg font-black">No polls yet</p>
-            <p className="mt-1 text-sm text-mut">Tap <b>Ask</b> on any look to let your friends vote from WhatsApp.</p>
-            <Link href="/" className="grad-cta mt-4 inline-flex min-h-12 items-center rounded-2xl px-5 font-semibold">Ask the Muse</Link>
-          </div>
+          <EmptyState icon="users" title="No polls yet" action={<Link href="/" className="grad-cta press inline-flex min-h-12 items-center rounded-2xl px-5 font-semibold text-white">Ask the Muse</Link>}>
+            Tap <b>Ask</b> on a look · friends vote on WhatsApp
+          </EmptyState>
         )}
         {data?.map((p) => (
           <Link key={p.id} href={`/circle/${p.id}`} className="glass flex items-center justify-between gap-3 rounded-3xl p-4">

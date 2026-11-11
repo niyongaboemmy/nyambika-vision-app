@@ -20,7 +20,7 @@ type Mode = "loading" | "3d" | "flat";
 
 export function ShowroomClient({ room, commerce }: { room: Showroom; commerce?: Commerce | null }) {
   return (
-    <Suspense fallback={<div className="min-h-dvh bg-ink" />}>
+    <Suspense fallback={<div className="theme-media skeleton min-h-dvh" />}>
       <Room room={room} commerce={commerce ?? null} />
     </Suspense>
   );
@@ -192,7 +192,7 @@ function Room({ room, commerce }: { room: Showroom; commerce: Commerce | null })
   const pct = progress.total ? Math.round((progress.loaded / progress.total) * 100) : 100;
 
   return (
-    <main className="relative h-dvh w-full overflow-hidden bg-ink" style={{ background: `radial-gradient(80% 60% at 50% 20%, ${room.page.palette.primary}33, transparent 70%), #0b0a0f` }}>
+    <main className="theme-media relative h-dvh w-full overflow-hidden bg-ink text-txt" style={{ background: `radial-gradient(80% 60% at 50% 20%, ${room.page.palette.primary}33, transparent 70%), #0b0a0f` }}>
       <p className="sr-only" aria-live="polite">{announce}</p>
       {mode !== "flat" && (
         <canvas
@@ -280,7 +280,7 @@ function Room({ room, commerce }: { room: Showroom; commerce: Commerce | null })
             {mode === "3d" && <p className="mb-2 text-center text-[11px] text-txt/75">Drag to look · tap the floor or a ring to walk · tap a piece</p>}
             <nav aria-label="Pieces in this room" className="no-scrollbar -mx-3 flex gap-2 overflow-x-auto px-3 pb-1">
               {room.items.map((i) => (
-                <button key={i.productId} onClick={() => pick(i.productId)} aria-label={`${i.title}, ${price(i)}`} className="glass flex shrink-0 items-center gap-2 rounded-2xl p-1.5 pr-3 text-left">
+                <button key={i.productId} onClick={() => pick(i.productId)} className="glass flex shrink-0 items-center gap-2 rounded-2xl p-1.5 pr-3 text-left">
                   {i.poster ? <img src={i.poster} alt="" className="size-11 rounded-xl bg-black/30 object-contain" /> : <span className="size-11 rounded-xl bg-white/10" />}
                   <span className="max-w-[120px]">
                     <span className="block truncate text-xs font-bold">{i.title}</span>

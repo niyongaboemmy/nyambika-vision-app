@@ -61,7 +61,7 @@ export function LookView({ look, index, total, intentLabel, onSave, onVariant, o
   };
 
   return (
-    <div className="relative h-full w-full overflow-hidden bg-ink">
+    <div className="theme-media relative h-full w-full overflow-hidden bg-ink text-txt">
       <div className="absolute inset-0 bg-[radial-gradient(60%_50%_at_50%_45%,rgba(224,112,63,.28),transparent_70%),radial-gradient(50%_40%_at_90%_90%,rgba(139,92,246,.3),transparent_70%)]" />
 
       {/* Look image */}

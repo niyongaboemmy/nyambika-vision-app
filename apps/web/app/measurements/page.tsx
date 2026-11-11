@@ -3,6 +3,7 @@
 import { MEASUREMENT_FIELDS, type Measurements } from "@nyambika/contracts";
 import { useEffect, useState } from "react";
 import { Button, ErrorNote, Screen, TopBar } from "@/components/ui";
+import { Fact, InfoTip } from "@/components/kit";
 import { api } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { useApi } from "@/lib/use-api";
@@ -47,8 +48,16 @@ export default function MeasurementsPage() {
       <main className="space-y-4 px-4 pb-12">
         <section className="rounded-3xl bg-gradient-to-br from-violet/25 to-terra/20 p-4">
           <p className="font-display text-2xl font-black">Your fit, privately</p>
-          <p className="mt-1 text-sm text-txt/85">Used to recommend sizes and, only when you choose, shared with one tailor for one order for 14 days.</p>
-          {fromTwin && <p className="mt-2 rounded-2xl bg-black/30 px-3 py-2 text-sm">✨ Prefilled from your twin's size estimate ({data!.twinSize}). Expect ±3 cm: check with a tape measure.</p>}
+          <ul aria-label="How your measurements are used" className="mt-2 flex flex-wrap gap-1.5">
+            <li><Fact icon="ruler">Size advice</Fact></li>
+            <li><Fact icon="lock">Shared only by you · 1 tailor · 14 days</Fact></li>
+          </ul>
+          {fromTwin && (
+            <p className="mt-2 flex items-center gap-1 rounded-2xl bg-black/30 px-3 py-2 text-sm">
+              ✨ From your twin ({data!.twinSize}) · ±3 cm
+              <InfoTip label="About twin estimates">Prefilled from your twin&apos;s size estimate. Expect ±3 cm: check with a tape measure.</InfoTip>
+            </p>
+          )}
         </section>
 
         {!data ? (

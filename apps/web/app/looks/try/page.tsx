@@ -6,7 +6,7 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import { HoldToBuy } from "@/components/hold-to-buy";
 import { LookView } from "@/components/look-view";
 import { LimitState } from "@/components/limit-state";
-import { Screen, Spinner } from "@/components/ui";
+import { Screen, ShopperSkeleton } from "@/components/ui";
 import { api } from "@/lib/api";
 import type { Look } from "@/lib/looks";
 import { useSession } from "@/lib/session";
@@ -35,7 +35,7 @@ function TryOn() {
   // No (or a stale) ?variant= link used to spin forever: send the shopper somewhere useful instead.
   if (!variantId && !loading && me)
     return <Screen><div className="p-6 pt-24 text-center"><p className="text-mut">Pick a piece in a Maker Space to try it on.</p><Link href="/makers" className="glass mt-4 inline-flex min-h-12 items-center rounded-2xl px-5 font-semibold">Browse makers →</Link></div></Screen>;
-  if (!look) return <Screen><div className="grid min-h-dvh place-items-center"><Spinner /></div></Screen>;
+  if (!look) return <div className="theme-media"><ShopperSkeleton variant="media" title={false} /></div>;
   return (
     <div className="mx-auto h-dvh w-full max-w-[480px]">
       <LookView look={look} onSave={save} onVariant={variant}><HoldToBuy look={look} /></LookView>
