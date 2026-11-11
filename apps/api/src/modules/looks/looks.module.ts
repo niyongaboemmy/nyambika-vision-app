@@ -6,6 +6,7 @@ import { PrismaService } from "../../common/prisma.service";
 import { StorageService } from "../../common/storage.service";
 import { parse } from "../../common/zod";
 import { TwinModule, TwinService } from "../twin/twin.module";
+import { PilotService } from "../pilot/pilot.service";
 import { GenerationService } from "./generation.service";
 
 const lookInclude = {
@@ -104,12 +105,14 @@ export class LooksController {
   constructor(
     private prisma: PrismaService,
     private looks: LooksService,
+    private pilot: PilotService,
   ) {}
 
   /** Try one product on the twin (Maker Space "Try on me"). */
   @Post("try")
   async tryOn(@CurrentUser() user: AuthUser, @Body() body: unknown) {
     const { variantId } = parse(z.object({ variantId: z.string() }), body);
+    await this.pilot.assertShopper(user.id);
     const variant = await this.prisma.variant.findUnique({ where: { id: variantId }, include: { product: true } });
     if (!variant || variant.product.status !== "PUBLISHED") throw new NotFoundException("This item isn't available");
     const session = await this.prisma.intentSession.create({

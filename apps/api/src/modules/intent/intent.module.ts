@@ -1,12 +1,13 @@
 import "multer";
 import { BadRequestException, Body, Controller, Get, Injectable, Module, NotFoundException, Param, Post, UploadedFile, UseInterceptors } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
-import { Intent, IntentRequest, LOOK_GUARDRAILS } from "@nyambika/contracts";
+import { EXPERIMENTS, Intent, IntentRequest, LOOK_GUARDRAILS } from "@nyambika/contracts";
 import { AiClient } from "../../common/ai.client";
 import { AuthUser, CurrentUser, Public } from "../../common/auth";
 import { PrismaService } from "../../common/prisma.service";
 import { parse } from "../../common/zod";
 import { LooksModule, LooksService } from "../looks/looks.module";
+import { ExperimentsService, PilotService } from "../pilot/pilot.service";
 import { diversify, rank, type Candidate } from "./ranking";
 
 @Injectable()
@@ -15,12 +16,22 @@ export class IntentService {
     private prisma: PrismaService,
     private ai: AiClient,
     private looks: LooksService,
+    private experiments: ExperimentsService,
+    private pilot: PilotService,
   ) {}
+
+  /** Pilot experiment "3 vs 2 initial looks" (plan §8.1); the guardrail default when it isn't running. */
+  async initialLooks(userId: string) {
+    const arm = await this.experiments.variant(userId, EXPERIMENTS.initialLooks);
+    const n = Number(arm);
+    return arm && Number.isInteger(n) && n >= 1 && n <= 5 ? n : LOOK_GUARDRAILS.initialLooks;
+  }
 
   /** Grounding: only published, try-on-ready products from live pages are ever recommended (plan §15.2). */
   async candidates(): Promise<Candidate[]> {
+    const cohort = await this.pilot.rankablePageIds(); // pilot.allowlist: rank cohort pages only
     const products = await this.prisma.product.findMany({
-      where: { status: "PUBLISHED", readiness: "READY", page: { status: "PUBLISHED" } },
+      where: { status: "PUBLISHED", readiness: "READY", page: { status: "PUBLISHED" }, ...(cohort ? { pageId: { in: [...cohort] } } : {}) },
       include: { page: true, variants: { where: { cutoutPath: { not: null } } } },
     });
     return products.map((p) => ({
@@ -51,7 +62,8 @@ export class IntentService {
     const session = await this.prisma.intentSession.create({ data: { userId, input, source, intent } });
     const looks = [];
     for (const [i, r] of ranked.entries()) looks.push(await this.looks.create(userId, session.id, r.productId, r.variantId, i, r.score));
-    for (const l of looks.slice(0, LOOK_GUARDRAILS.initialLooks)) await this.looks.render(l.id).catch(() => undefined);
+    const initial = await this.initialLooks(userId);
+    for (const l of looks.slice(0, initial)) await this.looks.render(l.id).catch(() => undefined);
     return { sessionId: session.id, intent, total: looks.length };
   }
 
@@ -87,6 +99,7 @@ export class IntentController {
     private prisma: PrismaService,
     private ai: AiClient,
     private looks: LooksService,
+    private pilot: PilotService,
   ) {}
 
   /** Parse only (no looks): used to show chips before the shopper signs in. */
@@ -100,6 +113,7 @@ export class IntentController {
   /** Muse: text or voice transcript → intent → ranked looks (US-07.2). */
   @Post()
   async create(@CurrentUser() user: AuthUser, @Body() body: unknown) {
+    await this.pilot.assertShopper(user.id);
     const req = parse(IntentRequest, body);
     const intent = await this.intents.parse(req.text, req.source, req.locale);
     if (!intent.size) {
@@ -112,6 +126,7 @@ export class IntentController {
   /** Tap-to-edit chips: re-rank with the corrected intent. */
   @Post("refine")
   async refine(@CurrentUser() user: AuthUser, @Body() body: unknown) {
+    await this.pilot.assertShopper(user.id);
     const intent = parse(Intent, (body as { intent?: unknown })?.intent);
     return this.intents.fromIntent(user.id, "refined", intent.source, intent);
   }
@@ -121,6 +136,7 @@ export class IntentController {
   @UseInterceptors(FileInterceptor("file", { limits: { fileSize: 10 * 1024 * 1024 } }))
   async snap(@CurrentUser() user: AuthUser, @UploadedFile() file?: Express.Multer.File) {
     if (!file) throw new BadRequestException("Attach a photo");
+    await this.pilot.assertShopper(user.id);
     const { embedding, dominant_colours } = await this.ai.post<{ embedding: number[]; dominant_colours: string[] }>("/v1/embed/image", {
       image_b64: file.buffer.toString("base64"),
     });
@@ -137,7 +153,8 @@ export class IntentController {
       `[${embedding.join(",")}]`,
     );
     const best = new Map<string, (typeof rows)[number]>();
-    for (const r of rows) if (!best.has(r.productId)) best.set(r.productId, r);
+    const cohort = await this.pilot.rankablePageIds();
+    for (const r of rows) if (!best.has(r.productId) && (!cohort || cohort.has(r.pageId))) best.set(r.productId, r);
     const ranked = diversify([...best.values()], 9).map((r) => ({ productId: r.productId, variantId: r.variantId, score: Number(r.sim) }));
     const intent: Intent = {
       occasion: null,

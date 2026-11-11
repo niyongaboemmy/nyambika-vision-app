@@ -22,6 +22,7 @@ import { ConsentService } from "../../common/consent.service";
 import { PrismaService } from "../../common/prisma.service";
 import { StorageService } from "../../common/storage.service";
 import { parse } from "../../common/zod";
+import { serverEvent } from "../pilot/pilot.service";
 
 interface TwinCheck {
   ok: boolean;
@@ -77,9 +78,11 @@ export class TwinService {
     const encPath = `private/twins/${userId}/v${version}.enc`;
     const { iv, authTag } = await this.storage.putEncrypted(encPath, image);
     if (previous) await this.purge(previous.id);
-    return this.prisma.twin.create({
+    const twin = await this.prisma.twin.create({
       data: { userId, version, encPath, iv, authTag, mime, size: check.estimated_size, checks: check.checks, consentId: consent.id },
     });
+    await serverEvent(this.prisma, "twin_created", userId, { count: version });
+    return twin;
   }
 
   /** Remove twin bytes and every look rendered from it (storage + DB). */

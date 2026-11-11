@@ -2,17 +2,19 @@
 
 import { useDrag } from "@use-gesture/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Sheet } from "@/components/ui";
 import { api, rwf } from "@/lib/api";
 import { waLink, type MakerProduct, type MakerSpace } from "@/lib/maker";
 import { useSession } from "@/lib/session";
+import { track, trackOnce } from "@/lib/track";
 
 /** 2D coverflow collection (Maker Space v1). Swipe to browse, tap to open. */
 export function Collection({ maker }: { maker: MakerSpace }) {
   const [i, setI] = useState(0);
   const [open, setOpen] = useState<MakerProduct | null>(null);
   const items = maker.products;
+  useEffect(() => trackOnce(`maker:${maker.id}`, "maker_space_viewed", { pageId: maker.id }), [maker.id]);
   const bind = useDrag(
     ({ last, movement: [mx], tap }) => {
       if (tap || !last) return;
@@ -89,6 +91,7 @@ function ProductSheet({ maker, product, onClose }: { maker: MakerSpace; product:
           href={waLink(maker.whatsapp, `Muraho ${maker.name}! I'd like "${product.title}" (${v.colourName}). ${typeof window !== "undefined" ? window.location.origin : ""}/m/${maker.handle}`)}
           target="_blank"
           rel="noreferrer"
+          onClick={() => track("maker_contacted", { pageId: maker.id, productId: product.id, channel: "whatsapp" })}
         >
           💬 Order on WhatsApp
         </a>
@@ -120,7 +123,7 @@ export function MakerActions({ maker }: { maker: MakerSpace }) {
   return (
     <div className="fixed inset-x-0 bottom-0 z-30 mx-auto grid w-full max-w-[480px] grid-cols-2 gap-2 bg-gradient-to-t from-ink via-ink/95 to-transparent px-4 pt-6 pb-[max(env(safe-area-inset-bottom),16px)]">
       <Button onClick={follow} variant={following ? "glass" : "primary"}>{following ? `✓ ${t("maker.following")}` : `+ ${t("maker.follow")}`}</Button>
-      <a href={waLink(maker.whatsapp, `Muraho ${maker.name}!`)} target="_blank" rel="noreferrer" className="glass inline-flex min-h-12 items-center justify-center rounded-2xl font-semibold">💬 {t("maker.chat")}</a>
+      <a href={waLink(maker.whatsapp, `Muraho ${maker.name}!`)} target="_blank" rel="noreferrer" onClick={() => track("maker_contacted", { pageId: maker.id, channel: "whatsapp" })} className="glass inline-flex min-h-12 items-center justify-center rounded-2xl font-semibold">💬 {t("maker.chat")}</a>
     </div>
   );
 }

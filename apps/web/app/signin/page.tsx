@@ -12,7 +12,10 @@ const LABELS: Record<Locale, string> = { rw: "Kinyarwanda", en: "English", fr: "
 function SignIn() {
   const { t, locale, setLocale, reload } = useSession();
   const router = useRouter();
-  const next = useSearchParams().get("next") ?? "/";
+  const search = useSearchParams();
+  const next = search.get("next") ?? "/";
+  const [invite, setInvite] = useState(search.get("invite") ?? "");
+  const [showInvite, setShowInvite] = useState(Boolean(search.get("invite")));
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
   const [step, setStep] = useState<"phone" | "code">("phone");
@@ -43,7 +46,9 @@ function SignIn() {
       await api("/auth/otp/verify", { method: "POST", json: { phone, code } });
       await api("/auth/me", { method: "PATCH", json: { locale } }).catch(() => {});
       await reload();
-      router.replace(next);
+      // Pilot invite entered at sign-in: redeem it on the join screen (which explains any problem).
+      const pilotCode = invite.trim().toUpperCase();
+      router.replace(pilotCode && !next.startsWith("/join") ? `/join/${encodeURIComponent(pilotCode)}` : next);
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -82,6 +87,21 @@ function SignIn() {
               onChange={(e) => setPhone(e.target.value)}
               className="glass h-14 rounded-2xl px-4 text-lg outline-none placeholder:text-white/30"
             />
+            {showInvite ? (
+              <label className="flex flex-col gap-2 text-sm text-mut">
+                {t("pilot.code")}
+                <input
+                  value={invite}
+                  onChange={(e) => setInvite(e.target.value.toUpperCase())}
+                  autoCapitalize="characters"
+                  autoComplete="off"
+                  placeholder="NYA-1A2B3C"
+                  className="glass h-12 rounded-2xl px-4 font-mono tracking-[.15em] text-white outline-none placeholder:text-white/30"
+                />
+              </label>
+            ) : (
+              <button type="button" onClick={() => setShowInvite(true)} className="self-start text-sm text-mut underline underline-offset-4">{t("pilot.haveCode")}</button>
+            )}
             <ErrorNote error={error} />
             <Button disabled={busy || phone.replace(/\D/g, "").length < 9}>{t("auth.sendCode")}</Button>
           </form>

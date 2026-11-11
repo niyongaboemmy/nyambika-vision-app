@@ -6,6 +6,7 @@ import { Button, Chip, ErrorNote, Sheet } from "@/components/ui";
 import { api } from "@/lib/api";
 import type { Look } from "@/lib/looks";
 import type { OwnerPoll } from "@/lib/social";
+import { track } from "@/lib/track";
 
 const MAX = 4;
 
@@ -49,6 +50,7 @@ export function CircleAsk({ look, open, onClose, intentLabel }: { look: Look; op
     try {
       const p = await api<OwnerPoll>("/circle/polls", { method: "POST", json: { lookIds: picked, question, consent: true } });
       setPoll(p);
+      track("circle_poll_created", { count: picked.length });
       setStep("done");
       navigator.vibrate?.([12, 30, 12]);
     } catch (e) {
