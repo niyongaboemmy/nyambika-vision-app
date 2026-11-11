@@ -594,13 +594,68 @@ const PATHS = {
   needle: "M20 4 9 15M7 17l-3 3M14 4h6v6M9 15l-2 2 1 1",
   search: "M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14M21 21l-4.3-4.3",
   arrowRight: "M5 12h14M13 6l6 6-6 6",
+  // iOS-style pass: glyphs that replace every emoji used as an icon (SF Symbols-like, rounded, 1.75 px stroke).
+  play: "M7.5 4.8v14.4a.9.9 0 0 0 1.4.8l11.2-7.2a.9.9 0 0 0 0-1.6L8.9 4a.9.9 0 0 0-1.4.8",
+  pause: "M8 5v14M16 5v14",
+  phone: "M8 2.5h8A1.5 1.5 0 0 1 17.5 4v16a1.5 1.5 0 0 1-1.5 1.5H8A1.5 1.5 0 0 1 6.5 20V4A1.5 1.5 0 0 1 8 2.5M11 18.5h2",
+  call: "M5 3.5h3l1.5 4.5-2 1.5a11 11 0 0 0 5 5l1.5-2 4.5 1.5v3a2 2 0 0 1-2 2A16 16 0 0 1 3 5.5a2 2 0 0 1 2-2",
+  bell: "M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15zM10 20.5a2 2 0 0 0 4 0",
+  chat: "M20 11.5a8 7.5 0 0 1-11.6 6.7L4 19.5l1.3-3.8A7.5 7.5 0 1 1 20 11.5",
+  calendar: "M4 6h16v14H4zM4 10h16M8 3v4M16 3v4",
+  pin: "M12 21s-6.5-5.7-6.5-11a6.5 6.5 0 0 1 13 0c0 5.3-6.5 11-6.5 11M12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5",
+  key: "M14.5 14a5 5 0 1 0-4.6-3L3 17.9V21h3v-2h2v-2h2l1.9-1.9a5 5 0 0 0 2.6.9M16.5 7.5h.01",
+  hand: "M8 13V5.5a1.5 1.5 0 0 1 3 0V11M11 10V4a1.5 1.5 0 0 1 3 0v7M14 10.5v-5a1.5 1.5 0 0 1 3 0V14a7 7 0 0 1-7 7h-.5a6 6 0 0 1-4.6-2.2L3.5 15a1.5 1.5 0 0 1 2.3-1.9L8 15",
+  headset: "M3 9.5A2.5 2.5 0 0 1 5.5 7h13A2.5 2.5 0 0 1 21 9.5v5a2.5 2.5 0 0 1-2.5 2.5h-3l-2-2.5h-3L8.5 17h-3A2.5 2.5 0 0 1 3 14.5z",
+  dress: "M9 3l1 3h4l1-3M10 6l-1 5h6l-1-5M9 11l-4 10h14l-4-10",
+  user: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M4.5 20.5a7.5 7.5 0 0 1 15 0",
+  person: "M12 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4M9.5 21v-6.5L8 13.5V10a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v3.5l-1.5 1V21",
+  trash: "M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3",
+  link: "M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1 1M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1-1",
+  edit: "M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4",
+  image: "M4 5h16v14H4zM4 16l5-5 4 4 2-2 5 5M15.5 9.5h.01",
+  video: "M3 6.5A1.5 1.5 0 0 1 4.5 5h9A1.5 1.5 0 0 1 15 6.5v11a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 3 17.5zM15 10.5 21 7v10l-6-3.5",
+  thumbsUp: "M7 10v10H4V10zM7 10l4-7a2 2 0 0 1 2.5 2.2L13 9h5.5a2 2 0 0 1 2 2.4l-1.4 7A2 2 0 0 1 17.1 20H7",
+  thumbsDown: "M7 14V4H4v10zM7 14l4 7a2 2 0 0 0 2.5-2.2L13 15h5.5a2 2 0 0 0 2-2.4l-1.4-7A2 2 0 0 0 17.1 4H7",
+  fire: "M12 21a6.5 6.5 0 0 0 6.5-6.5c0-4-3-6-4-9.5-2.5 1.5-3.5 4-3.5 6-1-.5-2-1.5-2-3-2 1.5-3.5 4-3.5 6.5A6.5 6.5 0 0 0 12 21",
+  star: "M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z",
+  bulb: "M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3",
+  ring: "M12 21a6 6 0 1 0 0-12 6 6 0 0 0 0 12M9.5 9.5 8 5l2-2h4l2 2-1.5 4.5",
+  gift: "M4 10h16v4H4zM5.5 14h13v7h-13zM12 10v11M12 10S10.5 5 8 5.5 7 9 12 10M12 10s1.5-5 4-4.5S17 9 12 10",
+  crown: "M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z",
+  wrench: "M15 4a5 5 0 0 0-4.6 6.9l-6.9 6.9a1.8 1.8 0 0 0 2.6 2.6l6.9-6.9A5 5 0 0 0 20 9l-3 3-3-1-1-3 3-3a5 5 0 0 0-1-1",
+  hourglass: "M6 3h12M6 21h12M7 3c0 4 5 5.5 5 9s-5 5-5 9M17 3c0 4-5 5.5-5 9s5 5 5 9",
+  ticket: "M3 6h18v3.5a2.5 2.5 0 0 0 0 5V18H3v-3.5a2.5 2.5 0 0 0 0-5zM14.5 6v12",
+  signal: "M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.5 16a5 5 0 0 1 7 0M12 19.5h.01",
+  sunrise: "M3 18h18M7 18a5 5 0 0 1 10 0M12 4v4M5 9.5 6.5 11M19 9.5 17.5 11M2 14h2M20 14h2",
+  music: "M9 18V5l11-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0M20 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0",
+  checkCircle: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18M8 12.5l2.7 2.7L16 9.5",
+  minus: "M5 12h14",
+  eyeOff: "M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3 3.9M6.6 6.6A17 17 0 0 0 2 12s3.5 7 10 7a9.6 9.6 0 0 0 5.4-1.6M9.9 9.9a3 3 0 0 0 4.2 4.2",
+  smile: "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18M8.5 14a4.5 4.5 0 0 0 7 0M9 9.5h.01M15 9.5h.01",
+  clap: "M8 12.5 5 9.5a1.4 1.4 0 0 1 2-2l4 4M9.5 8 7 5.5a1.4 1.4 0 0 1 2-2l5.5 5.5M13 6.5l-1-1a1.4 1.4 0 0 1 2-2l4.5 4.5a6 6 0 0 1 0 8.5l-1 1a6 6 0 0 1-8.5 0L4.5 13a1.4 1.4 0 0 1 2-2L9 13.5M18.5 2.5l1-1M21 5.5l1.5-.5",
+  moto: "M2.5 17.5a2.5 2.5 0 1 0 5 0 2.5 2.5 0 1 0-5 0M16.5 17.5a2.5 2.5 0 1 0 5 0 2.5 2.5 0 1 0-5 0M5 15h4.5l3-5h3l3.5 7.5M14 5.5h2.5l1 4.5",
+  rotate: "M3 12a9 9 0 0 1 15.5-6.2M21 12a9 9 0 0 1-15.5 6.2M18.5 2.5v3.3h-3.3M5.5 21.5v-3.3h3.3",
+  move: "M12 3v18M3 12h18M12 3 9.5 5.5M12 3l2.5 2.5M12 21l-2.5-2.5M12 21l2.5-2.5M3 12l2.5-2.5M3 12l2.5 2.5M21 12l-2.5-2.5M21 12l-2.5 2.5",
+  wand: "M4 20 15 9M15 9l2-2M18 3v2M21 6h-2M20.5 3.5l-1.3 1.3M13 4v1.5M20 11h-1.5",
+  tag: "M3 12V4h8l10 10-8 8zM7.5 8.5h.01",
+  cash: "M3 7h18v10H3zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6M6 10v.01M18 14v.01",
+  leaf: "M5 19C5 10 10 5 20 4c-1 10-6 15-15 15M5 19l7-7",
+  filter: "M4 6h16M7 12h10M10 18h4",
+  send: "M21 3 10 14M21 3l-7 18-4-7-7-4z",
+  sliders: "M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0M16 4v4M10 10v4M18 16v4",
 } as const;
 
 export type IconName = keyof typeof PATHS;
 
-export function Icon({ name, className = "size-5" }: { name: IconName; className?: string }) {
+/** Glyphs that look right filled (SF "fill" variants for selected tabs, saved hearts, ratings). */
+const FILLABLE = new Set<IconName>(["heart", "star", "home", "bell", "bag", "play", "user", "chat", "pin", "bulb", "thumbsUp", "fire", "tag", "headset"]);
+
+/** One icon system for shopper, studio and admin: SF Symbols-like, rounded caps/joins, 1.75 px stroke.
+ *  `filled` gives the SF ".fill" look on glyphs that support it (selected tab, saved heart). */
+export function Icon({ name, className = "size-5", filled = false }: { name: IconName; className?: string; filled?: boolean }) {
+  const fill = filled && FILLABLE.has(name);
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={name === "more" ? 3.4 : 1.9} strokeLinecap="round" strokeLinejoin="round" aria-hidden className={className}>
+    <svg viewBox="0 0 24 24" fill={fill ? "currentColor" : "none"} stroke="currentColor" strokeWidth={name === "more" ? 3.4 : 1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden className={className}>
       <path d={PATHS[name]} />
     </svg>
   );
