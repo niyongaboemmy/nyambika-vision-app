@@ -199,7 +199,7 @@ export function ArMirror({ items, initial }: { items: WardrobeItem[]; initial: s
 
   return (
     <div className="relative">
-      <div className="relative isolate h-[min(70dvh,620px)] overflow-hidden rounded-[32px] bg-black" data-testid="ar-stage">
+      <div className="theme-media relative isolate h-[min(70dvh,620px)] overflow-hidden rounded-[32px] bg-black text-txt" data-testid="ar-stage">
         <video ref={video} playsInline muted className="hidden" />
         {mode === "live" || mode === "starting" ? (
           <canvas ref={canvas} className="h-full w-full" aria-label={`Live mirror with ${sel?.title ?? "the garment"} overlaid on your body`} role="img" />

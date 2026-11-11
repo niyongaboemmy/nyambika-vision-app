@@ -6,7 +6,7 @@ import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { HoldToBuy } from "@/components/hold-to-buy";
 import { LookView } from "@/components/look-view";
 import { TwinNudge } from "@/components/twin-nudge";
-import { ErrorNote, Screen, Spinner } from "@/components/ui";
+import { ErrorNote, Screen, ShopperSkeleton } from "@/components/ui";
 import { api } from "@/lib/api";
 import { isRendering, type Look } from "@/lib/looks";
 import { track, trackOnce } from "@/lib/track";
@@ -76,7 +76,7 @@ function Stream() {
   const replace = (l: Look) => setData((d) => (d ? { ...d, looks: d.looks.map((x) => (x.id === l.id ? l : x)) } : d));
 
   if (error && !data) return <Screen><div className="p-6 pt-20"><ErrorNote error={error} /></div></Screen>;
-  if (!data) return <Screen><div className="grid min-h-dvh place-items-center"><Spinner /></div></Screen>;
+  if (!data) return <div className="theme-media"><ShopperSkeleton variant="media" title={false} /></div>;
   if (!data.looks.length) return <Screen><p className="p-6 pt-24 text-center text-mut">No matching looks yet. Try asking differently.</p></Screen>;
 
   const label = intentLabel(data, snap);

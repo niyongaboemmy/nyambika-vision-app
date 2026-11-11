@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { HoldToBuy } from "@/components/hold-to-buy";
 import { LookView } from "@/components/look-view";
-import { ErrorNote, Screen, Spinner } from "@/components/ui";
+import { ErrorNote, Screen, ShopperSkeleton } from "@/components/ui";
 import { api } from "@/lib/api";
 import type { Look } from "@/lib/looks";
 import { useSession } from "@/lib/session";
@@ -28,7 +28,7 @@ function TryOn() {
   }, [loading, me, variantId, router]);
 
   if (error) return <Screen><div className="p-6 pt-20"><ErrorNote error={error} /></div></Screen>;
-  if (!look) return <Screen><div className="grid min-h-dvh place-items-center"><Spinner /></div></Screen>;
+  if (!look) return <div className="theme-media"><ShopperSkeleton variant="media" title={false} /></div>;
   return (
     <div className="mx-auto h-dvh w-full max-w-[480px]">
       <LookView look={look} onSave={save} onVariant={variant}><HoldToBuy look={look} /></LookView>

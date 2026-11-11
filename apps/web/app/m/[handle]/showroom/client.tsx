@@ -20,7 +20,7 @@ type Mode = "loading" | "3d" | "flat";
 
 export function ShowroomClient({ room, commerce }: { room: Showroom; commerce?: Commerce | null }) {
   return (
-    <Suspense fallback={<div className="min-h-dvh bg-ink" />}>
+    <Suspense fallback={<div className="theme-media skeleton min-h-dvh" />}>
       <Room room={room} commerce={commerce ?? null} />
     </Suspense>
   );
@@ -192,7 +192,7 @@ function Room({ room, commerce }: { room: Showroom; commerce: Commerce | null })
   const pct = progress.total ? Math.round((progress.loaded / progress.total) * 100) : 100;
 
   return (
-    <main className="relative h-dvh w-full overflow-hidden bg-ink" style={{ background: `radial-gradient(80% 60% at 50% 20%, ${room.page.palette.primary}33, transparent 70%), #0b0a0f` }}>
+    <main className="theme-media relative h-dvh w-full overflow-hidden bg-ink text-txt" style={{ background: `radial-gradient(80% 60% at 50% 20%, ${room.page.palette.primary}33, transparent 70%), #0b0a0f` }}>
       <p className="sr-only" aria-live="polite">{announce}</p>
       {mode !== "flat" && (
         <canvas

@@ -214,7 +214,7 @@ export function ShowClient({ initial }: { initial: ShowView }) {
 
   if (!watching) {
     return (
-      <main className="relative mx-auto min-h-dvh w-full max-w-[480px] overflow-hidden bg-ink pb-10">
+      <main className="theme-media relative mx-auto min-h-dvh w-full max-w-[480px] overflow-hidden bg-ink pb-10 text-txt">
         <header className="relative h-[58dvh] min-h-[360px]">
           {show.cover && <img src={show.cover} alt="" className="absolute inset-0 size-full object-cover" />}
           <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-ink" />
@@ -277,7 +277,7 @@ export function ShowClient({ initial }: { initial: ShowView }) {
   }
 
   return (
-    <main className="relative h-dvh w-full overflow-hidden bg-ink" onKeyDown={(e) => {
+    <main className="theme-media relative h-dvh w-full overflow-hidden bg-ink text-txt" onKeyDown={(e) => {
       if (e.key === "ArrowLeft") engine.current?.look(0.12);
       if (e.key === "ArrowRight") engine.current?.look(-0.12);
     }}>
