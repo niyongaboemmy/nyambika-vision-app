@@ -68,7 +68,7 @@ const rwfTexts = await card.getByText(/RWF \d/).allInnerTexts();
 assert(rwfTexts.length === 0, `the Nairobi look shows KES, not an RWF figure ${rwfTexts.join(" | ")}`);
 await p.waitForTimeout(600);
 await shot("feed-kes-look");
-await card.getByRole("button", { name: /^✋ Buy$/ }).click();
+await card.getByRole("button", { name: /^Buy$/ }).click();
 const sheet = p.getByRole("dialog");
 await sheet.getByText("You'll be charged").waitFor({ timeout: 15000 });
 assert((await sheet.getByRole("button", { name: /M-Pesa/ }).count()) === 1, "buy sheet offers M-Pesa (Kenyan wallet)");

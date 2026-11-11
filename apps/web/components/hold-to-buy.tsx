@@ -7,11 +7,14 @@ import { AddToBag } from "@/components/bag";
 import { DiscountField, type AppliedDiscount } from "@/components/growth-offer";
 import { WalletPhone, type CheckoutResult } from "@/components/region";
 import { SizeNotes, useSizeRecommendation } from "@/components/size-hint";
+import { SPRING } from "@/components/look-rail";
+import { Icon } from "@/components/studio";
 import { Chip, ErrorNote, Sheet, Spinner } from "@/components/ui";
 import { api, rwf } from "@/lib/api";
 import type { Look } from "@/lib/looks";
 import type { OrderView } from "@/lib/orders";
 import { useCommerce, useRegion, type Commerce } from "@/lib/region";
+import { haptic } from "@/lib/native";
 import { useSession } from "@/lib/session";
 import { track } from "@/lib/track";
 
@@ -70,20 +73,27 @@ export function HoldToBuy({ look, autoOpen = false }: { look: Look; /** E35: ope
   if (!me) return null;
   return (
     <>
-      <button onClick={() => { setOpen(true); track("buy_sheet_opened", { lookId: look.id }); }} className="hit grad-cta shrink-0 rounded-2xl px-4 py-2 text-sm font-bold" disabled={!look.variant.inStock}>
-        ✋ {look.variant.inStock ? "Buy" : "Sold out"}
+      <button
+        type="button"
+        onClick={() => { haptic("light"); setOpen(true); track("buy_sheet_opened", { lookId: look.id }); }}
+        className="grad-cta inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full px-5 text-[15px] font-bold text-white shadow-[0_10px_28px_-10px_rgba(139,92,246,.8)] transition-transform duration-300 active:scale-95 disabled:opacity-60"
+        style={{ transitionTimingFunction: SPRING }}
+        disabled={!look.variant.inStock}
+      >
+        <Icon name="bag" className="size-[18px]" />
+        {look.variant.inStock ? "Buy" : "Sold out"}
       </button>
       <Sheet open={open} onClose={() => !busy && setOpen(false)}>
         <div className="max-h-[80dvh] overflow-y-auto overscroll-contain pr-1">
         <h3 className="font-display text-2xl font-black">{look.product.title}{look.product.madeToOrder ? " · tailor-made" : ""}</h3>
-        <p className="text-sm text-mut">{regional ? `${regional.flag} ` : ""}{look.maker.name} {look.maker.verified && "✓"} · {look.variant.colourName} · ready {eta}</p>
+        <p className="flex flex-wrap items-center gap-x-1 text-sm text-mut">{look.maker.name}{look.maker.verified && <Icon name="checkCircle" className="size-3.5 text-mint" />} · {look.variant.colourName} · ready {eta}</p>
 
         <div className="mt-4 space-y-3">
           <div>
             <p className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-mut">Size</p>
             <div className="flex flex-wrap gap-2">
               {look.variant.sizes.map((s) => (
-                <Chip key={s} active={s === size} onClick={() => { picked.current = true; setSize(s); }}>{s === recSize ? `📏 ${s} · ${rec!.basis === "PROFILE" ? t("size.recommended") : t("buy.sizeFromTwin")} ✓` : s === twinSize && !recSize ? `📏 ${s} · ${t("buy.sizeFromTwin")} ✓` : s}</Chip>
+                <Chip key={s} active={s === size} onClick={() => { picked.current = true; setSize(s); }}>{s === recSize ? <><Icon name="ruler" className="size-4" />{s} · {rec!.basis === "PROFILE" ? t("size.recommended") : t("buy.sizeFromTwin")}</> : s === twinSize && !recSize ? <><Icon name="ruler" className="size-4" />{s} · {t("buy.sizeFromTwin")}</> : s}</Chip>
               ))}
             </div>
             <SizeNotes rec={recSize ? rec : null} size={size} />
@@ -95,18 +105,18 @@ export function HoldToBuy({ look, autoOpen = false }: { look: Look; /** E35: ope
           ) : (
             <>
               <div className="flex flex-wrap gap-2">
-                <Chip active={delivery === "DELIVERY"} onClick={() => setDelivery("DELIVERY")}>🛵 Delivery {eta} · +{rwf(DELIVERY_FEE)}</Chip>
-                <Chip active={delivery === "PICKUP"} onClick={() => setDelivery("PICKUP")}>🏪 Pickup in {look.maker.sector}</Chip>
+                <Chip active={delivery === "DELIVERY"} onClick={() => setDelivery("DELIVERY")}><Icon name="moto" className="size-4" />Delivery {eta} · +{rwf(DELIVERY_FEE)}</Chip>
+                <Chip active={delivery === "PICKUP"} onClick={() => setDelivery("PICKUP")}><Icon name="store" className="size-4" />Pickup in {look.maker.sector}</Chip>
               </div>
               {delivery === "DELIVERY" && (
                 <input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Delivery address (e.g. KG 7 Ave, Kacyiru)" aria-label="Delivery address" className="glass h-12 w-full rounded-2xl px-4 outline-none placeholder:text-white/40" />
               )}
               <div className="flex flex-wrap gap-2">
-                <Chip active={wallet === "MTN_MOMO"} onClick={() => setWallet("MTN_MOMO")}>🟡 MTN MoMo · {me.phone.slice(-4).padStart(8, "•")}</Chip>
-                <Chip active={wallet === "AIRTEL_MONEY"} onClick={() => setWallet("AIRTEL_MONEY")}>🔴 Airtel Money</Chip>
+                <Chip active={wallet === "MTN_MOMO"} onClick={() => setWallet("MTN_MOMO")}><span aria-hidden className="size-2.5 rounded-full bg-[#ffcb05]" />MTN MoMo · {me.phone.slice(-4).padStart(8, "•")}</Chip>
+                <Chip active={wallet === "AIRTEL_MONEY"} onClick={() => setWallet("AIRTEL_MONEY")}><span aria-hidden className="size-2.5 rounded-full bg-[#e40000]" />Airtel Money</Chip>
               </div>
               <DiscountField variantId={look.variant.id} open={open} onChange={setDiscount} />
-              <p className="pt-2 text-center text-sm">🔐 {t("buy.paidTo")} <b>{look.maker.madeBy[0] ? `${look.maker.madeBy[0]}, ${look.maker.name}` : look.maker.name}</b> · {rwf(total)}</p>
+              <p className="flex flex-wrap items-center justify-center gap-x-1 pt-2 text-center text-sm"><Icon name="lock" className="size-4 text-gold" /> {t("buy.paidTo")} <b>{look.maker.madeBy[0] ? `${look.maker.madeBy[0]}, ${look.maker.name}` : look.maker.name}</b> · {rwf(total)}</p>
               <ErrorNote error={error} />
               <HoldRing label={`${t("buy.title")}: ${rwf(total)}`} disabled={busy || needsAddress} busy={busy} onHeld={submit} hint="Press and hold 1 second · then your MoMo PIN" />
               {needsAddress && <p className="text-center text-xs text-gold">Add a delivery address to continue</p>}
@@ -167,8 +177,8 @@ function RegionHold({ look, commerce, size, eta, busy, setBusy }: { look: Look; 
   return (
     <>
       <div className="flex flex-wrap gap-2">
-        <Chip active={delivery === "DELIVERY"} onClick={() => setDelivery("DELIVERY")}>🛵 In {commerce.country} {eta} · +{show(commerce.domesticDeliveryMinor, commerce.currency).primary}</Chip>
-        <Chip active={delivery === "PICKUP"} onClick={() => setDelivery("PICKUP")}>🏪 Pickup in {look.maker.sector}</Chip>
+        <Chip active={delivery === "DELIVERY"} onClick={() => setDelivery("DELIVERY")}><Icon name="moto" className="size-4" />In {commerce.country} {eta} · +{show(commerce.domesticDeliveryMinor, commerce.currency).primary}</Chip>
+        <Chip active={delivery === "PICKUP"} onClick={() => setDelivery("PICKUP")}><Icon name="store" className="size-4" />Pickup in {look.maker.sector}</Chip>
       </div>
       {delivery === "DELIVERY" && (
         <input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Delivery address" aria-label="Delivery address" className="glass h-12 w-full rounded-2xl px-4 outline-none placeholder:text-white/40" />
@@ -179,7 +189,7 @@ function RegionHold({ look, commerce, size, eta, busy, setBusy }: { look: Look; 
         <p className="text-xs uppercase tracking-widest text-mut">{t("region.charged")}</p>
         <p className="font-display text-3xl font-black">{shown.primary}</p>
         {shown.approx && <p className="text-sm text-txt/80">{shown.approx} <span className="text-mut">· reference only</span></p>}
-        <p className="mt-1 text-xs text-mut">🔐 {t("buy.paidTo")} {look.maker.name} in {commerce.currency} · maker-funded offers apply automatically</p>
+        <p className="mt-1 inline-flex flex-wrap items-center justify-center gap-x-1 text-xs text-mut"><Icon name="lock" className="size-3.5 text-gold" /> {t("buy.paidTo")} {look.maker.name} in {commerce.currency} · offers auto-apply</p>
       </div>
       <ErrorNote error={error} />
       <HoldRing
@@ -195,21 +205,27 @@ function RegionHold({ look, commerce, size, eta, busy, setBusy }: { look: Look; 
   );
 }
 
-/** The press-and-hold ring (pointer + keyboard). `onHeld` rejecting resets the ring. */
+/** Hold-to-buy pill (pointer + keyboard): a progress bar fills the button while held; `onHeld` rejecting resets it. */
 function HoldRing({ label, disabled, busy, onHeld, hint }: { label: string; disabled: boolean; busy: boolean; onHeld: () => Promise<void>; hint: string }) {
   const { t } = useSession();
   const [progress, setProgress] = useState(0);
   const raf = useRef<number | null>(null);
   const started = useRef(0);
+  const half = useRef(false);
   useEffect(() => () => { if (raf.current) cancelAnimationFrame(raf.current); }, []);
 
   function begin() {
     if (disabled) return;
     started.current = performance.now();
-    navigator.vibrate?.(10);
+    half.current = false;
+    haptic("light");
     const tick = () => {
       const p = Math.min(1, (performance.now() - started.current) / HOLD_MS);
       setProgress(p);
+      if (p > 0.5 && !half.current) {
+        half.current = true;
+        haptic("light");
+      }
       if (p >= 1) return void onHeld().catch(() => setProgress(0));
       raf.current = requestAnimationFrame(tick);
     };
@@ -220,27 +236,28 @@ function HoldRing({ label, disabled, busy, onHeld, hint }: { label: string; disa
     if (!busy) setProgress(0);
   }
 
-  const r = 52;
-  const c = 2 * Math.PI * r;
   return (
-    // Visual only: the ring stays pinned at the bottom of the scrolling sheet so the primary action is always in reach.
+    // The pill stays pinned at the bottom of the scrolling sheet so the primary action is always in reach.
     <div className="sticky bottom-0 z-10 -mx-5 mt-2 flex flex-col items-center gap-2 bg-gradient-to-t from-ink-2 from-60% to-transparent px-5 pb-1 pt-5">
       <button
+        type="button"
         aria-label={label}
+        aria-disabled={disabled || undefined}
         onPointerDown={begin}
         onPointerUp={cancel}
         onPointerLeave={cancel}
-        onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && !e.repeat) begin(); }}
+        onPointerCancel={cancel}
+        onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && !e.repeat) { e.preventDefault(); begin(); } }}
         onKeyUp={cancel}
         onContextMenu={(e) => e.preventDefault()}
-        className="relative grid size-36 select-none place-items-center rounded-full touch-none"
+        className={`grad-cta relative h-14 w-full select-none overflow-hidden rounded-full text-white shadow-[0_12px_32px_-12px_rgba(139,92,246,.8)] touch-none transition-[transform,opacity] duration-300 [-webkit-touch-callout:none] ${disabled && !busy ? "opacity-50" : ""}`}
+        style={{ transform: `scale(${1 - progress * 0.03})`, transitionTimingFunction: SPRING }}
       >
-        <svg viewBox="0 0 120 120" className="absolute inset-0 -rotate-90">
-          <circle cx="60" cy="60" r={r} stroke="rgba(255,255,255,.15)" strokeWidth="8" fill="none" />
-          <circle cx="60" cy="60" r={r} stroke="#F2B84B" strokeWidth="8" fill="none" strokeLinecap="round" strokeDasharray={c} strokeDashoffset={c * (1 - progress)} />
-        </svg>
-        <span className="grad-cta grid size-28 place-items-center rounded-full text-center font-display text-lg font-black leading-tight" style={{ transform: `scale(${1 - progress * 0.06})` }}>
-          {busy ? <Spinner /> : progress > 0 ? <>{t("buy.holding")}</> : <>✋<br />{t("buy.title")}</>}
+        {/* Progress bar: a light fill sweeps across the button while it is held. */}
+        <span aria-hidden className="absolute inset-y-0 left-0 bg-white/30" style={{ width: `${progress * 100}%`, transition: progress === 0 ? `width 360ms ${SPRING}` : "none" }} />
+        <span aria-hidden className="relative flex h-full items-center justify-center gap-2 px-4 text-[15px] font-bold">
+          {busy ? <Spinner /> : <Icon name="hand" className="size-5 shrink-0" />}
+          <span className="truncate">{busy ? label : progress > 0 ? t("buy.holding") : label}</span>
         </span>
       </button>
       <p className="text-center text-xs text-mut">{hint}</p>

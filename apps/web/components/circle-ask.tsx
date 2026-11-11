@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { Icon } from "@/components/studio";
 import { Button, Chip, ErrorNote, Sheet } from "@/components/ui";
 import { api } from "@/lib/api";
 import type { Look } from "@/lib/looks";
@@ -61,14 +62,14 @@ export function CircleAsk({ look, open, onClose, intentLabel }: { look: Look; op
   }
 
   const chosen = (candidates ?? []).filter((c) => picked.includes(c.id)).sort((a, b) => picked.indexOf(a.id) - picked.indexOf(b.id));
-  const shareText = poll ? `${poll.question} Vote for my outfit 👗 ${poll.shareUrl}` : "";
+  const shareText = poll ? `${poll.question} Vote for my outfit: ${poll.shareUrl}` : "";
 
   return (
     <Sheet open={open} onClose={() => !busy && onClose()}>
       {step === "pick" && (
         <div>
-          <h3 className="font-display text-2xl font-black">Ask your circle 👥</h3>
-          <p className="text-sm text-mut">Pick 2–{MAX} looks. Friends vote from WhatsApp, no account needed.</p>
+          <h3 className="flex items-center gap-2 font-display text-2xl font-black"><Icon name="users" className="size-6 text-gold" />Ask your circle</h3>
+          <p className="text-sm text-mut">Pick 2–{MAX} · friends vote on WhatsApp</p>
           <div className="mt-4 grid max-h-[42vh] grid-cols-3 gap-2 overflow-y-auto no-scrollbar" role="group" aria-label="Your looks">
             {candidates === null
               ? Array.from({ length: 6 }).map((_, i) => <div key={i} className="skeleton aspect-[9/14] rounded-2xl" />)
@@ -113,16 +114,16 @@ export function CircleAsk({ look, open, onClose, intentLabel }: { look: Look; op
             {chosen.map((c) => (
               <div key={c.id} className="relative aspect-[9/14] flex-1 overflow-hidden rounded-2xl bg-ink-3">
                 {c.image && <img src={c.image} alt={`${c.variant.colourName} look`} className="h-full w-full object-cover" />}
-                <span className="absolute bottom-1.5 left-1.5 rounded-md bg-black/65 px-1.5 py-0.5 text-[9px] font-bold">✦ AI preview</span>
+                <span className="absolute bottom-1.5 left-1.5 inline-flex items-center gap-0.5 rounded-md bg-black/65 px-1.5 py-0.5 text-[9px] font-bold"><Icon name="sparkle" className="size-2.5" />AI preview</span>
                 <span className="absolute bottom-1.5 right-1.5 size-3 rounded-full orb" aria-hidden />
               </div>
             ))}
           </div>
-          <ul className="mt-4 space-y-1.5 text-sm text-txt/90">
-            <li>🖼️ {chosen.length} copies of these looks, each stamped <b>AI preview</b> + Nyambika mark. Your originals stay private.</li>
-            <li>🙈 No name, phone, twin or measurements</li>
-            <li>⏳ Closes in 72 h · take it down anytime</li>
-            <li>🧵 Makers never see polls.</li>
+          <ul className="mt-4 space-y-2 text-sm text-txt/90">
+            <li className="flex items-center gap-2.5"><Icon name="image" className="size-4 shrink-0 text-gold" />{chosen.length} stamped copies · AI label</li>
+            <li className="flex items-center gap-2.5"><Icon name="eyeOff" className="size-4 shrink-0 text-gold" />No name, phone, twin or sizes</li>
+            <li className="flex items-center gap-2.5"><Icon name="hourglass" className="size-4 shrink-0 text-gold" />Closes in 72 h · take down anytime</li>
+            <li className="flex items-center gap-2.5"><Icon name="shield" className="size-4 shrink-0 text-gold" />Never shared with makers</li>
           </ul>
           <label className="glass mt-4 flex items-start gap-3 rounded-2xl p-3 text-sm">
             <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5 size-5 accent-[#F2B84B]" />
@@ -150,9 +151,9 @@ export function CircleAsk({ look, open, onClose, intentLabel }: { look: Look; op
           </a>
           <div className="mt-2 flex gap-2">
             <Button variant="glass" className="flex-1" onClick={async () => { await navigator.clipboard?.writeText(poll.shareUrl).catch(() => {}); setCopied(true); }}>
-              {copied ? "Link copied ✓" : "Copy link"}
+              {copied ? <><Icon name="check" className="size-4" />Copied</> : <><Icon name="copy" className="size-4" />Copy link</>}
             </Button>
-            <Link href={`/circle/${poll.id}`} className="glass inline-flex min-h-12 flex-1 items-center justify-center rounded-2xl font-semibold">Live results →</Link>
+            <Link href={`/circle/${poll.id}`} className="glass inline-flex min-h-12 flex-1 items-center justify-center rounded-2xl font-semibold">Live results <Icon name="chevron" className="ml-1 size-4" /></Link>
           </div>
         </div>
       )}

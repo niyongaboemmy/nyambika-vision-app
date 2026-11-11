@@ -4,6 +4,8 @@ import { isExpectedText, LimitState } from "@/components/limit-state";
 import { morphPrice, quantizeHue, type MorphLength, type MorphSleeve, type MorphSpec } from "@nyambika/contracts";
 import { useCallback, useEffect, useRef, useState, type PointerEvent as RPointerEvent } from "react";
 import { AskTailorSheet } from "@/components/ask-tailor";
+import { RailButton } from "@/components/look-rail";
+import { Icon } from "@/components/studio";
 import { Sheet } from "@/components/ui";
 import { api, rwf } from "@/lib/api";
 import type { Look } from "@/lib/looks";
@@ -36,12 +38,9 @@ export function MorphRail({ look }: { look: Look }) {
   if (!tpl?.customizable && !sewable) return null;
   return (
     <>
-      <button onClick={() => (tpl?.customizable ? setOpen(true) : setAsk(true))} className="hit flex flex-col items-center gap-1 text-xs font-semibold">
-        <span className="glass grid size-12 place-items-center rounded-full text-xl" aria-hidden>
-          {tpl?.customizable ? <span className="size-6 rounded-full bg-[conic-gradient(red,yellow,lime,cyan,blue,magenta,red)] shadow-[0_0_12px_rgba(255,255,255,.35)]" /> : "✂️"}
-        </span>
-        {tpl?.customizable ? t("morph.action") : t("morph.sew")}
-      </button>
+      <RailButton label={tpl?.customizable ? t("morph.action") : t("morph.sew")} onClick={() => (tpl?.customizable ? setOpen(true) : setAsk(true))}>
+        {tpl?.customizable ? <span className="block size-[22px] rounded-full bg-[conic-gradient(red,yellow,lime,cyan,blue,magenta,red)] shadow-[0_0_10px_rgba(255,255,255,.3)] ring-2 ring-white/80" /> : <Icon name="scissors" className="size-[22px]" />}
+      </RailButton>
       {tpl?.customizable && open && <MorphSheet look={look} tpl={tpl} onClose={() => setOpen(false)} />}
       {!tpl?.customizable && (
         <AskTailorSheet
@@ -105,8 +104,8 @@ function MorphSheet({ look, tpl, onClose }: { look: Look; tpl: MorphTemplateView
   return (
     <Sheet open onClose={onClose}>
       <div className="-mt-2 flex items-center justify-between gap-2">
-        <span className="glass rounded-2xl px-3 py-1.5 text-sm font-semibold">🎨 {t("morph.title")} · {tpl.maker?.name}</span>
-        <button onClick={onClose} aria-label="Close" className="glass grid size-9 place-items-center rounded-full">✕</button>
+        <span className="glass inline-flex min-w-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold"><Icon name="palette" className="size-4 shrink-0 text-gold" /><span className="truncate">{t("morph.title")} · {tpl.maker?.name}</span></span>
+        <button onClick={onClose} aria-label="Close" className="hit glass grid size-9 shrink-0 place-items-center rounded-full"><Icon name="x" className="size-4" /></button>
       </div>
 
       <ColourRing hue={hue} onChange={setHue} busy={busy}>
@@ -130,14 +129,14 @@ function MorphSheet({ look, tpl, onClose }: { look: Look; tpl: MorphTemplateView
       </div>
 
       <button onClick={() => setAsk(true)} className="mt-3 flex w-full items-center gap-3 rounded-3xl border border-white/15 bg-[linear-gradient(120deg,rgba(224,112,63,.28),rgba(139,92,246,.22))] p-3.5 text-left transition active:scale-[.99]">
-        <span className="text-2xl" aria-hidden>🪡</span>
+        <span className="grid size-10 shrink-0 place-items-center rounded-full bg-white/10" aria-hidden><Icon name="needle" className="size-5" /></span>
         <span className="min-w-0 flex-1">
           <span className="block font-display text-base font-black">{t("morph.ask").replace("{maker}", tpl.maker?.name.split(" ")[0] ?? "the tailor")}</span>
           <span className="block text-sm text-txt/80">
-            {rwf(price)}{extra > 0 ? ` · +${rwf(extra)}` : ""} · ready in {o.leadTimeDays} days · uses your measurements
+            {rwf(price)}{extra > 0 ? ` · +${rwf(extra)}` : ""} · {o.leadTimeDays} days · your measurements
           </span>
         </span>
-        <span aria-hidden className="text-xl">→</span>
+        <Icon name="chevron" className="size-5 shrink-0 text-txt/70" />
       </button>
 
       <AskTailorSheet

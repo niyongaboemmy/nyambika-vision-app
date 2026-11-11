@@ -1,8 +1,10 @@
 "use client";
 
 import { isExpectedText, LimitState } from "@/components/limit-state";
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { GlassControl, MATERIAL, RailButton } from "@/components/look-rail";
+import { Icon } from "@/components/studio";
 import { Button, Sheet } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import type { Look } from "@/lib/looks";
@@ -196,27 +198,18 @@ export function VideoRail({ look }: { look: Look }) {
   const ready = source === "TURNAROUND" || (Boolean(frames) && consent);
   return (
     <div ref={anchor} className="contents">
-      <button onClick={open} aria-label={rendering ? `Video ${pct}% ready` : t("video.title")} className="hit flex flex-col items-center gap-1 text-xs font-semibold">
-        <span className={`glass relative grid size-12 place-items-center rounded-full ${playing ? "bg-terra/70 text-white" : ""}`}>
-          {rendering && (
-            <svg viewBox="0 0 48 48" className="absolute inset-0 -rotate-90" aria-hidden>
-              <circle cx="24" cy="24" r="22" fill="none" stroke="rgba(255,255,255,.15)" strokeWidth="3" />
-              <circle cx="24" cy="24" r="22" fill="none" stroke="#e0703f" strokeWidth="3" strokeLinecap="round" strokeDasharray={`${(pct / 100) * 138} 138`} className="transition-[stroke-dasharray] duration-500" />
-            </svg>
-          )}
-          <FilmIcon />
-        </span>
-        {rendering ? `${pct}%` : t("video.rail")}
-      </button>
+      <RailButton label={t("video.rail")} caption={rendering ? `${pct}%` : undefined} ariaLabel={rendering ? `Video ${pct}% ready` : t("video.title")} onClick={open} active={playing} busy={rendering} progress={pct}>
+        <Icon name="video" className="size-[22px]" />
+      </RailButton>
 
       <Sheet open={sheet} onClose={() => setSheet(false)}>
         <div className="flex items-start gap-3">
           <span className="orb grid size-12 shrink-0 place-items-center rounded-2xl text-ink">
-            <FilmIcon />
+            <Icon name="video" className="size-6" />
           </span>
           <div>
             <h3 className="font-display text-xl font-black">{t("video.title")}</h3>
-            <p className="text-sm text-mut">This look, moving · every frame labelled + signed</p>
+            <p className="text-sm text-mut">This look, moving · labelled + signed</p>
           </div>
         </div>
 
@@ -225,7 +218,7 @@ export function VideoRail({ look }: { look: Look }) {
             <div className="relative mx-auto aspect-[9/14] w-40 overflow-hidden rounded-3xl skeleton">
               <div className="absolute inset-x-0 h-1 animate-[scan_1.6s_ease-in-out_infinite] bg-terra shadow-[0_0_18px_#e0703f]" style={{ top: "40%" }} />
             </div>
-            <p className="text-center text-sm text-mut">Making your video · {pct}%{job?.source === "CLIP" ? " · your clip is deleted as soon as we've used it" : ""}</p>
+            <p className="text-center text-sm text-mut">Making your video · {pct}%{job?.source === "CLIP" ? " · clip deleted after" : ""}</p>
           </div>
         ) : (
           <>
@@ -233,13 +226,13 @@ export function VideoRail({ look }: { look: Look }) {
               <legend className="sr-only">What to use</legend>
               {(
                 [
-                  ["TURNAROUND", "🔄", state?.onTwin ? "My twin" : "AI model", "A gentle turn"],
-                  ["CLIP", "🎥", "My short clip", "Up to 4 s, deleted after"],
+                  ["TURNAROUND", "rotate", state?.onTwin ? "My twin" : "AI model", "A gentle turn"],
+                  ["CLIP", "video", "My short clip", "≤ 4 s · deleted after"],
                 ] as const
               ).map(([v, icon, title, sub]) => (
                 <label key={v} className={`cursor-pointer rounded-2xl border p-3 transition has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-white ${source === v ? "border-terra bg-terra/15" : "border-white/10 bg-white/5"}`}>
                   <input type="radio" name="video-source" value={v} checked={source === v} onChange={() => setSource(v)} className="sr-only" />
-                  <span className="block text-xl" aria-hidden>{icon}</span>
+                  <Icon name={icon} className="mb-1 size-6" />
                   <span className="block font-semibold">{title}</span>
                   <span className="block text-xs text-mut">{sub}</span>
                 </label>
@@ -269,17 +262,18 @@ export function VideoRail({ look }: { look: Look }) {
                 {state && state.quote.source !== "CREDITS" && <span className="block text-[11px] text-mut">usually {state.quote.credits} credits</span>}
               </span>
             </div>
-            <ul className="mt-3 space-y-1.5 text-xs text-mut">
-              <li>✨ {t("video.label")}, labelled and signed with Content Credentials (C2PA).</li>
-              <li>🛡️ Sampled frames are checked: your face and skin tone stay yours, steady across the clip.</li>
-              <li>🔒 Private to you. Makers never receive it. Not charged if it doesn't pass.</li>
+            <ul className="mt-3 flex flex-wrap gap-1.5 text-xs text-txt/90">
+              <li className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-2.5 py-1"><Icon name="sparkle" className="size-3.5 text-gold" />{t("video.label")} · C2PA</li>
+              <li className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-2.5 py-1"><Icon name="shield" className="size-3.5 text-gold" />Face + skin tone kept</li>
+              <li className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-2.5 py-1"><Icon name="lock" className="size-3.5 text-gold" />Never shared with makers</li>
+              <li className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-2.5 py-1"><Icon name="wallet" className="size-3.5 text-gold" />Not charged if it fails</li>
             </ul>
             {state && !state.eligible && state.reason && <p className="mt-3 text-sm text-gold">{state.reason}</p>}
             {job?.status === "WITHHELD" && <p className="mt-3 text-sm text-gold">Didn't pass our checks · not charged · try again</p>}
             {job?.error && <p className="mt-3 text-sm text-gold">{job.error}</p>}
             {error && (isExpectedText(error) ? <LimitState error={error} /> : <p className="mt-3 text-sm text-red-300" role="alert">{error}</p>)}
             <Button className="mt-4 w-full" onClick={start} disabled={Boolean(busy) || !ready || (state ? !state.eligible : false)}>
-              {busy === "start" ? "Starting…" : `🎬 ${t("video.title")}`}
+              {busy === "start" ? "Starting…" : <><Icon name="video" className="size-4" /> {t("video.title")}</>}
             </Button>
           </>
         )}
@@ -309,46 +303,29 @@ function VideoLayer({ job, anchor, alt, label, onClose }: { job: VideoJob; ancho
   if (!target) return null;
   const fixed = target === document.body;
   return createPortal(
-    <div className={`${fixed ? "fixed" : "absolute"} inset-x-0 top-[96px] bottom-[150px] z-[5] flex animate-rise items-center justify-center`}>
-      <div className="relative h-full">
+    <div className={`${fixed ? "fixed" : "absolute"} inset-0 z-[5] animate-fade bg-black`}>
+      <div className="relative size-full">
         {useImg ? (
-          <img src={(paused && job.poster) || job.webp!} alt={alt} className="h-full w-auto object-contain" />
+          <img src={(paused && job.poster) || job.webp!} alt={alt} className="size-full object-cover object-center" />
         ) : (
-          <video ref={video} src={job.mp4!} poster={job.poster ?? undefined} loop muted playsInline autoPlay={!paused} aria-label={alt} onError={() => setUseImg(true)} className="h-full w-auto object-contain" />
+          <video ref={video} src={job.mp4!} poster={job.poster ?? undefined} loop muted playsInline autoPlay={!paused} aria-label={alt} onError={() => setUseImg(true)} className="size-full object-cover object-center" />
         )}
-        <div className="absolute left-2 top-2 flex flex-wrap items-center gap-1.5">
-          <span className="rounded-full border border-white/20 bg-black/60 px-2.5 py-1.5 text-[11px] font-semibold backdrop-blur">🎬 {label}</span>
-          <CtlButton label={paused ? "Play video" : "Pause video"} onClick={() => setPaused((x) => !x)}>{paused ? "▶" : "❚❚"}</CtlButton>
-          <CtlButton label="About this video" onClick={() => setInfo((x) => !x)}>i</CtlButton>
-          <CtlButton label="Close video" onClick={onClose}>✕</CtlButton>
+        <div className="absolute left-3 top-[calc(max(env(safe-area-inset-top),12px)+96px)] flex flex-wrap items-center gap-2">
+          <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold text-white ${MATERIAL}`}><Icon name="video" className="size-3.5" /> {label}</span>
+          <GlassControl label={paused ? "Play video" : "Pause video"} onClick={() => setPaused((x) => !x)}><Icon name={paused ? "play" : "pause"} className="size-4" /></GlassControl>
+          <GlassControl label="About this video" onClick={() => setInfo((x) => !x)}><Icon name="info" className="size-4" /></GlassControl>
+          <GlassControl label="Close video" onClick={onClose}><Icon name="x" className="size-4" /></GlassControl>
         </div>
         {info && (
-          <div className="glass absolute inset-x-2 top-14 rounded-2xl p-3 text-xs leading-relaxed">
-            <p>✨ AI video try-on · fit can differ</p>
-            {job.guard && <p>🛡️ {job.guard.sampledFrames} frames checked · identity steady {Math.round((job.guard.identityStability ?? 0) * 100)}%</p>}
-            {job.c2pa && <p>🔏 Content Credentials (C2PA) · {job.c2pa.model} · #{job.c2pa.sha256}</p>}
-            {job.source === "CLIP" && <p>🗑️ Your clip {job.clipDeleted ? "has been deleted" : "is being deleted"}.</p>}
-          </div>
+          <ul className={`absolute inset-x-3 top-[calc(max(env(safe-area-inset-top),12px)+150px)] space-y-1.5 rounded-2xl p-3 text-xs leading-relaxed text-white ${MATERIAL}`}>
+            <li className="flex items-center gap-2"><Icon name="sparkle" className="size-3.5 shrink-0 text-gold" />AI video try-on · fit can differ</li>
+            {job.guard && <li className="flex items-center gap-2"><Icon name="shield" className="size-3.5 shrink-0 text-gold" />{job.guard.sampledFrames} frames checked · identity {Math.round((job.guard.identityStability ?? 0) * 100)}%</li>}
+            {job.c2pa && <li className="flex items-start gap-2 break-all"><Icon name="lock" className="mt-0.5 size-3.5 shrink-0 text-gold" />C2PA · {job.c2pa.model} · #{job.c2pa.sha256}</li>}
+            {job.source === "CLIP" && <li className="flex items-center gap-2"><Icon name="trash" className="size-3.5 shrink-0 text-gold" />Clip {job.clipDeleted ? "deleted" : "being deleted"}</li>}
+          </ul>
         )}
       </div>
     </div>,
     target,
-  );
-}
-
-function CtlButton({ children, label, onClick }: { children: ReactNode; label: string; onClick: () => void }) {
-  return (
-    <button onClick={onClick} aria-label={label} className="glass grid size-9 place-items-center rounded-full text-sm">
-      {children}
-    </button>
-  );
-}
-
-function FilmIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="size-6 drop-shadow-[0_0_8px_rgba(224,112,63,.6)]" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" aria-hidden>
-      <rect x="3" y="5" width="13" height="14" rx="2.5" fill="rgba(224,112,63,.18)" />
-      <path d="m16 10 5-3v10l-5-3z" />
-    </svg>
   );
 }
