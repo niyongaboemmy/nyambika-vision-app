@@ -1,8 +1,9 @@
 "use client";
 
 import { RUNWAY_SKINS, SHOW, SHOWROOM_BUDGET } from "@nyambika/contracts";
-import { useEffect, useState, type ReactNode } from "react";
-import { Fact, InfoTip } from "@/components/kit";
+import { useEffect, useState } from "react";
+import { MoreActions } from "@/components/ios";
+import { Fact, InfoTip, toast } from "@/components/kit";
 import { Badge, Card, Chip, Empty, Field, Icon, Input, Kpi, Meter, Note, ScreenSkeleton, SButton, SectionTitle, SLink, StudioSheet, Switch, Textarea } from "@/components/studio";
 import { api, rwf } from "@/lib/api";
 import { fmtWhen } from "@/lib/vr";
@@ -122,13 +123,13 @@ function BoothCard({ data, onSaved }: { data: VrStudio; onSaved: () => void }) {
           <Field label="Welcome line" hint={`${banner.length}/80 · on the banner`}>
             <Input value={banner} maxLength={80} onChange={(e) => setBanner(e.target.value)} placeholder="Murakaza neza · Welcome to my atelier" />
           </Field>
-          <RailField label={`On the mannequins (${featured.length}/${SHOWROOM_BUDGET.mannequins})`} hint="Others hang on the rails. None picked = your page order.">
+          <Field label={`On the mannequins (${featured.length}/${SHOWROOM_BUDGET.mannequins})`} hint="Others hang on the rails. None picked = your page order." group>
             <div className="no-scrollbar -mx-4 flex gap-2.5 overflow-x-auto px-4 pb-1 sm:-mx-5 sm:px-5">
               {with3d.map((c) => (
                 <Tile key={c.productId} c={c} on={featured.includes(c.productId)} order={featured.indexOf(c.productId) + 1} onClick={() => toggle(c.productId)} />
               ))}
             </div>
-          </RailField>
+          </Field>
           <div className="flex flex-wrap gap-2">
             <SButton onClick={() => void save()} disabled={busy}>{busy ? "Saving…" : "Save showroom"}</SButton>
             <SLink href={`/m/${data.page.handle}/showroom`} variant="outline" target="_blank" rel="noreferrer"><Icon name="eye" className="size-4" /> Open showroom</SLink>
@@ -137,19 +138,6 @@ function BoothCard({ data, onSaved }: { data: VrStudio; onSaved: () => void }) {
         </>
       )}
     </Card>
-  );
-}
-
-/** A group with a horizontal piece rail: `min-w-0` stops the fieldset growing to the rail's full width. */
-function RailField({ label, hint, children }: { label: string; hint: string; children: ReactNode }) {
-  return (
-    <fieldset className="min-w-0 space-y-2">
-      <legend className="mb-2 flex items-center gap-1 text-[13px] font-bold text-cocoa">
-        {label}
-        <InfoTip label={`About ${label.replace(/\s*\(.*\)$/, "")}`}>{hint}</InfoTip>
-      </legend>
-      {children}
-    </fieldset>
   );
 }
 
@@ -171,7 +159,6 @@ function Tile({ c, on, order, onClick, note }: { c: Candidate; on: boolean; orde
 
 function ShowsCard({ data, onNew, onChanged }: { data: VrStudio; onNew: () => void; onChanged: () => void }) {
   const [err, setErr] = useState<string | null>(null);
-  const [copied, setCopied] = useState<string | null>(null);
   const url = (id: string) => `${window.location.origin}/m/${data.page.handle}/shows/${id}`;
   async function cancel(id: string) {
     if (!confirm("Cancel this show? People who RSVP'd get no reminder.")) return;
@@ -205,19 +192,30 @@ function ShowsCard({ data, onNew, onChanged }: { data: VrStudio; onNew: () => vo
               <li key={s.id} className="flex gap-3 rounded-2xl bg-white p-2.5 ring-1 ring-inset ring-hairline">
                 {s.cover ? <img loading="lazy" decoding="async" src={s.cover} alt="" className="h-24 w-20 shrink-0 rounded-xl object-cover" /> : <span className="h-24 w-20 shrink-0 rounded-xl bg-paper-2" />}
                 <div className="min-w-0 flex-1 space-y-1">
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    <Badge value={tone} label={label} />
-                    {s.status !== "CANCELLED" && s.runwayStatus !== "READY" && <Chip tone={s.runwayStatus === "FAILED" ? "red" : "gold"}>Runway {s.runwayStatus.toLowerCase()}</Chip>}
+                  <div className="flex items-start gap-1.5">
+                    <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
+                      <Badge value={tone} label={label} />
+                      {s.status !== "CANCELLED" && s.runwayStatus !== "READY" && <Chip tone={s.runwayStatus === "FAILED" ? "red" : "gold"}>Runway {s.runwayStatus.toLowerCase()}</Chip>}
+                    </div>
+                    <MoreActions
+                      label={`More for ${s.title}`}
+                      title={s.title}
+                      actions={[
+                        { label: "Copy link", icon: "link", onSelect: () => void navigator.clipboard?.writeText(url(s.id)).then(() => toast("Link copied")) },
+                        ...(upcoming ? [{ label: "Cancel show", icon: "x" as const, destructive: true, onSelect: () => void cancel(s.id) }] : []),
+                      ]}
+                      className="-mr-1 -mt-1"
+                    />
                   </div>
                   <p className="truncate font-bold text-cocoa">{s.title}</p>
                   <p className="text-xs text-cocoa-2">{fmtWhen(s.startsAt)} · {s.items.length} looks · {Math.ceil(s.durationSec / 60)} min</p>
-                  <p className="text-xs font-semibold text-cocoa">{s.rsvps} RSVP · {s.peakViewers} peak viewers · {s.reactions} reactions</p>
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    <SLink href={`/m/${data.page.handle}/shows/${s.id}`} variant="soft" className="px-3 text-xs" target="_blank" rel="noreferrer">Open</SLink>
-                    <SButton variant="soft" className="px-3 text-xs" onClick={() => void navigator.clipboard?.writeText(url(s.id)).then(() => setCopied(s.id))}>
-                      <Icon name="copy" className="size-3.5" /> {copied === s.id ? "Copied" : "Copy link"}
-                    </SButton>
-                    {upcoming && <SButton variant="ghost" className="px-3 text-xs" onClick={() => void cancel(s.id)}>Cancel show</SButton>}
+                  <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-semibold tabular-nums text-cocoa">
+                    <span className="inline-flex items-center gap-1"><Icon name="ticket" className="size-3.5 text-cocoa-2" />{s.rsvps}<span className="sr-only"> RSVP</span></span>
+                    <span className="inline-flex items-center gap-1"><Icon name="eye" className="size-3.5 text-cocoa-2" />{s.peakViewers}<span className="sr-only"> peak viewers</span></span>
+                    <span className="inline-flex items-center gap-1"><Icon name="fire" className="size-3.5 text-cocoa-2" />{s.reactions}<span className="sr-only"> reactions</span></span>
+                  </p>
+                  <div className="pt-1">
+                    <SLink href={`/m/${data.page.handle}/shows/${s.id}`} variant="soft" className="px-4 text-xs" target="_blank" rel="noreferrer"><Icon name="play" className="size-3.5" /> Open</SLink>
                   </div>
                 </div>
               </li>
@@ -314,7 +312,7 @@ function ShowSheet({ open, onClose, data, onDone }: { open: boolean; onClose: ()
             ))}
           </div>
         </Field>
-        <RailField label={`Looks on the runway (${items.length}/${SHOW.maxItems})`} hint="They walk in the order you tap them. Bags and shoes walk on a stand.">
+        <Field label={`Looks on the runway (${items.length}/${SHOW.maxItems})`} hint="They walk in the order you tap them. Bags and shoes walk on a stand." group>
           {usable.length ? (
             <div className="no-scrollbar -mx-4 flex gap-2.5 overflow-x-auto px-4 pb-1">
               {usable.map((c) => (
@@ -324,7 +322,7 @@ function ShowSheet({ open, onClose, data, onDone }: { open: boolean; onClose: ()
           ) : (
             <p className="text-sm text-cocoa-2">Needs a product photo with a clean cut-out</p>
           )}
-        </RailField>
+        </Field>
         <Field label="Runway model skin tone" hint="A synthetic AI model, never a real person or a shopper's twin." group>
           <div className="flex gap-2" role="radiogroup" aria-label="Runway model skin tone">
             {RUNWAY_SKINS.map((s) => (

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { MoreActions } from "@/components/ios";
 import { Empty, Field, Icon, Input, Meter, Monogram, Note, ScreenSkeleton, SButton, SectionTitle, StudioSheet, Switch } from "@/components/studio";
 import { api, rwf } from "@/lib/api";
 import type { Maker } from "@/lib/types";
@@ -76,7 +77,19 @@ export default function Makers() {
                 </p>
                 <p className="truncate text-xs text-cocoa-2">{m.phone || "no phone"} · MoMo {m.momoMerchant || "—"}</p>
               </div>
-              <SButton variant={m.active ? "ghost" : "outline"} className="-my-1 px-3" onClick={() => patch(m.id, { active: !m.active })}>{m.active ? "Deactivate" : "Activate"}</SButton>
+              {m.active ? (
+                <MoreActions
+                  label={`More for ${m.name}`}
+                  title={m.name}
+                  actions={[
+                    ...(m.phone ? [{ label: "Call", icon: "call" as const, onSelect: () => void (window.location.href = `tel:${m.phone}`) }] : []),
+                    { label: "Deactivate", icon: "x", destructive: true, onSelect: () => void patch(m.id, { active: false }) },
+                  ]}
+                  className="-mr-1"
+                />
+              ) : (
+                <SButton variant="outline" className="-my-1 px-3" onClick={() => patch(m.id, { active: true })}>Activate</SButton>
+              )}
             </div>
             <dl className="grid grid-cols-2 gap-2">
               <div className="rounded-2xl bg-paper p-2.5 ring-1 ring-inset ring-hairline">
