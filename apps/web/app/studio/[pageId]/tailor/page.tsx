@@ -11,7 +11,7 @@ import { useManagedPage } from "../layout";
 
 const FILTERS: { key: string; label: string; match: (s: string) => boolean }[] = [
   { key: "open", label: "To do", match: (s) => ["REQUESTED", "DEPOSIT_PAID", "CUTTING", "SEWING", "FITTING", "FINISHING", "BALANCE_PAID"].includes(s) },
-  { key: "waiting", label: "Waiting on customer", match: (s) => ["QUOTED", "DEPOSIT_PENDING", "READY", "BALANCE_PENDING"].includes(s) },
+  { key: "waiting", label: "Waiting", match: (s) => ["QUOTED", "DEPOSIT_PENDING", "READY", "BALANCE_PENDING"].includes(s) },
   { key: "done", label: "Done", match: (s) => ["DELIVERED", "DECLINED", "CANCELLED"].includes(s) },
   { key: "all", label: "All", match: () => true },
 ];
@@ -29,26 +29,31 @@ export default function TailorDesk() {
   const fittings = data?.filter((o) => o.fitting && new Date(o.fitting.startsAt).getTime() > Date.now()).length ?? 0;
 
   return (
-    <div className="pb-24">
+    <div>
       <DeskNav pageId={page.id} />
       <div className="grid grid-cols-2 gap-3">
-        <Bento label="New requests" value={newCount} hint={newCount ? "Send a quote today" : "All answered"} accent="bg-gradient-to-br from-amber-200 to-orange-200 text-stone-900" />
+        <Bento label="New requests" value={newCount} hint={newCount ? "Quote today" : "All answered"} accent="bg-gradient-to-br from-amber-200 to-orange-200 text-stone-900" />
         <Bento label="On the table" value={making} hint="Cutting → finishing" />
         <Bento label="Fittings booked" value={fittings} hint="Upcoming" />
-        <Bento label="Paid to you" value={<span className="text-2xl">{rwf(deposits)}</span>} hint="Deposits + balances, via MoMo" accent="bg-stone-900 text-white" />
+        <Bento label="Paid to you" value={<span className="text-xl">{rwf(deposits)}</span>} hint="Via MoMo" accent="bg-stone-900 text-white" />
       </div>
 
       <div className="no-scrollbar -mx-4 mt-5 flex gap-2 overflow-x-auto px-4" role="tablist" aria-label="Filter">
-        {FILTERS.map((x) => (
-          <button key={x.key} role="tab" aria-selected={x.key === filter} onClick={() => setFilter(x.key)} className={`min-h-10 shrink-0 rounded-full px-4 text-sm font-semibold ${x.key === filter ? "bg-stone-900 text-white" : "bg-white text-stone-700 ring-1 ring-stone-300"}`}>
-            {x.label}
-          </button>
-        ))}
+        {FILTERS.map((x) => {
+          const on = x.key === filter;
+          const n = data?.filter((o) => x.match(o.status)).length;
+          return (
+            <button key={x.key} role="tab" aria-selected={on} onClick={() => setFilter(x.key)} className={`st-press inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full px-4 text-sm font-semibold ${on ? "bg-stone-900 text-white" : "bg-white text-stone-700 ring-1 ring-stone-300"}`}>
+              {x.label}
+              {n !== undefined && <span className={`rounded-full px-1.5 text-[11px] font-bold tabular-nums ${on ? "bg-white/20" : "bg-stone-100"}`}>{n}</span>}
+            </button>
+          );
+        })}
       </div>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         {!data && [0, 1, 2].map((i) => <div key={i} className="h-36 animate-pulse rounded-3xl bg-stone-200" />)}
-        {data && rows.length === 0 && <Empty>{filter === "open" ? "Nothing to do right now. New requests from Live morph and your services land here and on WhatsApp." : "No orders here."}</Empty>}
+        {data && rows.length === 0 && <Empty icon="scissors" title={filter === "open" ? "Nothing to do" : "No orders here"}>{filter === "open" ? "New requests land here and on WhatsApp." : null}</Empty>}
         {rows.map((o) => (
           <Link key={o.id} href={`/studio/${page.id}/tailor/${o.id}`} className="group flex gap-3 rounded-3xl bg-white p-3 ring-1 ring-stone-200 transition hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-stone-900">
             <div className="relative h-32 w-24 shrink-0 overflow-hidden rounded-2xl bg-stone-100">
