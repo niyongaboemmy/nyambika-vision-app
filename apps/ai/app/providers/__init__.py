@@ -1,7 +1,8 @@
 from .base import VTONProvider, VTONResult
 from .local_compositor import LocalCompositor
+from .routed import RoutedVTON
 
-_PROVIDERS: dict[str, VTONProvider] = {"local-compositor": LocalCompositor()}
+_PROVIDERS: dict[str, VTONProvider] = {"local-compositor": LocalCompositor(), "routed": RoutedVTON()}
 
 
 def get_provider(name: str) -> VTONProvider:
