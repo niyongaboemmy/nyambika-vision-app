@@ -9,11 +9,9 @@ process.env.DEV_EXPOSE_OTP = "1";
 process.env.OTP_MAX_PER_15M = "100";
 process.env.MOCK_AUTO_APPROVE_MS = "0";
 
-const { AppModule } = await import("../src/app.module");
-const { PrismaService } = await import("../src/common/prisma.service");
-
+// Env must be set before the app's config module loads, hence dynamic imports in beforeAll.
 let app: INestApplication;
-let prisma: InstanceType<typeof PrismaService>;
+let prisma: import("../src/common/prisma.service").PrismaService;
 const uniq = String(Date.now()).slice(-6);
 
 async function login(phone: string) {
@@ -24,6 +22,8 @@ async function login(phone: string) {
 }
 
 beforeAll(async () => {
+  const { AppModule } = await import("../src/app.module");
+  const { PrismaService } = await import("../src/common/prisma.service");
   const mod = await Test.createTestingModule({ imports: [AppModule] }).compile();
   app = mod.createNestApplication();
   app.use(cookieParser());
