@@ -16,6 +16,10 @@ from .providers import get_provider, registry
 app = FastAPI(title="Nyambika AI Gateway", version="0.1.0")
 app.include_router(stt.router)  # E22 speech-to-text: POST /v1/stt
 app.include_router(avatar_api.router)  # E33/E34 3D twin + 3D try-on: /v1/avatar/*
+from . import video_tryon  # noqa: E402
+from .inference import api as inference_api  # noqa: E402
+app.include_router(video_tryon.router)  # E39 video try-on + NLB video eval: /v1/video/*
+inference_api.install(app)  # E42 self-hosted inference routing: /v1/inference/*
 
 
 class ImageIn(BaseModel):
@@ -109,6 +113,7 @@ def tryon(body: TryOnIn):
         "c2pa": credentials,
         "model_version": result.model_version,
         "latency_ms": int((time.perf_counter() - started) * 1000),
+        "routing": getattr(result, "routing", None),  # E42: backend, region, cost, fallback (routed provider only)
     }
 
 

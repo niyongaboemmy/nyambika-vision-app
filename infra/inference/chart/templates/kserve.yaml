@@ -1,0 +1,42 @@
+{{- if .Values.kserve.enabled }}
+{{- range $name, $m := .Values.kserve.models }}
+{{- if $m.enabled }}
+---
+# Open Inference Protocol v2 model server. Contract the gateway relies on (apps/ai/app/inference/pool.py):
+#   POST /v2/models/{{ $name }}/infer  inputs: BYTES tensors (base64 images, JSON params) -> outputs: BYTES tensors
+#   GET  /v2/models/{{ $name }}/ready  200 when weights are loaded
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  name: {{ $name }}
+  labels: {app.kubernetes.io/part-of: nyambika-inference, nyambika.rw/region: {{ $.Values.region | quote }}}
+  annotations:
+    serving.kserve.io/deploymentMode: RawDeployment
+spec:
+  predictor:
+    minReplicas: {{ $m.replicas }}
+    maxReplicas: {{ $m.maxReplicas }}
+    nodeSelector: {{- toYaml $.Values.gpuNodePool.nodeSelector | nindent 6 }}
+    tolerations: {{- toYaml $.Values.gpuNodePool.tolerations | nindent 6 }}
+    containers:
+      - name: kserve-container
+        image: {{ $m.image }}
+        args: ["--model_name={{ $name }}", "--http_port=8080"]
+        env:
+          - {name: MODEL_WEIGHTS_URI, value: {{ $m.weights | quote }}}
+          - {name: LOG_REQUEST_BODIES, value: "false"}   # personal images are never logged (AI-GW-03/05)
+          - {name: RETAIN_INPUTS, value: "false"}
+        ports: [{containerPort: 8080, protocol: TCP}]
+        readinessProbe: {httpGet: {path: /v2/models/{{ $name }}/ready, port: 8080}, periodSeconds: 5}
+        resources:
+          {{- if gt (int $m.gpus) 0 }}
+          limits: {nvidia.com/gpu: {{ $m.gpus }}, memory: {{ $.Values.resources.memoryPerGpu }}}
+          requests: {cpu: {{ $.Values.resources.cpuPerGpu | quote }}, memory: {{ $.Values.resources.memoryPerGpu }}}
+          {{- else }}
+          limits: {memory: 4Gi}
+          requests: {cpu: "1", memory: 2Gi}
+          {{- end }}
+        securityContext: {runAsNonRoot: true, allowPrivilegeEscalation: false, capabilities: {drop: [ALL]}}
+{{- end }}
+{{- end }}
+{{- end }}

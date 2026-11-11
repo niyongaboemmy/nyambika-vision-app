@@ -4,6 +4,7 @@ import { Access, AuthUser, CurrentUser } from "../../common/auth";
 import { MessagingService } from "../../common/messaging.service";
 import { PrismaService } from "../../common/prisma.service";
 import { parse } from "../../common/zod";
+import { assertActivationAllowed } from "../inference/nlb-gate";
 
 const COMPLETED = ["DELIVERED", "COMPLETED"] as const;
 const PAID = ["PAID", "ACCEPTED", "IN_PREPARATION", "READY", "SHIPPED", "DELIVERED", "COMPLETED"] as const;
@@ -149,6 +150,13 @@ export class AdminController {
   async setModel(@CurrentUser() user: AuthUser, @Param("id") id: string, @Body() body: unknown) {
     await this.access.requireHost(user.id);
     const { status } = parse(z.object({ status: z.enum(["ACTIVE", "RETIRED"]) }), body);
+    // E39 NLB gate: gated tiers (video try-on) need a passing eval for this exact version before activation.
+    if (status === "ACTIVE") {
+      await assertActivationAllowed(this.prisma, id).catch(async (e: Error) => {
+        await this.access.audit(user.id, "admin.model_activation_refused", { id, reason: e.message });
+        throw e;
+      });
+    }
     await this.access.audit(user.id, "admin.model_status", { id, status });
     return this.prisma.modelVersion.update({ where: { id }, data: { status } });
   }

@@ -38,3 +38,15 @@ def b64_image(img) -> str:
     buf = io.BytesIO()
     img.save(buf, format="PNG")
     return base64.b64encode(buf.getvalue()).decode()
+
+
+@pytest.fixture(scope="session")
+def cutouts(client, assets):
+    """E39/E42 tests: RGBA garment cut-outs from the readiness pipeline, keyed by asset stem."""
+    from PIL import Image
+
+    out = {}
+    for name in ("dress-terracotta-circles", "dress-indigo-zigzag"):
+        r = client.post("/v1/garment/assess", json={"image_b64": b64(assets / f"{name}.png")}).json()
+        out[name] = Image.open(io.BytesIO(base64.b64decode(r["cutout_b64"]))).convert("RGBA")
+    return out

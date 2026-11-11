@@ -1,0 +1,8 @@
+apiVersion: v2
+name: nyambika-inference
+description: Self-hosted GPU inference pool for the Nyambika AI gateway (E42, AI-GW-07). Permissively licensed models only (ADR-0007).
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+kubeVersion: ">=1.28.0-0"
+keywords: [vllm, kserve, gpu, inference]

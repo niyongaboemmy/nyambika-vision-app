@@ -39,6 +39,8 @@ import { NetworkMigrationModule } from "./modules/migration/network";
 import { PushModule } from "./common/push/push.module";
 import { RegionModule } from "./modules/region/region.module";
 import { Twin3dModule } from "./modules/twin3d/twin3d.module";
+import { InferenceModule } from "./modules/inference/inference.module";
+import { VideoModule } from "./modules/video/video.module";
 
 @Controller()
 class HealthController {
@@ -91,6 +93,8 @@ class HealthController {
     PushModule,
     RegionModule,
     Twin3dModule,
+    InferenceModule,
+    VideoModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: AuthGuard }],

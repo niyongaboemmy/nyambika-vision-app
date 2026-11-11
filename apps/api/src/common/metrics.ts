@@ -54,3 +54,19 @@ export const queueDepth = new Gauge({
   labelNames: ["state"] as const,
   registers: [registry],
 });
+
+// E42 self-hosted inference: provider-side cost and calls per route and backend (pool | hosted), synced from the
+// gateway router. Billed spend stays in nyambika_ai_spend_rwf_total; this is what each route costs us to serve.
+export const aiInferenceCost = new Counter({
+  name: "nyambika_ai_inference_cost_rwf_total",
+  help: "Inference cost in RWF by route and backend (pool = self-hosted GPU, hosted = provider)",
+  labelNames: ["route", "backend"] as const,
+  registers: [registry],
+});
+
+export const aiInferenceCalls = new Counter({
+  name: "nyambika_ai_inference_calls_total",
+  help: "Inference calls by route, backend and outcome (ok | failed | fallback)",
+  labelNames: ["route", "backend", "outcome"] as const,
+  registers: [registry],
+});

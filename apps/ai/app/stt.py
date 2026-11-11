@@ -266,8 +266,29 @@ class OpenAICompatibleAdapter:
         return Transcript(text, lang, round(conf, 3), self.name, False)
 
 
+class RoutedAdapter:
+    """E42: STT through the inference router (self-hosted Whisper on the GPU pool, or the hosted adapter)."""
+
+    name = "routed"
+
+    def transcribe(self, audio: Audio, language: Lang | None) -> Transcript:
+        from .inference import NoBackend, get_router
+
+        try:
+            t, _info = get_router().call("stt", {"audio": audio, "language": language})
+        except NoBackend as exc:
+            raise SttError(503, f"Speech service unavailable: {exc.detail}") from exc
+        return t
+
+
 def get_adapter() -> SttAdapter:
-    provider = os.environ.get("STT_PROVIDER", "dev-scripted")
+    if os.environ.get("STT_PROVIDER") == "routed":
+        return RoutedAdapter()
+    return hosted_adapter()
+
+
+def hosted_adapter() -> SttAdapter:
+    provider = os.environ.get("STT_HOSTED_PROVIDER") or os.environ.get("STT_PROVIDER", "dev-scripted")
     if provider == "openai-compatible":
         url = os.environ.get("STT_API_URL")
         if not url:

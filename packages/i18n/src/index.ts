@@ -222,6 +222,10 @@ const en = {
   "twin3d.disclaimer": "Visual guidance only. Actual fit may differ.",
   "twin3d.consentTitle": "Private 3D twin",
   "twin3d.consentBody": "Build and keep my encrypted 3D twin. Only I see it; delete anytime.",
+  "video.rail": "Video",
+  "video.title": "See it on video",
+  "video.label": "AI video try-on",
+  "video.consent": "Use my clip only to make this video, then delete it. Never shared with makers.",
 };
 
 type Messages = typeof en;
@@ -444,6 +448,10 @@ const rw: Messages = {
   "twin3d.disclaimer": "Ni icyerekezo gusa. Uko umwambaro uzakubera bishobora gutandukana.",
   "twin3d.consentTitle": "Impanga ya 3D yihariye",
   "twin3d.consentBody": "Kora kandi ubike impanga yanjye ya 3D mu ibanga. Ni jye wenyine uyibona; nshobora kuyisiba igihe cyose.",
+  "video.rail": "Videwo",
+  "video.title": "Birebe kuri videwo",
+  "video.label": "Igerageza rya videwo rya AI",
+  "video.consent": "Koresha videwo yanjye gusa mu gukora iyi videwo, hanyuma uyisibe. Ntisangizwa abadozi.",
 };
 
 const fr: Messages = {
@@ -663,6 +671,10 @@ const fr: Messages = {
   "twin3d.disclaimer": "Indication visuelle uniquement. L'ajustement réel peut varier.",
   "twin3d.consentTitle": "Jumeau 3D privé",
   "twin3d.consentBody": "Créer et conserver mon jumeau 3D chiffré. Moi seul·e le vois ; suppression à tout moment.",
+  "video.rail": "Vidéo",
+  "video.title": "Voir en vidéo",
+  "video.label": "Essayage vidéo IA",
+  "video.consent": "Utiliser mon clip uniquement pour cette vidéo, puis le supprimer. Jamais partagé avec les créateurs.",
 };
 
 /**
