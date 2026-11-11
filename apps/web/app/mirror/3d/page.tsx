@@ -237,8 +237,8 @@ function ConsentIntro({ onConsent, error }: { onConsent: () => void; error: stri
         <label className="glass flex cursor-pointer items-center gap-3 rounded-3xl p-4">
           <span className="flex-1 text-sm font-bold">{t("twin3d.consentTitle")}</span>
           <input type="checkbox" role="switch" checked={on} onChange={(e) => setOn(e.target.checked)} className="sr-only" aria-label="I consent to creating my private 3D twin" />
-          <span aria-hidden className={`relative h-7 w-12 shrink-0 rounded-full transition ${on ? "bg-mint" : "bg-white/20"}`}>
-            <span className={`absolute top-0.5 size-6 rounded-full bg-white transition-all ${on ? "left-[22px]" : "left-0.5"}`} />
+          <span aria-hidden className={`relative h-7 w-12 shrink-0 rounded-full transition ${on ? "bg-[#0f8a5f]" : "bg-white/20"}`}>
+            <span className={`absolute top-0.5 size-6 rounded-full bg-[#fff] shadow transition-all ${on ? "left-[22px]" : "left-0.5"}`} />
           </span>
         </label>
         <ErrorNote error={error} />

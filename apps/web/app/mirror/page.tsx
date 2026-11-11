@@ -187,8 +187,8 @@ function ConsentCard({ consent, setConsent }: { consent: boolean; setConsent: (v
         <span className="text-2xl" aria-hidden>🔒</span>
         <span className="flex-1 text-sm font-bold">{t("mirror.consentTitle")}</span>
         <input type="checkbox" role="switch" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="peer sr-only" aria-label="I consent to creating my private twin" />
-        <span aria-hidden className={`relative h-7 w-12 shrink-0 rounded-full transition peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-gold ${consent ? "bg-mint" : "bg-white/20"}`}>
-          <span className={`absolute top-0.5 size-6 rounded-full bg-white transition-all ${consent ? "left-[22px]" : "left-0.5"}`} />
+        <span aria-hidden className={`relative h-7 w-12 shrink-0 rounded-full transition peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-gold ${consent ? "bg-[#0f8a5f]" : "bg-white/20"}`}>
+          <span className={`absolute top-0.5 size-6 rounded-full bg-[#fff] shadow transition-all ${consent ? "left-[22px]" : "left-0.5"}`} />
         </span>
       </label>
       <InfoTip label="About your private twin">{t("mirror.consentBody")}</InfoTip>

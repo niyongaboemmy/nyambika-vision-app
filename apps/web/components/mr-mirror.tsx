@@ -153,11 +153,11 @@ export function MrMirror({ pieces, wardrobe, twin, arPilot, initial }: { pieces:
             {busy}
           </span>
         )}
-        <p className="absolute inset-x-3 bottom-3 mx-auto w-fit max-w-[calc(100%-24px)] rounded-full bg-black/60 px-3 py-1 text-center text-[11px] text-txt/90 backdrop-blur">{body === "twin" ? "🔒 Your 3D twin · only you see it" : "Synthetic body, not a real person · size and drape are approximate"}</p>
+        <p className="absolute inset-x-3 bottom-3 mx-auto w-fit max-w-[calc(100%-24px)] rounded-full bg-black/60 px-3 py-1 text-center text-[11px] text-txt/90 backdrop-blur">{body === "twin" ? "🔒 Your 3D twin · only you see it" : "Synthetic body · approximate fit"}</p>
         {ready && (
           <div className="absolute right-3 top-3 flex gap-1.5">
-            <button onClick={() => engine.current?.rotate(-0.5)} aria-label="Turn left" className="glass grid size-10 place-items-center rounded-full">⟲</button>
-            <button onClick={() => engine.current?.rotate(0.5)} aria-label="Turn right" className="glass grid size-10 place-items-center rounded-full">⟳</button>
+            <button onClick={() => engine.current?.rotate(-0.5)} aria-label="Turn left" className="hit glass grid size-10 place-items-center rounded-full">⟲</button>
+            <button onClick={() => engine.current?.rotate(0.5)} aria-label="Turn right" className="hit glass grid size-10 place-items-center rounded-full">⟳</button>
           </div>
         )}
       </section>
@@ -247,13 +247,13 @@ export function MrMirror({ pieces, wardrobe, twin, arPilot, initial }: { pieces:
             </button>
           )}
           {error && (isExpectedText(error) ? <LimitState error={error} /> : <p className="text-center text-xs text-terra" role="alert">{error}</p>)}
-          <p className="text-center text-[11px] text-mut">{support.ar ? "Point at the floor, then pinch, pull the trigger or tap to place it. Switch colour and size on the floating panel." : "Your headset shows the mirror in a virtual room (passthrough mixed reality isn't offered by this browser)."}</p>
+          <p className="text-center text-[11px] text-mut">{support.ar ? "Point at the floor · tap to place · colour and size on the panel" : "Virtual room · no passthrough in this browser"}</p>
         </section>
       ) : (
         <section aria-label="Inline mirror" className="space-y-3">
           <div className="glass rounded-3xl p-4 text-sm">
             <p className="font-bold">This device can&apos;t do mixed reality</p>
-            <p className="mt-1 text-mut">{arPilot && wardrobe.length ? "Here's the live camera mirror instead. It runs on this phone only." : "Your 3D twin shows the same pieces in 3D."}</p>
+            <p className="mt-1 text-mut">{arPilot && wardrobe.length ? "Live camera mirror instead · on this phone only" : "Your 3D twin shows the same pieces"}</p>
           </div>
           {arPilot && wardrobe.length ? (
             <ArMirror items={wardrobe} initial={piece?.assets[0]?.variantId ?? null} />

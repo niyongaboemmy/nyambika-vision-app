@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui";
+import { Button, InfoTip } from "@/components/ui";
 import { anchorsFromAlpha, isLowEnd, LM, loadPoseTracker, smoothLandmarks, warpStrips, type Anchors, type Landmark, type PoseTracker, type Pt, type WardrobeItem } from "@/lib/twin3d";
 import { prefersReducedMotion } from "@/lib/xr";
 
@@ -239,7 +239,10 @@ export function ArMirror({ items, initial }: { items: WardrobeItem[]; initial: s
           ))}
         </div>
       )}
-      <p className="mt-3 text-center text-xs text-mut">Pilot: overlay accuracy is still being validated. Visual guidance only. Actual fit may differ.</p>
+      <p className="mt-3 flex items-center justify-center gap-1 text-center text-xs text-mut">
+        Pilot · visual guide only
+        <InfoTip label="About AR accuracy">Overlay accuracy is still being validated. Visual guidance only. Actual fit may differ.</InfoTip>
+      </p>
     </div>
   );
 }

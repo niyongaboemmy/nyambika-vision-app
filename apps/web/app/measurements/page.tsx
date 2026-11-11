@@ -94,8 +94,8 @@ export default function MeasurementsPage() {
                   className="peer sr-only"
                 />
                 <span className="flex-1">Store encrypted · size advice</span>
-                <span aria-hidden className={`relative h-7 w-12 shrink-0 rounded-full transition peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-gold ${consent || data.profile ? "bg-mint" : "bg-white/20"}`}>
-                  <span className={`absolute top-0.5 size-6 rounded-full bg-white transition-all ${consent || data.profile ? "left-[22px]" : "left-0.5"}`} />
+                <span aria-hidden className={`relative h-7 w-12 shrink-0 rounded-full transition peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-gold ${consent || data.profile ? "bg-[#0f8a5f]" : "bg-white/20"}`}>
+                  <span className={`absolute top-0.5 size-6 rounded-full bg-[#fff] shadow transition-all ${consent || data.profile ? "left-[22px]" : "left-0.5"}`} />
                 </span>
               </label>
               <InfoTip label="About storing measurements">Store my measurements encrypted to recommend sizes. I can delete them any time.</InfoTip>

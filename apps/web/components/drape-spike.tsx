@@ -238,7 +238,7 @@ export function TwinDrapePanel({ bodySize }: { bodySize: string | null }) {
       <div className="flex items-start justify-between gap-2">
         <div>
           <h2 id="drape-spike-title" className="font-display text-lg font-black">Physics fit preview</h2>
-          <p className="text-xs text-mut">Sewn from a real pattern and draped by a cloth simulation on your twin&apos;s body.</p>
+          <p className="text-xs text-mut">Real pattern · cloth simulation</p>
         </div>
         <ExperimentalBadge />
       </div>
@@ -306,12 +306,12 @@ export function PatternPreview3D({ orderId, shareActive, defaultGarment }: { ord
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <h3 id="pattern-3d-title" className="text-lg font-black">✂️ Preview pattern in 3D</h3>
-          <p className="text-sm text-stone-600">Adjust the pattern, then see it sewn and draped on a body sized from the shared measurements.</p>
+          <p className="text-sm text-stone-600">Sewn and draped on the shared measurements</p>
         </div>
         <ExperimentalBadge tone="light" />
       </div>
       {!shareActive ? (
-        <p className="rounded-2xl bg-stone-50 p-3 text-sm text-stone-700 ring-1 ring-stone-200">Available only while the customer&apos;s measurement share for this order is active.</p>
+        <p className="rounded-2xl bg-stone-50 p-3 text-sm text-stone-700 ring-1 ring-stone-200">Needs an active measurement share</p>
       ) : (
         <>
           <Pills label="Pattern" options={GARMENTS} value={g} onChange={(v) => { setGarment(v); setLength(null); setSleeve(null); }} tone="light" />

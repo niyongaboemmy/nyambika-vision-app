@@ -7,7 +7,7 @@ import { AddressesCard } from "@/components/bag";
 import { NotificationPrefsCard } from "@/components/notification-prefs";
 import { PasskeysCard } from "@/components/passkeys";
 import { Icon, type IconName } from "@/components/studio";
-import { Button, ErrorNote, LearnMore, Screen, Sheet, TopBar } from "@/components/ui";
+import { Button, ErrorNote, Fact, LearnMore, Screen, Sheet, TopBar } from "@/components/ui";
 import { api } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { useApi } from "@/lib/use-api";
@@ -74,11 +74,10 @@ export default function Trust() {
         <ErrorNote error={error} />
         <section className="glass rounded-3xl p-4" aria-labelledby="promise">
           <h2 id="promise" className="font-display text-lg font-black">Your promise</h2>
-          <ul className="mt-3 flex flex-wrap gap-2">
+          <ul aria-label="Our promises" className="mt-3 flex flex-wrap gap-2">
             {PROMISES.map((p) => (
-              <li key={p.label} className="flex min-h-10 items-center gap-2 rounded-2xl bg-white/[.06] px-3 text-[13px] font-semibold">
-                <Icon name={p.icon} className="size-4 shrink-0 text-gold" />
-                {p.label}
+              <li key={p.label}>
+                <Fact icon={p.icon}>{p.label}</Fact>
               </li>
             ))}
           </ul>

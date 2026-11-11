@@ -87,8 +87,8 @@ export function NotificationPrefsCard() {
                 <span className="block text-xs text-mut">{t(r.body)}</span>
               </span>
               <input type="checkbox" role="switch" className="peer sr-only" checked={data.prefs[r.key]} onChange={(e) => toggle(r.key, e.target.checked)} />
-              <span aria-hidden className={`relative h-7 w-12 shrink-0 rounded-full transition peer-focus-visible:outline-2 peer-focus-visible:outline-gold ${data.prefs[r.key] ? "bg-mint" : "bg-white/20"}`}>
-                <span className={`absolute top-0.5 size-6 rounded-full bg-white transition-all ${data.prefs[r.key] ? "left-[22px]" : "left-0.5"}`} />
+              <span aria-hidden className={`relative h-7 w-12 shrink-0 rounded-full transition peer-focus-visible:outline-2 peer-focus-visible:outline-gold ${data.prefs[r.key] ? "bg-[#0f8a5f]" : "bg-white/20"}`}>
+                <span className={`absolute top-0.5 size-6 rounded-full bg-[#fff] shadow transition-all ${data.prefs[r.key] ? "left-[22px]" : "left-0.5"}`} />
               </span>
             </label>
           ))}
