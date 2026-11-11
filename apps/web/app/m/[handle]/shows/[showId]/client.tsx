@@ -7,6 +7,8 @@ import { useEffect, useRef, useState } from "react";
 import { HoldToBuy } from "@/components/hold-to-buy";
 import type { RunwayEngine } from "@/components/vr-engine";
 import { api, rwf } from "@/lib/api";
+import { Price } from "@/components/region";
+import type { Commerce } from "@/lib/region";
 import { useSession } from "@/lib/session";
 import { useLive } from "@/lib/use-live";
 import { countdown, fmtWhen, lookFor, lowEnd, type ShowSnapshot, type ShowView } from "@/lib/vr";
@@ -38,6 +40,13 @@ export function ShowClient({ initial }: { initial: ShowView }) {
   const replayIdx = useRef(0);
   const mine = useRef(new Map<string, number>());
   const runwayRef = useRef(initial.runwayStatus);
+  const [commerce, setCommerce] = useState<Commerce | null>(null);
+  // E40/E41: the page's currency (and "≈" display currency) like the Maker Space; RWF when no regional price.
+  const money = (p: { id: string; priceRwf: number }) =>
+    commerce && commerce.prices[p.id] != null ? <Price minor={commerce.prices[p.id]!} currency={commerce.currency} approxClassName="text-txt/70" /> : rwf(p.priceRwf);
+  useEffect(() => {
+    void api<Commerce>(`/region/pages/by-handle/${initial.maker.handle}/commerce`).then(setCommerce).catch(() => undefined);
+  }, [initial.maker.handle]);
 
   const serverNow = now + offset;
   const phase: ShowPhase = showPhase({ status: show.phase === "CANCELLED" ? "CANCELLED" : "SCHEDULED", startsAt: show.startsAt, items: show.items.length, walkSec: show.walkSec }, new Date(serverNow));
@@ -255,7 +264,7 @@ export function ShowClient({ initial }: { initial: ShowView }) {
                 <li key={i.position} className="w-32 shrink-0">
                   <div className="glass overflow-hidden rounded-3xl">{(i.runway?.poster ?? i.photo) && <img src={(i.runway?.poster ?? i.photo)!} alt="" className="h-40 w-full object-cover" />}</div>
                   <p className="mt-1 truncate text-sm font-semibold">{i.product.title}</p>
-                  <p className="text-xs text-gold">{rwf(i.product.priceRwf)}</p>
+                  <p className="text-xs text-gold">{money(i.product)}</p>
                 </li>
               ))}
             </ul>
@@ -314,7 +323,7 @@ export function ShowClient({ initial }: { initial: ShowView }) {
               : cursor?.stage === "intro"
                 ? `Welcome to ${show.title}`
                 : item
-                  ? <><span className="text-mut">Look {cursor!.index + 1} of {show.items.length} · </span><b>{item.product.title}</b> <span className="text-gold">{rwf(item.product.priceRwf)}</span>{cursor?.stage === "outro" ? " · finale" : ""}</>
+                  ? <><span className="text-mut">Look {cursor!.index + 1} of {show.items.length} · </span><b>{item.product.title}</b> <span className="text-gold">{money(item.product)}</span>{cursor?.stage === "outro" ? " · finale" : ""}</>
                   : cursor?.stage === "after" ? "Thank you for watching" : " "}
           </p>
           <div className="flex items-center gap-2">

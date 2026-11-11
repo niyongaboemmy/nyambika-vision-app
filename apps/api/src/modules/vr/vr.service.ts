@@ -520,6 +520,11 @@ export class VrService implements OnModuleInit, OnModuleDestroy {
     let ready = 0;
     let fallback = 0;
     for (const item of s.items) {
+      // Idempotent: a second run (queue retry, manual rebuild) never re-dresses or re-meters finished looks.
+      if (item.status === "READY") {
+        ready += 1;
+        continue;
+      }
       const v = await this.prisma.variant.findUnique({ where: { id: item.variantId }, include: { product: true } });
       if (!v) {
         await this.prisma.fashionShowItem.update({ where: { id: item.id }, data: { status: "FAILED", error: "Colour removed" } });
