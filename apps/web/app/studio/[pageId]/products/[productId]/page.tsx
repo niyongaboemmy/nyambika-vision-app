@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { AiWrite } from "@/components/ai-write";
-import { Badge, Card, Field, Icon, Input, Note, ScreenSkeleton, SButton, Skeleton, Steps, Textarea } from "@/components/studio";
+import { InfoTip } from "@/components/kit";
+import { Badge, Card, Chip, Field, Icon, Input, Note, ScreenSkeleton, SButton, Skeleton, Steps, Textarea } from "@/components/studio";
 import { EDITOR_STEPS, EditorSection, ProductPreview } from "@/components/studio-product";
 import { MorphOptions } from "@/components/morph-options";
 import { AttrSuggest } from "@/components/mlspike-suggest";
@@ -96,7 +97,7 @@ function ProductDetail() {
               {canManage && p.status !== "ARCHIVED" && <SButton variant="ghost" disabled={busy} onClick={() => act("archive")}>Archive</SButton>}
             </div>
             {(p.status === "DRAFT" || p.status === "OUT_OF_STOCK") && !allPhotos && (
-              <p className="text-xs text-cocoa-2">Tip: add a photo for every colour first, so shoppers can try it on.</p>
+              <p className="flex items-center gap-1.5 text-xs font-semibold text-cocoa-2"><Icon name="camera" className="size-3.5" />Add a photo per colour first</p>
             )}
           </Card>
 
@@ -227,12 +228,12 @@ function StudioCard({ p, onChange }: { p: StudioProduct; onChange: () => Promise
           <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-violet-ink text-white shadow-[0_8px_18px_-8px_rgba(98,57,201,.8)]"><Icon name="sparkle" className="size-5" /></span>
           <div>
             <h3 id="ai-studio-t" className="font-display text-lg font-black tracking-tight text-cocoa">✨ AI product studio</h3>
-            <p className="text-sm text-cocoa-2">Show this piece on AI models with different skin tones. Photos are labelled as AI and use your page allowance.</p>
+            <p className="mt-1 flex flex-wrap gap-1.5"><Chip tone="violet">AI label · C2PA</Chip><Chip>Uses allowance</Chip><InfoTip label="About AI product studio">Show this piece on AI models with different skin tones. Photos are labelled as AI and use your page allowance.</InfoTip></p>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {ready.map((v) => (
-            <button key={v.id} type="button" aria-pressed={v.id === variantId} onClick={() => setVariantId(v.id)} className={`st-press inline-flex min-h-10 items-center gap-2 rounded-full px-3.5 text-sm font-semibold ring-1 ring-inset ${v.id === variantId ? "bg-cocoa text-white ring-cocoa" : "bg-white text-cocoa ring-hairline"}`}>
+            <button key={v.id} type="button" aria-pressed={v.id === variantId} onClick={() => setVariantId(v.id)} className={`st-press inline-flex min-h-11 items-center gap-2 rounded-full px-3.5 text-sm font-semibold ring-1 ring-inset ${v.id === variantId ? "bg-cocoa text-white ring-cocoa" : "bg-white text-cocoa ring-hairline"}`}>
               <span className="size-3.5 rounded-full ring-1 ring-white/60" style={{ background: v.colourHex }} />
               {v.colourName}
             </button>
@@ -276,7 +277,7 @@ function StudioCard({ p, onChange }: { p: StudioProduct; onChange: () => Promise
                     await api(`/products/${p.id}/media/${m.id}`, { method: "DELETE" });
                     await onChange();
                   }}
-                  className="st-press absolute right-1.5 top-1.5 grid size-8 place-items-center rounded-full bg-white/90 text-cocoa"
+                  className="hit st-press absolute right-1.5 top-1.5 grid size-8 place-items-center rounded-full bg-white/90 text-cocoa"
                   aria-label="Remove photo"
                 >
                   <Icon name="x" className="size-4" />

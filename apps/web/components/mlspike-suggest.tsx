@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Icon, Note } from "@/components/studio";
+import { InfoTip } from "@/components/kit";
+import { Chip, Icon, Note } from "@/components/studio";
 import { api } from "@/lib/api";
 import { useApi } from "@/lib/use-api";
 
@@ -55,7 +56,7 @@ export function AttrSuggest({ productId, canEdit, onApplied }: { productId: stri
         <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-violet-ink text-white shadow-[0_8px_18px_-8px_rgba(98,57,201,.8)]"><Icon name="sparkle" className="size-5" /></span>
         <div className="min-w-0">
           <h3 id="attr-suggest-t" className="font-display text-lg font-black tracking-tight text-cocoa">✨ Suggested from your photo</h3>
-          <p className="text-sm text-cocoa-2">Tap Use to fill it in. You can change it any time.</p>
+          <p className="text-sm text-cocoa-2">Tap Use · change any time</p>
         </div>
       </div>
       <ul className="mt-3 space-y-2">
@@ -83,12 +84,16 @@ export function AttrSuggest({ productId, canEdit, onApplied }: { productId: stri
       </ul>
       <Note error={err} />
       {data.blocked && data.blocked.length > 0 && (
-        <p className="mt-2 rounded-xl bg-white/70 px-3 py-2 text-xs text-cocoa-2">
-          {data.blocked.map((b) => FIELD[b as Suggestion["field"]] ?? b).join(" and ")} suggestions stay off until they pass Nyambika&apos;s fairness and accuracy checks.
+        <p className="mt-2 flex items-center gap-1.5 rounded-xl bg-white/70 px-3 py-2 text-xs font-semibold text-cocoa-2">
+          {data.blocked.map((b) => FIELD[b as Suggestion["field"]] ?? b).join(" and ")}: off until fairness checks pass
         </p>
       )}
-      <p className="mt-2 text-[11px] leading-relaxed text-cocoa-2">
-        Made by Nyambika&apos;s own small model, run in Rwanda ({data.servedBy === "pool" ? "self-hosted" : "simple colour rules"}). Trained on synthetic garments and photos makers chose to share. Experimental.
+      <p className="mt-2 flex flex-wrap items-center gap-1.5">
+        <Chip tone="violet">Run in Rwanda</Chip>
+        <Chip>Experimental</Chip>
+        <InfoTip label="About this model">
+          Made by Nyambika&apos;s own small model, run in Rwanda ({data.servedBy === "pool" ? "self-hosted" : "simple colour rules"}). Trained on synthetic garments and photos makers chose to share. Experimental.
+        </InfoTip>
       </p>
     </section>
   );

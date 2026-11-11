@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Icon, Kpi, Meter, ScreenSkeleton, Skeleton, type IconName } from "@/components/studio";
+import { Chip, Icon, Kpi, Meter, ScreenSkeleton, Skeleton, type IconName } from "@/components/studio";
 import { ShareSheet } from "@/components/studio-shell";
 import { VoiceModeGate } from "@/components/coop-assist";
 import { rwf } from "@/lib/api";
@@ -33,6 +33,11 @@ const PAID = ["PAID", "ACCEPTED", "IN_PREPARATION", "READY", "SHIPPED", "DELIVER
 const IN_PROGRESS = ["ACCEPTED", "IN_PREPARATION", "READY", "SHIPPED"];
 const RETAKE = ["NEEDS_BETTER_PHOTO", "NOT_SUPPORTED"];
 const DAYS = 14;
+
+/** "RWF 4.39M" on tiles (the full amount is the title); amounts under a million stay exact. */
+function rwfCompact(n: number) {
+  return n < 1_000_000 ? rwf(n) : `RWF ${new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 2 }).format(n)}`;
+}
 
 /** Daily series over the last `DAYS` days from the order list (client-side; the API returns 30-day totals). */
 function daily(orders: OrderView[], pick: (o: OrderView) => number) {
@@ -94,18 +99,18 @@ export default function Home() {
   const used = a?.plan ? a.plan.allowanceUsed / Math.max(1, a.plan.monthlyCap) : 0;
   const todos: Todo[] = [];
   if (page.status === "PENDING_VERIFICATION")
-    todos.push({ key: "verify", icon: "shield", tone: "gold", title: "Waiting for verification", hint: "Add products now. Your page goes live as soon as the Nyambika team verifies you." });
-  if (page.status === "PAUSED") todos.push({ key: "paused", icon: "clock", tone: "sky", title: "Your page is paused", hint: "Shoppers can't see it. Publish it again in Settings.", href: `${base}/settings` });
+    todos.push({ key: "verify", icon: "shield", tone: "gold", title: "Waiting for verification", hint: "Add products meanwhile" });
+  if (page.status === "PAUSED") todos.push({ key: "paused", icon: "clock", tone: "sky", title: "Your page is paused", hint: "Hidden from shoppers", href: `${base}/settings` });
   if (s.needAction.length)
-    todos.push({ key: "orders", icon: "inbox", tone: "terra", title: `${s.needAction.length} ${s.needAction.length === 1 ? "order needs" : "orders need"} you`, hint: "Accept so the buyer knows you're on it.", href: `${base}/orders` });
+    todos.push({ key: "orders", icon: "inbox", tone: "terra", title: `${s.needAction.length} ${s.needAction.length === 1 ? "order needs" : "orders need"} you`, hint: "Tap to accept", href: `${base}/orders` });
   if (s.pending.length)
-    todos.push({ key: "approve", icon: "check", tone: "violet", title: `${s.pending.length} ${s.pending.length === 1 ? "piece" : "pieces"} to approve`, hint: "Submitted by your makers.", href: `${base}/products` });
+    todos.push({ key: "approve", icon: "check", tone: "violet", title: `${s.pending.length} ${s.pending.length === 1 ? "piece" : "pieces"} to approve`, hint: "From your makers", href: `${base}/products` });
   if (s.retake.length)
-    todos.push({ key: "retake", icon: "camera", tone: "gold", title: `${s.retake.length} ${s.retake.length === 1 ? "photo needs" : "photos need"} a retake`, hint: "Flat, in daylight, on a plain background.", href: `${base}/products?filter=photo` });
+    todos.push({ key: "retake", icon: "camera", tone: "gold", title: `${s.retake.length} ${s.retake.length === 1 ? "photo needs" : "photos need"} a retake`, hint: "Flat · daylight · plain", href: `${base}/products?filter=photo` });
   if (s.drafts.length)
-    todos.push({ key: "drafts", icon: "layers", tone: "sky", title: `${s.drafts.length} ${s.drafts.length === 1 ? "draft" : "drafts"} not live yet`, hint: "Publish them so shoppers can try them on.", href: `${base}/products?filter=draft` });
+    todos.push({ key: "drafts", icon: "layers", tone: "sky", title: `${s.drafts.length} ${s.drafts.length === 1 ? "draft" : "drafts"} not live yet`, hint: "Publish to go live", href: `${base}/products?filter=draft` });
   if (a?.plan && used >= 0.8)
-    todos.push({ key: "allowance", icon: "alert", tone: used >= 1 ? "terra" : "gold", title: used >= 1 ? "Try-on allowance used up" : `${Math.round(used * 100)}% of allowance used`, hint: used >= 1 ? "Shoppers continue with their own free looks." : "Consider a bigger plan for this month.", href: `${base}/settings#plan` });
+    todos.push({ key: "allowance", icon: "alert", tone: used >= 1 ? "terra" : "gold", title: used >= 1 ? "Try-on allowance used up" : `${Math.round(used * 100)}% of allowance used`, hint: used >= 1 ? "Shoppers use their own looks" : "Upgrade plan", href: `${base}/settings#plan` });
 
   const loadingTodos = !products || (manager && !orders);
   const firstName = me?.name?.split(" ")[0];
@@ -125,7 +130,7 @@ export default function Home() {
                 <span className="grid size-11 place-items-center rounded-2xl bg-emerald-100 text-mint-ink"><Icon name="check" className="size-5" /></span>
                 <span>
                   <span className="block font-extrabold text-cocoa">You&apos;re all caught up</span>
-                  <span className="block text-sm text-cocoa-2">New orders and photo checks will show up here.</span>
+                  <span className="block text-sm text-cocoa-2">Nothing to do</span>
                 </span>
               </li>
             )}
@@ -136,7 +141,7 @@ export default function Home() {
                     <span className={`grid size-11 shrink-0 place-items-center rounded-2xl ${TODO_TONE[t.tone]}`}><Icon name={t.icon} className="size-5" /></span>
                     <span className="min-w-0 flex-1">
                       <span className="block font-extrabold text-cocoa">{t.title}</span>
-                      <span className="block text-sm leading-snug text-cocoa-2">{t.hint}</span>
+                      <span className="block truncate text-sm text-cocoa-2">{t.hint}</span>
                     </span>
                     {t.href && <Icon name="chevron" className="size-5 shrink-0 text-cocoa-3" />}
                   </>
@@ -176,7 +181,7 @@ export default function Home() {
                   <h2 id="plan-title" className="font-extrabold text-cocoa">{a.plan.name} plan</h2>
                   <Link href={`${base}/settings#plan`} className="text-xs font-bold text-violet-ink underline-offset-2 hover:underline">Manage plan</Link>
                 </div>
-                <p className="mb-2 mt-0.5 text-xs text-cocoa-2">Try-on allowance this month</p>
+                <p className="mb-2 mt-0.5 text-xs text-cocoa-2">Try-ons this month</p>
                 <Meter value={a.plan.allowanceUsed} max={a.plan.monthlyCap} label="Try-on allowance used" />
                 <p className="mt-1.5 text-sm font-bold tabular-nums text-cocoa">
                   {a.plan.allowanceUsed} <span className="font-semibold text-cocoa-2">/ {a.plan.monthlyCap} looks</span>
@@ -185,7 +190,7 @@ export default function Home() {
             ) : a ? (
               <>
                 <h2 id="plan-title" className="font-extrabold text-cocoa">Free plan</h2>
-                <p className="mt-1 text-sm text-cocoa-2">Shoppers use their own free looks on your pieces.</p>
+                <p className="mt-1 text-sm text-cocoa-2">Shoppers use their own looks</p>
                 <Link href={`${base}/settings#plan`} className="mt-2 inline-block text-sm font-bold text-violet-ink">See plans</Link>
               </>
             ) : (
@@ -206,7 +211,7 @@ export default function Home() {
           ) : (
             <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
               <Kpi label="Paid orders" value={a.orders} spark={s.ordersSpark} tone="terra" className="xl:col-span-2" />
-              <Kpi label="Revenue (to you)" value={rwf(a.revenueRwf)} spark={s.revenueSpark} tone="mint" className="xl:col-span-2" />
+              <Kpi label="Revenue (to you)" value={<span title={rwf(a.revenueRwf)}>{rwfCompact(a.revenueRwf)}</span>} spark={s.revenueSpark} tone="mint" className="xl:col-span-2" />
               <Kpi label="Looks on shoppers" value={a.looks} hint={`${a.saves} saved`} tone="violet" className="xl:col-span-2" />
               <Kpi label="Look → order" value={`${(a.conversion * 100).toFixed(1)}%`} hint="Sales per try-on" className="xl:col-span-2" />
               <Kpi label="Saves" value={a.saves} className="xl:col-span-2" />
@@ -252,9 +257,9 @@ export default function Home() {
 
       {!manager && page.memberType === "COOPERATIVE" && <VoiceModeGate pageId={page.id} />}
       {!manager && (
-        <section className="st-card rounded-[24px] p-4 text-sm leading-relaxed text-cocoa-2">
+        <section className="st-card rounded-[24px] p-4">
           <p className="font-extrabold text-cocoa">You make for {page.name}</p>
-          <p className="mt-1">Add your pieces with a clear photo. Your cooperative admin approves them before they go live, and you&apos;re credited as the maker when you agree to it.</p>
+          <p className="mt-2 flex flex-wrap gap-1.5"><Chip tone="violet"><Icon name="camera" className="size-3.5" />Clear photo</Chip><Chip tone="sky"><Icon name="check" className="size-3.5" />Admin approves</Chip><Chip tone="mint"><Icon name="users" className="size-3.5" />Credited with your OK</Chip></p>
         </section>
       )}
 

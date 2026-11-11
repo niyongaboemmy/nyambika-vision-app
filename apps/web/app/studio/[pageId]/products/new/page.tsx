@@ -153,7 +153,7 @@ export default function NewProduct() {
             </fieldset>
             <Field group label="Sizes"><TogglePills all={["XS", "S", "M", "L", "XL", "XXL"]} on={sizes} toggle={(v) => toggle(sizes, setSizes, v)} /></Field>
             <div className="space-y-3 rounded-2xl bg-paper p-3.5 ring-1 ring-inset ring-hairline">
-              <Switch checked={f.madeToOrder} onChange={(v) => setF({ ...f, madeToOrder: v })} label="Made to order" description="Sewn to the shopper's twin size after they pay." />
+              <Switch checked={f.madeToOrder} onChange={(v) => setF({ ...f, madeToOrder: v })} label="Made to order" description="Sewn after payment" />
               <Field label="Lead time (days)"><Input type="number" min={0} max={90} value={f.leadTimeDays} onChange={(e) => setF({ ...f, leadTimeDays: Number(e.target.value) })} className="w-28" /></Field>
             </div>
           </EditorSection>
@@ -181,11 +181,11 @@ export default function NewProduct() {
           <SButton disabled={busy} className="min-h-12 w-full text-base">
             {busy ? "Saving…" : "Save and add photos"} {!busy && <Icon name="chevron" className="size-4" />}
           </SButton>
-          <p className="text-center text-xs text-cocoa-2">Saved as a draft. Nothing is public until you publish.</p>
+          <p className="flex items-center justify-center gap-1.5 text-xs font-semibold text-cocoa-2"><Icon name="lock" className="size-3.5" />Saved as draft · not public</p>
         </form>
         <aside className="sticky top-28 hidden space-y-3 lg:block" aria-label="Live preview">
           {preview}
-          <p className="px-1 text-xs leading-relaxed text-cocoa-2">This is how your piece appears on your Maker Space. Shoppers tap it to see it on their own twin.</p>
+          <p className="px-1 text-xs font-semibold text-cocoa-2">How shoppers see it</p>
         </aside>
       </div>
     </div>
