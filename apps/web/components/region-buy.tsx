@@ -4,7 +4,7 @@ import { formatMoney } from "@nyambika/contracts/money";
 import { normalizePhone, pickZone } from "@nyambika/contracts/region-data";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { WalletPhone, type CheckoutResult } from "@/components/region";
+import { WalletPhone, type CheckoutResult } from "@/components/region-pay";
 import { Button, Chip, ErrorNote, Sheet, Spinner } from "@/components/ui";
 import { api } from "@/lib/api";
 import type { MakerProduct, MakerSpace } from "@/lib/maker";

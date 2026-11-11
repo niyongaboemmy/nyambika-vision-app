@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { AddToBag } from "@/components/bag";
 import { DiscountField, type AppliedDiscount } from "@/components/growth-offer";
-import { WalletPhone, type CheckoutResult } from "@/components/region";
+import { WalletPhone, type CheckoutResult } from "@/components/region-pay";
 import { SizeNotes, useSizeRecommendation } from "@/components/size-hint";
 import { Chip, ErrorNote, Sheet, Spinner } from "@/components/ui";
 import { api, rwf } from "@/lib/api";
