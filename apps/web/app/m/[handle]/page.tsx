@@ -8,6 +8,7 @@ import { CollectionAlerts } from "@/components/growth-offer";
 import { Shelf3d } from "@/components/vr-shelf";
 import type { Shelf } from "@/lib/vr";
 import { RegionPill } from "@/components/region";
+import { Fact } from "@/components/kit";
 import type { Commerce } from "@/lib/region";
 
 type Props = { params: Promise<{ handle: string }> };
@@ -42,29 +43,30 @@ export default async function MakerSpacePage({ params }: Props) {
   };
 
   return (
-    <div className="relative mx-auto min-h-dvh w-full max-w-[480px] overflow-hidden bg-ink pb-28">
+    <div className="relative mx-auto min-h-dvh w-full max-w-[480px] overflow-hidden bg-ink pb-[calc(env(safe-area-inset-bottom)+112px)]">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <header className="relative h-[300px]" style={{ background: THEMES[m.theme] ?? THEMES.terra }}>
         <div className="absolute inset-0 opacity-25 [background-image:repeating-linear-gradient(45deg,#fff_0_2px,transparent_2px_26px),repeating-linear-gradient(-45deg,#fff_0_2px,transparent_2px_26px)]" />
         <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-ink" />
-        <a href="/" aria-label="Back to Muse" className="glass absolute left-4 top-[max(env(safe-area-inset-top),14px)] grid size-10 place-items-center rounded-full">←</a>
+        <a href="/" aria-label="Back to Muse" className="hit glass absolute left-4 top-[max(env(safe-area-inset-top),14px)] grid size-10 place-items-center rounded-full">←</a>
         <RegionPill className="absolute right-4 top-[max(env(safe-area-inset-top),14px)]" />
       </header>
       <section className="relative -mt-24 px-5">
         <div className="flex items-end gap-4">
           <span className="grid size-24 shrink-0 place-items-center rounded-full border-4 border-gold bg-ink font-display text-3xl font-black text-gold">{initials}</span>
           <div className="min-w-0 pb-1">
-            <h1 className="font-display text-3xl font-black leading-tight">
-              {m.name} {m.verified && <span className="text-mint" title="Verified member">✓</span>}
+            <h1 className="font-display text-[clamp(1.5rem,7vw,1.875rem)] font-black leading-tight">
+              {m.name}{m.verified && <span className="whitespace-nowrap text-mint" title="Verified member">&nbsp;✓</span>}
             </h1>
             <p className="text-sm text-txt/80">
-              {commerce && commerce.region !== "RW" ? `${commerce.flag} ` : ""}{TYPE_LABEL[m.memberType]} · {m.sector} · ★ {m.rating.toFixed(1)} · {m.reviewCount} reviews
+              {commerce && commerce.region !== "RW" ? `${commerce.flag} ` : ""}{TYPE_LABEL[m.memberType]} · {m.sector} · ★ {m.rating.toFixed(1)} ({m.reviewCount}<span className="sr-only"> reviews</span>)
             </p>
           </div>
         </div>
         <p className="mt-4 text-[15px] leading-relaxed text-txt/90">
-          “{m.story}” <span className="font-semibold text-gold">Their page · managed by the maker</span>
+          “{m.story}”
         </p>
+        <p className="mt-3"><Fact icon="check">Managed by the maker</Fact></p>
       </section>
 
       <Collection maker={m} commerce={commerce} />

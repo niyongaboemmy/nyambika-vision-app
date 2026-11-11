@@ -41,14 +41,14 @@ export default async function Makers({ searchParams }: { searchParams: Promise<{
   return (
     <div className="aurora mx-auto min-h-dvh w-full max-w-[480px] px-4 pb-10">
       <div className="flex items-center justify-between pt-[max(env(safe-area-inset-top),14px)] pb-2">
-        <Link href="/" className="glass grid size-10 place-items-center rounded-full" aria-label="Back">←</Link>
+        <Link href="/" className="hit glass grid size-10 place-items-center rounded-full" aria-label="Back">←</Link>
         <h1 className="font-display text-xl font-black">Browse makers</h1>
         <RegionPill />
       </div>
-      <form className="mt-2"><input name="q" defaultValue={q} placeholder="Search makers" className="glass h-12 w-full rounded-2xl px-4 outline-none placeholder:text-white/40" /></form>
+      <form className="mt-2" role="search"><input name="q" type="search" aria-label="Search makers" defaultValue={q} placeholder="Search makers" className="glass h-12 w-full rounded-2xl px-4 outline-none placeholder:text-white/40" /></form>
       <div className="no-scrollbar mt-3 flex gap-2 overflow-x-auto">
         {filters.map((f) => (
-          <Link key={f.href} href={f.href} className={`whitespace-nowrap rounded-2xl border px-3.5 py-2 text-sm font-semibold ${(type ?? "") === (f.href.split("=")[1] ?? "") ? "border-gold/70 bg-gold/20" : "border-white/20 bg-white/10"}`}>{f.label}</Link>
+          <Link key={f.href} href={f.href} aria-current={(type ?? "") === (f.href.split("=")[1] ?? "") ? "page" : undefined} className={`press inline-flex min-h-11 items-center whitespace-nowrap rounded-2xl border px-3.5 text-sm font-semibold ${(type ?? "") === (f.href.split("=")[1] ?? "") ? "border-gold/70 bg-gold/20" : "border-white/20 bg-white/10"}`}>{f.label}</Link>
         ))}
       </div>
       <div className="mt-4 space-y-3">

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { HostVerify, PrintButton } from "@/components/passport-bits";
+import { InfoTip } from "@/components/kit";
 import { QrCode } from "@/components/qr";
 import { serverApi } from "@/lib/server-api";
 
@@ -59,7 +60,7 @@ export default async function PassportPage({ params, searchParams }: Props) {
             <p className="text-[11px] font-bold uppercase tracking-[.28em] text-terra-ink">Product passport</p>
             <p className="text-xs text-cocoa-2">Nyambika · version {p.version} · {date(p.publishedAt)}</p>
           </div>
-          <Link href={`/m/${p.page.handle}`} className="text-sm font-bold text-cocoa underline decoration-cocoa/30 underline-offset-4 print:hidden">{p.page.name} →</Link>
+          <Link href={`/m/${p.page.handle}`} className="inline-flex min-h-11 items-center text-sm font-bold text-cocoa underline decoration-cocoa/30 underline-offset-4 print:hidden">{p.page.name} →</Link>
         </header>
 
         {old && (
@@ -140,7 +141,7 @@ export default async function PassportPage({ params, searchParams }: Props) {
 
           <Block title="Carbon footprint">
             <p className="text-[15px]">{d.carbon.kgCo2e != null ? `${d.carbon.kgCo2e} kg CO₂e` : "Not assessed yet"}</p>
-            <p className="mt-1 text-xs text-cocoa-2">Method: {d.carbon.method}. Placeholder until a textile footprint method is adopted.</p>
+            <p className="mt-1 flex items-center gap-1 text-xs text-cocoa-2">Method: {d.carbon.method}<InfoTip label="About the carbon method">Placeholder until a textile footprint method is adopted.</InfoTip></p>
           </Block>
         </div>
 
@@ -181,7 +182,7 @@ export default async function PassportPage({ params, searchParams }: Props) {
         </section>
 
         <details className="mt-8 rounded-[20px] bg-white p-4 text-sm ring-1 ring-inset ring-hairline print:hidden">
-          <summary className="cursor-pointer font-bold">EU Digital Product Passport alignment (draft)</summary>
+          <summary className="flex min-h-11 cursor-pointer items-center font-bold">EU passport alignment (draft)</summary>
           <p className="mt-2 text-cocoa-2">Field names follow the draft EU ESPR textile passport vocabulary. The delegated act is expected in 2027; this mapping is a draft alignment and may change. Machine-readable data is embedded as JSON-LD.</p>
           <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 font-mono text-xs">
             {Object.entries(p.euDraftFields).map(([k, v]) => (

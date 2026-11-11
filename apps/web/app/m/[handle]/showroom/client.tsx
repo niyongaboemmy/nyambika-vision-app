@@ -265,7 +265,7 @@ function Room({ room, commerce }: { room: Showroom; commerce: Commerce | null })
               <Pill href={`/m/${room.page.handle}`}>🏠 Maker Space</Pill>
             </div>
             {twin?.id === item.productId && twin.state === "on" && <p className="mt-2 text-[11px] text-mut">🔒 Only you see your 3D twin here. {twin.note}</p>}
-            {twin?.id === item.productId && twin.state === "none" && <p className="mt-2 text-xs text-mut">No 3D twin yet. <Link className="text-gold underline" href="/mirror/3d">Make one in 2 minutes</Link>.</p>}
+            {twin?.id === item.productId && twin.state === "none" && <p className="mt-2 text-xs text-mut"><Link className="text-gold underline" href="/mirror/3d">Make your 3D twin</Link> · 2 min</p>}
             {twin?.id === item.productId && twin.state === "error" && <p className="mt-2 text-xs text-terra">{twin.note}</p>}
           </section>
         ) : (
@@ -277,7 +277,7 @@ function Room({ room, commerce }: { room: Showroom; commerce: Commerce | null })
               <Ctl label="Turn right" onClick={() => engine.current?.turn(-Math.PI / 6)}>⟳</Ctl>
               <Ctl label="Next piece" onClick={() => engine.current?.step(1)}>›</Ctl>
             </div>
-            {mode === "3d" && <p className="mb-2 text-center text-[11px] text-txt/75">Drag to look · tap the floor or a ring to walk · tap a piece</p>}
+            {mode === "3d" && <p className="mb-2 text-center text-[11px] text-txt/75">Drag · tap floor to walk · tap a piece</p>}
             <nav aria-label="Pieces in this room" className="no-scrollbar -mx-3 flex gap-2 overflow-x-auto px-3 pb-1">
               {room.items.map((i) => (
                 <button key={i.productId} onClick={() => pick(i.productId)} className="glass flex shrink-0 items-center gap-2 rounded-2xl p-1.5 pr-3 text-left">
@@ -290,7 +290,7 @@ function Room({ room, commerce }: { room: Showroom; commerce: Commerce | null })
               ))}
             </nav>
             {room.shows[0] && (
-              <Link href={`/m/${room.page.handle}/shows/${room.shows[0].id}`} className="mt-2 flex items-center justify-center gap-2 text-xs font-semibold text-gold">
+              <Link href={`/m/${room.page.handle}/shows/${room.shows[0].id}`} className="mt-1 flex min-h-11 items-center justify-center gap-2 text-xs font-semibold text-gold">
                 {room.shows[0].phase === "LIVE" ? `● ${t("vr.live")}: ${room.shows[0].title}` : `${t("vr.fashionShow")} · ${fmtWhen(room.shows[0].startsAt)}`} ›
               </Link>
             )}
@@ -304,7 +304,7 @@ function Room({ room, commerce }: { room: Showroom; commerce: Commerce | null })
             {xrError && <p className="mt-1 text-center text-xs text-terra" role="alert">{xrError}</p>}
           </div>
         )}
-        <p className="mt-2 text-center text-[10px] text-txt/60">✨ {room.label} · shapes and drape are approximate</p>
+        <p className="mt-2 text-center text-[10px] text-txt/60">✨ {room.label} · approximate</p>
       </div>
 
       {/* R4 spike: shared presence (flag vr.multiuser_spike; renders nothing while off) */}

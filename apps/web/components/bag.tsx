@@ -59,7 +59,7 @@ export function AddressesCard() {
   return (
     <section className="glass space-y-2 rounded-3xl p-4" aria-labelledby="addr-h">
       <p id="addr-h" className="font-semibold">📍 {t("bag.addresses")}</p>
-      <p className="text-xs text-mut">Encrypted on our side. Only the maker you order from sees the address, for delivery.</p>
+      <p className="text-xs text-mut">Encrypted · only your maker sees it</p>
       {rows === null ? (
         <div className="h-12 animate-pulse rounded-2xl bg-white/10" />
       ) : (

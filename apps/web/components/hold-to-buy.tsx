@@ -70,7 +70,7 @@ export function HoldToBuy({ look, autoOpen = false }: { look: Look; /** E35: ope
   if (!me) return null;
   return (
     <>
-      <button onClick={() => { setOpen(true); track("buy_sheet_opened", { lookId: look.id }); }} className="grad-cta shrink-0 rounded-2xl px-4 py-2 text-sm font-bold" disabled={!look.variant.inStock}>
+      <button onClick={() => { setOpen(true); track("buy_sheet_opened", { lookId: look.id }); }} className="hit grad-cta shrink-0 rounded-2xl px-4 py-2 text-sm font-bold" disabled={!look.variant.inStock}>
         ✋ {look.variant.inStock ? "Buy" : "Sold out"}
       </button>
       <Sheet open={open} onClose={() => !busy && setOpen(false)}>

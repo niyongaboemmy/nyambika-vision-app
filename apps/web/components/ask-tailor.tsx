@@ -160,7 +160,7 @@ export function AskTailorSheet({ open, onClose, request }: { open: boolean; onCl
                 </label>
               ))}
             </div>
-            <p className="mt-2 text-[11px] text-mut">Saved encrypted to your private profile.</p>
+            <p className="mt-2 text-[11px] text-mut">Saved encrypted · private</p>
           </fieldset>
         )}
 

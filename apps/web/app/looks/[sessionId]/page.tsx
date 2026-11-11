@@ -110,9 +110,6 @@ function Stream() {
           >
             <HoldToBuy look={look} />
           </LookView>
-          {i === 0 && index === 0 && data.looks.length > 1 && (
-            <p className="pointer-events-none absolute inset-x-0 bottom-[178px] z-10 text-center text-sm text-txt/80">↑ swipe up · next look</p>
-          )}
         </section>
       ))}
       <TwinNudge place="stream" index={index} />

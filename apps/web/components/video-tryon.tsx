@@ -196,7 +196,7 @@ export function VideoRail({ look }: { look: Look }) {
   const ready = source === "TURNAROUND" || (Boolean(frames) && consent);
   return (
     <div ref={anchor} className="contents">
-      <button onClick={open} aria-label={rendering ? `Video ${pct}% ready` : t("video.title")} className="flex flex-col items-center gap-1 text-xs font-semibold">
+      <button onClick={open} aria-label={rendering ? `Video ${pct}% ready` : t("video.title")} className="hit flex flex-col items-center gap-1 text-xs font-semibold">
         <span className={`glass relative grid size-12 place-items-center rounded-full ${playing ? "bg-terra/70 text-white" : ""}`}>
           {rendering && (
             <svg viewBox="0 0 48 48" className="absolute inset-0 -rotate-90" aria-hidden>
@@ -216,7 +216,7 @@ export function VideoRail({ look }: { look: Look }) {
           </span>
           <div>
             <h3 className="font-display text-xl font-black">{t("video.title")}</h3>
-            <p className="text-sm text-mut">This look moving with you, frame by frame. Every frame we check is labelled and signed.</p>
+            <p className="text-sm text-mut">This look, moving · every frame labelled + signed</p>
           </div>
         </div>
 
@@ -275,7 +275,7 @@ export function VideoRail({ look }: { look: Look }) {
               <li>🔒 Private to you. Makers never receive it. Not charged if it doesn't pass.</li>
             </ul>
             {state && !state.eligible && state.reason && <p className="mt-3 text-sm text-gold">{state.reason}</p>}
-            {job?.status === "WITHHELD" && <p className="mt-3 text-sm text-gold">That video didn't pass our checks, so we didn't show it or charge you. Try again.</p>}
+            {job?.status === "WITHHELD" && <p className="mt-3 text-sm text-gold">Didn't pass our checks · not charged · try again</p>}
             {job?.error && <p className="mt-3 text-sm text-gold">{job.error}</p>}
             {error && (isExpectedText(error) ? <LimitState error={error} /> : <p className="mt-3 text-sm text-red-300" role="alert">{error}</p>)}
             <Button className="mt-4 w-full" onClick={start} disabled={Boolean(busy) || !ready || (state ? !state.eligible : false)}>
@@ -324,7 +324,7 @@ function VideoLayer({ job, anchor, alt, label, onClose }: { job: VideoJob; ancho
         </div>
         {info && (
           <div className="glass absolute inset-x-2 top-14 rounded-2xl p-3 text-xs leading-relaxed">
-            <p>✨ AI-generated video try-on. Real fit and drape can differ.</p>
+            <p>✨ AI video try-on · fit can differ</p>
             {job.guard && <p>🛡️ {job.guard.sampledFrames} frames checked · identity steady {Math.round((job.guard.identityStability ?? 0) * 100)}%</p>}
             {job.c2pa && <p>🔏 Content Credentials (C2PA) · {job.c2pa.model} · #{job.c2pa.sha256}</p>}
             {job.source === "CLIP" && <p>🗑️ Your clip {job.clipDeleted ? "has been deleted" : "is being deleted"}.</p>}

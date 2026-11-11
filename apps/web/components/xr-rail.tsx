@@ -210,7 +210,7 @@ function MotionLayer({ clip, anchor, alt, onClose }: { clip: MotionClip; anchor:
 
 function Rail({ children, label, onClick, active, busy, progress = 0, ariaLabel }: { children: ReactNode; label: string; onClick: () => void; active?: boolean; busy?: boolean; progress?: number; ariaLabel?: string }) {
   return (
-    <button onClick={onClick} aria-label={ariaLabel} className="flex flex-col items-center gap-1 text-xs font-semibold">
+    <button onClick={onClick} aria-label={ariaLabel} className="hit flex flex-col items-center gap-1 text-xs font-semibold">
       <span className={`glass relative grid size-12 place-items-center rounded-full text-lg ${active ? "bg-violet/70 text-white" : ""}`}>
         {busy && (
           <svg viewBox="0 0 48 48" className="absolute inset-0 -rotate-90" aria-hidden>

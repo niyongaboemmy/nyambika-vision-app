@@ -57,9 +57,12 @@ export function Collection({ maker, commerce }: { maker: MakerSpace; commerce?: 
           );
         })}
       </div>
-      <p className="mt-2 text-center text-xs text-mut">
-        {i + 1} / {items.length} · swipe to browse · tap to try on your twin
-      </p>
+      {/* Pager: buttons mirror the swipe; tapping the centre card opens it. */}
+      <div className="mt-2 flex items-center justify-center gap-3 text-xs text-mut">
+        <button type="button" aria-label="Previous in collection" disabled={i === 0} onClick={() => setI((x) => Math.max(0, x - 1))} className="hit press grid size-8 place-items-center rounded-full border border-white/15 bg-white/5 text-base disabled:opacity-35">‹</button>
+        <span className="min-w-12 text-center tabular-nums" aria-live="polite">{i + 1} / {items.length}</span>
+        <button type="button" aria-label="Next in collection" disabled={i === items.length - 1} onClick={() => setI((x) => Math.min(items.length - 1, x + 1))} className="hit press grid size-8 place-items-center rounded-full border border-white/15 bg-white/5 text-base disabled:opacity-35">›</button>
+      </div>
       <ProductSheet maker={maker} product={open} commerce={commerce} onClose={() => setOpen(null)} />
     </section>
   );
@@ -82,7 +85,7 @@ function ProductSheet({ maker, product, commerce, onClose }: { maker: MakerSpace
           <p className="text-sm text-mut">{product.madeToOrder ? `Ready in ${product.leadTimeDays} days` : v.inStock ? "In stock" : "Out of stock"}</p>
           <div className="flex flex-wrap gap-2 pt-1" role="radiogroup" aria-label="Colour">
             {product.variants.map((x, j) => (
-              <button key={x.id} role="radio" aria-checked={j === vi} aria-label={x.colourName} onClick={() => setVi(j)} className={`size-8 rounded-full border-2 ${j === vi ? "border-gold" : "border-white/30"}`} style={{ background: x.colourHex }} />
+              <button key={x.id} role="radio" aria-checked={j === vi} aria-label={x.colourName} onClick={() => setVi(j)} className={`hit size-8 rounded-full border-2 ${j === vi ? "border-gold" : "border-white/30"}`} style={{ background: x.colourHex }} />
             ))}
           </div>
         </div>
@@ -99,7 +102,7 @@ function ProductSheet({ maker, product, commerce, onClose }: { maker: MakerSpace
           💬 Order on WhatsApp
         </a>
       </div>
-      {product.readiness !== "READY" && <p className="mt-2 text-center text-xs text-mut">Try-on isn't available for this item yet.</p>}
+      {product.readiness !== "READY" && <p className="mt-2 text-center text-xs text-mut">Try-on coming soon</p>}
       {commerce && (commerce.wallets.length > 0 || commerce.card.enabled) && commerce.prices[product.id] != null && (
         <div className="mt-2 grid grid-cols-2 gap-2"><RegionBuy maker={maker} product={product} variantIndex={vi} commerce={commerce} /></div>
       )}

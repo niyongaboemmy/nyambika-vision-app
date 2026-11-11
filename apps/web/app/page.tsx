@@ -288,15 +288,15 @@ export default function Muse() {
                 aria-pressed={!prefs.muted}
                 aria-label={t("voice.speakReplies")}
                 title={prefs.muted ? t("voice.unmute") : t("voice.mute")}
-                className="glass press grid size-10 place-items-center rounded-full"
+                className="hit glass press grid size-10 place-items-center rounded-full"
               >
                 <Icon name={prefs.muted ? "mute" : "volume"} className="size-5" />
               </button>
             )}
-            <button onClick={() => setMenu(true)} onPointerEnter={() => void import("@/components/menu")} aria-label="Menu" className="glass press grid size-10 place-items-center rounded-full"><Icon name="menu" className="size-5" /></button>
+            <button onClick={() => setMenu(true)} onPointerEnter={() => void import("@/components/menu")} aria-label="Menu" className="hit glass press grid size-10 place-items-center rounded-full"><Icon name="menu" className="size-5" /></button>
           </span>
         ) : (
-          <Link href="/signin" className="glass rounded-full px-4 py-2 text-sm font-semibold">Sign in</Link>
+          <Link href="/signin" className="hit glass rounded-full px-4 py-2 text-sm font-semibold">Sign in</Link>
         )}
       </header>
 
@@ -366,7 +366,7 @@ export default function Muse() {
               aria-label={t("muse.type")}
               className="glass h-14 w-full rounded-2xl px-4 text-base outline-none placeholder:text-white/40"
             />
-            <button type="button" onClick={() => setText(t("muse.example"))} className="mt-2 text-sm text-mut underline">e.g. “{t("muse.example")}”</button>
+            <button type="button" onClick={() => setText(t("muse.example"))} className="hit mt-2 text-sm text-mut underline">e.g. “{t("muse.example")}”</button>
           </form>
         )}
 
@@ -410,9 +410,9 @@ export default function Muse() {
           </button>
           <button aria-label={t("muse.type")} title={t("muse.type")} onClick={() => setPhase("typing")} className="glass press grid size-16 place-items-center rounded-full"><Icon name="keyboard" className="size-7" /></button>
         </div>
-        <p className="mt-2 text-center text-xs text-mut">
+        <p className="mt-1 flex min-h-11 items-center justify-center gap-1 text-center text-xs text-mut">
           {voiceOn ? t("muse.hold") : t("muse.type")}
-          {voiceOn && me && <> · <button type="button" onClick={() => setVoiceSheet(true)} className="underline underline-offset-2">{t("voice.options")}</button></>}
+          {voiceOn && me && <> · <button type="button" onClick={() => setVoiceSheet(true)} className="inline-flex min-h-11 items-center underline underline-offset-2">{t("voice.options")}</button></>}
         </p>
       </footer>
 

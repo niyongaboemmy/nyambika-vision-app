@@ -86,9 +86,9 @@ export function LookView({ look, index, total, intentLabel, onSave, onVariant, o
       {/* Top chips */}
       <div className="absolute inset-x-4 top-[max(env(safe-area-inset-top),14px)] z-10 flex items-start justify-between gap-2">
         <div className="flex flex-col items-start gap-1.5">
-          <Link href="/" aria-label="Back to Muse" className="glass grid size-10 place-items-center rounded-full">←</Link>
+          <Link href="/" aria-label="Back to Muse" className="hit glass grid size-10 place-items-center rounded-full">←</Link>
           {intentLabel && <span className="glass rounded-2xl px-3 py-1.5 text-sm font-semibold">💍 {intentLabel}</span>}
-          <button onClick={() => setAbout(true)} className="rounded-xl border border-white/20 bg-black/50 px-2.5 py-1 text-xs font-semibold">
+          <button onClick={() => setAbout(true)} className="hit rounded-xl border border-white/20 bg-black/50 px-2.5 py-1 text-xs font-semibold">
             ✨ {look.onTwin ? t("looks.onTwin") : t("looks.onModel")}
           </button>
         </div>
@@ -118,7 +118,12 @@ export function LookView({ look, index, total, intentLabel, onSave, onVariant, o
           </Link>
           <p className="mt-2 font-display text-lg font-black"><LookPrice handle={look.maker.handle} productId={look.product.id} priceRwf={look.product.priceRwf} /> · <span className="font-sans text-base font-semibold">{look.product.madeToOrder ? "made to measure" : look.product.title}</span></p>
           <div className="mt-1 flex items-center justify-between gap-2">
-            <p className="text-xs text-mut">← swipe for Maker Space · ✋ hold to buy</p>
+            {/* Gesture hints as glanceable chips (each gesture has a visible fallback: rail, maker link, Buy). */}
+            <p className="flex min-w-0 flex-wrap gap-x-2.5 gap-y-1 text-xs text-mut">
+              {total && (index ?? 0) < total - 1 ? <span>↑ Next</span> : null}
+              <span>← Maker</span>
+              <span>✋ Hold to buy</span>
+            </p>
             {children}
           </div>
         </div>
@@ -147,7 +152,7 @@ export function LookView({ look, index, total, intentLabel, onSave, onVariant, o
           })}
           <p className="pointer-events-none absolute inset-0 grid place-items-center text-center text-sm font-semibold">{look.variant.colourName}</p>
         </div>
-        <p className="mt-3 text-center text-xs text-mut">Colours this maker actually sews. Free recolour arrives with tailor custom orders.</p>
+        <p className="mt-3 text-center text-xs text-mut">Real colours from this maker</p>
       </Sheet>
 
       <CircleAsk look={look} open={ask} onClose={() => setAsk(false)} intentLabel={intentLabel} />
@@ -156,10 +161,10 @@ export function LookView({ look, index, total, intentLabel, onSave, onVariant, o
       <Sheet open={about} onClose={() => setAbout(false)}>
         <h3 className="font-display text-xl font-black">About this image</h3>
         <ul className="mt-3 space-y-2 text-sm text-txt/90">
-          <li>✨ AI-generated preview on {look.onTwin ? "your private twin" : "an AI model (create your twin to see it on you)"}. Real fit and drape can differ.</li>
-          <li>🛡️ Passed our quality and fairness check (face and skin tone unchanged, garment faithful).</li>
-          {look.c2pa && <li>🔏 Content Credentials (C2PA) signed · {look.c2pa.model} · #{look.c2pa.sha256}</li>}
-          <li>🔒 Only you can see this image. Makers never receive your twin or your looks.</li>
+          <li>✨ AI preview on {look.onTwin ? "your private twin" : "an AI model"} · fit can differ</li>
+          <li>🛡️ Quality and fairness checked</li>
+          {look.c2pa && <li className="break-all">🔏 C2PA signed · {look.c2pa.model} · #{look.c2pa.sha256}</li>}
+          <li>🔒 Only you see it · never shared with makers</li>
         </ul>
       </Sheet>
     </div>
@@ -168,7 +173,7 @@ export function LookView({ look, index, total, intentLabel, onSave, onVariant, o
 
 function RailButton({ children, label, onClick, active }: { children: ReactNode; label: string; onClick: () => void; active?: boolean }) {
   return (
-    <button onClick={onClick} className="flex flex-col items-center gap-1 text-xs font-semibold">
+    <button onClick={onClick} className="hit flex flex-col items-center gap-1 text-xs font-semibold">
       <span className={`glass grid size-12 place-items-center rounded-full text-xl ${active ? "bg-terra/70 text-white" : ""}`}>{children}</span>
       {label}
     </button>

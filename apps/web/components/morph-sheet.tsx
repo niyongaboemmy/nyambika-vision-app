@@ -36,7 +36,7 @@ export function MorphRail({ look }: { look: Look }) {
   if (!tpl?.customizable && !sewable) return null;
   return (
     <>
-      <button onClick={() => (tpl?.customizable ? setOpen(true) : setAsk(true))} className="flex flex-col items-center gap-1 text-xs font-semibold">
+      <button onClick={() => (tpl?.customizable ? setOpen(true) : setAsk(true))} className="hit flex flex-col items-center gap-1 text-xs font-semibold">
         <span className="glass grid size-12 place-items-center rounded-full text-xl" aria-hidden>
           {tpl?.customizable ? <span className="size-6 rounded-full bg-[conic-gradient(red,yellow,lime,cyan,blue,magenta,red)] shadow-[0_0_12px_rgba(255,255,255,.35)]" /> : "✂️"}
         </span>

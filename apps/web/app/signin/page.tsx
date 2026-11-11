@@ -98,7 +98,7 @@ function SignIn() {
 
         <div>
           <p className="mb-2 text-xs font-semibold uppercase tracking-[.2em] text-gold">{t("lang.pick")}</p>
-          <div className="flex flex-wrap gap-2">
+          <div role="group" aria-label={t("lang.pick")} className="flex flex-wrap gap-2">
             {LOCALES.map((l) => (
               <Chip key={l} active={l === locale} onClick={() => setLocale(l)}>{LABELS[l]}</Chip>
             ))}
@@ -145,7 +145,7 @@ function SignIn() {
                 />
               </label>
             ) : (
-              <button type="button" onClick={() => setShowInvite(true)} className="self-start text-sm text-mut underline underline-offset-4">{t("pilot.haveCode")}</button>
+              <button type="button" onClick={() => setShowInvite(true)} className="-my-2 inline-flex min-h-11 items-center self-start text-sm text-mut underline underline-offset-4">{t("pilot.haveCode")}</button>
             )}
             <ErrorNote error={error} />
             <Button disabled={busy || phone.replace(/\D/g, "").length < 9 || (phoneCheck ? !phoneCheck.ok : false)}>{t("auth.sendCode")}</Button>
@@ -165,7 +165,7 @@ function SignIn() {
             />
             {devCode && (
               <p className="text-center text-xs text-mut">
-                {t("auth.devCode")}: <button type="button" className="font-mono text-gold underline" onClick={() => setCode(devCode)}>{devCode}</button>
+                {t("auth.devCode")}: <button type="button" className="hit font-mono text-gold underline" onClick={() => setCode(devCode)}>{devCode}</button>
               </p>
             )}
             <ErrorNote error={error} />

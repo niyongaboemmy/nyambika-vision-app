@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Button, ErrorNote, Screen, Spinner, TopBar } from "@/components/ui";
+import { Button, ErrorNote, Fact, Screen, Spinner, TopBar } from "@/components/ui";
 import { api } from "@/lib/api";
 import { useSession } from "@/lib/session";
 
@@ -53,13 +53,15 @@ export default function Join() {
           <span aria-hidden className="orb mb-6 block size-16 rounded-full shadow-[0_0_40px_rgba(242,184,75,.45)] motion-safe:animate-orb" />
           <p className="text-xs font-semibold uppercase tracking-[.2em] text-gold">Nyambika pilot · Kigali</p>
           <h1 className="mt-2 font-display text-4xl font-black leading-tight text-grad">{done ? t("pilot.joined") : t("pilot.join")}</h1>
-          <p className="mt-2 text-mut">
-            {done
-              ? done.kind === "PAGE"
-                ? `Your page${done.pages > 1 ? "s are" : " is"} part of ${done.cohort}. Shoppers in the pilot will see your pieces.`
-                : `Welcome to ${done.cohort}. Ask the Muse for an occasion and see looks from Rwandan makers.`
-              : "Looks from Rwandan tailors, cooperatives and sellers, rendered on your private twin. Your invite opens the pilot for you."}
-          </p>
+          {done ? (
+            <p className="mt-2 text-mut">{done.kind === "PAGE" ? `${done.cohort} · pilot shoppers see your pieces` : `Welcome to ${done.cohort}`}</p>
+          ) : (
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              <Fact icon="store">Rwandan makers</Fact>
+              <Fact icon="lock">On your private twin</Fact>
+              <Fact icon="sparkle">Invite only</Fact>
+            </div>
+          )}
         </div>
 
         {done ? (
@@ -89,7 +91,7 @@ export default function Join() {
             <ErrorNote error={error} />
             <Button disabled={code.trim().length < 4}>{t("pilot.join")}{me ? "" : " →"}</Button>
             <p className="text-center text-xs text-mut">
-              No code yet? Ask a pilot maker, or follow <Link href="/makers" className="underline">our makers</Link> for the launch.
+              No code? <Link href="/makers" className="inline-flex min-h-11 items-center underline">Browse makers</Link>
             </p>
           </form>
         )}

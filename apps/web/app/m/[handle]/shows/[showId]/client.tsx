@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { HoldToBuy } from "@/components/hold-to-buy";
+import { Fact } from "@/components/kit";
 import type { RunwayEngine } from "@/components/vr-engine";
 import { api, rwf } from "@/lib/api";
 import { Price } from "@/components/region";
@@ -238,7 +239,7 @@ export function ShowClient({ initial }: { initial: ShowView }) {
           ) : (
             <div className="glass rounded-3xl p-4">
               <p className="font-display text-2xl font-black">That&apos;s a wrap</p>
-              <p className="text-sm text-mut">The show has ended. Replay it with the audience&apos;s reactions.</p>
+              <p className="text-sm text-mut">Replay with live reactions</p>
               <button onClick={() => void startReplay()} className="grad-cta mt-3 flex min-h-12 w-full items-center justify-center rounded-2xl font-bold">▶ {t("vr.replay")}</button>
             </div>
           )}
@@ -253,7 +254,7 @@ export function ShowClient({ initial }: { initial: ShowView }) {
                   🔔 {me ? t("vr.rsvp") : `Sign in · ${t("vr.rsvp")}`}
                 </button>
               )}
-              <p className="mt-1.5 text-center text-xs text-mut">One WhatsApp message about an hour before. Your number is never shown to the maker.</p>
+              <div className="mt-2 flex flex-wrap justify-center gap-1.5"><Fact icon="mail">1 WhatsApp · 1 h before</Fact><Fact icon="lock">Never shared with makers</Fact></div>
             </div>
           )}
           {err && (isExpectedText(err) ? <LimitState error={err} /> : <p role="alert" className="text-sm text-terra">{err}</p>)}

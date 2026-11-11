@@ -42,7 +42,7 @@ export function MenuSheet({ open, onClose }: { open: boolean; onClose: () => voi
         <span className="text-xs font-bold uppercase tracking-[.14em] text-mut">Display</span>
         <ThemeToggle />
       </div>
-      <div className="no-scrollbar -mx-5 mt-3 flex gap-2 overflow-x-auto px-5" role="group" aria-label="Language">
+      <div className="no-scrollbar -mx-5 mt-3 flex gap-2 overflow-x-auto px-5 py-0.5" role="group" aria-label="Language">
         {LOCALES.map((l) => <Chip key={l} active={l === locale} onClick={() => setLocale(l)}>{LABELS[l]}</Chip>)}
       </div>
       <button onClick={() => { void signOut(); onClose(); }} className="press mt-4 flex min-h-11 w-full items-center justify-center gap-2 rounded-2xl text-sm font-semibold text-mut hover:text-txt">

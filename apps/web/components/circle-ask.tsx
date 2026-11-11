@@ -92,7 +92,7 @@ export function CircleAsk({ look, open, onClose, intentLabel }: { look: Look; op
                   );
                 })}
           </div>
-          {candidates && candidates.length < 2 && <p className="mt-3 text-sm text-gold">You need at least two finished looks. Swipe through a few more first.</p>}
+          {candidates && candidates.length < 2 && <p className="mt-3 text-sm text-gold">Needs 2+ finished looks</p>}
           <label className="mt-4 block text-xs font-semibold uppercase tracking-widest text-mut" htmlFor="circle-q">Your question</label>
           <input id="circle-q" value={question} maxLength={120} onChange={(e) => setQuestion(e.target.value)} className="glass mt-1.5 h-12 w-full rounded-2xl px-4 outline-none" />
           <div className="mt-2 flex flex-wrap gap-2">
@@ -144,7 +144,7 @@ export function CircleAsk({ look, open, onClose, intentLabel }: { look: Look; op
             ))}
           </div>
           <h3 className="font-display text-2xl font-black text-grad">Your poll is live</h3>
-          <p className="text-sm text-mut">Send it to your circle. Votes appear live.</p>
+          <p className="text-sm text-mut">Votes appear live</p>
           <a href={`https://wa.me/?text=${encodeURIComponent(shareText)}`} target="_blank" rel="noreferrer" className="mt-4 flex min-h-12 items-center justify-center gap-2 rounded-2xl bg-[#25D366] px-5 font-bold text-[#062b14]">
             Share on WhatsApp
           </a>
