@@ -65,6 +65,7 @@ No hydration warnings, broken images or 5xx responses were found on any route or
 | social | Pilot survey sheet covered the restyle sheet after the paid order; hold-to-buy failure was silent | Pre-answers the survey via API; prints the on-screen reason on failure |
 | tailor | 17:00 slot already published by earlier runs | Picks any free time |
 | voice | `muse.voice` experiment puts half of fresh users in the text arm (no mic); shirt stock down to 1; address list sampled too early | Pre-registers numbers until one is in the voice arm; stock-safe third piece; waits for the address |
+| region (and every `crawl-lib` crawl) | Under heavy machine load a screenshot taken mid-hydration made React report a mismatch on `caret-color` (Playwright hides the caret by injecting that style) | `isCrawlArtifact()` in `crawl-lib` ignores hydration diffs that touch only `caret-color`; any other mismatch still fails |
 | infer | Needs a gateway with `INFERENCE_ROUTING=1`, `VTON_PROVIDER=routed`, `INFERENCE_POOL_URL` | Run the slot's own gateway + fake pool (documented here) |
 | API `test/checkout.spec.ts` | Crawls on the shared DB had bought the test's pieces | Tops the variant up for the test and restores the original stock |
 
