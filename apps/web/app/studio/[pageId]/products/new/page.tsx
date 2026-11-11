@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AiWrite } from "@/components/ai-write";
 import { Field, Icon, Input, Note, SButton, Select, Steps, Switch, Textarea, TogglePills } from "@/components/studio";
+import { Stepper } from "@/components/ios";
 import { EDITOR_STEPS, EditorSection, ProductPreview } from "@/components/studio-product";
 import { api } from "@/lib/api";
 import { CATEGORIES, type Maker, OCCASIONS, STYLES } from "@/lib/types";
@@ -154,7 +155,10 @@ export default function NewProduct() {
             <Field group label="Sizes"><TogglePills all={["XS", "S", "M", "L", "XL", "XXL"]} on={sizes} toggle={(v) => toggle(sizes, setSizes, v)} /></Field>
             <div className="space-y-3 rounded-2xl bg-paper p-3.5 ring-1 ring-inset ring-hairline">
               <Switch checked={f.madeToOrder} onChange={(v) => setF({ ...f, madeToOrder: v })} label="Made to order" description="Sewn after payment" />
-              <Field label="Lead time (days)"><Input type="number" min={0} max={90} value={f.leadTimeDays} onChange={(e) => setF({ ...f, leadTimeDays: Number(e.target.value) })} className="w-28" /></Field>
+              <div className="flex min-h-11 items-center justify-between gap-3">
+                <span className="text-[15px] font-semibold text-cocoa">Lead time</span>
+                <Stepper label="Lead time days" value={Number(f.leadTimeDays)} onChange={(v) => setF({ ...f, leadTimeDays: v })} min={0} max={90} unit="d" />
+              </div>
             </div>
           </EditorSection>
 

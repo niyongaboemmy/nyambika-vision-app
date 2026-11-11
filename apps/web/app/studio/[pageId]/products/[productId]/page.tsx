@@ -7,6 +7,7 @@ import { Suspense, useState } from "react";
 import { AiWrite } from "@/components/ai-write";
 import { InfoTip } from "@/components/kit";
 import { Badge, Card, Chip, Field, Icon, Input, Note, ScreenSkeleton, SButton, Skeleton, Steps, Textarea } from "@/components/studio";
+import { MoreActions } from "@/components/ios";
 import { EDITOR_STEPS, EditorSection, ProductPreview } from "@/components/studio-product";
 import { MorphOptions } from "@/components/morph-options";
 import { AttrSuggest } from "@/components/mlspike-suggest";
@@ -74,7 +75,12 @@ function ProductDetail() {
                 <h2 className="font-display text-2xl font-black leading-tight tracking-tight text-cocoa">{p.title}</h2>
                 <p className="mt-0.5 text-sm text-cocoa-2">{rwf(p.priceRwf)} · {p.category}{p.madeToOrder ? ` · made to order (${p.leadTimeDays} days)` : ""}</p>
               </div>
-              <Badge value={p.status} label={p.status === "PUBLISHED" ? "live" : undefined} />
+              <div className="flex shrink-0 items-center gap-1">
+                <Badge value={p.status} label={p.status === "PUBLISHED" ? "live" : undefined} />
+                {canManage && p.status !== "ARCHIVED" && (
+                  <MoreActions label="More product actions" title={p.title} actions={[{ label: "Archive", icon: "box", destructive: true, disabled: busy, onSelect: () => act("archive") }]} />
+                )}
+              </div>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <Badge value={p.readiness} label={`try-on: ${p.readiness.replace(/_/g, " ").toLowerCase()}`} />
@@ -94,7 +100,6 @@ function ProductDetail() {
                 </SButton>
               )}
               {p.status === "PUBLISHED" && <SButton variant="outline" disabled={busy} onClick={() => act("unpublish")}>Unpublish</SButton>}
-              {canManage && p.status !== "ARCHIVED" && <SButton variant="ghost" disabled={busy} onClick={() => act("archive")}>Archive</SButton>}
             </div>
             {(p.status === "DRAFT" || p.status === "OUT_OF_STOCK") && !allPhotos && (
               <p className="flex items-center gap-1.5 text-xs font-semibold text-cocoa-2"><Icon name="camera" className="size-3.5" />Add a photo per colour first</p>

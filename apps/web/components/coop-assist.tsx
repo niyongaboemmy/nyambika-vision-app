@@ -49,7 +49,7 @@ export function MakerAccessPanel({ pageId, maker }: { pageId: string; maker: Mak
       <div className="flex flex-wrap items-center gap-2">
         {active ? <Chip tone="violet"><Icon name="shield" className="size-3.5" /> Helping allowed until {new Date(row.assist!.expiresAt!).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</Chip> : row.assist?.status === "PENDING" ? <Chip tone="gold">Waiting for {maker.name.split(" ")[0]}&apos;s OK</Chip> : null}
       </div>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="flex flex-wrap gap-2 [&>*]:flex-1 [&>*]:whitespace-nowrap">
         {active ? (
           <Link href={`/studio/${pageId}/easy?assist=${maker.id}`} className="st-press st-cta inline-flex min-h-11 items-center justify-center gap-1.5 rounded-2xl px-3 text-sm font-bold text-white">
             <Icon name="users" className="size-4" /> Help {maker.name.split(" ")[0]}

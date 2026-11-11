@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { Group, GroupRow } from "@/components/ios";
 import { LearnMore } from "@/components/kit";
 import { Card, Icon, Note, Skeleton, Switch } from "@/components/studio";
 import { api } from "@/lib/api";
@@ -32,14 +33,9 @@ interface TrainingState {
 export function TrainingDataLink({ pageId }: { pageId: string }) {
   const { data } = useApi<TrainingState>(`/pages/${pageId}/training-data`);
   return (
-    <Link href={`/studio/${pageId}/training`} className="st-card st-press st-lift flex items-center gap-3 rounded-[24px] p-4">
-      <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-violet-100 text-violet-ink"><Icon name="layers" className="size-5" /></span>
-      <span className="min-w-0 flex-1">
-        <span className="block font-extrabold text-cocoa">Help train Nyambika&apos;s garment helper</span>
-        <span className="block text-sm text-cocoa-2">{data ? (data.optedIn ? "You share garment photos · change any time" : "Off · you decide which photos to share") : "Your choice, off by default"}</span>
-      </span>
-      <Icon name="chevron" className="size-5 shrink-0 text-cocoa-3" />
-    </Link>
+    <Group>
+      <GroupRow icon="layers" tone="violet" title="Help train Nyambika's garment helper" subtitle={data ? (data.optedIn ? "Sharing · change any time" : "Off · your choice") : "Off by default"} href={`/studio/${pageId}/training`} />
+    </Group>
   );
 }
 

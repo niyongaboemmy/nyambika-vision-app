@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
+import { MoreActions } from "@/components/ios";
 import { Badge, Empty, Icon, Note, ScreenSkeleton, SButton, SectionTitle, StudioSheet, type IconName } from "@/components/studio";
 import { api, rwf } from "@/lib/api";
 import { ORDER_LABEL, type OrderView } from "@/lib/orders";
@@ -63,19 +64,23 @@ export default function Orders() {
   const actions = (o: OrderView, full?: boolean) => {
     const next = o.next.filter((n) => ACTION[n]);
     if (!next.length) return null;
+    const primary = next.filter((n) => !SECONDARY.includes(n));
+    const secondary = next.filter((n) => SECONDARY.includes(n));
     return (
-      <div className={`flex flex-wrap gap-2 ${full ? "" : "pt-1"}`}>
-        {next.map((n) => (
-          <SButton
-            key={n}
-            variant={SECONDARY.includes(n) ? "outline" : "primary"}
-            disabled={busy === o.id + n}
-            onClick={() => move(o.id, n)}
-            className={SECONDARY.includes(n) ? "px-3" : "flex-1 px-3"}
-          >
+      <div className={`flex items-center gap-2 ${full ? "" : "pt-1"}`}>
+        {primary.map((n) => (
+          <SButton key={n} disabled={busy === o.id + n} onClick={() => move(o.id, n)} className="flex-1 px-3">
             {ACTION[n]}
           </SButton>
         ))}
+        {secondary.length > 0 && (
+          <MoreActions
+            label={`More actions for order ${o.code}`}
+            title={`${o.item.title} · ${o.code}`}
+            className="size-11 shrink-0 bg-white ring-1 ring-inset ring-hairline"
+            actions={secondary.map((n) => ({ label: ACTION[n], icon: "x", destructive: true, disabled: busy === o.id + n, onSelect: () => move(o.id, n) }))}
+          />
+        )}
       </div>
     );
   };
