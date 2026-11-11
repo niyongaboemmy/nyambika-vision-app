@@ -202,6 +202,16 @@ export class PresenceLayer {
     this.floats = this.floats.filter((x) => x.t <= 1.8);
   }
 
+  /** A floor point ~2.2 m in front of someone (outside their bubble), facing them; null if not in view. */
+  near(sid: string): { x: number; z: number; yaw: number } | null {
+    const b = this.bodies.get(sid);
+    if (!b?.root.visible) return null;
+    const a = b.shownYaw + (Math.random() - 0.5) * 0.9;
+    const x = b.root.position.x - Math.sin(a) * 2.2;
+    const z = b.root.position.z - Math.cos(a) * 2.2;
+    return { x, z, yaw: Math.atan2(x - b.root.position.x, z - b.root.position.z) };
+  }
+
   visibleCount() {
     return [...this.bodies.values()].filter((b) => b.root.visible).length;
   }

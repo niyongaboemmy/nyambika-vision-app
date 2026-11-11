@@ -103,6 +103,7 @@ export function SharedRoom({ engine, room, signedIn, signInHref, seated, show }:
             L?.upsert(next);
             return new Map(p).set(e.sid, next);
           });
+          if (e.sid === client.current?.sid) setYou((y) => (y ? { ...y, muted: e.muted } : y));
           if (e.sid === client.current?.sid) caption(e.muted ? "The host paused your reactions" : "Your reactions are back on");
           return;
         case "runway":
@@ -150,6 +151,7 @@ export function SharedRoom({ engine, room, signedIn, signInHref, seated, show }:
         const { PresenceLayer } = await import("@/components/presence-layer");
         const font = getComputedStyle(document.body).getPropertyValue("--font-display").trim() || "system-ui, sans-serif";
         layer.current = new PresenceLayer(engine, { font, reducedMotion: prefersReducedMotion(), selfSid: () => client.current?.sid ?? null });
+        if (process.env.NODE_ENV !== "production") (window as unknown as { __presence?: PresenceLayer }).__presence = layer.current; // crawl hook
       }
       client.current?.leave();
       client.current = new PresenceClient(room, () => engine.viewerPose(), (e) => onEventRef.current(e));
@@ -323,7 +325,7 @@ export function SharedRoom({ engine, room, signedIn, signInHref, seated, show }:
               {list.map((m) => {
                 const self = m.sid === you?.sid;
                 return (
-                  <li key={m.sid} className="flex items-center gap-2 rounded-2xl bg-white/5 p-2">
+                  <li key={m.sid} className="flex flex-wrap items-center gap-2 rounded-2xl bg-white/5 p-2">
                     <span className="grid size-9 shrink-0 place-items-center rounded-full text-sm font-black text-ink" style={{ background: ["#e5395f", "#f0b429", "#2dd4bf", "#8b5cf6", "#38bdf8", "#f97316", "#a3e635", "#f472b6"][m.hue % 8] }} aria-hidden>
                       {m.nick[0]}
                     </span>
@@ -340,7 +342,21 @@ export function SharedRoom({ engine, room, signedIn, signInHref, seated, show }:
                       </span>
                     </span>
                     {!self && (
-                      <span className="flex shrink-0 gap-1">
+                      <span className={`flex shrink-0 gap-1 ${host ? "w-full justify-end" : ""}`}>
+                        {m.seat === "avatar" && you?.seat === "avatar" && (
+                          <button
+                            onClick={() => {
+                              const n = layer.current?.near(m.sid);
+                              if (n) engine.moveTo(n.x, n.z, n.yaw);
+                              else setNote(`${m.nick} isn't close enough to see yet`);
+                              setPeople(false);
+                            }}
+                            className="min-h-10 rounded-full bg-white/10 px-3 text-xs font-semibold"
+                            aria-label={`Go near ${m.nick}`}
+                          >
+                            Go near
+                          </button>
+                        )}
                         <button onClick={() => toggleHide(m.sid)} className="min-h-10 rounded-full bg-white/10 px-3 text-xs font-semibold" aria-label={`${hidden.has(m.sid) ? "Show" : "Hide"} ${m.nick}`}>
                           {hidden.has(m.sid) ? "Show" : "Hide"}
                         </button>

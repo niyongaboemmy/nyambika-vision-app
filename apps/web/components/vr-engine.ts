@@ -627,6 +627,12 @@ export class ShowroomEngine {
     this.frameHooks.add(fn);
     return () => void this.frameHooks.delete(fn);
   }
+  /** Glide (inline) or teleport (XR) to a floor point facing `yaw` (presence "go near"). */
+  moveTo(x: number, z: number, yaw: number) {
+    const p = new THREE.Vector3(x, 0, z);
+    if (this.renderer.xr.isPresenting) this.teleport(p);
+    else this.glideTo(p, yaw);
+  }
   /** Viewer eye position (metres, room space) and facing yaw (radians), inline or in XR. */
   viewerPose() {
     const xr = this.renderer.xr.isPresenting;

@@ -152,7 +152,7 @@ export function MrMirror({ pieces, wardrobe, twin, arPilot, initial }: { pieces:
             {busy}
           </span>
         )}
-        <p className="absolute inset-x-3 bottom-3 text-center text-[11px] text-txt/80">{body === "twin" ? "🔒 Your 3D twin · only you see it" : "Synthetic body, not a real person · size and drape are approximate"}</p>
+        <p className="absolute inset-x-3 bottom-3 mx-auto w-fit max-w-[calc(100%-24px)] rounded-full bg-black/60 px-3 py-1 text-center text-[11px] text-txt/90 backdrop-blur">{body === "twin" ? "🔒 Your 3D twin · only you see it" : "Synthetic body, not a real person · size and drape are approximate"}</p>
         {ready && (
           <div className="absolute right-3 top-3 flex gap-1.5">
             <button onClick={() => engine.current?.rotate(-0.5)} aria-label="Turn left" className="glass grid size-10 place-items-center rounded-full">⟲</button>
