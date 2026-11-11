@@ -125,6 +125,9 @@ await shot("owner-live-update");
 await page.locator("section", { hasText: /your circle picked/i }).getByRole("button", { name: /buy/i }).click();
 await page.getByRole("button", { name: /hold to buy/i }).waitFor();
 await page.getByRole("button", { name: /pickup in/i }).click();
+// Cross-border maker (E41 hardening): the sheet asks for the payer's wallet number in the maker's country.
+const walletNo = page.getByRole("dialog").getByLabel(/number \(/i);
+if (await walletNo.count()) await walletNo.first().fill("0712345678");
 await shot("winner-hold-sheet");
 const hold = page.getByRole("button", { name: /hold to buy/i });
 const box = await hold.boundingBox();

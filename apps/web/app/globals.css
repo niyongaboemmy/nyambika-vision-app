@@ -404,6 +404,7 @@ body {
 
 .grad-cta {
   background: var(--grad-cta);
+  color: #fff;
 }
 
 .text-grad {

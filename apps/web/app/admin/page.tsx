@@ -268,14 +268,14 @@ function OutboxTab() {
   return (
     <ul className="grid grid-cols-1 gap-2 lg:grid-cols-2">
       {data.map((n) => (
-        <li key={n.id} className="st-card space-y-2 rounded-[22px] p-4">
+        <li key={n.id} className="st-card min-w-0 space-y-2 rounded-[22px] p-4">
           <div className="flex flex-wrap items-center gap-1.5 text-xs">
             <Chip tone={n.channel === "WHATSAPP" ? "mint" : "sky"}>{n.channel.toLowerCase()}</Chip>
-            <span className="font-semibold text-cocoa">{n.to}</span>
+            <span className="min-w-0 break-all font-semibold text-cocoa">{n.to}</span>
             <span className="text-cocoa-2">· {n.template}</span>
             <span className="ml-auto text-cocoa-2">{new Date(n.createdAt).toLocaleString()}</span>
           </div>
-          <p className="rounded-2xl rounded-tl-md bg-paper p-3 text-sm leading-relaxed text-cocoa ring-1 ring-inset ring-hairline">{n.body.replace(/code: \d{6}/, "code: ••••••")}</p>
+          <p className="break-words rounded-2xl rounded-tl-md bg-paper p-3 text-sm leading-relaxed text-cocoa ring-1 ring-inset ring-hairline [overflow-wrap:anywhere]">{n.body.replace(/code: \d{6}/, "code: ••••••")}</p>
         </li>
       ))}
     </ul>
