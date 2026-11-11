@@ -13,6 +13,32 @@ import { track } from "@/lib/track";
 
 const WALLET_ICON: Record<Wallet, string> = { MTN_MOMO: "🟡", AIRTEL_MONEY: "🔴", MPESA: "🟢" };
 
+/** Pay-with chips + the payer's wallet number for the maker's country. Shared by the Maker Space sheet and Looks hold-to-buy. */
+export function WalletPhone<M extends Wallet | "CARD">({ commerce, methods, method, onMethod, phone, onPhone }: { commerce: Commerce; methods: readonly M[]; method: M | undefined; onMethod: (m: M) => void; phone: string; onPhone: (p: string) => void }) {
+  const { t } = useSession();
+  const phoneCheck = method && method !== "CARD" ? normalizePhone(phone, commerce.region) : null;
+  return (
+    <>
+      <fieldset>
+        <legend className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-mut">{t("region.payWith")}</legend>
+        <div className="flex flex-wrap gap-2">
+          {methods.map((m) => (
+            <Chip key={m} active={method === m} onClick={() => onMethod(m)}>{m === "CARD" ? `💳 ${t("region.card")}` : `${WALLET_ICON[m as Wallet]} ${WALLET_LABEL[m as Wallet]}`}</Chip>
+          ))}
+        </div>
+        {!methods.length && <p className="text-sm text-gold">This maker takes orders on WhatsApp for now.</p>}
+      </fieldset>
+      {method && method !== "CARD" && (
+        <div>
+          <label htmlFor="payer" className="text-xs font-semibold text-mut">{WALLET_LABEL[method as Wallet]} number ({REGIONS[commerce.region].name})</label>
+          <input id="payer" inputMode="tel" value={phone} onChange={(e) => onPhone(e.target.value)} placeholder={commerce.phoneExample} aria-invalid={phone.length > 3 && !phoneCheck?.ok} className="glass mt-1 h-12 w-full rounded-2xl px-4 outline-none placeholder:text-white/40" />
+          {phone.length > 3 && phoneCheck && !phoneCheck.ok && <p className="mt-1 text-xs text-gold">{phoneCheck.message}</p>}
+        </div>
+      )}
+    </>
+  );
+}
+
 /** A price in the maker's currency, with "≈" in the shopper's display currency when it differs (E40). */
 export function Price({ minor, currency, className = "", approxClassName = "text-mut" }: { minor: number; currency: CurrencyCode; className?: string; approxClassName?: string }) {
   const { show } = useRegion();
@@ -85,7 +111,7 @@ export function RegionSheet({ open, onClose }: { open: boolean; onClose: () => v
 
 // ------------------------------------------------------------------------------ checkout
 
-interface CheckoutResult {
+export interface CheckoutResult {
   orderId: string;
   code: string;
   status: string;
@@ -207,22 +233,7 @@ export function RegionBuy({ maker, product, variantIndex, commerce }: { maker: M
                   <input value={address} onChange={(e) => setAddress(e.target.value)} placeholder={delivery === "SHIP" ? "Street, city, postcode" : "Delivery address"} aria-label="Delivery address" className="glass h-12 w-full rounded-2xl px-4 outline-none placeholder:text-white/40" />
                 )}
 
-                <fieldset>
-                  <legend className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-mut">{t("region.payWith")}</legend>
-                  <div className="flex flex-wrap gap-2">
-                    {methods.map((m) => (
-                      <Chip key={m} active={method === m} onClick={() => setMethod(m)}>{m === "CARD" ? `💳 ${t("region.card")}` : `${WALLET_ICON[m]} ${WALLET_LABEL[m]}`}</Chip>
-                    ))}
-                  </div>
-                  {!methods.length && <p className="text-sm text-gold">This maker takes orders on WhatsApp for now.</p>}
-                </fieldset>
-                {method && method !== "CARD" && (
-                  <div>
-                    <label htmlFor="payer" className="text-xs font-semibold text-mut">{WALLET_LABEL[method]} number ({REGIONS[commerce.region].name})</label>
-                    <input id="payer" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder={commerce.phoneExample} aria-invalid={phone.length > 3 && !phoneCheck?.ok} className="glass mt-1 h-12 w-full rounded-2xl px-4 outline-none placeholder:text-white/40" />
-                    {phone.length > 3 && phoneCheck && !phoneCheck.ok && <p className="mt-1 text-xs text-gold">{phoneCheck.message}</p>}
-                  </div>
-                )}
+                <WalletPhone commerce={commerce} methods={methods} method={method} onMethod={setMethod} phone={phone} onPhone={setPhone} />
                 <input value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="Discount code (optional)" aria-label="Discount code" maxLength={24} className="glass h-11 w-full rounded-2xl px-4 text-sm uppercase outline-none placeholder:normal-case placeholder:text-white/40" />
               </div>
 
