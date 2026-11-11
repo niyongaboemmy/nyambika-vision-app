@@ -67,7 +67,7 @@ function client(i, run, abuser = false) {
         yaw += (Math.random() - 0.5) * 0.3;
         x = Math.max(-6, Math.min(6, x + Math.sin(yaw) * 0.12));
         z = Math.max(-6, Math.min(6, z + Math.cos(yaw) * 0.12));
-        const f = JSON.stringify({ t: "p", x: Math.round(x * 100), y: 160, z: Math.round(z * 100), yw: Math.round(((yaw + Math.PI) % (2 * Math.PI)) * 1000 - 3141), ts: Date.now() % 1_000_000 });
+        const f = JSON.stringify({ t: "p", x: Math.round(x * 100), y: 160, z: Math.round(z * 100), yw: Math.round(Math.atan2(Math.sin(yaw), Math.cos(yaw)) * 1000), ts: Date.now() % 1_000_000 });
         if (ws.readyState === 1) {
           ws.send(f);
           c.up += f.length;
@@ -78,7 +78,14 @@ function client(i, run, abuser = false) {
           c.up += Buffer.byteLength(r);
         }
       };
-      timer = setInterval(send, abuser ? 15 : 100);
+      // Real clients are not phase-locked to the server tick: 100 ms ± 10 ms jitter. (A fixed setInterval on one
+      // macOS host gets coalesced onto the same wake-ups as the server timer and reads a constant ~100 ms.)
+      const period = Number(process.env.SEND_MS ?? 100);
+      const loop = () => {
+        send();
+        timer = setTimeout(loop, abuser ? 15 : period - 10 + Math.random() * 20);
+      };
+      timer = setTimeout(loop, Math.random() * period);
     } else if (m.t === "s") {
       const now = Date.now() % 1_000_000;
       for (const e of m.p) {
@@ -89,10 +96,10 @@ function client(i, run, abuser = false) {
   };
   ws.onclose = (ev) => {
     c.closed = ev.code;
-    clearInterval(timer);
+    clearTimeout(timer);
   };
   c.stop = () => {
-    clearInterval(timer);
+    clearTimeout(timer);
     try {
       ws.close(1000);
     } catch {}
@@ -132,7 +139,7 @@ for (const n of COUNTS) {
         const a = s0[k];
         if (!a || !b) return null;
         const cpuUs = b.cpu.user - a.cpu.user + (b.cpu.system - a.cpu.system);
-        return { instance: b.instance, cpuPctOfOneCore: Math.round((cpuUs / 1e6 / wall) * 1000) / 10, tickMsP50: b.tickMsP50, tickMsP95: b.tickMsP95, tickMsMax: b.tickMsMax, rssMB: b.rssMB, outKBps: Math.round((b.bytesOut - a.bytesOut) / wall / 1024), inKBps: Math.round((b.bytesIn - a.bytesIn) / wall / 1024), msgsOutPerSec: Math.round((b.msgsOut - a.msgsOut) / wall), drops: b.drops - a.drops, backpressureSkips: b.backpressureSkips - a.backpressureSkips, closedFlood: b.closedFlood - a.closedFlood };
+        return { instance: b.instance, cpuPctOfOneCore: Math.round((cpuUs / 1e6 / wall) * 1000) / 10, tickMsP50: b.tickMsP50, tickMsP95: b.tickMsP95, tickMsMax: b.tickMsMax, publishMsP95: b.publishMsP95, timerLagMsP95: b.timerLagMsP95, rssMB: b.rssMB, outKBps: Math.round((b.bytesOut - a.bytesOut) / wall / 1024), inKBps: Math.round((b.bytesIn - a.bytesIn) / wall / 1024), msgsOutPerSec: Math.round((b.msgsOut - a.msgsOut) / wall), drops: b.drops - a.drops, backpressureSkips: b.backpressureSkips - a.backpressureSkips, closedFlood: b.closedFlood - a.closedFlood };
       })
     : null;
   const abuser = ABUSER ? clients[n - 1] : null;

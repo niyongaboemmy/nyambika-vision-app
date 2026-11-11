@@ -9,6 +9,11 @@ import { publicMember, PresenceRoom, type MemberRecord } from "./presence-room";
 
 export const PRESENCE_FLAG = "vr.multiuser_spike";
 
+const ring = (arr: number[], v: number) => {
+  arr.push(v);
+  if (arr.length > 600) arr.shift();
+};
+
 /** Minimal socket surface (ws.WebSocket in production, fakes in tests and the load test). */
 export interface PresenceSocket {
   send(data: string): void;
@@ -62,7 +67,11 @@ export class PresenceService implements OnModuleInit, OnModuleDestroy {
   private reportSeen = new Map<string, number>();
   // metrics (GET /vr/presence/stats; the load test samples these)
   stats = { msgsIn: 0, msgsOut: 0, bytesIn: 0, bytesOut: 0, drops: 0, closedFlood: 0, backpressureSkips: 0, ticks: 0 };
+  /** CPU time of the synchronous part of each tick, Redis publish round trips, and timer lag (ms). */
   private tickMs: number[] = [];
+  private publishMs: number[] = [];
+  private lagMs: number[] = [];
+  private lastTick = 0;
 
   constructor(
     private prisma: PrismaService,
@@ -340,6 +349,8 @@ export class PresenceService implements OnModuleInit, OnModuleDestroy {
   /** One 10 Hz tick: publish local poses, then send every local participant its due snapshot. */
   async tick(now = Date.now()) {
     const t0 = performance.now();
+    if (this.lastTick) ring(this.lagMs, Math.max(0, t0 - this.lastTick - 1000 / PRESENCE.hz));
+    this.lastTick = t0;
     this.stats.ticks++;
     if (this.stats.ticks % 100 === 0 && this.conns.size && !(await this.enabled())) {
       for (const c of [...this.conns.values()]) {
@@ -363,9 +374,12 @@ export class PresenceService implements OnModuleInit, OnModuleDestroy {
       const f = room.frameFor(c.sid, now);
       if (f) this.send(c.sid, { t: "s", ts: now, p: f.p, n: f.n });
     }
-    await Promise.all(pubs);
-    this.tickMs.push(performance.now() - t0);
-    if (this.tickMs.length > 600) this.tickMs.shift();
+    const t1 = performance.now();
+    ring(this.tickMs, t1 - t0);
+    if (pubs.length) {
+      await Promise.all(pubs);
+      ring(this.publishMs, performance.now() - t1);
+    }
   }
 
   async counts(room: string) {
@@ -375,8 +389,10 @@ export class PresenceService implements OnModuleInit, OnModuleDestroy {
   }
 
   metrics() {
-    const s = [...this.tickMs].sort((a, b) => a - b);
-    const q = (p: number) => (s.length ? Math.round(s[Math.min(s.length - 1, Math.floor(p * s.length))] * 100) / 100 : 0);
-    return { instance: this.instance, connections: this.conns.size, rooms: this.rooms.size, ...this.stats, tickMsP50: q(0.5), tickMsP95: q(0.95), tickMsMax: q(1), cpu: process.cpuUsage(), rssMB: Math.round(process.memoryUsage().rss / 1048576) };
+    const q = (arr: number[], p: number) => {
+      const s = [...arr].sort((a, b) => a - b);
+      return s.length ? Math.round(s[Math.min(s.length - 1, Math.floor(p * s.length))] * 100) / 100 : 0;
+    };
+    return { instance: this.instance, connections: this.conns.size, rooms: this.rooms.size, ...this.stats, tickMsP50: q(this.tickMs, 0.5), tickMsP95: q(this.tickMs, 0.95), tickMsMax: q(this.tickMs, 1), publishMsP95: q(this.publishMs, 0.95), timerLagMsP95: q(this.lagMs, 0.95), cpu: process.cpuUsage(), rssMB: Math.round(process.memoryUsage().rss / 1048576) };
   }
 }
