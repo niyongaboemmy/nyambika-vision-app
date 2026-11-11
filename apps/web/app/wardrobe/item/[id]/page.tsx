@@ -58,7 +58,7 @@ export default function WardrobeItem() {
               <p className="mt-1 text-sm text-mut">No outfits with this piece yet. Restyle it for your next event.</p>
             )}
           </section>
-          <div className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-[480px] px-5 pb-[max(env(safe-area-inset-bottom),16px)] pt-6 [background:linear-gradient(transparent,rgba(11,10,15,.9)_45%)]">
+          <div className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-[480px] px-5 pb-[max(env(safe-area-inset-bottom),16px)] pt-6 fade-bottom">
             <button onClick={() => setRestyle(true)} className="grad-cta min-h-14 w-full rounded-2xl font-display text-lg font-black">✨ Restyle for an event</button>
           </div>
           <RestyleSheet open={restyle} onClose={() => setRestyle(false)} />

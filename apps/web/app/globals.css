@@ -140,7 +140,11 @@
 [data-theme="light"] :is(.text-emerald-200, .text-emerald-300, .text-teal-100):not(.theme-media *) { color: #065f46; }
 [data-theme="light"] :is(.text-sky-200, .text-sky-300, .text-violet-100, .text-violet-200, .text-violet-300):not(.theme-media *) { color: #4c1d95; }
 /* Solid colour fills, photo scrims and media keep white type in the light theme. */
-[data-theme="light"] :is(.grad-cta, .orb, [class~="bg-terra"], [class~="bg-terra/70"], [class~="bg-violet"], [class~="bg-violet/70"], [class*="bg-red-5"], [class~="bg-red-600"], [class~="bg-emerald-600"], [class*="bg-black/"], [class*="from-black"]) {
+/* Low-opacity black "wells" (inset panels on the dark aurora) become soft ink tints on cream. */
+[data-theme="light"] :is([class~="bg-black/10"], [class~="bg-black/20"], [class~="bg-black/25"], [class~="bg-black/30"], [class~="bg-black/35"]):not(.theme-media *) {
+  background-color: rgb(28 23 20 / 0.06);
+}
+[data-theme="light"] :is(.grad-cta, .orb, [class~="bg-terra"], [class~="bg-terra/70"], [class~="bg-violet"], [class~="bg-violet/70"], [class*="bg-red-5"], [class~="bg-red-600"], [class~="bg-emerald-600"], [class~="bg-black/40"], [class~="bg-black/45"], [class~="bg-black/50"], [class~="bg-black/55"], [class~="bg-black/60"], [class~="bg-black/65"], [class~="bg-black/70"], [class~="bg-black/75"], [class~="bg-black/80"], [class~="bg-black/85"], [class~="bg-black/90"], [class*="from-black"]) {
   --color-white: #fff;
   --color-txt: #f5efe8;
   --color-mut: #d9d0c7;
@@ -307,9 +311,15 @@
   --color-orange-200: #5a3414;
 }
 /* Gradient fills and destructive buttons keep white type at night. */
-[data-theme="dark"] .theme-light :is(.st-cta, .grad-cta, [class~="bg-red-700"], [class~="bg-red-600"], [class~="bg-red-800"], [class*="bg-gradient-to-"], [class*="bg-black/"], [class*="from-black"]) {
+[data-theme="dark"] .theme-light :is(.st-cta, .grad-cta, [class~="bg-red-700"], [class~="bg-red-600"], [class~="bg-red-800"], [class*="bg-black/"], [class*="from-black"]),
+[data-theme="dark"] .theme-light [class*="bg-gradient-to-"][class~="text-white"] {
   --color-white: #fff;
 }
+/* Inverted pills (light fill at night) always carry dark type, even inside a white-restoring scope. */
+[data-theme="dark"] .theme-light :is([class~="bg-cocoa"], [class~="bg-violet-ink"], [class~="bg-terra-ink"], [class~="bg-mint-ink"], [class~="bg-stone-900"]) {
+  --color-white: #1c1815;
+}
+[data-theme="dark"] .theme-light .text-red-700 { color: #fca5a5; }
 /* Studio's fixed-white photo frames (cutouts, QR) stay white so garments and codes read true. */
 [data-theme="dark"] .theme-light .keep-white { background-color: #fff; color: #1d1814; }
 
@@ -564,6 +574,9 @@ body {
   ::view-transition-old(*),
   ::view-transition-new(*) { animation: none !important; }
 }
+
+/* Bottom action bars fade the page out behind them (theme-aware). */
+.fade-bottom { background: linear-gradient(transparent, color-mix(in oklab, var(--surface) 92%, transparent) 45%); }
 
 /* Tabular figures for prices and counters. */
 .tabular { font-variant-numeric: tabular-nums; }

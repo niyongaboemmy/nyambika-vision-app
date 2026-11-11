@@ -157,7 +157,8 @@ for (const theme of THEMES) {
       const page = await ctx.newPage();
       const tag = `[${theme} ${vp}] ${name}`;
       page.on("console", (m) => m.type() === "error" && !/WebGL|GPU stall|camera|NotAllowedError|NotFoundError|getUserMedia|Requested device not found/i.test(m.text()) && issues.push(`${tag} console: ${m.text().slice(0, 200)}`));
-      page.on("pageerror", (e) => issues.push(`${tag} pageerror: ${e.message}`));
+      // React dev-only profiling bug on server pages ("cannot have a negative time stamp"); not an app error.
+      page.on("pageerror", (e) => !/negative time stamp/.test(e.message) && issues.push(`${tag} pageerror: ${e.message}`));
       page.on("response", (r) => r.status() >= 500 && issues.push(`${tag} HTTP ${r.status()} ${r.url()}`));
       try {
         await page.goto(`${BASE}${path}`, { waitUntil: "domcontentloaded" });

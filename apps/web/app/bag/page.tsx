@@ -49,7 +49,7 @@ export default function BagPage() {
 
   return (
     <Screen>
-      <TopBar back="/" title={<span className="font-display text-xl font-black">🛍️ {t("bag.title")}</span>} />
+      <TopBar back="/" title={t("bag.title")} />
       <main className="space-y-4 px-4 pb-40">
         <ErrorNote error={error} />
         {bag === null ? (

@@ -104,7 +104,8 @@ export function GarmentViewer({ assets, title, initialVariantId, variantId, clas
     <div className={className}>
       <div
         className={`xr-stage relative isolate overflow-hidden rounded-[28px] border border-white/10 ${tall ? "h-[min(62dvh,560px)]" : "h-[340px]"}`}
-        style={{ background: "radial-gradient(70% 55% at 50% 38%, rgba(139,92,246,.30), transparent 70%), radial-gradient(60% 45% at 50% 100%, rgba(224,112,63,.28), transparent 72%), linear-gradient(180deg,#141120,#0b0a0f)" }}
+        // Backdrop follows the theme (lit studio by day, night stage in dark mode); --backdrop-3d is a token.
+        style={{ background: "radial-gradient(70% 55% at 50% 38%, rgba(139,92,246,.22), transparent 70%), radial-gradient(60% 45% at 50% 100%, rgba(224,112,63,.2), transparent 72%), var(--backdrop-3d)" }}
       >
         {/* Floor: soft spotlight disc under the garment for depth */}
         <div aria-hidden className="pointer-events-none absolute inset-x-[12%] bottom-[7%] h-[16%] rounded-[50%] bg-[radial-gradient(closest-side,rgba(255,255,255,.14),transparent)]" />

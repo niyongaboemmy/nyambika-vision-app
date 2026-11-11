@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Screen, TopBar } from "@/components/ui";
+import { EmptyState, Screen, TopBar } from "@/components/ui";
 import { rwf } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { useApi } from "@/lib/use-api";
@@ -17,12 +17,9 @@ export default function CustomOrders() {
       <main className="space-y-3 px-4 pb-10">
         {!data && [0, 1].map((i) => <div key={i} className="h-28 rounded-3xl skeleton" />)}
         {data?.length === 0 && (
-          <div className="glass rounded-3xl p-6 text-center">
-            <p className="text-4xl">🪡</p>
-            <p className="mt-2 font-display text-lg font-black">Nothing tailor-made yet</p>
-            <p className="mt-1 text-sm text-mut">Open a look from a tailor and tap Morph or Sew to ask for your own version.</p>
-            <Link href="/makers" className="mt-3 inline-block text-sm font-semibold text-gold">Browse tailors →</Link>
-          </div>
+          <EmptyState icon="scissors" title="Nothing tailor-made yet" action={<Link href="/makers" className="glass press inline-flex min-h-11 items-center rounded-2xl px-4 text-sm font-semibold">Browse tailors →</Link>}>
+            On a tailor&apos;s look, tap <b>Morph</b> or <b>Sew</b>
+          </EmptyState>
         )}
         {data?.map((o) => {
           const step = journeyIndex(o.status);

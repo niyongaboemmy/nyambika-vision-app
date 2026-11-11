@@ -104,7 +104,7 @@ export default function WardrobePage() {
       )}
       {data && tiles.length > 0 && shown.length === 0 && <p className="px-5 pt-4 text-center text-sm text-mut">Nothing matches those filters.</p>}
 
-      <div className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-[480px] px-5 pb-[max(env(safe-area-inset-bottom),16px)] pt-6 [background:linear-gradient(transparent,rgba(11,10,15,.9)_45%)]">
+      <div className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-[480px] px-5 pb-[max(env(safe-area-inset-bottom),16px)] pt-6 fade-bottom">
         <button onClick={() => setRestyle(true)} className="grad-cta flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl font-display text-lg font-black shadow-[0_10px_30px_rgba(139,92,246,.35)] transition active:scale-[.98]">✨ {t("wardrobe.restyle")}</button>
       </div>
 
