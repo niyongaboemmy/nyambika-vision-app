@@ -1,8 +1,8 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { HoldToBuy } from "@/components/hold-to-buy";
 import { Chip, ErrorNote, Screen, Sheet, TopBar } from "@/components/ui";
 import { RestyleSheet } from "@/components/wardrobe-restyle";
 import { rwf } from "@/lib/api";
@@ -10,6 +10,9 @@ import type { Look } from "@/lib/looks";
 import { COLOUR_SWATCH, nice, OCCASIONS, whenLabel, type Wardrobe } from "@/lib/social";
 import { useApi } from "@/lib/use-api";
 import { useSession } from "@/lib/session";
+
+// Opened from a saved look's sheet only: keep checkout (and its zod-backed money helpers) out of the first load.
+const HoldToBuy = dynamic(() => import("@/components/hold-to-buy").then((m) => m.HoldToBuy), { ssr: false });
 
 type Tile =
   | { kind: "owned"; id: string; title: string; sub: string; image: string | null; colours: string[]; occasions: string[]; href: string }

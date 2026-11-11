@@ -2,7 +2,8 @@
 // Run against a production build:  NEXT_DIST_DIR=.next-build next build && next start --port 3114
 // Usage: BASE_URL=http://localhost:3114 node scripts/perf-uiux.mjs [label]
 // Per route, in a cold browser context on a Pixel 7 profile with 4x CPU slowdown and "slow 4G"
-// (150 ms RTT, 1.6 Mbps): first-load JS (gzip bytes over the wire), LCP, CLS, and an INP proxy
+// (150 ms RTT, 1.6 Mbps): JS at the load event and JS until network idle (incl. deferred chunks and Next's
+// route prefetches), gzip bytes over the wire, LCP, CLS, and an INP proxy
 // (the slowest event-timing entry after tapping the page's first button-free area and first chip/button that
 // does not navigate). Writes JSON to scripts/crawl-output/perf-<label>.json and prints a markdown table.
 import { mkdirSync, writeFileSync } from "node:fs";
@@ -79,6 +80,7 @@ for (const [path, name] of ROUTES) {
     if (reqType.get(e.requestId) === "Script") js += e.encodedDataLength;
   });
   await page.goto(`${BASE}${path}`, { waitUntil: "load" });
+  const jsAtLoad = js; // critical JS: everything fetched before the load event
   await page.waitForLoadState("networkidle").catch(() => {});
   await page.waitForTimeout(1200);
   // INP proxy: tap a neutral spot, then the first in-page toggle-like control that does not navigate.
@@ -87,7 +89,7 @@ for (const [path, name] of ROUTES) {
   if (await ctl.count()) await ctl.click({ timeout: 2000, noWaitAfter: true }).catch(() => {});
   await page.waitForTimeout(800);
   const v = await page.evaluate(() => window.__v);
-  rows.push({ path: path.replace(/looks\/[a-z0-9]{20,}/, "looks/:id").replace(/variant=.*/, "variant=:id"), name, jsKB: +(js / 1024).toFixed(1), lcp: Math.round(v.lcp), cls: +v.cls.toFixed(3), inp: Math.round(v.inp) });
+  rows.push({ path: path.replace(/looks\/[a-z0-9]{20,}/, "looks/:id").replace(/variant=.*/, "variant=:id"), name, jsLoadKB: +(jsAtLoad / 1024).toFixed(1), jsKB: +(js / 1024).toFixed(1), lcp: Math.round(v.lcp), cls: +v.cls.toFixed(3), inp: Math.round(v.inp) });
   console.log(`${name}: ${(js / 1024).toFixed(1)} KB js · LCP ${Math.round(v.lcp)} ms · CLS ${v.cls.toFixed(3)} · INP~ ${Math.round(v.inp)} ms`);
   await context.close();
 }
@@ -95,5 +97,5 @@ await browser.close();
 
 mkdirSync(new URL("./crawl-output/", import.meta.url), { recursive: true });
 writeFileSync(new URL(`./crawl-output/perf-${label}.json`, import.meta.url), JSON.stringify(rows, null, 2));
-console.log(`\n| Route | First-load JS (KB gz) | LCP (ms) | CLS | INP proxy (ms) |\n|---|---:|---:|---:|---:|`);
-for (const r of rows) console.log(`| ${r.name} \`${r.path}\` | ${r.jsKB} | ${r.lcp} | ${r.cls} | ${r.inp} |`);
+console.log(`\n| Route | JS at load (KB gz) | JS until idle incl. deferred + prefetch (KB gz) | LCP (ms) | CLS | INP proxy (ms) |\n|---|---:|---:|---:|---:|---:|`);
+for (const r of rows) console.log(`| ${r.name} \`${r.path}\` | ${r.jsLoadKB} | ${r.jsKB} | ${r.lcp} | ${r.cls} | ${r.inp} |`);
