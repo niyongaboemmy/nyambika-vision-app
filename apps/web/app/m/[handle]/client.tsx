@@ -1,6 +1,6 @@
 "use client";
 
-import { useDrag } from "@use-gesture/react";
+import { useDrag } from "@/lib/drag";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";

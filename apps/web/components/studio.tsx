@@ -238,33 +238,9 @@ export function Note({ error, ok, onRetry }: { error?: unknown; ok?: string | nu
 
 /* ───────────────────────── new building blocks ───────────────────────── */
 
-export function Skeleton({ className = "" }: { className?: string }) {
-  return <div data-skeleton aria-hidden className={`st-skel rounded-2xl ${className}`} />;
-}
-
-/** Content-shaped loading state for a whole studio screen. */
-export function ScreenSkeleton({ variant = "bento" }: { variant?: "bento" | "grid" | "list" }) {
-  return (
-    <div role="status" aria-label="Loading" className="space-y-4">
-      <Skeleton className="h-8 w-48" />
-      {variant === "grid" ? (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-4">
-          {Array.from({ length: 6 }, (_, i) => <Skeleton key={i} className="aspect-[4/5]" />)}
-        </div>
-      ) : variant === "list" ? (
-        Array.from({ length: 4 }, (_, i) => <Skeleton key={i} className="h-24" />)
-      ) : (
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <Skeleton className="col-span-2 h-40" />
-          <Skeleton className="h-28" />
-          <Skeleton className="h-28" />
-          <Skeleton className="h-28" />
-          <Skeleton className="h-28" />
-        </div>
-      )}
-    </div>
-  );
-}
+// Skeletons live in skeletons.tsx (no "use client": route loading.tsx files render them on the server with no
+// client JS, JS budget pass); re-exported here so existing imports keep working.
+export { Skeleton, ScreenSkeleton } from "./skeletons";
 
 export function SectionTitle({ title, eyebrow, action, as: H = "h2", id }: { title: ReactNode; eyebrow?: string; action?: ReactNode; as?: "h1" | "h2" | "h3"; id?: string }) {
   return (

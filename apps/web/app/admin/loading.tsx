@@ -1,4 +1,4 @@
-import { ScreenSkeleton } from "@/components/studio";
+import { ScreenSkeleton } from "@/components/skeletons";
 
 /** Host admin skeleton in the studio theme (the admin shell mounts with the page). */
 export default function Loading() {
