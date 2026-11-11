@@ -93,18 +93,22 @@ export function InferencePanel() {
     return () => clearInterval(t);
   }, [load]);
 
-  async function run(key: string, fn: () => Promise<string | void>) {
+  /** Runs an action; the outcome goes to the panel note, or back to the caller when `local` (shown on the card). */
+  async function run(key: string, fn: () => Promise<string | void>, local = false): Promise<{ ok?: string; error?: string }> {
     setBusy(key);
-    setNote(null);
+    if (!local) setNote(null);
+    let out: { ok?: string; error?: string } = {};
     try {
       const ok = await fn();
-      if (ok) setNote({ ok });
+      if (ok) out = { ok };
       await load();
     } catch (e) {
-      setNote({ error: e instanceof ApiError ? e.message : (e as Error).message });
+      out = { error: e instanceof ApiError ? e.message : (e as Error).message };
     } finally {
       setBusy(null);
     }
+    if (!local && (out.ok || out.error)) setNote(out);
+    return out;
   }
 
   if (!data) return <ScreenSkeleton variant="list" />;
@@ -214,7 +218,7 @@ export function InferencePanel() {
                     )}
                   </div>
                   {s.configured && (
-                    <dl className="mt-2 grid grid-cols-4 gap-1.5 text-[11px]">
+                    <dl className="mt-2 grid grid-cols-2 gap-1.5 text-[11px] sm:grid-cols-4">
                       {[
                         ["Calls", `${s.ok}/${s.calls}`],
                         ["p50 · p95", `${ms(s.p50_ms)} · ${ms(s.p95_ms)}`],
@@ -242,7 +246,13 @@ export function InferencePanel() {
   );
 }
 
-function VideoModels({ models, busy, run }: { models: VideoModel[]; busy: string | null; run: (key: string, fn: () => Promise<string | void>) => Promise<void> }) {
+function VideoModels({ models, busy, run }: { models: VideoModel[]; busy: string | null; run: (key: string, fn: () => Promise<string | void>, local?: boolean) => Promise<{ ok?: string; error?: string }> }) {
+  const [msg, setMsg] = useState<Record<string, { ok?: string; error?: string }>>({});
+  const act = async (id: string, key: string, fn: () => Promise<string | void>) => {
+    setMsg((m) => ({ ...m, [id]: {} }));
+    const out = await run(key, fn, true);
+    setMsg((m) => ({ ...m, [id]: out }));
+  };
   return (
     <div className="space-y-2" aria-labelledby="video-models-t">
       <h3 id="video-models-t" className="font-display text-lg font-black tracking-tight text-cocoa">Video try-on providers · NLB gate</h3>
@@ -280,13 +290,13 @@ function VideoModels({ models, busy, run }: { models: VideoModel[]; busy: string
                 )}
               </div>
               <div className="flex flex-wrap gap-2">
-                <SButton variant="soft" className="min-h-10" disabled={busy !== null} onClick={() => run(`eval-${m.id}`, async () => {
+                <SButton variant="soft" className="min-h-10" disabled={busy !== null} onClick={() => act(m.id, `eval-${m.id}`, async () => {
                   const r = await api<{ passed: boolean }>(`/admin/video/models/${encodeURIComponent(m.id)}/eval`, { method: "POST" });
                   return r.passed ? `NLB video eval passed for ${m.id}` : `NLB video eval did not pass for ${m.id}`;
                 })}>
                   <Icon name="shield" className="size-4" /> {busy === `eval-${m.id}` ? "Evaluating 15 subgroups…" : "Run NLB eval"}
                 </SButton>
-                <SButton variant={m.status === "ACTIVE" ? "outline" : "primary"} className="min-h-10" disabled={busy !== null} onClick={() => run(`status-${m.id}`, async () => {
+                <SButton variant={m.status === "ACTIVE" ? "outline" : "primary"} className="min-h-10" disabled={busy !== null} onClick={() => act(m.id, `status-${m.id}`, async () => {
                   const next = m.status === "ACTIVE" ? "RETIRED" : "ACTIVE";
                   await api(`/admin/models/${encodeURIComponent(m.id)}`, { method: "PATCH", json: { status: next } });
                   return next === "ACTIVE" ? `${m.id} activated for shoppers` : `${m.id} retired`;
@@ -294,6 +304,8 @@ function VideoModels({ models, busy, run }: { models: VideoModel[]; busy: string
                   {m.status === "ACTIVE" ? "Retire" : "Activate"}
                 </SButton>
               </div>
+              {(msg[m.id]?.ok || msg[m.id]?.error) && <Note ok={msg[m.id]?.ok ?? null} error={msg[m.id]?.error ? `Activation refused: ${msg[m.id]?.error}` : null} />}
+              {!msg[m.id]?.error && m.status !== "ACTIVE" && !m.canActivate && m.gateReason && m.lastEval && <p className="text-xs text-cocoa-2">Gate: {m.gateReason}</p>}
             </li>
           );
         })}

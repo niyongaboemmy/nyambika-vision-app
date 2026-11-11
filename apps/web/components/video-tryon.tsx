@@ -322,7 +322,7 @@ function VideoLayer({ job, anchor, alt, label, onClose }: { job: VideoJob; ancho
           <CtlButton label="Close video" onClick={onClose}>✕</CtlButton>
         </div>
         {info && (
-          <div className="glass absolute inset-x-2 bottom-2 rounded-2xl p-3 text-xs leading-relaxed">
+          <div className="glass absolute inset-x-2 top-14 rounded-2xl p-3 text-xs leading-relaxed">
             <p>✨ AI-generated video try-on. Real fit and drape can differ.</p>
             {job.guard && <p>🛡️ {job.guard.sampledFrames} frames checked · identity steady {Math.round((job.guard.identityStability ?? 0) * 100)}%</p>}
             {job.c2pa && <p>🔏 Content Credentials (C2PA) · {job.c2pa.model} · #{job.c2pa.sha256}</p>}
