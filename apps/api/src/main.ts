@@ -11,6 +11,8 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bodyParser: false });
   // Migration bundles may embed product photos (base64); everything else stays small.
   app.use("/admin/migration", json({ limit: "40mb" }));
+  // Partner try-on (E37) sends one garment image as base64 (≤ 10 MB decoded).
+  app.use("/v1/partner", json({ limit: "15mb" }));
   app.use(json({ limit: "2mb" }));
   app.use(cookieParser());
   app.use((req: Request, res: Response, next: NextFunction) => {

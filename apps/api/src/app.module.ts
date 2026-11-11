@@ -32,6 +32,7 @@ import { XrModule } from "./modules/xr/xr.module";
 import { VoiceModule } from "./modules/voice/voice.module";
 import { PasskeysModule } from "./modules/passkeys/passkeys.module";
 import { CheckoutModule } from "./modules/checkout/checkout.module";
+import { AgentsModule } from "./modules/agents/agents.module";
 
 @Controller()
 class HealthController {
@@ -77,6 +78,7 @@ class HealthController {
     VoiceModule,
     PasskeysModule,
     CheckoutModule,
+    AgentsModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: AuthGuard }],

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { AiWrite } from "@/components/ai-write";
+import { AgentChannels } from "@/components/agent-channels";
 import { Card, Field, Icon, Input, Monogram, Note, SButton, SectionTitle, Switch, Textarea } from "@/components/studio";
 import { api, rwf } from "@/lib/api";
 import { THEMES } from "@/lib/maker";
@@ -202,6 +203,8 @@ export default function Settings() {
           {page.status !== "PUBLISHED" && <SButton onClick={() => run(() => api(`/pages/${page.id}/status`, { method: "POST", json: { status: "PUBLISHED" } }), "Page is live.")}>Publish page</SButton>}
         </div>
       </Card>
+
+      <AgentChannels pageId={page.id} />
 
       <Card className="space-y-3">
         <h2 id="staff" className="scroll-mt-28 font-display text-lg font-black tracking-tight text-cocoa">Staff</h2>
