@@ -185,7 +185,7 @@ function QuoteComposer({ order, busy, onSend, onDecline }: { order: CustomOrderV
         <button type="button" onClick={() => setPrice(String(Math.round(order.estimateRwf / 500) * 500))} className="st-press min-h-11 flex-1 rounded-2xl bg-amber-50 px-3 text-left text-sm ring-1 ring-amber-200">
           ✨ Use suggested <b>{rwf(Math.round(order.estimateRwf / 500) * 500)}</b>
         </button>
-        <InfoTip label="About the suggested price">Your base price plus the morph options you set.</InfoTip>
+        <InfoTip label="How this price is worked out">Your base price plus the morph options you set.</InfoTip>
       </div>
       <Field label="Price (RWF)">
         <Input inputMode="numeric" value={price} onChange={(e) => setPrice(e.target.value.replace(/\D/g, ""))} className="text-2xl font-black" />

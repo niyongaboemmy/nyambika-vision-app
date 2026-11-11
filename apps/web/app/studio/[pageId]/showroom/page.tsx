@@ -1,7 +1,7 @@
 "use client";
 
 import { RUNWAY_SKINS, SHOW, SHOWROOM_BUDGET } from "@nyambika/contracts";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Fact, InfoTip } from "@/components/kit";
 import { Badge, Card, Chip, Empty, Field, Icon, Input, Kpi, Meter, Note, ScreenSkeleton, SButton, SectionTitle, SLink, StudioSheet, Switch, Textarea } from "@/components/studio";
 import { api, rwf } from "@/lib/api";
@@ -105,10 +105,11 @@ function BoothCard({ data, onSaved }: { data: VrStudio; onSaved: () => void }) {
         <Kpi label="Pieces in the room" value={data.showroom.pieces} hint={`${Math.min(data.showroom.pieces, SHOWROOM_BUDGET.mannequins)} on mannequins`} />
         <div className="st-card flex min-w-0 flex-col gap-1.5 rounded-[22px] p-4">
           <p className="text-xs font-bold text-cocoa-2">Room size</p>
-          <p className="font-display text-[clamp(1.25rem,5.5vw,1.5rem)] font-black leading-tight tracking-tight text-cocoa tabular-nums">
-            {fmtMB(data.showroom.bytes)} <span className="text-xs font-bold text-cocoa-2">/ {fmtMB(data.showroom.limitBytes)}</span>
-          </p>
-          <div className="mt-auto"><Meter value={data.showroom.bytes} max={data.showroom.limitBytes} label={`Room size ${fmtMB(data.showroom.bytes)} of ${fmtMB(data.showroom.limitBytes)}`} /></div>
+          <p className="whitespace-nowrap font-display text-[clamp(1.25rem,5.5vw,1.5rem)] font-black leading-tight tracking-tight text-cocoa tabular-nums">{fmtMB(data.showroom.bytes)}</p>
+          <div className="mt-auto space-y-1">
+            <Meter value={data.showroom.bytes} max={data.showroom.limitBytes} label={`Room size ${fmtMB(data.showroom.bytes)} of ${fmtMB(data.showroom.limitBytes)}`} />
+            <p className="text-xs text-cocoa-2">of {fmtMB(data.showroom.limitBytes)}</p>
+          </div>
         </div>
       </div>
       {with3d.length === 0 ? (
@@ -121,13 +122,13 @@ function BoothCard({ data, onSaved }: { data: VrStudio; onSaved: () => void }) {
           <Field label="Welcome line" hint={`${banner.length}/80 · on the banner`}>
             <Input value={banner} maxLength={80} onChange={(e) => setBanner(e.target.value)} placeholder="Murakaza neza · Welcome to my atelier" />
           </Field>
-          <Field label={`On the mannequins (${featured.length}/${SHOWROOM_BUDGET.mannequins})`} hint="Others hang on the rails. None picked = your page order." group>
-            <div className="no-scrollbar -mx-4 flex gap-2.5 overflow-x-auto px-4 pb-1">
+          <RailField label={`On the mannequins (${featured.length}/${SHOWROOM_BUDGET.mannequins})`} hint="Others hang on the rails. None picked = your page order.">
+            <div className="no-scrollbar -mx-4 flex gap-2.5 overflow-x-auto px-4 pb-1 sm:-mx-5 sm:px-5">
               {with3d.map((c) => (
                 <Tile key={c.productId} c={c} on={featured.includes(c.productId)} order={featured.indexOf(c.productId) + 1} onClick={() => toggle(c.productId)} />
               ))}
             </div>
-          </Field>
+          </RailField>
           <div className="flex flex-wrap gap-2">
             <SButton onClick={() => void save()} disabled={busy}>{busy ? "Saving…" : "Save showroom"}</SButton>
             <SLink href={`/m/${data.page.handle}/showroom`} variant="outline" target="_blank" rel="noreferrer"><Icon name="eye" className="size-4" /> Open showroom</SLink>
@@ -136,6 +137,19 @@ function BoothCard({ data, onSaved }: { data: VrStudio; onSaved: () => void }) {
         </>
       )}
     </Card>
+  );
+}
+
+/** A group with a horizontal piece rail: `min-w-0` stops the fieldset growing to the rail's full width. */
+function RailField({ label, hint, children }: { label: string; hint: string; children: ReactNode }) {
+  return (
+    <fieldset className="min-w-0 space-y-2">
+      <legend className="mb-2 flex items-center gap-1 text-[13px] font-bold text-cocoa">
+        {label}
+        <InfoTip label={`About ${label.replace(/\s*\(.*\)$/, "")}`}>{hint}</InfoTip>
+      </legend>
+      {children}
+    </fieldset>
   );
 }
 
@@ -174,7 +188,7 @@ function ShowsCard({ data, onNew, onChanged }: { data: VrStudio; onNew: () => vo
         <p className="text-xs font-bold uppercase tracking-widest text-cocoa-2">Virtual fashion shows</p>
         <h2 className="font-display text-xl font-black text-cocoa">A runway for your collection</h2>
         <div className="mt-2 flex flex-wrap items-center gap-1.5">
-          <Fact icon="sparkle">AI model · never a shopper</Fact>
+          <Fact icon="sparkle">AI model</Fact>
           <Fact icon="mail">WhatsApp RSVP</Fact>
           <Fact icon="bag">Hold to buy</Fact>
           <InfoTip label="About fashion shows">Your pieces walk in 3D on an AI runway model (never a real shopper). Shoppers RSVP for a WhatsApp reminder, react live and buy with one hold.</InfoTip>
@@ -300,7 +314,7 @@ function ShowSheet({ open, onClose, data, onDone }: { open: boolean; onClose: ()
             ))}
           </div>
         </Field>
-        <Field label={`Looks on the runway (${items.length}/${SHOW.maxItems})`} hint="They walk in the order you tap them. Bags and shoes walk on a stand." group>
+        <RailField label={`Looks on the runway (${items.length}/${SHOW.maxItems})`} hint="They walk in the order you tap them. Bags and shoes walk on a stand.">
           {usable.length ? (
             <div className="no-scrollbar -mx-4 flex gap-2.5 overflow-x-auto px-4 pb-1">
               {usable.map((c) => (
@@ -308,9 +322,9 @@ function ShowSheet({ open, onClose, data, onDone }: { open: boolean; onClose: ()
               ))}
             </div>
           ) : (
-            <p className="text-sm text-cocoa-2">Add a photo with a clean cut-out to a product first.</p>
+            <p className="text-sm text-cocoa-2">Needs a product photo with a clean cut-out</p>
           )}
-        </Field>
+        </RailField>
         <Field label="Runway model skin tone" hint="A synthetic AI model, never a real person or a shopper's twin." group>
           <div className="flex gap-2" role="radiogroup" aria-label="Runway model skin tone">
             {RUNWAY_SKINS.map((s) => (
