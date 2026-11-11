@@ -124,7 +124,7 @@ const stt = sttCalls.at(-1);
 assert(stt?.status === 200 && stt.body?.duration_s > 1 && stt.body?.duration_s <= 30, `server STT answered (${stt?.body?.provider}, ${stt?.body?.duration_s}s, ${Math.round((stt?.body?.confidence ?? 0) * 100)}%)`);
 assert((await transcript.inputValue()).length > 5, `transcript shown for editing: “${await transcript.inputValue()}”`);
 await transcript.fill("I need a dress for a wedding on Saturday under 50,000");
-await page.getByRole("button", { name: /^✨ send$/i }).click();
+await page.getByRole("button", { name: /^send$/i }).click();
 await page.getByText(/got it: something for a wedding/i).waitFor({ timeout: 15000 });
 await page.waitForTimeout(300);
 await shot("muse-understood-reply");
@@ -198,7 +198,7 @@ const [wrap] = pick(imena, 1);
 async function addToBag(product, label) {
   const v = product.variants.find((x) => x.inStock);
   await page.goto(`${BASE}/looks/try?variant=${v.id}`);
-  const buy = page.getByRole("button", { name: /✋ buy/i });
+  const buy = page.getByRole("button", { name: /^buy$/i });
   await buy.waitFor({ timeout: 30000 });
   await buy.click();
   await page.getByRole("button", { name: /add to bag/i }).click();
