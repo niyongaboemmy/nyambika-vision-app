@@ -12,7 +12,7 @@ export function Twin3dCard() {
       <span aria-hidden className="relative grid size-14 shrink-0 place-items-center rounded-2xl bg-[radial-gradient(circle_at_30%_30%,rgba(242,184,75,.55),rgba(139,92,246,.45))] text-2xl shadow-[0_8px_24px_rgba(139,92,246,.35)]">🧊</span>
       <span className="relative min-w-0 flex-1">
         <span className="block font-display text-lg font-black">{t("twin3d.title")}</span>
-        <span className="block text-sm text-mut">Turn once, then spin, pose and dress your twin in 3D.</span>
+        <span className="block text-sm text-mut">Spin · pose · dress</span>
       </span>
       <span aria-hidden className="relative text-xl text-gold transition group-hover:translate-x-0.5">→</span>
     </Link>

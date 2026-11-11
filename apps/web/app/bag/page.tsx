@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { EmptyBag } from "@/components/bag";
-import { Button, Chip, ErrorNote, Screen, Sheet, TopBar } from "@/components/ui";
+import { Button, Chip, ErrorNote, Fact, InfoTip, Screen, Sheet, TopBar } from "@/components/ui";
 import { api, rwf } from "@/lib/api";
 import { BAG_DELIVERY_FEE, type Bag, type BagGroup, type CheckoutResult, type SavedAddress } from "@/lib/bag";
 import { useSession } from "@/lib/session";
@@ -65,7 +65,10 @@ export default function BagPage() {
                 <p className="font-display text-lg font-black">
                   {groups.length} {t("bag.makers")} · {groups.length} {t("bag.payments")}
                 </p>
-                <p className="mt-1 text-sm text-txt/90">{t("bag.splitNote")}</p>
+                <p className="mt-2 flex items-center gap-1">
+                  <Fact icon="wallet">Paid directly to each maker</Fact>
+                  <InfoTip label="About split payments">{t("bag.splitNote")}</InfoTip>
+                </p>
               </section>
             )}
             {groups.map((g) => (
@@ -87,11 +90,11 @@ export default function BagPage() {
                         <p className="text-sm">{rwf(l.unitPriceRwf)}</p>
                       </div>
                       <div className="flex shrink-0 items-center gap-1 rounded-2xl bg-white/10 p-1" role="group" aria-label={`Quantity of ${l.title}`}>
-                        <button className="grid size-9 place-items-center rounded-xl text-lg" aria-label={l.qty === 1 ? `${t("bag.remove")} ${l.title}` : `One fewer ${l.title}`} onClick={() => setQty(l.id, l.qty - 1)}>
+                        <button className="hit grid size-9 place-items-center rounded-xl text-lg" aria-label={l.qty === 1 ? `${t("bag.remove")} ${l.title}` : `One fewer ${l.title}`} onClick={() => setQty(l.id, l.qty - 1)}>
                           {l.qty === 1 ? "🗑" : "−"}
                         </button>
                         <span className="w-5 text-center font-semibold" aria-live="polite">{l.qty}</span>
-                        <button className="grid size-9 place-items-center rounded-xl text-lg disabled:opacity-40" aria-label={`One more ${l.title}`} disabled={l.qty >= 5 || (!l.madeToOrder && l.qty >= l.stock)} onClick={() => setQty(l.id, l.qty + 1)}>＋</button>
+                        <button className="hit grid size-9 place-items-center rounded-xl text-lg disabled:opacity-40" aria-label={`One more ${l.title}`} disabled={l.qty >= 5 || (!l.madeToOrder && l.qty >= l.stock)} onClick={() => setQty(l.id, l.qty + 1)}>＋</button>
                       </div>
                     </li>
                   ))}
@@ -213,7 +216,7 @@ function CheckoutSheet({ open, onClose, groups, delivery, total, onDone }: {
             {addressId === "new" && (
               <>
                 <input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="e.g. KG 7 Ave, Kacyiru" aria-label={t("bag.address")} className="glass h-12 w-full rounded-2xl px-4 outline-none placeholder:text-white/40" />
-                <label className="flex items-center gap-2 text-sm text-mut">
+                <label className="flex min-h-11 items-center gap-2 text-sm text-mut">
                   <input type="checkbox" checked={save} onChange={(e) => setSave(e.target.checked)} className="size-4 accent-[#f2b84b]" />
                   {t("bag.saveAddress")}
                 </label>
@@ -244,7 +247,12 @@ function CheckoutSheet({ open, onClose, groups, delivery, total, onDone }: {
               );
             })}
           </ol>
-          {groups.length > 1 && <p className="mt-2 text-xs text-gold">{t("bag.splitNote")}</p>}
+          {groups.length > 1 && (
+            <p className="mt-2 flex items-center gap-1 text-xs text-gold">
+              {groups.length} {t("bag.payments")}
+              <InfoTip label="About split payments">{t("bag.splitNote")}</InfoTip>
+            </p>
+          )}
         </section>
       </div>
       <ErrorNote error={error} />
@@ -252,7 +260,7 @@ function CheckoutSheet({ open, onClose, groups, delivery, total, onDone }: {
         {busy ? "…" : `${t("bag.pay")} ${rwf(total)}${groups.length > 1 ? ` · ${groups.length} ${t("bag.payments")}` : ""}`}
       </Button>
       {needsAddress && !ready && <p className="mt-2 text-center text-xs text-gold">Add a delivery address to continue</p>}
-      <p className="mt-2 text-center text-xs text-mut">You approve each request with your Mobile Money PIN. Nothing is taken before that.</p>
+      <p className="mt-2 text-center text-xs text-mut">🔐 Approve each with your PIN · nothing taken before</p>
     </Sheet>
   );
 }

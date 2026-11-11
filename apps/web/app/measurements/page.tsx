@@ -82,11 +82,24 @@ export default function MeasurementsPage() {
                 </label>
               ))}
             </div>
-            <button onClick={() => setMore(!more)} className="mt-3 text-sm font-semibold text-gold">{more ? "Fewer measurements" : "+ Inseam, shoulder, arm, neck"}</button>
-            <label className="mt-4 flex items-start gap-3 text-sm">
-              <input type="checkbox" checked={consent || Boolean(data.profile)} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5 size-5 accent-[#f2b84b]" />
-              <span>Store my measurements encrypted to recommend sizes. I can delete them any time.</span>
-            </label>
+            <button onClick={() => setMore(!more)} aria-expanded={more} className="mt-2 inline-flex min-h-11 items-center text-sm font-semibold text-gold">{more ? "Fewer measurements" : "+ Inseam, shoulder, arm, neck"}</button>
+            <div className="mt-2 flex items-center gap-1 rounded-2xl bg-black/25 py-1 pl-3 pr-1">
+              <label className="flex min-h-11 flex-1 cursor-pointer items-center gap-3 text-sm font-semibold">
+                <input
+                  type="checkbox"
+                  role="switch"
+                  checked={consent || Boolean(data.profile)}
+                  onChange={(e) => setConsent(e.target.checked)}
+                  aria-label="Store my measurements encrypted to recommend sizes"
+                  className="peer sr-only"
+                />
+                <span className="flex-1">Store encrypted · size advice</span>
+                <span aria-hidden className={`relative h-7 w-12 shrink-0 rounded-full transition peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-gold ${consent || data.profile ? "bg-mint" : "bg-white/20"}`}>
+                  <span className={`absolute top-0.5 size-6 rounded-full bg-white transition-all ${consent || data.profile ? "left-[22px]" : "left-0.5"}`} />
+                </span>
+              </label>
+              <InfoTip label="About storing measurements">Store my measurements encrypted to recommend sizes. I can delete them any time.</InfoTip>
+            </div>
             <ErrorNote error={err} />
             {ok && <p role="status" className="mt-2 text-sm text-mint">{ok}</p>}
             <Button className="mt-3 w-full" disabled={busy || (!consent && !data.profile)} onClick={save}>{busy ? "Saving…" : data.profile ? "Save changes" : "Save measurements"}</Button>
@@ -105,7 +118,7 @@ export default function MeasurementsPage() {
                     <p className="text-xs text-mut">{s.active ? `Until ${kigaliTime(s.expiresAt, { day: "numeric", month: "short" })}` : s.revokedAt ? "Ended" : "Expired"}</p>
                   </div>
                   {s.active && (
-                    <button className="rounded-xl border border-white/20 px-3 py-1.5 font-semibold" onClick={async () => { await api(`/measurements/shares/${s.id}/revoke`, { method: "POST" }); await reload(); }}>Stop</button>
+                    <button className="min-h-11 rounded-xl border border-white/20 px-4 font-semibold" onClick={async () => { await api(`/measurements/shares/${s.id}/revoke`, { method: "POST" }); await reload(); }}>Stop</button>
                   )}
                 </li>
               ))}
@@ -114,7 +127,7 @@ export default function MeasurementsPage() {
         )}
 
         {data?.profile && (
-          <button className="w-full text-center text-sm text-mut underline" onClick={async () => { if (confirm("Delete your measurements and end every share?")) { await api("/measurements", { method: "DELETE" }); await reload(); } }}>
+          <button className="min-h-11 w-full text-center text-sm text-mut underline" onClick={async () => { if (confirm("Delete your measurements and end every share?")) { await api("/measurements", { method: "DELETE" }); await reload(); } }}>
             Delete my measurements
           </button>
         )}

@@ -66,13 +66,13 @@ function MrPage() {
           <section className="glass mt-6 space-y-3 rounded-3xl p-5 text-center">
             <p className="text-4xl" aria-hidden>🥽</p>
             <p className="font-display text-xl font-black">Mixed-reality mirror is an experiment</p>
-            <p className="text-sm text-mut">A fitting mirror for your room, with a headset · not on for you yet.</p>
+            <p className="text-sm text-mut">Headset · not on for you yet</p>
             <Link href="/mirror/ar" className="grad-cta inline-flex min-h-12 items-center justify-center rounded-2xl px-5 font-semibold text-white">🪞 Open the AR mirror</Link>
           </section>
         ) : (
           <>
             {pieces.length === 0 && (
-              <p className="glass mb-4 rounded-2xl p-4 text-sm text-mut">None of your recent pieces have a 3D model yet. Open a maker&apos;s 3D showroom and choose &ldquo;Mixed-reality mirror&rdquo; on a piece.</p>
+              <p className="glass mb-4 rounded-2xl p-4 text-sm text-mut">No 3D pieces yet · pick one in a maker&apos;s 3D showroom</p>
             )}
             <MrMirror pieces={pieces} wardrobe={wardrobe} twin={twin} arPilot={Boolean(flags["ar.mirror_pilot"])} initial={initial} />
           </>

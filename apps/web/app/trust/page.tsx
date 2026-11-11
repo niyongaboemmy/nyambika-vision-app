@@ -30,11 +30,11 @@ const PURPOSE: Record<string, { title: string; body: string }> = {
 
 /** The five promises as scannable tiles; the full wording sits behind "Learn more". */
 const PROMISES: { icon: IconName; label: string }[] = [
-  { icon: "lock", label: "Twin encrypted, only you see it" },
-  { icon: "shield", label: "Makers never get your twin or looks" },
-  { icon: "sparkle", label: "AI looks labelled · C2PA" },
+  { icon: "lock", label: "Twin encrypted · only you" },
+  { icon: "shield", label: "Never shared with makers" },
+  { icon: "sparkle", label: "AI label · C2PA" },
   { icon: "wallet", label: "Paid directly to the maker" },
-  { icon: "mic", label: "Audio is never stored · voice becomes text" },
+  { icon: "mic", label: "Audio never stored" },
 ];
 
 /** Trust centre (prototype v2 structure · FR-PRV): consents, data, deletion. */
@@ -74,10 +74,10 @@ export default function Trust() {
         <ErrorNote error={error} />
         <section className="glass rounded-3xl p-4" aria-labelledby="promise">
           <h2 id="promise" className="font-display text-lg font-black">Your promise</h2>
-          <ul className="mt-3 grid grid-cols-2 gap-2">
-            {PROMISES.map((p, i) => (
-              <li key={p.label} className={`flex items-start gap-2 rounded-2xl bg-white/[.06] p-3 text-[13px] font-semibold leading-snug ${i === PROMISES.length - 1 ? "col-span-2" : ""}`}>
-                <Icon name={p.icon} className="mt-px size-4 shrink-0 text-gold" />
+          <ul className="mt-3 flex flex-wrap gap-2">
+            {PROMISES.map((p) => (
+              <li key={p.label} className="flex min-h-10 items-center gap-2 rounded-2xl bg-white/[.06] px-3 text-[13px] font-semibold">
+                <Icon name={p.icon} className="size-4 shrink-0 text-gold" />
                 {p.label}
               </li>
             ))}
@@ -98,10 +98,10 @@ export default function Trust() {
             <section className="glass rounded-3xl p-4">
               <div className="flex items-center justify-between">
                 <p className="flex items-center gap-2 font-semibold"><Icon name="mirror" className="size-4 text-gold" /> My twin</p>
-                <Link href="/mirror" className="text-sm text-gold">{data.twin ? "View / retake" : "Create"}</Link>
+                <Link href="/mirror" className="hit text-sm font-semibold text-gold">{data.twin ? "View / retake" : "Create"}</Link>
               </div>
               <p className="mt-1 text-sm text-mut">
-                {data.twin ? `Version ${data.twin.version} · size ${data.twin.size ?? "—"} · since ${new Date(data.twin.createdAt).toLocaleDateString()}` : "No twin. Looks show on an AI model."}
+                {data.twin ? `v${data.twin.version} · size ${data.twin.size ?? "—"} · ${new Date(data.twin.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}` : "No twin · looks use an AI model"}
               </p>
               <dl className="mt-3 grid grid-cols-3 gap-2 text-center">
                 {([["Looks", data.counts.looks], ["Saved", data.counts.saved], ["Orders", data.counts.orders]] as const).map(([k, v]) => (
@@ -154,8 +154,8 @@ export default function Trust() {
           {confirm === "TWIN" ? "Delete your twin?" : confirm === "LOOKS" ? "Delete all your looks?" : "Delete your account?"}
         </p>
         <p className="mt-2 text-sm text-mut">
-          {confirm === "TWIN" && "Your twin image and every look rendered from it are erased now. You can create a new twin later."}
-          {confirm === "LOOKS" && "All generated looks and Muse history are erased. Saved looks too."}
+          {confirm === "TWIN" && "Your twin and every look made from it are erased now."}
+          {confirm === "LOOKS" && "All looks, saved looks and Muse history are erased."}
           {confirm === "ACCOUNT" && "Twin, looks and history are erased and you are signed out. Order records stay for the legal period without your name or phone."}
         </p>
         <ErrorNote error={err} />

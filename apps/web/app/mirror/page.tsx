@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Twin3dCard } from "@/components/twin3d-card";
-import { Button, ErrorNote, Screen, Spinner, TopBar } from "@/components/ui";
+import { Button, ErrorNote, InfoTip, Screen, Spinner, TopBar } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { useSession } from "@/lib/session";
 
@@ -108,7 +108,7 @@ export default function Mirror() {
           <div className="pt-6 text-center">
             <Silhouette scanning />
             <h1 className="mt-4 font-display text-3xl font-black text-grad">{t("mirror.title")}</h1>
-            <p className="mt-2 text-mut">Create a private twin once, and every look appears on you.</p>
+            <p className="mt-2 text-mut">Once · then every look is on you</p>
           </div>
           <div className="space-y-3">
             <ConsentCard consent={consent} setConsent={setConsent} />
@@ -119,8 +119,8 @@ export default function Mirror() {
               <input type="file" accept="image/*" className="sr-only" disabled={!consent} onChange={(e) => e.target.files?.[0] && review(e.target.files[0])} />
             </label>
             <details className="text-center text-sm text-mut">
-              <summary className="cursor-pointer">{t("mirror.useDemo")}</summary>
-              <p className="mt-2 text-xs">Synthetic people for testing; no real person's image is used.</p>
+              <summary className="inline-flex min-h-11 cursor-pointer items-center">{t("mirror.useDemo")}</summary>
+              <p className="mt-1 text-xs">Synthetic · no real person</p>
               <div className="mt-2 flex justify-center gap-2">
                 {[1, 2, 3, 4, 5].map((n) => (
                   <button key={n} disabled={!consent} onClick={() => persona(n)} className="glass size-11 rounded-full font-semibold disabled:opacity-40" aria-label={`Persona ${n}`}>
@@ -129,7 +129,7 @@ export default function Mirror() {
                 ))}
               </div>
             </details>
-            <Link href="/mirror/3d" className="block text-center text-sm text-gold">🧊 Prefer 3D? Make a 3D twin →</Link>
+            <Link href="/mirror/3d" className="flex min-h-11 items-center justify-center text-sm text-gold">🧊 Prefer 3D? Make a 3D twin →</Link>
           </div>
         </main>
       )}
@@ -168,8 +168,10 @@ export default function Mirror() {
           <div className="w-full space-y-2">
             <Twin3dCard />
             <Link href="/" className="block"><Button className="w-full">✨ Ask the Muse</Button></Link>
-            <Link href="/trust" className="block text-sm text-mut underline">Manage or delete my twin</Link>
-            <button onClick={() => setStep("intro")} className="text-sm text-mut underline">Retake twin</button>
+            <div className="grid grid-cols-2 gap-2">
+              <Link href="/trust" className="flex min-h-11 items-center justify-center text-sm text-mut underline">Manage or delete my twin</Link>
+              <button onClick={() => setStep("intro")} className="min-h-11 text-sm text-mut underline">Retake twin</button>
+            </div>
           </div>
         </main>
       )}
@@ -180,16 +182,17 @@ export default function Mirror() {
 function ConsentCard({ consent, setConsent }: { consent: boolean; setConsent: (v: boolean) => void }) {
   const { t } = useSession();
   return (
-    <label className="glass flex cursor-pointer items-center gap-3 rounded-3xl p-4">
-      <span className="text-2xl">🔒</span>
-      <span className="flex-1 text-sm">
-        <b>{t("mirror.consentTitle")}</b> · {t("mirror.consentBody")}
-      </span>
-      <input type="checkbox" role="switch" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="peer sr-only" aria-label="I consent to creating my private twin" />
-      <span className={`relative h-7 w-12 rounded-full transition ${consent ? "bg-mint" : "bg-white/20"}`}>
-        <span className={`absolute top-0.5 size-6 rounded-full bg-white transition-all ${consent ? "left-[22px]" : "left-0.5"}`} />
-      </span>
-    </label>
+    <div className="glass flex items-center gap-2 rounded-3xl p-4">
+      <label className="flex flex-1 cursor-pointer items-center gap-3">
+        <span className="text-2xl" aria-hidden>🔒</span>
+        <span className="flex-1 text-sm font-bold">{t("mirror.consentTitle")}</span>
+        <input type="checkbox" role="switch" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="peer sr-only" aria-label="I consent to creating my private twin" />
+        <span aria-hidden className={`relative h-7 w-12 shrink-0 rounded-full transition peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-gold ${consent ? "bg-mint" : "bg-white/20"}`}>
+          <span className={`absolute top-0.5 size-6 rounded-full bg-white transition-all ${consent ? "left-[22px]" : "left-0.5"}`} />
+        </span>
+      </label>
+      <InfoTip label="About your private twin">{t("mirror.consentBody")}</InfoTip>
+    </div>
   );
 }
 

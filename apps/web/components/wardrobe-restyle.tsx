@@ -64,7 +64,7 @@ export function RestyleSheet({ open, onClose }: { open: boolean; onClose: () => 
   return (
     <Sheet open={open} onClose={() => !busy && onClose()}>
       <h2 className="font-display text-2xl font-black">Restyle for an event ✨</h2>
-      <p className="text-sm text-mut">The Muse mixes what you own with 1–2 new pieces from makers, on your twin.</p>
+      <p className="text-sm text-mut">Your pieces + 1–2 new · on your twin</p>
       <div className="mt-4 max-h-[62vh] space-y-4 overflow-y-auto no-scrollbar pb-1">
         {intents && intents.length > 0 && (
           <fieldset>
@@ -103,7 +103,7 @@ export function RestyleSheet({ open, onClose }: { open: boolean; onClose: () => 
       </div>
       <ErrorNote error={error} />
       <Button className="mt-4 w-full" disabled={busy} onClick={submit}>{busy ? "Styling your wardrobe…" : "✨ Style 3 outfits"}</Button>
-      <p className="mt-2 text-center text-xs text-mut">Counts as looks on your daily allowance · AI previews, C2PA signed</p>
+      <p className="mt-2 text-center text-xs text-mut">Uses daily looks · AI label · C2PA</p>
     </Sheet>
   );
 }

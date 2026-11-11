@@ -18,7 +18,8 @@ export default function Saved() {
             {l.image ? <img loading="lazy" decoding="async" src={l.image} alt={l.product.title} className="aspect-[9/16] w-full object-cover" /> : <div className="skeleton aspect-[9/16]" />}
             <div className="p-2">
               <p className="truncate text-sm font-semibold">{l.product.title}</p>
-              <p className="truncate text-xs text-mut">{l.maker.name} · {rwf(l.product.priceRwf)}</p>
+              <p className="truncate text-xs text-mut">{l.maker.name}</p>
+              <p className="tabular text-xs font-bold">{rwf(l.product.priceRwf)}</p>
             </div>
           </Link>
         ))}

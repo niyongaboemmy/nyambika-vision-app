@@ -81,7 +81,7 @@ export function NotificationPrefsCard() {
       {data && (
         <>
           {ROWS.filter((r) => !r.appOnly || isNative() || data.devices.some((d) => d.platform !== "WEB")).map((r) => (
-            <label key={r.key} className="flex items-center gap-3">
+            <label key={r.key} className="flex min-h-11 cursor-pointer items-center gap-3">
               <span className="flex-1">
                 <span className="block text-sm font-semibold">{t(r.title)}</span>
                 <span className="block text-xs text-mut">{t(r.body)}</span>
@@ -96,7 +96,7 @@ export function NotificationPrefsCard() {
           <div className="border-t border-white/10 pt-3">
             <p className="text-xs font-semibold uppercase tracking-wide text-mut">{t("push.devices")}</p>
             {data.devices.length === 0 ? (
-              <p className="mt-1 text-sm text-mut">{t("push.none")}</p>
+              <p className="mt-1 text-sm text-mut">{state === "denied" ? t("push.denied") : state === "unsupported" ? t("push.unsupported") : t("push.none")}</p>
             ) : (
               <ul className="mt-2 space-y-2">
                 {data.devices.map((d) => (
@@ -108,7 +108,7 @@ export function NotificationPrefsCard() {
                     </span>
                     <button
                       type="button"
-                      className="glass min-h-10 rounded-xl px-3 text-xs font-semibold"
+                      className="glass min-h-11 min-w-11 rounded-xl px-3 text-xs font-semibold"
                       aria-label={`Remove ${DEVICE_LABEL[d.platform]}`}
                       onClick={async () => {
                         await api(`/push/devices/${d.id}`, { method: "DELETE" });
@@ -123,8 +123,8 @@ export function NotificationPrefsCard() {
             )}
           </div>
 
-          {state === "unsupported" && <p className="text-xs text-mut">{t("push.unsupported")}</p>}
-          {state === "denied" && <p className="text-xs text-mut">{t("push.denied")}</p>}
+          {data.devices.length > 0 && state === "unsupported" && <p className="text-xs text-mut">{t("push.unsupported")}</p>}
+          {data.devices.length > 0 && state === "denied" && <p className="text-xs text-mut">{t("push.denied")}</p>}
           <div className="grid grid-cols-2 gap-2">
             {state !== "on" && state !== "unsupported" && state !== "denied" && <Button variant="glass" onClick={turnOn}>{t("push.thisDevice")}</Button>}
             {data.devices.length > 0 && (

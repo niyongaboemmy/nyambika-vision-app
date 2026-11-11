@@ -4,7 +4,7 @@ import { useParams } from "next/navigation";
 import { useCallback, useState } from "react";
 import { Bubble } from "@/components/circle-bits";
 import { HoldToBuy } from "@/components/hold-to-buy";
-import { Button, ErrorNote, Screen, Sheet, TopBar } from "@/components/ui";
+import { Button, ErrorNote, Fact, Screen, Sheet, TopBar } from "@/components/ui";
 import { api, rwf } from "@/lib/api";
 import { timeLeft, type OwnerPoll, type Snapshot } from "@/lib/social";
 import { useApi } from "@/lib/use-api";
@@ -107,7 +107,7 @@ export default function PollOwner() {
             </div>
             <HoldToBuy look={winner.look} />
           </div>
-          <p className="mt-2 text-xs text-mut">✋ Hold to buy the winner · paid straight to the maker</p>
+          <p className="mt-2 text-xs text-mut">✋ Hold to buy · paid directly to the maker</p>
         </section>
       )}
 
@@ -116,7 +116,7 @@ export default function PollOwner() {
           {poll.comments.map((c) => <Bubble key={c.id} c={c} />)}
         </section>
       ) : (
-        open && <p className="mt-8 px-8 text-center text-sm text-mut">Votes and comments appear here the moment your friends tap. Share the link to get started.</p>
+        open && <p className="mt-8 px-8 text-center text-sm text-mut">No votes yet · share the link</p>
       )}
 
       {open ? (
@@ -126,15 +126,19 @@ export default function PollOwner() {
             <Button variant="glass" className="flex-1" onClick={async () => { await navigator.clipboard?.writeText(poll.shareUrl).catch(() => {}); setCopied(true); }}>{copied ? "Copied ✓" : "Copy link"}</Button>
             <Button variant="glass" className="flex-1" onClick={() => setConfirm(true)}>Take down</Button>
           </div>
-          <p className="pt-1 text-center text-xs text-mut">🔗 Shared as a private live poll · AI-preview watermark · makers never see it</p>
+          <ul aria-label="How this poll is shared" className="flex flex-wrap justify-center gap-2 pt-1">
+            <li><Fact icon="lock">Private link</Fact></li>
+            <li><Fact icon="sparkle">AI label</Fact></li>
+            <li><Fact icon="shield">Never shared with makers</Fact></li>
+          </ul>
         </div>
       ) : (
-        <p className="mt-8 px-6 text-center text-sm text-mut">The shared copies are deleted. Only you can still see these results.</p>
+        <p className="mt-8 px-6 text-center text-sm text-mut">The shared copies are deleted · only you see results</p>
       )}
 
       <Sheet open={confirm} onClose={() => setConfirm(false)}>
         <h2 className="font-display text-xl font-black">Take this poll down?</h2>
-        <p className="mt-1 text-sm text-txt/80">The link stops working right away and the shared previews are deleted. You keep the results.</p>
+        <p className="mt-1 text-sm text-txt/80">Link off · previews deleted · you keep the results</p>
         <div className="mt-4 flex gap-2">
           <Button variant="glass" className="flex-1" onClick={() => setConfirm(false)}>Keep it</Button>
           <Button variant="danger" className="flex-1" disabled={busy} onClick={revoke}>Take down</Button>

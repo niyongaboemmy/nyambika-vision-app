@@ -64,7 +64,7 @@ function ArPage() {
           <section className="glass mt-6 space-y-3 rounded-3xl p-5 text-center">
             <p className="text-4xl" aria-hidden>🪞</p>
             <p className="font-display text-xl font-black">AR mirror is a pilot</p>
-            <p className="text-sm text-mut">Testing with a small group · not on for you yet. Your 3D twin shows the same pieces.</p>
+            <p className="text-sm text-mut">Small test group · not on for you yet</p>
             <Link href={`/mirror/3d${variant ? `?variant=${variant}` : ""}`} className="grad-cta inline-flex min-h-12 items-center justify-center rounded-2xl px-5 font-semibold text-white">🧊 Open my 3D twin</Link>
           </section>
         ) : (
@@ -73,8 +73,8 @@ function ArPage() {
       </main>
       <nav aria-label="Mirror mode" className="fixed inset-x-0 bottom-[max(env(safe-area-inset-bottom),14px)] z-30 flex justify-center">
         <div className="glass flex rounded-full p-1.5 shadow-[0_12px_40px_rgba(0,0,0,.45)]">
-          <Link href={`/mirror/3d${variant ? `?variant=${variant}` : ""}`} className="rounded-full px-5 py-2.5 text-sm font-bold text-white/80">🧊 {t("twin3d.title")}</Link>
-          <span aria-current="page" className="rounded-full bg-[#c81e4a] px-5 py-2.5 text-sm font-bold text-[#fff]">🪞 {t("twin3d.ar")}</span>
+          <Link href={`/mirror/3d${variant ? `?variant=${variant}` : ""}`} className="flex min-h-11 items-center rounded-full px-5 text-sm font-bold text-white/80">🧊 {t("twin3d.title")}</Link>
+          <span aria-current="page" className="flex min-h-11 items-center rounded-full bg-[#c81e4a] px-5 text-sm font-bold text-[#fff]">🪞 {t("twin3d.ar")}</span>
         </div>
       </nav>
     </Screen>

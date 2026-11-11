@@ -42,10 +42,9 @@ export default function WardrobePage() {
 
   return (
     <Screen className="pb-28">
-      <TopBar back="/" right={<Link href="/circle" className="glass rounded-full px-3 py-2 text-sm font-semibold">👥 Polls</Link>} />
+      <TopBar back="/" right={<Link href="/circle" className="hit glass flex min-h-10 items-center rounded-full px-3.5 text-sm font-semibold">👥 Polls</Link>} />
       <header className="px-5">
         <h1 className="font-display text-[34px] font-black leading-tight text-grad">{t("wardrobe.title")}</h1>
-        <p className="text-sm text-txt/80">What you own + looks you saved · restyled by the Muse</p>
       </header>
 
       {data?.events.length ? (
@@ -69,7 +68,7 @@ export default function WardrobePage() {
         <div className="no-scrollbar mt-2 flex items-center gap-2 overflow-x-auto px-5 pb-1" role="group" aria-label="Filter by occasion and colour">
           {occasions.map((o) => <Chip key={o} active={occasion === o} onClick={() => setOccasion(occasion === o ? null : o)}>{nice(o)}</Chip>)}
           {colours.map((c) => (
-            <button key={c} type="button" aria-label={`Colour: ${c}`} aria-pressed={colour === c} onClick={() => setColour(colour === c ? null : c)} className={`size-9 shrink-0 rounded-full border-2 transition ${colour === c ? "scale-110 border-gold" : "border-white/25"}`} style={{ background: COLOUR_SWATCH[c] }} />
+            <button key={c} type="button" aria-label={`Colour: ${c}`} aria-pressed={colour === c} onClick={() => setColour(colour === c ? null : c)} className={`hit size-9 shrink-0 rounded-full border-2 transition ${colour === c ? "scale-110 border-gold" : "border-white/25"}`} style={{ background: COLOUR_SWATCH[c] }} />
           ))}
         </div>
       )}
@@ -102,7 +101,7 @@ export default function WardrobePage() {
         <div className="glass mx-5 mt-2 rounded-3xl p-6 text-center">
           <p className="text-3xl">🧺</p>
           <p className="mt-2 font-display text-lg font-black">Your wardrobe fills itself</p>
-          <p className="mt-1 text-sm text-mut">Pieces you buy appear here once delivered, and looks you double-tap to save. The Muse can still style an event with new pieces.</p>
+          <p className="mt-1 text-sm text-mut">Delivered pieces + saved looks</p>
         </div>
       )}
       {data && tiles.length > 0 && shown.length === 0 && <p className="px-5 pt-4 text-center text-sm text-mut">Nothing matches those filters.</p>}

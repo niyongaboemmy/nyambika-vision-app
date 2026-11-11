@@ -68,7 +68,7 @@ function Order() {
             <span className="grid size-20 place-items-center rounded-full bg-mint text-4xl text-ink">✓</span>
             <p className="font-display text-3xl font-black">{t("buy.paid")}</p>
             <p className="text-sm">{t("buy.paidDirect")} <b>{o.payoutLabel}</b> · {amount}</p>
-            <p className="text-xs text-mut">Nyambika never holds your money. The maker has your order on WhatsApp.</p>
+            <p className="text-xs text-mut">💬 Maker notified on WhatsApp</p>
           </section>
         )}
 
@@ -83,8 +83,9 @@ function Order() {
                 <p className="text-sm text-mut">{o.item.colourName} · size {o.item.size}{o.item.makerName ? ` · made by ${o.item.makerName}` : ""}</p>
               </>
             )}
-            <p className="text-sm">{amount} · {o.deliveryMode === "DELIVERY" ? `delivery to ${o.address}` : "pickup"}</p>
-            <Link href={`/m/${o.page.handle}`} className="text-sm text-gold">{o.page.name} →</Link>
+            <p className="text-sm font-semibold">{amount}</p>
+            <p className="truncate text-xs text-mut">{o.deliveryMode === "DELIVERY" ? `🛵 ${o.address}` : "🏪 Pickup"}</p>
+            <Link href={`/m/${o.page.handle}`} className="hit mt-0.5 inline-block text-sm text-gold">{o.page.name} →</Link>
           </div>
         </section>
 

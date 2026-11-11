@@ -193,8 +193,9 @@ function Twin3d() {
       <Sheet open={skinOpen} onClose={() => setSkinOpen(false)}>
         <fieldset>
           <legend className="font-display text-xl font-black">Pick your skin tone</legend>
-          <p className="mt-1 text-sm text-mut">
-            Your body shape comes from {state?.hasProfile ? "your saved measurements" : state?.twinSize ? `your twin's size estimate (${state.twinSize})` : "a size M starting point you can adjust"}. No photo is used.
+          <p className="mt-2 flex flex-wrap gap-2">
+            <Fact icon="ruler">{state?.hasProfile ? "From your measurements" : state?.twinSize ? `Size ${state.twinSize} estimate` : "Size M · adjustable"}</Fact>
+            <Fact icon="lock">No photo used</Fact>
           </p>
           <div className="mt-4 grid grid-cols-5 gap-3">
             {SKIN_SWATCHES.map((h, i) => (
@@ -230,12 +231,11 @@ function ConsentIntro({ onConsent, error }: { onConsent: () => void; error: stri
             Separate from your photo twin, so it needs its own yes. The body is stylised from your measurements and skin tone; it is not a
             photo-real likeness. It is encrypted, only you see it, and it is never shared with makers. Capture frames are deleted as soon as
             your twin is built, and you can delete everything any time.
+            <span className="mt-2 block">{t("twin3d.consentBody")}</span>
           </LearnMore>
         </div>
         <label className="glass flex cursor-pointer items-center gap-3 rounded-3xl p-4">
-          <span className="flex-1 text-sm">
-            <b>{t("twin3d.consentTitle")}</b> · {t("twin3d.consentBody")}
-          </span>
+          <span className="flex-1 text-sm font-bold">{t("twin3d.consentTitle")}</span>
           <input type="checkbox" role="switch" checked={on} onChange={(e) => setOn(e.target.checked)} className="sr-only" aria-label="I consent to creating my private 3D twin" />
           <span aria-hidden className={`relative h-7 w-12 shrink-0 rounded-full transition ${on ? "bg-mint" : "bg-white/20"}`}>
             <span className={`absolute top-0.5 size-6 rounded-full bg-white transition-all ${on ? "left-[22px]" : "left-0.5"}`} />
@@ -295,20 +295,22 @@ function Start({
         <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-sky/20 text-2xl">↻</span>
         <span>
           <span className="block font-display text-lg font-black">Turn once in front of the camera</span>
-          <span className="block text-sm text-mut">About 10 seconds. Prop your phone up, step back, turn slowly.</span>
+          <span className="block text-sm text-mut">~10 s · step back, turn slowly</span>
         </span>
       </button>
       <button onClick={onMeasurements} className="glass flex w-full items-center gap-4 rounded-3xl p-4 text-left transition active:scale-[.98]">
         <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-gold/20 text-2xl">📏</span>
         <span>
           <span className="block font-display text-lg font-black">From my measurements</span>
-          <span className="block text-sm text-mut">No photos: a body-shape twin from {state.hasProfile ? "your saved measurements" : "your size"} and a skin tone you pick.</span>
+          <span className="block text-sm text-mut">No photos · {state.hasProfile ? "your measurements" : "your size"} + skin tone</span>
         </span>
       </button>
       {state.personas > 0 && (
         <section className="glass rounded-3xl p-4">
-          <p className="font-semibold">Try with a synthetic person</p>
-          <p className="text-xs text-mut">Illustrated test people with a generated turnaround. No real person&apos;s image is used.</p>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="font-semibold">Try with a synthetic person</p>
+            <Fact icon="shield">No real person</Fact>
+          </div>
           <div className="mt-3 flex justify-between gap-2">
             {Array.from({ length: state.personas }, (_, i) => i + 1).map((n) => (
               <button key={n} disabled={busy} onClick={() => onPersona(n)} aria-label={`Persona ${n}`} className="grid size-12 place-items-center rounded-full border-2 border-white/20 font-display font-black transition active:scale-90 disabled:opacity-40" style={{ background: SKIN_SWATCHES[4 + n] }}>
@@ -318,7 +320,7 @@ function Start({
           </div>
         </section>
       )}
-      <button onClick={onWithdraw} className="w-full text-center text-sm text-mut underline">Withdraw 3D twin consent</button>
+      <button onClick={onWithdraw} className="min-h-11 w-full text-center text-sm text-mut underline">Withdraw 3D twin consent</button>
     </main>
   );
 }
@@ -346,7 +348,7 @@ function Building({ avatar }: { avatar: Avatar3dView }) {
       </div>
       <div className="mt-6">
         <p className="font-display text-2xl font-black text-grad">Building your 3D twin</p>
-        <p className="mt-1 text-sm text-mut">Fitting your proportions, matching your skin tone, rigging a skeleton so you can move.</p>
+        <p className="mt-1 text-sm text-mut">Proportions · skin tone · skeleton</p>
       </div>
     </main>
   );
@@ -416,7 +418,7 @@ function Viewer({
   return (
     <main className="space-y-3 px-4 pb-28">
       {rejected && rejected.status !== "READY" && (
-        <p className="glass rounded-2xl px-3 py-2 text-xs text-mut" role="status">Your last rebuild didn&apos;t finish ({rejected.status.toLowerCase()}). Showing your current twin.</p>
+        <p className="glass rounded-2xl px-3 py-2 text-xs text-mut" role="status">Last rebuild {rejected.status.toLowerCase()} · showing current twin</p>
       )}
       <Twin3dViewer src={src} poster={poster} alt={alt} pose={pose} spin={spin} label={state.label} busy={dressing} onLoaded={() => setDressing(null)} />
       <p className="text-center text-xs text-mut">🤏 pinch to zoom · drag to spin · {t("twin3d.disclaimer")}</p>
@@ -446,7 +448,7 @@ function Viewer({
                 {fit.fit ? ` · ${Math.max(0, Math.round(fit.fit.ease_m * 100))} cm ease` : ""}
               </p>
             </div>
-            <button onClick={() => { setFit(null); setGarment(null); }} className="text-sm text-mut underline">Undress</button>
+            <button onClick={() => { setFit(null); setGarment(null); }} className="hit text-sm text-mut underline">Undress</button>
           </div>
           {garment.colours.length > 1 && (
             <div className="flex flex-wrap gap-2.5" role="radiogroup" aria-label="Colour">
@@ -463,7 +465,7 @@ function Viewer({
               </button>
             ))}
           </div>
-          <Link href={`/looks/try?variant=${fit.variantId}`} className="block text-center text-sm text-gold">See it on my photo twin →</Link>
+          <Link href={`/looks/try?variant=${fit.variantId}`} className="flex min-h-11 items-center justify-center text-sm text-gold">See it on my photo twin →</Link>
         </section>
       )}
 
@@ -490,9 +492,9 @@ function Viewer({
 
       <nav aria-label="Mirror mode" className="fixed inset-x-0 bottom-[max(env(safe-area-inset-bottom),14px)] z-30 flex justify-center">
         <div className="glass flex rounded-full p-1.5 shadow-[0_12px_40px_rgba(0,0,0,.45)]">
-          <span aria-current="page" className="rounded-full bg-white/20 px-5 py-2.5 text-sm font-bold">🧊 {t("twin3d.title")}</span>
+          <span aria-current="page" className="flex min-h-11 items-center rounded-full bg-white/20 px-5 text-sm font-bold">🧊 {t("twin3d.title")}</span>
           {state.arMirrorPilot && (
-            <Link href={`/mirror/ar${fit ? `?variant=${fit.variantId}` : ""}`} className="rounded-full px-5 py-2.5 text-sm font-bold text-white/80">🪞 {t("twin3d.ar")}</Link>
+            <Link href={`/mirror/ar${fit ? `?variant=${fit.variantId}` : ""}`} className="flex min-h-11 items-center rounded-full px-5 text-sm font-bold text-white/80">🪞 {t("twin3d.ar")}</Link>
           )}
         </div>
       </nav>
@@ -511,7 +513,11 @@ function Viewer({
           <dt className="text-mut">Quality check</dt>
           <dd>{avatar.eval?.passed ? `✓ passed (skin Δ ${avatar.eval.skin_tone_delta.toFixed(3)})` : "—"}</dd>
         </dl>
-        <p className="mt-3 text-xs text-mut">Encrypted, private to you, never shared with makers. Capture frames were deleted after building.</p>
+        <ul aria-label="Privacy" className="mt-3 flex flex-wrap gap-2">
+          <li><Fact icon="lock">Encrypted · only you</Fact></li>
+          <li><Fact icon="shield">Never shared with makers</Fact></li>
+          <li><Fact icon="refresh">Frames deleted</Fact></li>
+        </ul>
         <div className="mt-4 grid grid-cols-2 gap-2">
           <Button variant="glass" onClick={async () => { setMenu(false); await onRebuild(); }}>Delete &amp; rebuild</Button>
           <Link href="/trust" className="glass flex min-h-12 items-center justify-center rounded-2xl font-semibold">Privacy</Link>
@@ -549,7 +555,7 @@ function AdjustSheet({ open, onClose, avatar, onBuilt }: { open: boolean; onClos
   return (
     <Sheet open={open} onClose={onClose}>
       <p className="font-display text-xl font-black">Adjust my body</p>
-      <p className="text-sm text-mut">Match your twin to your measurements. Your skin tone stays the same.</p>
+      <p className="text-sm text-mut">Skin tone stays the same</p>
       <div className="mt-4 space-y-4">
         {FIELDS.map((f) => (
           <div key={f.key}>

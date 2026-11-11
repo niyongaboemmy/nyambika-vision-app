@@ -41,11 +41,11 @@ export default function EventOutfits() {
         {data ? (
           <>
             <h1 className="font-display text-[28px] font-black leading-tight">{data.title} {whenLabel(data.daysUntil)}</h1>
-            <p className="text-sm text-txt/80">{data.rendering ? "The Muse is styling your wardrobe on your twin…" : `${data.ready} outfit${data.ready === 1 ? "" : "s"} ready · swipe to compare`}</p>
+            <p className="text-sm text-txt/80">{data.rendering ? "The Muse is styling…" : `${data.ready} outfit${data.ready === 1 ? "" : "s"} ready · swipe to compare`}</p>
             {data.reminderSentAt ? (
               <p className="mt-2 inline-block rounded-full bg-[#25D366]/20 px-3 py-1 text-xs font-semibold text-[#7ff0a8]">📲 WhatsApp reminder sent</p>
             ) : data.daysUntil > 3 ? (
-              <p className="mt-2 inline-block rounded-full bg-white/10 px-3 py-1 text-xs text-txt/80">📲 We&apos;ll remind you on WhatsApp 3 days before</p>
+              <p className="mt-2 inline-block rounded-full bg-white/10 px-3 py-1 text-xs text-txt/80">📲 WhatsApp reminder · 3 days before</p>
             ) : null}
           </>
         ) : (
@@ -60,7 +60,7 @@ export default function EventOutfits() {
               {o?.image ? (
                 <img src={o.image} alt={`Outfit ${i + 1}: ${o.pieces.map((p) => p.title).join(" with ")}, AI preview on your twin`} className="h-full w-full animate-rise object-contain" />
               ) : o && !isRendering(o.status) ? (
-                <p className="grid h-full place-items-center px-8 text-center text-sm text-mut">This one didn&apos;t pass our quality check, so we won&apos;t show it.</p>
+                <p className="grid h-full place-items-center px-8 text-center text-sm text-mut">Hidden · failed quality check</p>
               ) : (
                 <div className="skeleton relative h-full" role="status" aria-label="Rendering outfit">
                   <div className="absolute inset-x-0 h-1 animate-[scan_1.6s_ease-in-out_infinite] bg-sky shadow-[0_0_18px_#38bdf8]" />
@@ -82,13 +82,13 @@ export default function EventOutfits() {
                       {p.owned ? (
                         <span className="rounded-full bg-mint/20 px-2 py-0.5 text-[10px] font-bold text-mint">Owned</span>
                       ) : p.maker ? (
-                        <Link href={`/m/${p.maker.handle}`} className="rounded-full bg-gold/20 px-2.5 py-1 text-[11px] font-bold text-gold">New · view</Link>
+                        <Link href={`/m/${p.maker.handle}`} className="hit rounded-full bg-gold/20 px-2.5 py-1 text-[11px] font-bold text-gold">New · view</Link>
                       ) : null}
                     </li>
                   ))}
                 </ul>
                 <p className="mt-3 text-xs text-txt/80">✨ {o.reasons.join(" · ")}</p>
-                {o.newCostRwf > 0 && <p className="mt-1 text-xs text-mut">New pieces: {rwf(o.newCostRwf)}, paid straight to the makers</p>}
+                {o.newCostRwf > 0 && <p className="mt-1 text-xs text-mut">New: {rwf(o.newCostRwf)} · paid directly to the makers</p>}
               </div>
             )}
           </article>
