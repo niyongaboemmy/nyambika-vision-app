@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleDestroy } from "@nestjs/common";
+import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import { randomBytes } from "node:crypto";
 import { Redis } from "ioredis";
 import { config } from "../../config";
@@ -15,7 +15,7 @@ const VIEWERS = (showId: string) => `vr:viewers:${showId}`;
  * without Redis (single-instance dev, tests) everything stays in process.
  */
 @Injectable()
-export class ShowLive implements OnModuleDestroy {
+export class ShowLive implements OnModuleInit, OnModuleDestroy {
   private log = new Logger("ShowLive");
   private listeners = new Map<string, Set<Listener>>();
   private local = new Map<string, number>();
@@ -28,6 +28,11 @@ export class ShowLive implements OnModuleDestroy {
   counters: CounterStore = new MemoryCounterStore();
   /** Tests can turn Redis off entirely. */
   useRedis = process.env.NODE_ENV !== "test" && !process.env.VITEST;
+
+  onModuleInit() {
+    // Connect up front so the first viewer is already counted in the shared hash.
+    this.connect();
+  }
 
   private connect() {
     if (this.pub || !this.useRedis) return;
@@ -83,7 +88,8 @@ export class ShowLive implements OnModuleDestroy {
     if (this.redisOk && this.pub) {
       try {
         const all = await this.pub.hvals(VIEWERS(showId));
-        return all.reduce((s, v) => s + Math.max(0, Number(v) || 0), 0);
+        // Never fewer than the streams this instance holds (covers joins made before Redis was ready).
+        return Math.max(this.localViewers(showId), all.reduce((s, v) => s + Math.max(0, Number(v) || 0), 0));
       } catch {
         /* fall through */
       }

@@ -37,6 +37,7 @@ export function ShowClient({ initial }: { initial: ShowView }) {
   const engine = useRef<RunwayEngine | null>(null);
   const replayIdx = useRef(0);
   const mine = useRef(new Map<string, number>());
+  const runwayRef = useRef(initial.runwayStatus);
 
   const serverNow = now + offset;
   const phase: ShowPhase = showPhase({ status: show.phase === "CANCELLED" ? "CANCELLED" : "SCHEDULED", startsAt: show.startsAt, items: show.items.length, walkSec: show.walkSec }, new Date(serverNow));
@@ -66,6 +67,10 @@ export function ShowClient({ initial }: { initial: ShowView }) {
     liveish ? `/api/vr/public/shows/${show.id}/live` : null,
     (s) => {
       setSnap(s);
+      if (s.runwayStatus !== runwayRef.current) {
+        runwayRef.current = s.runwayStatus;
+        void api<ShowView>(`/vr/public/shows/${s.id}`).then(setShow).catch(() => undefined);
+      }
       setOffset(new Date(s.serverNow).getTime() - Date.now());
       const fresh = s.recent.filter((r) => !seen.current.has(r.id));
       for (const r of fresh) seen.current.add(r.id);
@@ -81,7 +86,10 @@ export function ShowClient({ initial }: { initial: ShowView }) {
 
   // Runway engine: three.js is fetched only when the runway is on screen.
   useEffect(() => {
-    if (!watching || !gl || engine.current) return;
+    if (!watching || !gl) return;
+    // Rebuild when the runway models finish building (garment stand → dressed avatar).
+    engine.current?.dispose();
+    engine.current = null;
     let live = true;
     void import("@/components/vr-engine").then(({ RunwayEngine }) => {
       if (!live || !canvas.current) return;
@@ -101,7 +109,8 @@ export function ShowClient({ initial }: { initial: ShowView }) {
     return () => {
       live = false;
     };
-  }, [watching, gl, show]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [watching, gl, show.id, show.runwayStatus]);
   useEffect(() => () => engine.current?.dispose(), []);
   useEffect(() => {
     if (!watching && engine.current) {

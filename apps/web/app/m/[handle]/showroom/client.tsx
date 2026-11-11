@@ -10,7 +10,7 @@ import { XrStage } from "@/components/xr-viewer";
 import { api, rwf } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import type { FitView, Twin3dState } from "@/lib/twin3d";
-import { countdown, fmtWhen, lookFor, lowEnd, xrSupported, type RoomItem, type Showroom } from "@/lib/vr";
+import { fmtWhen, lookFor, lowEnd, xrSupported, type RoomItem, type Showroom } from "@/lib/vr";
 import { fmtMB, hasWebGL2, load3d, prefersReducedMotion, type Garment3d } from "@/lib/xr";
 
 type Mode = "loading" | "3d" | "flat";
@@ -79,6 +79,8 @@ function Room({ room }: { room: Showroom }) {
           onReady: () => setFirstView(true),
         });
         setMode("3d");
+        // Dev/test hook: the crawl drives the XR hold-to-buy hand-off without a headset.
+        if (process.env.NODE_ENV !== "production") (window as unknown as { __vrShowroom?: ShowroomEngine }).__vrShowroom = engine.current;
         const pre = q.get("item");
         if (pre && room.items.some((i) => i.productId === pre)) engine.current.select(pre);
       })
@@ -271,7 +273,7 @@ function Room({ room }: { room: Showroom }) {
             </nav>
             {room.shows[0] && (
               <Link href={`/m/${room.page.handle}/shows/${room.shows[0].id}`} className="mt-2 flex items-center justify-center gap-2 text-xs font-semibold text-gold">
-                {room.shows[0].phase === "LIVE" ? `● ${t("vr.live")}: ${room.shows[0].title}` : `${t("vr.fashionShow")} · ${room.shows[0].title} · ${fmtWhen(room.shows[0].startsAt)} (in ${countdown(new Date(room.shows[0].startsAt).getTime() - Date.now())})`} ›
+                {room.shows[0].phase === "LIVE" ? `● ${t("vr.live")}: ${room.shows[0].title}` : `${t("vr.fashionShow")} · ${fmtWhen(room.shows[0].startsAt)}`} ›
               </Link>
             )}
           </div>

@@ -343,7 +343,7 @@ export class ShowroomEngine {
       g.fillStyle = "#FFE7B0";
       g.fillText(this.o.banner, 700, 300, 1300);
     });
-    const bannerMesh = new THREE.Mesh(new THREE.PlaneGeometry(4.6, 1.38), new THREE.MeshBasicMaterial({ map: banner, transparent: true }));
+    const bannerMesh = new THREE.Mesh(new THREE.PlaneGeometry(4.6, 1.38), new THREE.MeshBasicMaterial({ map: banner, transparent: true, fog: false }));
     bannerMesh.position.set(0, 3.1, -ROOM_R + 0.35);
     this.scene.add(bannerMesh);
 
@@ -429,7 +429,7 @@ export class ShowroomEngine {
       hit.position.y = top - piece.heightM / 2;
       hit.userData.piece = piece.id;
       anchor.add(hit);
-      const label = new THREE.Mesh(new THREE.PlaneGeometry(0.84, 0.26), new THREE.MeshBasicMaterial({ map: labelTexture(this.o.font, piece.title, piece.price, this.o.highContrast), transparent: true, depthWrite: false }));
+      const label = new THREE.Mesh(new THREE.PlaneGeometry(0.84, 0.26), new THREE.MeshBasicMaterial({ map: labelTexture(this.o.font, piece.title, piece.price, this.o.highContrast), transparent: true, depthWrite: false, fog: false }));
       label.position.set(0, isM ? top + 0.38 : top - piece.heightM - 0.24, 0);
       label.userData.piece = piece.id;
       anchor.add(label);
@@ -1063,24 +1063,24 @@ export class RunwayEngine {
       this.scene.add(strip);
     }
     // Backdrop with the maker's name and show title, framed by an imigongo arch.
-    const back = canvasTexture(1600, 700, (g) => {
-      imigongo(g, 1600, 700, mix(p.deep, "#000000", 0.4), mix(p.deep, p.primary, 0.3), 70);
-      const grad = g.createRadialGradient(800, 350, 60, 800, 350, 820);
+    const back = canvasTexture(1600, 1070, (g) => {
+      imigongo(g, 1600, 1070, mix(p.deep, "#000000", 0.4), mix(p.deep, p.primary, 0.3), 70);
+      const grad = g.createRadialGradient(800, 420, 60, 800, 420, 900);
       grad.addColorStop(0, "rgba(0,0,0,.15)");
       grad.addColorStop(1, "rgba(0,0,0,.85)");
       g.fillStyle = grad;
-      g.fillRect(0, 0, 1600, 700);
+      g.fillRect(0, 0, 1600, 1070);
       g.textAlign = "center";
       g.textBaseline = "middle";
       g.fillStyle = "#ffffff";
       g.font = `900 150px ${o.font}`;
-      g.fillText(o.brand, 800, 290, 1500);
+      g.fillText(o.brand, 800, 250, 1500);
       g.fillStyle = "#FFE7B0";
       g.font = `800 64px ${o.font}`;
-      g.fillText(o.title, 800, 440, 1500);
+      g.fillText(o.title, 800, 380, 1500);
     });
-    const backdrop = new THREE.Mesh(new THREE.PlaneGeometry(8, 3.5), new THREE.MeshBasicMaterial({ map: back }));
-    backdrop.position.set(0, 2.2, -HALF - 1.1);
+    const backdrop = new THREE.Mesh(new THREE.PlaneGeometry(9, 6), new THREE.MeshBasicMaterial({ map: back, fog: false }));
+    backdrop.position.set(0, 3.0, -HALF - 1.1);
     this.scene.add(backdrop);
     this.titleGlow = new THREE.MeshBasicMaterial({ color: p.primary, transparent: true, opacity: 0.5 });
     const arch = new THREE.Mesh(new THREE.TorusGeometry(1.5, 0.05, 10, 64, Math.PI), this.titleGlow);
