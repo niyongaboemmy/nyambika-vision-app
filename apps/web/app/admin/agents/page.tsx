@@ -9,6 +9,9 @@ import { api, rwf } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { useApi } from "@/lib/use-api";
 import { Fact, LearnMore } from "@/components/kit";
+import { MoreActions } from "@/components/ios";
+import { useDrag } from "@/lib/drag";
+import { haptic } from "@/lib/native";
 
 const SCOPES = ["catalogue:read", "checkout:write", "mcp:use", "tryon:write", "usage:read"] as const;
 // Categorical series colours (validated: lightness band, chroma, CVD ΔE ≥ 17 on the light surface).
@@ -221,6 +224,11 @@ function ClientCard({ c, models, onChange }: { c: ClientRow; models: Overview["m
   const [secret, setSecret] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const live = c.keys.filter((k) => k.state === "OK");
+  const toggleStatus = async () => {
+    await api(`/admin/agents/clients/${c.id}/status`, { method: "POST", json: { status: c.status === "ACTIVE" ? "SUSPENDED" : "ACTIVE" } });
+    onChange();
+  };
+  const rotateSecret = async () => setSecret((await api<{ secret: string }>(`/admin/agents/clients/${c.id}/webhook-secret`, { method: "POST" })).secret);
   return (
     <Card className="min-w-0 space-y-4">
       <div className="flex items-start gap-3">
@@ -233,9 +241,16 @@ function ClientCard({ c, models, onChange }: { c: ClientRow; models: Overview["m
             <Chip>{c.calls14d} calls · 14 d</Chip>
           </div>
         </div>
-        <SButton variant="ghost" onClick={async () => { await api(`/admin/agents/clients/${c.id}/status`, { method: "POST", json: { status: c.status === "ACTIVE" ? "SUSPENDED" : "ACTIVE" } }); onChange(); }}>
-          {c.status === "ACTIVE" ? "Suspend" : "Reactivate"}
-        </SButton>
+        <MoreActions
+          label={`More for ${c.name}`}
+          title={c.name}
+          actions={[
+            ...(c.contract ? [{ label: "Edit contract", icon: "edit" as const, onSelect: () => setContractSheet(true) }] : []),
+            ...(c.kind === "PARTNER" ? [{ label: "Usage CSV", icon: "download" as const, onSelect: () => window.location.assign(`/api/admin/agents/clients/${c.id}/usage.csv`) }] : []),
+            ...(c.kind === "PARTNER" ? [{ label: c.hasWebhookSecret ? "Rotate webhook secret" : "Create webhook secret", icon: "key" as const, onSelect: () => void rotateSecret() }] : []),
+            { label: c.status === "ACTIVE" ? "Suspend client" : "Reactivate client", icon: c.status === "ACTIVE" ? ("pause" as const) : ("play" as const), destructive: c.status === "ACTIVE", onSelect: () => void toggleStatus() },
+          ]}
+        />
       </div>
 
       {c.kind === "PARTNER" && c.contract && c.usage && (
@@ -246,14 +261,7 @@ function ClientCard({ c, models, onChange }: { c: ClientRow; models: Overview["m
           </div>
           <Meter value={c.usage.billed} max={c.contract.monthlyQuota} label="Looks used this month against quota" />
           <p className="text-xs text-cocoa-2"><b className="text-cocoa tabular-nums">{c.usage.billed}/{c.contract.monthlyQuota}</b> looks · {c.usage.overage} overage ({rwf(c.usage.overageRwf)}) · {c.usage.sandbox} sandbox</p>
-          <div className="flex flex-wrap gap-2 pt-1">
-            <SButton variant="outline" onClick={() => setContractSheet(true)}>Edit contract</SButton>
-            <SButton variant="outline" onClick={() => setSandboxSheet(true)}><Icon name="sparkle" className="size-4" /> Sandbox try-on</SButton>
-            <a className="st-press inline-flex min-h-11 items-center gap-1.5 rounded-2xl border border-hairline bg-white px-3.5 text-sm font-bold text-cocoa" href={`/api/admin/agents/clients/${c.id}/usage.csv`} download><Icon name="download" className="size-4" /> Usage CSV</a>
-            <SButton variant="ghost" onClick={async () => setSecret((await api<{ secret: string }>(`/admin/agents/clients/${c.id}/webhook-secret`, { method: "POST" })).secret)}>
-              {c.hasWebhookSecret ? "Rotate webhook secret" : "Create webhook secret"}
-            </SButton>
-          </div>
+          <SButton variant="outline" className="w-full" onClick={() => setSandboxSheet(true)}><Icon name="sparkle" className="size-4" /> Sandbox try-on</SButton>
         </div>
       )}
 
@@ -264,15 +272,7 @@ function ClientCard({ c, models, onChange }: { c: ClientRow; models: Overview["m
         </div>
         <ul className="space-y-2">
           {c.keys.map((k) => (
-            <li key={k.id} className={`flex flex-wrap items-center gap-2 rounded-2xl bg-white p-2.5 ring-1 ring-inset ring-hairline ${k.state !== "OK" ? "bg-paper-2 [&_code]:line-through" : ""}`}>
-              <code className="rounded-lg bg-paper-2 px-2 py-1 text-xs font-bold text-cocoa">{k.prefix}…</code>
-              <Chip tone={k.env === "LIVE" ? "mint" : "sky"}>{k.env.toLowerCase()}</Chip>
-              {k.state !== "OK" && <Badge value={k.state === "REVOKED" ? "CANCELLED" : "SUSPENDED"} label={k.state.toLowerCase()} />}
-              <span className="order-last w-full text-xs leading-relaxed text-cocoa-2">{k.scopes.join(" · ")} · {k.rateLimitPerMin}/min{k.monthlyQuota ? ` · ${k.monthlyQuota.toLocaleString()}/month` : ""} · used {ago(k.lastUsedAt)}</span>
-              {k.state === "OK" && (
-                <SButton variant="ghost" className="ml-auto text-red-800" aria-label={`Revoke key ${k.prefix}`} onClick={async () => { await api(`/admin/agents/keys/${k.id}/revoke`, { method: "POST" }); onChange(); }}>Revoke</SButton>
-              )}
-            </li>
+            <KeyItem key={k.id} k={k} onRevoke={async () => { await api(`/admin/agents/keys/${k.id}/revoke`, { method: "POST" }); onChange(); }} />
           ))}
           {c.keys.length === 0 && <li className="text-sm text-cocoa-2">No keys yet.</li>}
         </ul>
@@ -284,6 +284,61 @@ function ClientCard({ c, models, onChange }: { c: ClientRow; models: Overview["m
       <SandboxSheet client={c} models={models} open={sandboxSheet} onClose={() => setSandboxSheet(false)} onDone={onChange} />
       <SecretSheet secret={secret} onClose={() => setSecret(null)} />
     </Card>
+  );
+}
+
+const REVEAL = 96;
+
+/** Key row. Phones: swipe left to reveal Revoke (iOS trailing swipe action); keyboard/desktop: the visible button. */
+function KeyItem({ k, onRevoke }: { k: KeyRow; onRevoke: () => void }) {
+  const live = k.state === "OK";
+  const [x, setX] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const bind = useDrag(
+    ({ movement: [mx], last, tap }) => {
+      if (!live || tap) return;
+      const base = x <= -REVEAL / 2 ? -REVEAL : 0;
+      const next = Math.min(0, Math.max(-REVEAL - 24, base + mx));
+      if (last) {
+        const open = next < -REVEAL / 2;
+        if (open && base === 0) haptic("light");
+        setX(open ? -REVEAL : 0);
+        setDragging(false);
+      } else {
+        setDragging(true);
+        setX(next);
+      }
+    },
+    { axis: "x", filterTaps: true },
+  );
+  const revealed = x <= -REVEAL / 2;
+  return (
+    <li className="relative overflow-hidden rounded-2xl">
+      {live && (
+        <button
+          type="button"
+          tabIndex={revealed ? 0 : -1}
+          aria-hidden={!revealed}
+          onClick={() => { haptic("medium"); setX(0); onRevoke(); }}
+          className="absolute inset-y-0 right-0 flex w-24 items-center justify-center gap-1 bg-red-600 text-sm font-bold text-[#fff]"
+        >
+          <Icon name="trash" className="size-4" /> Revoke
+        </button>
+      )}
+      <div
+        {...(live ? bind() : {})}
+        style={{ transform: `translateX(${x}px)` }}
+        className={`relative flex touch-pan-y flex-wrap items-center gap-2 rounded-2xl bg-white p-2.5 ring-1 ring-inset ring-hairline ${dragging ? "" : "transition-transform duration-300 ease-[var(--spring)]"} ${!live ? "bg-paper-2 [&_code]:line-through" : ""}`}
+      >
+        <code className="rounded-lg bg-paper-2 px-2 py-1 text-xs font-bold text-cocoa">{k.prefix}…</code>
+        <Chip tone={k.env === "LIVE" ? "mint" : "sky"}>{k.env.toLowerCase()}</Chip>
+        {!live && <Badge value={k.state === "REVOKED" ? "CANCELLED" : "SUSPENDED"} label={k.state.toLowerCase()} />}
+        <span className="order-last w-full truncate text-xs text-cocoa-2">{k.scopes.join(" · ")} · {k.rateLimitPerMin}/min{k.monthlyQuota ? ` · ${k.monthlyQuota.toLocaleString()}/month` : ""} · used {ago(k.lastUsedAt)}</span>
+        {live && (
+          <SButton variant="ghost" className="ml-auto text-red-800" aria-label={`Revoke key ${k.prefix}`} onClick={() => { haptic("medium"); onRevoke(); }}>Revoke</SButton>
+        )}
+      </div>
+    </li>
   );
 }
 

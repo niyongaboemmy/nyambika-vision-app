@@ -10,6 +10,7 @@ import { api, rwf } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { useApi } from "@/lib/use-api";
 import { InfoTip } from "@/components/kit";
+import { Group, GroupRow, MoreActions } from "@/components/ios";
 
 // Lazy (below the fold / on demand): keeps this route's first-load JS small.
 const InferencePanel = dynamic(() => import("@/components/inference-panel").then((m) => m.InferencePanel), { ssr: false, loading: () => <Skeleton className="h-72" /> });
@@ -211,22 +212,29 @@ function FlagsTab() {
       <section aria-labelledby="flags-t" className="space-y-2">
         <h2 id="flags-t" className="font-display text-xl font-black tracking-tight text-cocoa">Feature flags</h2>
         {!flags && <ScreenSkeleton variant="list" />}
-        <ul className="st-card divide-y divide-hairline rounded-[24px] px-4">
-          {flags?.map((f) => (
-            <li key={f.key} className="py-3.5">
-              <Switch
-                checked={f.enabled}
-                ariaLabel={f.key}
-                label={<span className="font-mono text-[13px]">{f.key}</span>}
-                description={<span className="line-clamp-2">{f.description}</span>}
-                onChange={async (enabled) => {
-                  setFlags((all) => all?.map((x) => (x.key === f.key ? { ...x, enabled } : x)) ?? null);
-                  await api(`/admin/flags/${f.key}`, { method: "PATCH", json: { enabled } }).catch(() => reload());
-                }}
+        {flags && (
+          <Group>
+            {flags.map((f) => (
+              <GroupRow
+                key={f.key}
+                icon={f.key.includes("kill_switch") ? "alert" : "flag"}
+                tone={f.key.includes("kill_switch") ? "red" : "stone"}
+                title={<span className="font-mono text-[13px]">{f.key}</span>}
+                subtitle={f.description}
+                accessory={
+                  <Switch
+                    checked={f.enabled}
+                    ariaLabel={f.key}
+                    onChange={async (enabled) => {
+                      setFlags((all) => all?.map((x) => (x.key === f.key ? { ...x, enabled } : x)) ?? null);
+                      await api(`/admin/flags/${f.key}`, { method: "PATCH", json: { enabled } }).catch(() => reload());
+                    }}
+                  />
+                }
               />
-            </li>
-          ))}
-        </ul>
+            ))}
+          </Group>
+        )}
       </section>
       <section aria-labelledby="models-t" className="space-y-2">
         <h2 id="models-t" className="font-display text-xl font-black tracking-tight text-cocoa">Model registry</h2>
@@ -434,7 +442,8 @@ function MigrationTab() {
                   <div className="flex flex-wrap items-center gap-2">
                     {["IMPORTED", "CHANGES_REQUESTED", "IN_REVIEW"].includes(i.status) && <SButton variant="outline" onClick={() => act(i.id, "send-review")}>{i.status === "IMPORTED" ? "Send review link" : "Resend review link"}</SButton>}
                     {i.status === "SIGNED_OFF" && <SButton onClick={() => act(i.id, "go-live")}>Go live + redirect</SButton>}
-                    {(i.status === "LIVE" || i.status === "SIGNED_OFF") && <SButton variant="outline" onClick={() => act(i.id, "rollback")}>Roll back</SButton>}
+                    {i.status === "LIVE" && <SButton variant="outline" onClick={() => act(i.id, "rollback")}>Roll back</SButton>}
+                    {i.status === "SIGNED_OFF" && <MoreActions label={`More for ${i.page?.name ?? "page"}`} title={i.page?.name} actions={[{ label: "Roll back", icon: "rotate", destructive: true, onSelect: () => act(i.id, "rollback") }]} />}
                     <a href={i.reviewUrl} target="_blank" rel="noreferrer" className="st-press ml-auto inline-flex min-h-11 items-center gap-1 rounded-2xl px-2 text-sm font-bold text-violet-ink hover:bg-paper-2">
                       Open review link <Icon name="chevron" className="size-4" />
                     </a>

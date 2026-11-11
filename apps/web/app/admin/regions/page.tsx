@@ -77,7 +77,7 @@ export default function RegionsAdmin() {
             <Fact icon="wallet">Paid directly · local currency</Fact>
             <LearnMore>Prepare each EAC country before launch. Makers are paid directly in their own currency; Nyambika never collects. Residency routes decide where a country&apos;s data will live.</LearnMore>
           </div>
-          <Segmented label="Region" value={code} onChange={setCode} options={data.regions.map((x) => ({ value: x.code, label: `${x.flag} ${x.name}` }))} />
+          <Segmented label="Region" value={code} onChange={setCode} options={data.regions.map((x) => ({ value: x.code, label: x.name }))} />
           <Note error={err} ok={msg} />
 
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
