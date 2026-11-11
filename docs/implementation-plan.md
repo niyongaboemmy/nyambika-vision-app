@@ -504,6 +504,9 @@ Full network migrated (≥ 95% of active pages) · paid page conversion ≥ 30% 
 ## 11. Phase 5: R4 "Future" (Month 20+)
 Physics-based drape and **fit heatmaps** (pattern-based garments) · **tailor pattern-to-3D** custom previews · mixed-reality fitting mirror · multi-user VR events · **fine-tuned local model** on consented African garment data · advanced trend insights for members. Each item starts with a spike and an NLB-style evaluation before commitment.
 
+* **Spike 1, physics drape + fit heatmaps + tailor pattern-to-3D (Nov 2026):** flag-gated CPU prototype, NLB-style harness on synthetic bodies S..3XL. Outcome **Iterate**; see [`docs/spikes/r4-drape-pattern-3d.md`](spikes/r4-drape-pattern-3d.md).
+* **Spike 2, fine-tuned local model on consented garment data + advanced trend insights (Nov 2026):** consent-ledger opt-in, versioned manifests with tombstones and PII screen, CPU attribute model with per-head release behind `ml.local_attr_spike`, k-anonymous trends card behind `insights.trends_spike`. Outcome **Go** (pilot behind flags) for data governance and trends, **Iterate** for the model; see [`docs/spikes/r4-local-model-trends.md`](spikes/r4-local-model-trends.md).
+
 ---
 
 ## 12. Work Breakdown: Epics and Backlog

@@ -22,6 +22,8 @@ app.include_router(video_tryon.router)  # E39 video try-on + NLB video eval: /v1
 inference_api.install(app)  # E42 self-hosted inference routing: /v1/inference/*
 from .mlspike import api as mlspike_api  # noqa: E402
 app.include_router(mlspike_api.router)  # R4 spike: consented dataset, local attribute model, eval: /v1/ml/*
+from .drape import api as drape_api  # noqa: E402
+app.include_router(drape_api.router)  # R4 spike: physics drape + fit heatmap + pattern-to-3D: /v1/drape/*
 
 
 class ImageIn(BaseModel):

@@ -4,6 +4,7 @@ import { depositSplit, PROGRESS_STEPS, type Measurements } from "@nyambika/contr
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { garmentForCategory, PatternPreview3D } from "@/components/drape-spike";
 import { Card, Field, Input, Note, SButton, Textarea } from "@/components/studio";
 import { DeskNav, StatusChip } from "@/components/tailor-studio";
 import { api, ApiError, rwf } from "@/lib/api";
@@ -88,6 +89,7 @@ export default function TailorOrder() {
       </div>
 
       <MeasurementsCard order={o} />
+      <PatternPreview3D orderId={o.id} shareActive={Boolean(o.measurementShare?.active)} defaultGarment={o.product ? garmentForCategory(o.product.category) : undefined} />
 
       {["REQUESTED", "QUOTED"].includes(o.status) && <QuoteComposer order={o} busy={busy} onSend={(q) => act("quote", q)} onDecline={() => act("decline", { note: "Sorry, I can't take this one" })} />}
 
