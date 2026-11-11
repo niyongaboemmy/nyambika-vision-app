@@ -993,3 +993,159 @@ model MotionClip {
   @@index([userId, createdAt])
   @@index([lookId])
 }
+
+// ==== E30 Member growth tools (FR-PHO-07, FR-ANL-01/03, FR-PAGE-05) ====
+
+/// Maker-funded discount code or time-boxed offer (no code = applied automatically). Never platform-funded.
+model DiscountCode {
+  id          String    @id @default(cuid())
+  pageId      String
+  /// Upper-case code shoppers type; null for an automatic time-boxed offer.
+  code        String?
+  label       String    @default("")
+  /// PERCENT (value = 1..90) | AMOUNT (value = RWF)
+  kind        String
+  value       Int
+  productId   String?
+  minSpendRwf Int       @default(0)
+  maxUses     Int?
+  perShopper  Int       @default(1)
+  uses        Int       @default(0)
+  startsAt    DateTime  @default(now())
+  endsAt      DateTime?
+  active      Boolean   @default(true)
+  /// Always MAKER: the shopper pays the maker less; the platform never tops up.
+  fundedBy    String    @default("MAKER")
+  createdBy   String
+  createdAt   DateTime  @default(now())
+
+  @@unique([pageId, code])
+  @@index([pageId, active])
+}
+
+model DiscountRedemption {
+  id         String   @id @default(cuid())
+  discountId String
+  orderId    String   @unique
+  shopperId  String
+  pageId     String
+  amountRwf  Int
+  createdAt  DateTime @default(now())
+
+  @@index([discountId, shopperId])
+}
+
+/// Follower opt-in for WhatsApp "new collection" broadcasts (explicit and revocable, separate from following).
+model BroadcastOptIn {
+  userId    String
+  pageId    String
+  optedIn   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([userId, pageId])
+  @@index([pageId, optedIn])
+}
+
+model Broadcast {
+  id         String   @id @default(cuid())
+  pageId     String
+  createdBy  String
+  kind       String   @default("NEW_COLLECTION")
+  message    String
+  productIds String[]
+  link       String
+  recipients Int      @default(0)
+  skipped    Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  @@index([pageId, createdAt])
+}
+
+// ==== E31 Low-literacy cooperative flows (FR-COOP-07..09, UI-06) ====
+
+/// Per-maker accessibility settings, set by the cooperative admin.
+model MakerAccess {
+  coopMemberId String   @id
+  pageId       String
+  /// Voice-and-icon studio mode (big pictograms, spoken prompts).
+  voiceMode    Boolean  @default(false)
+  /// SMS notices and the USSD menu for makers without a smartphone.
+  smsMode      Boolean  @default(false)
+  locale       String   @default("rw")
+  updatedAt    DateTime @updatedAt
+}
+
+/// Maker's recorded consent for the cooperative admin to act on their behalf ("assisted mode").
+model AssistGrant {
+  id           String    @id @default(cuid())
+  pageId       String
+  coopMemberId String
+  requestedBy  String
+  /// PENDING → ACTIVE → REVOKED | EXPIRED
+  status       String    @default("PENDING")
+  /// How the maker agreed: SMS_CODE (read the code to the admin) or USSD (approved on their own phone).
+  method       String?
+  codeHash     String
+  scopes       String[]
+  consentText  String
+  consentId    String?
+  attempts     Int       @default(0)
+  grantedAt    DateTime?
+  expiresAt    DateTime?
+  revokedAt    DateTime?
+  createdAt    DateTime  @default(now())
+
+  @@index([coopMemberId, status])
+}
+
+// ==== E21 Full-network migration (FR-MIG-04/05) ====
+
+/// Queue-driven run of a (large) wave: per-wave concurrency window, outreach cadence, cut-over checklist.
+model MigrationRun {
+  waveId      String    @id
+  concurrency Int       @default(4)
+  total       Int
+  done        Int       @default(0)
+  failed      Int       @default(0)
+  /// QUEUED → RUNNING → IMPORTED | ROLLED_BACK
+  status      String    @default("QUEUED")
+  bundlePath  String
+  cadenceDays Int[]     @default([2, 5, 9])
+  checklist   Json      @default("{}")
+  maxRunning  Int       @default(0)
+  createdBy   String?
+  startedAt   DateTime?
+  finishedAt  DateTime?
+  createdAt   DateTime  @default(now())
+}
+
+model MigrationJob {
+  id         String    @id @default(cuid())
+  waveId     String
+  index      Int
+  handle     String
+  /// PENDING → ENQUEUED → RUNNING → DONE | FAILED
+  status     String    @default("PENDING")
+  error      String?
+  itemId     String?
+  startedAt  DateTime?
+  finishedAt DateTime?
+
+  @@unique([waveId, index])
+  @@index([waveId, status])
+}
+
+/// Owner outreach log (invites + reminders) for auto-chasing unsigned pages.
+model MigrationOutreach {
+  id     String   @id @default(cuid())
+  itemId String
+  waveId String
+  /// INVITE | REMINDER
+  kind   String
+  seq    Int      @default(0)
+  sentAt DateTime @default(now())
+
+  @@index([itemId])
+  @@index([waveId, kind])
+}

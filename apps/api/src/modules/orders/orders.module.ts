@@ -9,6 +9,7 @@ import { PrismaService } from "../../common/prisma.service";
 import { parse } from "../../common/zod";
 import { LooksModule, LooksService } from "../looks/looks.module";
 import { PaymentsService } from "../payments/payments.module";
+import { DiscountService, DiscountsModule } from "../growth/discounts";
 
 const DELIVERY_FEE_RWF = 2000;
 const STATUS_COPY: Partial<Record<OrderStatus, string>> = {
@@ -30,6 +31,7 @@ export class OrdersController {
     private payments: PaymentsService,
     private messaging: MessagingService,
     private looks: LooksService,
+    private discounts: DiscountService,
   ) {}
 
   /**
@@ -62,7 +64,9 @@ export class OrdersController {
     if (!payoutMsisdn) throw new ConflictException("This maker hasn't set up Mobile Money yet. Order on WhatsApp instead.");
 
     const fee = req.delivery === "DELIVERY" ? DELIVERY_FEE_RWF : 0;
-    const total = p.priceRwf + fee;
+    // E30: maker-funded discount code / time-boxed offer (never platform-funded, never on the delivery fee).
+    const discount = await this.discounts.resolve(p.pageId, p.id, p.priceRwf, user.id, req.discountCode);
+    const total = p.priceRwf - (discount?.amountRwf ?? 0) + fee;
     const code = `NY-${randomBytes(3).toString("hex").toUpperCase()}`;
     const readyBy = new Date(Date.now() + Math.max(1, p.leadTimeDays) * 86400_000);
     const order = await this.prisma.$transaction(async (tx) => {
@@ -70,7 +74,7 @@ export class OrdersController {
         const r = await tx.variant.updateMany({ where: { id: variant.id, stock: { gt: 0 } }, data: { stock: { decrement: 1 } } });
         if (r.count === 0) throw new ConflictException("Sold out in this colour");
       }
-      return tx.order.create({
+      const created = await tx.order.create({
         data: {
           code,
           pageId: p.pageId,
@@ -98,9 +102,16 @@ export class OrdersController {
               makerName: maker?.name ?? "",
             },
           },
-          events: { create: [{ status: "NEW", note: "Held to buy" }, { status: "AWAITING_PAYMENT", note: "Mobile Money request sent to your phone" }] },
+          events: {
+            create: [
+              { status: "NEW", note: discount ? `Held to buy · ${discount.rule.code ?? discount.rule.label ?? "offer"} −RWF ${discount.amountRwf.toLocaleString("en-US")} (maker-funded)` : "Held to buy" },
+              { status: "AWAITING_PAYMENT", note: "Mobile Money request sent to your phone" },
+            ],
+          },
         },
       });
+      if (discount) await this.discounts.redeem(tx, discount, created.id, user.id);
+      return created;
     });
     if (req.lookId) void this.looks.render(req.lookId, "HD").catch(() => undefined);
     await this.payments.request(order.id, {
@@ -228,5 +239,5 @@ export class OrdersController {
   }
 }
 
-@Module({ imports: [LooksModule], controllers: [OrdersController] })
+@Module({ imports: [LooksModule, DiscountsModule], controllers: [OrdersController] })
 export class OrdersModule {}

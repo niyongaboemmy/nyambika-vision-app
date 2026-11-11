@@ -15,7 +15,8 @@ export function Collection({ maker }: { maker: MakerSpace }) {
   const [i, setI] = useState(0);
   const [open, setOpen] = useState<MakerProduct | null>(null);
   const items = maker.products;
-  useEffect(() => trackOnce(`maker:${maker.id}`, "maker_space_viewed", { pageId: maker.id }), [maker.id]);
+  // E30: share links carry ?src=… (WhatsApp status, QR card, broadcast…) → traffic sources in Insights.
+  useEffect(() => trackOnce(`maker:${maker.id}`, "maker_space_viewed", { pageId: maker.id, source: new URLSearchParams(window.location.search).get("src")?.slice(0, 24) ?? undefined }), [maker.id]);
   const bind = useDrag(
     ({ last, movement: [mx], tap }) => {
       if (tap || !last) return;

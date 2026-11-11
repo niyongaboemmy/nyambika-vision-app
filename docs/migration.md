@@ -37,3 +37,17 @@ A synthetic example: `apps/ai/.venv/bin/python scripts/migration/make-sample-wav
 | 5. Go-live, 301 redirects | "Go live + redirect" publishes the page (verified) and its products, and enables the legacy redirect. Old URLs hit a catch-all route that issues a permanent redirect (308) to `/m/<handle>`. |
 | 6. Monitor 404s and traffic | Redirect hit counts per page; unmatched legacy paths are counted under "Unmatched legacy URLs". |
 | 7. Rollback | "Roll back" disables the redirect and hides the new page; the legacy page stays the live one. |
+
+## Full-network waves (E21)
+
+Host admin → Migration → **Whole network** (`/admin/network`) takes the same bundle format with up to 2,000 pages. Pages import on the `migration-import` BullMQ queue: each wave has its own concurrency window ("at a time", 1–16; dispatch is serialised with a Postgres advisory lock) and the worker has a global cap (`MIGRATION_WORKER_CONCURRENCY`, default 6). A page that fails half-way is removed so a re-run can import it.
+
+| Step | In the product |
+|---|---|
+| Owner outreach | "Send review links" sends a WhatsApp link to every owner not yet invited (idempotent). Unsigned pages are chased on the wave's cadence (default days 2, 5, 9 after the invite) by a 10-minute sweep; "Chase unsigned now" runs it on demand and "Rehearse cadence" (dev only) moves the clock forward 3 days. |
+| Dashboard | Progress, peak in-flight imports, funnel (imported → review sent → signed off → live), defects by category (photos, MoMo missing, no products, short story), failed imports, redirect hits. |
+| Cut-over checklist | Automatic: all imported, every owner invited, no blocker defects, ≥ 95% signed off (Gate 4). Manual: failures handled, redirect map exported (ticked by the export), DNS, rollback rehearsed (ticked by a rollback), support briefed. |
+| Redirect map | CSV (`legacy_host, legacy_path, target, status, redirect_active, hits`) or an nginx `map $uri $nyambika_new { … }` block for the legacy domain's edge. |
+| Go live / rollback | "Go live: all signed off" publishes every signed-off page and enables its redirect. "Roll back whole wave" cancels queued imports, hides every page of the wave and switches its redirects off; legacy pages stay live. |
+
+Synthetic network for testing: `apps/ai/.venv/bin/python scripts/migration/make-network.py OUT.json 200` (≈200 pages with deliberate defects, two duplicate handles and one invalid record).

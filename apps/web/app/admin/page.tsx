@@ -348,6 +348,7 @@ function MigrationTab() {
           <div>
             <p className="font-extrabold text-cocoa">Import a wave</p>
             <p className="text-sm text-cocoa-2">JSON bundle from the legacy export (format in docs/migration.md). Pages are imported hidden; photos go through the readiness pipeline.</p>
+            <a href="/admin/network" className="mt-1 inline-block text-sm font-bold text-violet-ink underline">Whole network (waves, outreach, cut-over) →</a>
           </div>
         </div>
         <label className={`st-press flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-paper-3 bg-paper text-sm font-bold text-cocoa hover:border-cocoa-3 focus-within:outline focus-within:outline-[2.5px] focus-within:outline-violet-ink ${busy ? "opacity-50" : ""}`}>

@@ -29,6 +29,9 @@ import { WardrobeModule } from "./modules/wardrobe/wardrobe.module";
 import { TailorModule } from "./modules/tailor/tailor.module";
 import { PilotModule } from "./modules/pilot/pilot.module";
 import { XrModule } from "./modules/xr/xr.module";
+import { GrowthModule } from "./modules/growth/growth.module";
+import { CoopVoiceModule } from "./modules/coopvoice/coopvoice.module";
+import { NetworkMigrationModule } from "./modules/migration/network";
 
 @Controller()
 class HealthController {
@@ -71,6 +74,9 @@ class HealthController {
     TailorModule,
     PilotModule,
     XrModule,
+    GrowthModule,
+    CoopVoiceModule,
+    NetworkMigrationModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: AuthGuard }],

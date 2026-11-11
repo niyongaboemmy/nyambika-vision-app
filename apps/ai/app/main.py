@@ -8,7 +8,7 @@ from fastapi import FastAPI, HTTPException
 from PIL import Image, ImageDraw
 from pydantic import BaseModel, Field
 
-from . import c2pa, config, garment, garment3d, guard, intent, listing, morph, motion, twin
+from . import c2pa, config, garment, garment3d, guard, insights, intent, listing, morph, motion, twin
 from .embed import embed_image
 from .imaging import decode_b64, encode_png_b64
 from .providers import get_provider, registry
@@ -195,3 +195,15 @@ def motion_preview(body: MotionIn):
         out["mp4_b64"] = base64.b64encode(r["mp4"]).decode() if r.get("mp4") else None
         out["poster_b64"] = base64.b64encode(r["poster"]).decode()
     return out
+
+
+class InsightsIn(BaseModel):
+    locale: Literal["rw", "en", "fr"] = "rw"
+    facts: dict = Field(default_factory=dict)
+    suggestions: list[str] = Field(default_factory=list, max_length=8)
+
+
+@app.post("/v1/insights/phrase")
+def insights_phrase(body: InsightsIn):
+    """E30 suggestions: rule text from the API, optionally rephrased by the LLM (MUSE_LLM=1)."""
+    return insights.phrase(body.locale, body.facts, body.suggestions)
