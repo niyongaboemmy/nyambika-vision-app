@@ -8,13 +8,14 @@ from fastapi import FastAPI, HTTPException
 from PIL import Image, ImageDraw
 from pydantic import BaseModel, Field
 
-from . import c2pa, config, garment, garment3d, guard, intent, listing, morph, motion, stt, twin
+from . import avatar_api, c2pa, config, garment, garment3d, guard, intent, listing, morph, motion, stt, twin
 from .embed import embed_image
 from .imaging import decode_b64, encode_png_b64
 from .providers import get_provider, registry
 
 app = FastAPI(title="Nyambika AI Gateway", version="0.1.0")
 app.include_router(stt.router)  # E22 speech-to-text: POST /v1/stt
+app.include_router(avatar_api.router)  # E33/E34 3D twin + 3D try-on: /v1/avatar/*
 
 
 class ImageIn(BaseModel):

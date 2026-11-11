@@ -165,6 +165,12 @@ const en = {
   "bag.sentBody": "We sent one request per maker. Enter your PIN for each.",
   "bag.remove": "Remove",
   "bag.addresses": "Saved addresses",
+  "twin3d.title": "3D twin",
+  "twin3d.ar": "AR mirror",
+  "twin3d.tryIn3d": "Try on my 3D twin",
+  "twin3d.disclaimer": "Visual guidance only. Actual fit may differ.",
+  "twin3d.consentTitle": "Private 3D twin",
+  "twin3d.consentBody": "Build and keep my encrypted 3D twin. Only I see it; delete anytime.",
 };
 
 type Messages = typeof en;
@@ -330,6 +336,12 @@ const rw: Messages = {
   "bag.sentBody": "Twohereje ubusabe kuri buri muhanzi. Shyiramo PIN kuri buri bumwe.",
   "bag.remove": "Kuramo",
   "bag.addresses": "Aderesi zabitswe",
+  "twin3d.title": "Impanga ya 3D",
+  "twin3d.ar": "Indorerwamo ya AR",
+  "twin3d.tryIn3d": "Gerageza ku mpanga yanjye ya 3D",
+  "twin3d.disclaimer": "Ni icyerekezo gusa. Uko umwambaro uzakubera bishobora gutandukana.",
+  "twin3d.consentTitle": "Impanga ya 3D yihariye",
+  "twin3d.consentBody": "Kora kandi ubike impanga yanjye ya 3D mu ibanga. Ni jye wenyine uyibona; nshobora kuyisiba igihe cyose.",
 };
 
 const fr: Messages = {
@@ -492,6 +504,12 @@ const fr: Messages = {
   "bag.sentBody": "Nous avons envoyé une demande par créateur. Saisissez votre PIN pour chacune.",
   "bag.remove": "Retirer",
   "bag.addresses": "Adresses enregistrées",
+  "twin3d.title": "Jumeau 3D",
+  "twin3d.ar": "Miroir AR",
+  "twin3d.tryIn3d": "Essayer sur mon jumeau 3D",
+  "twin3d.disclaimer": "Indication visuelle uniquement. L'ajustement réel peut varier.",
+  "twin3d.consentTitle": "Jumeau 3D privé",
+  "twin3d.consentBody": "Créer et conserver mon jumeau 3D chiffré. Moi seul·e le vois ; suppression à tout moment.",
 };
 
 export const catalogues: Record<Locale, Messages> = { en, rw, fr };
