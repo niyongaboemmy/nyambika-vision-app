@@ -5,6 +5,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { AiClient } from "../../common/ai.client";
 import { ConsentService } from "../../common/consent.service";
+import { kigaliDayStart, nextKigaliMidnight } from "../../common/kigali-day";
 import { aiSpend } from "../../common/metrics";
 import { MeteringService } from "../../common/metering.service";
 import { PrismaService } from "../../common/prisma.service";
@@ -155,13 +156,12 @@ export class Twin3dService implements OnModuleInit {
 
   private async requireConsent(userId: string) {
     if (!(await this.consent.has(userId, AVATAR_3D))) {
-      throw new ForbiddenException({ message: "Turn on the 3D twin consent first.", code: "CONSENT_REQUIRED" });
+      throw new ForbiddenException({ message: "Turn on the 3D twin consent first.", code: "CONSENT_REQUIRED", purpose: AVATAR_3D });
     }
   }
 
   private async gate(userId: string) {
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
+    const d = kigaliDayStart();
     const [consented, buildsToday, latest] = await Promise.all([
       this.consent.has(userId, AVATAR_3D),
       this.prisma.avatar3d.count({ where: { userId, createdAt: { gte: d }, status: { notIn: ["REJECTED", "FAILED"] } } }),
@@ -169,7 +169,7 @@ export class Twin3dService implements OnModuleInit {
     ]);
     const g = canBuild({ consent: consented, buildsToday, building: Boolean(latest && BUILDING.has(latest.status as AvatarStatus)) });
     if (!g.ok) {
-      throw new HttpException({ message: g.message, code: g.code }, g.code === "CONSENT_REQUIRED" ? HttpStatus.FORBIDDEN : HttpStatus.TOO_MANY_REQUESTS);
+      throw new HttpException({ message: g.message, code: g.code, ...(g.code === "CONSENT_REQUIRED" ? { purpose: AVATAR_3D } : g.code === "DAILY_CAP" ? { resetsAt: nextKigaliMidnight().toISOString(), scope: "AVATAR_3D" } : {}) }, g.code === "CONSENT_REQUIRED" ? HttpStatus.FORBIDDEN : HttpStatus.TOO_MANY_REQUESTS);
     }
     await this.metering.assertBudgetOpen();
   }

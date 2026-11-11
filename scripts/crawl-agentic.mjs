@@ -4,9 +4,9 @@
 // paid → link can't be reused → host runs a partner sandbox try-on → maker's AI-assistant opt-in in studio.
 // Run with BASE_URL=http://localhost:3101 API_URL=http://localhost:4101.
 import { createRequire } from "node:module";
-import { BASE, signIn, start } from "./crawl-lib.mjs";
+import { API_BASE, BASE, signIn, start } from "./crawl-lib.mjs";
 
-const API = process.env.API_URL ?? "http://localhost:4101";
+const API = API_BASE;
 const req = createRequire(new URL("../apps/api/package.json", import.meta.url));
 const { Client } = req("@modelcontextprotocol/sdk/client/index.js");
 const { StreamableHTTPClientTransport } = req("@modelcontextprotocol/sdk/client/streamableHttp.js");

@@ -14,6 +14,7 @@ import {
   type TextareaHTMLAttributes,
 } from "react";
 import { createPortal } from "react-dom";
+import { isExpectedText, LimitState } from "./limit-state";
 
 /* Light, warm primitives for the member Page Manager and host admin (brief §4 "Tailor / member studio").
  * Exported names and props of Card, SButton, Field, Input, Textarea, Select, Badge, PageTabs, Empty and Note
@@ -214,8 +215,10 @@ export function Empty({ children, icon = "sparkle", title, action }: { children:
   );
 }
 
-export function Note({ error, ok }: { error?: string | null; ok?: string | null }) {
-  if (error)
+/** Expected limits (daily cap, consent, rate limit, NLB gate, offline…) render as the calm LimitState card. */
+export function Note({ error, ok, onRetry }: { error?: unknown; ok?: string | null; onRetry?: () => void }) {
+  if (error && (typeof error !== "string" || isExpectedText(error))) return <LimitState error={error} tone="light" onRetry={onRetry} />;
+  if (typeof error === "string" && error)
     return (
       <p role="alert" className="flex items-start gap-2 rounded-2xl bg-red-50 px-3.5 py-2.5 text-sm font-medium text-red-800 ring-1 ring-inset ring-red-200">
         <Icon name="alert" className="mt-0.5 size-4 shrink-0" />

@@ -106,7 +106,7 @@ export class MotionService implements OnModuleInit, OnModuleDestroy {
     const ok = motionEligibility({ generationStatus: gen?.status ?? null }, await this.todayCount(userId));
     if (!ok.ok) throw new HttpException({ message: ok.reason, code: "MOTION_NOT_ALLOWED" }, HttpStatus.TOO_MANY_REQUESTS);
     if ((await this.twins.current(userId)) && !(await this.consent.has(userId, "TRYON_GENERATION"))) {
-      throw new ForbiddenException({ message: "You paused looks on your twin. Turn them back on in the Trust centre.", code: "CONSENT_WITHDRAWN" });
+      throw new ForbiddenException({ message: "You paused looks on your twin. Turn them back on in the Trust centre.", code: "CONSENT_WITHDRAWN", purpose: "TRYON_GENERATION" });
     }
     await this.metering.assertBudgetOpen();
     if (existing) await this.prisma.motionClip.delete({ where: { id: existing.id } });

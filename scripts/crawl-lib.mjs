@@ -1,10 +1,22 @@
 // Shared Playwright helpers for manual-test crawls (mobile-first: Pixel 7 viewport).
-import { mkdirSync } from "node:fs";
+import { mkdirSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 const require = createRequire(new URL("../apps/web/package.json", import.meta.url));
 const { chromium, devices } = require("@playwright/test");
 
 export const BASE = process.env.BASE_URL ?? "http://localhost:3000";
+/** Core API for direct calls: API_URL, else the agent-slot convention web 310N ↔ API 410N (3000 ↔ 4000). */
+export const API_BASE = process.env.API_URL ?? BASE.replace(/:3(\d{3})\b/, ":4$1");
+/** Database for crawls that flip flags with psql: CRAWL_DB, else the one apps/api/.env points at. */
+export const CRAWL_DB = process.env.CRAWL_DB ?? dbFromEnv() ?? "nyambika_dev";
+function dbFromEnv() {
+  try {
+    const env = readFileSync(new URL("../apps/api/.env", import.meta.url), "utf8");
+    return env.match(/^DATABASE_URL="?postgres(?:ql)?:\/\/[^/]+\/([^?"\s]+)/m)?.[1] ?? null;
+  } catch {
+    return null;
+  }
+}
 
 export async function start(name, launch = {}) {
   const out = new URL(`./crawl-output/${name}/`, import.meta.url).pathname;

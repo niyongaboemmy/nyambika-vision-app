@@ -2,9 +2,9 @@
 // versions, local attribute model eval + gated activation, ✨ auto-fill suggestion in the product editor with
 // `ml.local_attr_spike` on, and the k-anonymous Trends card with `insights.trends_spike` on.
 // Needs the API on 410N, the web on 310N and this branch's AI gateway (route `attr`, /v1/ml/*).
-import { BASE, signIn, start } from "./crawl-lib.mjs";
+import { API_BASE, BASE, signIn, start } from "./crawl-lib.mjs";
 
-const API_URL = process.env.API_URL ?? "http://localhost:4103";
+const API_URL = API_BASE;
 
 const OUT = new URL("./crawl-output/mlspike/", import.meta.url).pathname;
 const { browser, page: maker, shot, finish, issues } = await start("mlspike");

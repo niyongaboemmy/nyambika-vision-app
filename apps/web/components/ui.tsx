@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type ButtonHTMLAttributes, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { isExpectedText, LimitState } from "./limit-state";
 
 /** Mobile-first frame: full-bleed on phones, a centred phone-width column on larger screens. */
 export function Screen({ children, className = "", aurora = true }: { children: ReactNode; className?: string; aurora?: boolean }) {
@@ -113,7 +114,12 @@ export function Avatar({ name, size = 44, ring = false }: { name: string; size?:
   );
 }
 
-export function ErrorNote({ error }: { error: string | null }) {
+/**
+ * Inline error. Expected limits (daily cap, kill switch, consent, rate limit, offline…) render as the calm
+ * LimitState card instead; pass the caught error itself (or the friendly string from `api()`).
+ */
+export function ErrorNote({ error, onRetry }: { error: unknown; onRetry?: () => void }) {
   if (!error) return null;
+  if (typeof error !== "string" || isExpectedText(error)) return <LimitState error={error} onRetry={onRetry} />;
   return <p role="alert" className="rounded-xl border border-red-400/40 bg-red-500/15 px-3 py-2 text-sm text-red-100">{error}</p>;
 }

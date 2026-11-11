@@ -1,6 +1,7 @@
 import { Global, HttpException, HttpStatus, Injectable, Module } from "@nestjs/common";
 import { LOOK_GUARDRAILS } from "@nyambika/contracts";
 import { config } from "../config";
+import { dailyCapBody, kigaliDayStart } from "./kigali-day";
 import { PrismaService } from "./prisma.service";
 
 /**
@@ -11,10 +12,9 @@ import { PrismaService } from "./prisma.service";
 export class MeteringService {
   constructor(private prisma: PrismaService) {}
 
+  /** Daily caps follow the Kigali calendar day (see kigali-day.ts). */
   private startOfDay() {
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
-    return d;
+    return kigaliDayStart();
   }
 
   async generationsToday(userId: string) {
@@ -25,10 +25,7 @@ export class MeteringService {
     const used = await this.generationsToday(userId);
     const cap = await this.dailyCap();
     if (used >= cap) {
-      throw new HttpException(
-        { message: `Daily look limit reached (${cap}). New looks unlock tomorrow; saved looks stay free to view.`, code: "DAILY_CAP" },
-        HttpStatus.TOO_MANY_REQUESTS,
-      );
+      throw new HttpException(dailyCapBody(cap, used), HttpStatus.TOO_MANY_REQUESTS);
     }
   }
 
@@ -41,7 +38,7 @@ export class MeteringService {
   async assertBudgetOpen() {
     const flag = await this.prisma.featureFlag.findUnique({ where: { key: "ai.kill_switch" } });
     if (flag?.enabled) {
-      throw new HttpException({ message: "Looks are paused for a moment. Please try again later.", code: "KILL_SWITCH" }, 503);
+      throw new HttpException({ message: "Looks are paused for a moment. Please try again later.", code: "KILL_SWITCH", retryAfterSec: 300 }, 503);
     }
   }
 
