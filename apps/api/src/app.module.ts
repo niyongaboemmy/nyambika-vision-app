@@ -20,6 +20,8 @@ import { FlagsModule } from "./modules/flags/flags.module";
 import { PaymentsModule } from "./modules/payments/payments.module";
 import { OrdersModule } from "./modules/orders/orders.module";
 import { AnalyticsModule } from "./modules/analytics/analytics.module";
+import { PrivacyModule } from "./modules/privacy/privacy.module";
+import { AdminModule } from "./modules/admin/admin.module";
 
 @Controller()
 class HealthController {
@@ -53,6 +55,8 @@ class HealthController {
     PaymentsModule,
     OrdersModule,
     AnalyticsModule,
+    PrivacyModule,
+    AdminModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: AuthGuard }],

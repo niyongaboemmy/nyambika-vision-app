@@ -40,10 +40,10 @@ export function Collection({ maker }: { maker: MakerSpace }) {
               style={{
                 transform: `translateX(calc(-50% + ${d * 120}px)) rotateY(${d * -28}deg) scale(${1 - Math.abs(d) * 0.14})`,
                 zIndex: 10 - Math.abs(d),
-                opacity: 1 - Math.abs(d) * 0.3,
               }}
             >
-              {img && <img src={img} alt="" draggable={false} className="h-[200px] w-full object-cover" />}
+              {/* Dim only the photo on side cards so labels keep WCAG AA contrast. */}
+              {img && <img src={img} alt="" draggable={false} className="h-[200px] w-full object-cover" style={{ filter: `brightness(${1 - Math.abs(d) * 0.3})` }} />}
               <div className="p-2 text-left">
                 <p className="truncate text-sm font-semibold">{p.title}</p>
                 <p className="text-xs text-gold">{rwf(p.priceRwf)}</p>

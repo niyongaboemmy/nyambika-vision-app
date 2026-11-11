@@ -26,7 +26,7 @@ pnpm setup                                # install, build contracts, AI venv, m
 pnpm dev                                  # web :3000 · api :4000 · ai :8100
 ```
 
-Open http://localhost:3000 on a phone-sized window. In development, OTP codes are shown on the sign-in screen and mock MoMo prompts appear on the simulated handset at `/dev/handset`.
+Open http://localhost:3000 on a phone-sized window (or your phone on the same network). In development, OTP codes are shown on the sign-in screen and mock MoMo prompts appear on the simulated handset at `/dev/handset`.
 
 **Seeded accounts** (any OTP shown in dev):
 
@@ -45,3 +45,12 @@ Payments, WhatsApp/SMS, VTON providers and C2PA signing run through adapters wit
 ## Delivery status
 
 Tracked phase by phase in [docs/delivery-log.md](docs/delivery-log.md).
+
+## Testing
+
+```bash
+pnpm --filter @nyambika/api test        # ranking unit tests + API integration tests (needs Postgres)
+cd apps/ai && pnpm test                  # AI Gateway (pytest)
+pnpm e2e                                 # Playwright E2E + axe, against a running, seeded stack
+node scripts/crawl-s4.mjs                # sprint crawls: screenshots in scripts/crawl-output/
+```

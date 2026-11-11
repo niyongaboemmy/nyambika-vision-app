@@ -7,3 +7,32 @@
 | Sprint 2: twin + first look on you | Mirror moment: consent-first photo twin (camera with live on-device light check, upload, or synthetic persona), server capture checks with retake guidance, AES-256-GCM encrypted storage, versioning, purge cascade; consent ledger records. Generation pipeline (SRS B1) via AI Gateway: cache key, daily cap, kill-switch, guard (withheld looks hidden, not charged, queued for AI review), C2PA, metering on DELIVERED with FR-PLAN-03 source order. Full-screen LookView with maker card, AI label + content-credentials sheet, colour ring snapping to real variants, double-tap save (HD on save), share. AI-model fallback for shoppers without a twin. | `scripts/crawl-s2.mjs`. Crawl found and fixed: colour-ring label intercepting taps. |
 | Sprint 3: Ask & Snap → Looks stream | Muse home (no tab bar): orb, hold-to-speak voice beta (Web Speech API, `muse.voice_beta` flag), typing, intent chips with tap-to-edit and re-rank, RW/EN/FR intent parsing via AI Gateway. Retrieval and ranking (budget, occasion, category, style, colour by hue, location, lead time vs event date) with maker diversity inside a relevance band; grounded on published, try-on-ready, in-stock items only. Snap visual search over pgvector (cosine). Vertical Looks stream with progressive generation (3 on intent, +2 at look n−1). Saved looks. Menu sheet replaces tabs (CR-01). | `scripts/crawl-s3.mjs`: Kinyarwanda intent → first look on twin in 2.3 s; progressive render of look 4; Snap; chip edit. Ranking unit tests 6/6. |
 | Sprint 4: hold to buy, paid to the maker | Hold-to-buy sheet (size auto from twin, delivery/pickup, wallet, 1.2 s press-and-hold with progress ring, keyboard accessible) → idempotent order with stock reservation and payout routing (page or cooperative maker, FR-COOP-05) → Mobile Money request-to-pay via provider adapter (mock with simulated handset + HMAC-signed webhook; MTN Collections adapter for sandbox creds) → PAID, WhatsApp notifications to maker and shopper, polling fallback + reconciliation job, timeout/decline restores stock. Order lifecycle (SRS B2) with maker actions, shopper confirm receipt, reviews, disputes → moderation, CSV export. Ambient order timeline. Member analytics v1 and plan/allowance management with 80%/100% alerts. | `scripts/crawl-s4.mjs`: hold → PIN on handset → "Paid ✓ directly to Uwase Couture" → maker accepts/makes/ships/delivers → shopper confirms and reviews → analytics updated. Curl checks: idempotent retry, payout to coop maker, forged webhook 401. Crawl found and fixed: overlay stacking in sheets (now portalled). |
+| Sprint 5: harden, comply, accept | Trust centre: consent toggles (try-on withdrawal enforced server-side), hash-chained ledger verification, DSAR JSON export, deletion cascade (twin / looks / account with pseudonymised order retention) with per-step job record. Host admin: overview with AI unit economics against plan KPIs, verification queue (badge + WhatsApp notice), moderation (guard-withheld looks, disputes with mediation), feature flags incl. AI kill switch, model registry with per-model guard/latency stats, message outbox, audit log, payment reconciliation. SEO sitemap/robots. API integration tests (tenant isolation, one-page rule, admin guard, consent tamper detection, webhook signature, idempotency) and Playwright E2E with axe (WCAG 2.2 AA). | `scripts/crawl-s5.mjs`; API tests 16/16; E2E 6/6 (core loop within first-look budget, short hold does not buy, axe on public pages); `next build` green. Fixed: Maker Space contrast, non-optimistic toggles. |
+
+## Status against the implementation plan
+
+### Implemented and running locally
+All R1 "Must" epics in a working form: E01–E04, E06–E08, E10–E16, E18, E20, plus the platform pieces of E19 (CI, tests, a11y). Every v2 moment for R1 (Mirror → Ask/Snap → Looks on you → colour ring → Maker Space → Hold to buy → ambient order timeline) is in place.
+
+### Simulated locally behind adapters (ADR-0002), to replace before the pilot
+| Area | Local stand-in | Needed for production |
+|---|---|---|
+| Virtual try-on | Compositor (garment cut-out placed on the twin) | Licensed VTON provider that passes the NLB (OD-02) |
+| C2PA | HMAC-signed manifest in a PNG chunk | `c2patool`/c2pa-rs with KMS keys |
+| Payments | Mock MoMo with simulated handset; MTN adapter written but untested | MTN/Airtel credentials or aggregator (OD-05) |
+| WhatsApp / SMS | Outbox table + log | WhatsApp Cloud API templates, SMS gateway |
+| Kinyarwanda voice | Browser Web Speech API (beta flag) | Kinyarwanda ASR vendor (OD-03) |
+| Muse intent | RW/EN/FR rules parser; optional Claude tool call (`MUSE_LLM=1`) | LLM with the 300-utterance eval set |
+| Visual search | 64-d colour + texture embedding | Image embedding model |
+| Object storage | Local filesystem, AES-256-GCM twins | S3-compatible store with SSE-KMS in the approved region |
+
+### Not done yet (R1)
+- E05 AI product studio and AI listing writer (Should).
+- E17 migration tooling for existing member pages (needs the page export, OI-04).
+- On-device pose checks with MediaPipe (currently: on-device light check + server-side silhouette checks).
+- Postgres row-level security (API guards + tests today, ADR-0003); BullMQ/Redis job queue (in-process today, ADR-0004).
+- Observability stack (OpenTelemetry, Sentry), IaC/Terraform, preview environments, Lighthouse/bundle budget in CI.
+- Non-engineering Gate 2 items: NCSA certificate, DPIA, pen test, provider DPAs, native-speaker review of RW/FR copy.
+
+### Later phases (not started)
+R2 "Grow" (live morph, tailor custom orders, Ask-your-circle poll, wardrobe, 3D garment + AR, voice GA, passkeys), R3 "Expand" (3D twin, AR mirror, VR showroom, agentic commerce, native shell) and R4. These depend on the Gate 3 pilot decision in the plan.

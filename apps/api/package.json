@@ -18,6 +18,7 @@
   },
   "devDependencies": {
     "@nestjs/testing": "11.2.9",
+    "@swc/core": "^1.16.22",
     "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
@@ -29,6 +30,7 @@
     "tsc-watch": "^7.2.1",
     "tsx": "^4.23.15",
     "typescript": "5.9.3",
+    "unplugin-swc": "^2.0.0",
     "vitest": "^4.1.12"
   },
   "dependencies": {

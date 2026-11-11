@@ -19,3 +19,4 @@ apps/web/playwright-report/
 scripts/crawl-output/
 .cache/
 .pytest_cache/
+apps/web/.next-build/

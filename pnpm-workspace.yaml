@@ -11,3 +11,4 @@ allowBuilds:
   sharp: true
   "@nestjs/core": true
   unrs-resolver: true
+  "@swc/core": true

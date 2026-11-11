@@ -1,4 +1,5 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { ForbiddenException, Injectable, Logger } from "@nestjs/common";
+import { ConsentService } from "../../common/consent.service";
 import type { Generation } from "@prisma/client";
 import { AiClient } from "../../common/ai.client";
 import { MeteringService } from "../../common/metering.service";
@@ -33,6 +34,7 @@ export class GenerationService {
     private ai: AiClient,
     private twins: TwinService,
     private metering: MeteringService,
+    private consent: ConsentService,
   ) {}
 
   async model(tier: "PREVIEW" | "HD") {
@@ -43,6 +45,9 @@ export class GenerationService {
   /** Return a cached generation or queue a new one. Re-views are free (cache key includes twin version). */
   async ensure(userId: string, variantId: string, tier: "PREVIEW" | "HD" = "PREVIEW", persona = 2): Promise<Generation> {
     const twin = await this.twins.current(userId);
+    if (twin && !(await this.consent.has(userId, "TRYON_GENERATION"))) {
+      throw new ForbiddenException({ message: "You paused looks on your twin. Turn them back on in the Trust centre.", code: "CONSENT_WITHDRAWN" });
+    }
     const twinKey = twin ? `${twin.id}:v${twin.version}` : `persona-${persona}:v0`;
     const model = await this.model(tier);
     const cacheKey = `${twinKey}|${variantId}|${model.id}`;
