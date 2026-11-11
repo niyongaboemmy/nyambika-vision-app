@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 /** E42 routing policy (mirrors apps/ai/app/inference/policy.py). The API owns it; the gateway applies it. */
-export const ROUTES = ["tryon", "stt", "llm", "avatar", "video"] as const;
+export const ROUTES = ["tryon", "stt", "llm", "avatar", "video", "attr"] as const; // attr: R4 spike local model
 export type Route = (typeof ROUTES)[number];
 export const BACKENDS = ["pool", "hosted"] as const;
 
@@ -22,6 +22,40 @@ export const policySchema = z.object({
 });
 export type Policy = z.infer<typeof policySchema>;
 export type RoutePolicy = z.infer<typeof routePolicy>;
+
+/**
+ * Defaults for routes added after policies were first stored (mirror `_DEFAULTS` in apps/ai/app/inference/policy.py).
+ * `attr` (R4 spike): garment attributes from the in-process local model only, maker photos stay in-region.
+ */
+export const ADDED_ROUTE_DEFAULTS: Partial<Record<Route, RoutePolicy>> = {
+  attr: { strategy: "pool-only", latency_slo_ms: 2_000, residency: "in-region", fallback: true, pool: { enabled: true, cost_rwf: 0.2 }, hosted: { enabled: true, cost_rwf: 0 } },
+};
+
+/**
+ * Compat step for stored policies: `routes` is an exhaustive record, so a policy saved before a route existed (no
+ * `attr`) or by an API that did not know a route yet (an `attr` key it rejected) would fail `policySchema`. Keep every
+ * valid known route, fill a missing one from the gateway's live policy, else from the defaults, and drop unknown keys.
+ */
+export function upgradePolicy(stored: unknown, live?: { routes?: Record<string, unknown> } | null): { policy: Policy; changed: boolean } {
+  const s = (stored ?? {}) as { version?: unknown; breaker?: unknown; routes?: Record<string, unknown> };
+  const routes: Partial<Record<Route, RoutePolicy>> = {};
+  let changed = Object.keys(s.routes ?? {}).some((k) => !(ROUTES as readonly string[]).includes(k));
+  for (const route of ROUTES) {
+    const own = routePolicy.safeParse(s.routes?.[route]);
+    if (own.success) {
+      routes[route] = own.data;
+      continue;
+    }
+    const fromLive = routePolicy.safeParse(live?.routes?.[route]);
+    const filled = fromLive.success ? fromLive.data : ADDED_ROUTE_DEFAULTS[route];
+    if (!filled) throw new Error(`Stored inference policy has no valid "${route}" route`);
+    routes[route] = filled;
+    changed = true;
+  }
+  const breaker = breakerPolicy.safeParse(s.breaker);
+  const policy = policySchema.parse({ version: typeof s.version === "number" ? s.version : 0, breaker: breaker.success ? breaker.data : { failure_threshold: 3, cooldown_s: 15 }, routes });
+  return { policy, changed: changed || !breaker.success };
+}
 
 /** Video must never silently fall back to a backend without its own NLB pass. */
 export function enforceInvariants(p: Policy): Policy {

@@ -154,6 +154,54 @@ const fr = await maker.request.get(`${BASE}/api/pages/${P}/trends?locale=rw`);
 const rw = await fr.json();
 assert(rw.enabled && rw.rising.length > 0 && /mu byumweru/.test(rw.rising[0].text), "Kinyarwanda trend copy");
 
+// ── Cooperative: the credited maker's own consent is needed too (hardening pass 1) ─
+const coopCtx = await browser.newContext({ ...maker.context()._options });
+const coopAdmin = await coopCtx.newPage();
+await signIn(coopAdmin, "0788100002"); // Abahizi coop admin
+const coopPages = await (await coopAdmin.request.get(`${BASE}/api/pages/mine/list`)).json();
+const C = coopPages.find((p) => p.memberType === "COOPERATIVE")?.id ?? coopPages[0].id;
+await coopAdmin.request.put(`${BASE}/api/pages/${C}/training-data`, { data: { optedIn: true, locale: "en" } });
+await coopAdmin.goto(`${BASE}/studio/${C}/training`);
+const waiting = coopAdmin.getByText(/^Waiting for /).first();
+await waiting.waitFor({ timeout: 20000 });
+await waiting.scrollIntoViewIfNeeded();
+await coopAdmin.waitForTimeout(500);
+await coopAdmin.screenshot({ path: `${OUT}20-coop-admin-waiting-for-maker.png` });
+const before = (await (await coopAdmin.request.get(`${BASE}/api/pages/${C}/training-data`)).json()).products;
+assert(before.some((p) => p.waitingForMaker && !p.included), "coop admin's yes alone: credited pieces wait for the maker");
+
+const makerCtx = await browser.newContext({ ...maker.context()._options });
+const coopMaker = await makerCtx.newPage();
+for (const [p, label] of [[coopAdmin, "coop admin"], [coopMaker, "coop maker"]]) {
+  p.on("console", (m) => m.type() === "error" && issues.push(`${label} console: ${m.text()}`));
+  p.on("response", (r) => r.status() >= 500 && issues.push(`${label} HTTP ${r.status()} ${r.url()}`));
+}
+await signIn(coopMaker, "0788100004"); // Mukamana Jeanne, coop maker
+await coopMaker.goto(`${BASE}/studio/${C}/products`);
+await coopMaker.getByRole("link", { name: /your photos for training/i }).click();
+await coopMaker.waitForURL(/\/training$/);
+await coopMaker.getByRole("heading", { name: /pieces credited to you/i }).waitFor({ timeout: 20000 });
+await coopMaker.waitForTimeout(500);
+await coopMaker.screenshot({ path: `${OUT}21-coop-maker-consent-off.png` });
+const makerSwitch = coopMaker.getByRole("switch", { name: /share photos of pieces i made/i });
+if (await makerSwitch.isChecked()) await makerSwitch.click({ force: true }); // start from "off" on reruns
+await coopMaker.waitForTimeout(400);
+await makerSwitch.click({ force: true });
+await coopMaker.getByText(/thank you! pieces you made/i).waitFor();
+await coopMaker.waitForTimeout(400);
+await coopMaker.screenshot({ path: `${OUT}22-coop-maker-consent-on.png` });
+const after = (await (await coopAdmin.request.get(`${BASE}/api/pages/${C}/training-data`)).json()).products;
+const mine = (await (await coopMaker.request.get(`${BASE}/api/pages/${C}/training-data/maker`)).json()).pieces;
+assert(mine.length > 0 && mine.every((p) => after.find((a) => a.id === p.id)?.included === p.coopShares), "maker's yes + admin's yes → her pieces are shared");
+await makerSwitch.click({ force: true });
+await coopMaker.getByText(/stopped\. pieces you made/i).waitFor();
+const outNow = (await (await coopAdmin.request.get(`${BASE}/api/pages/${C}/training-data`)).json()).products;
+assert(mine.every((p) => outNow.find((a) => a.id === p.id)?.included === false), "maker withdraws → her pieces leave the dataset");
+assert((await coopAdmin.request.get(`${BASE}/api/pages/${C}/training-data/maker`)).status() === 403, "the coop admin cannot decide for the maker");
+await coopAdmin.request.put(`${BASE}/api/pages/${C}/training-data`, { data: { optedIn: false, locale: "en" } });
+await coopCtx.close();
+await makerCtx.close();
+
 // Leave the spike flags off (default) for whoever runs next.
 await flag("ml.local_attr_spike", false);
 await flag("insights.trends_spike", false);

@@ -9,9 +9,10 @@ import { PrismaService } from "../../common/prisma.service";
 import { StorageService } from "../../common/storage.service";
 import { config } from "../../config";
 import { GenerationService } from "../looks/generation.service";
+import { inferenceRegion } from "../looks/inference-region";
 import { TwinService } from "../twin/twin.module";
 import { personaFromCacheKey } from "../xr/xr-rules";
-import { mapGatewayStatus, residencyRegion, servedByActivatedModel, validateClip, VIDEO_JOB, VIDEO_RENDERING, VIDEO_TRYON, videoAvailable, videoCostRwf, videoEligibility, videoQuote } from "./video-rules";
+import { mapGatewayStatus, servedByActivatedModel, validateClip, VIDEO_JOB, VIDEO_RENDERING, VIDEO_TRYON, videoAvailable, videoCostRwf, videoEligibility, videoQuote } from "./video-rules";
 
 interface GatewayJob {
   status: string;
@@ -164,12 +165,8 @@ export class VideoTryOnService implements OnModuleInit, OnModuleDestroy {
   }
 
   /** E41 region of the shopper (else the page) → the router keeps self-hosted/hosted inference in that region. */
-  private async region(userId: string, pageId: string) {
-    const [prefs, page] = await Promise.all([
-      this.prisma.shopperPrefs.findUnique({ where: { userId } }).catch(() => null),
-      this.prisma.pageRegion.findUnique({ where: { pageId } }).catch(() => null),
-    ]);
-    return residencyRegion(prefs?.country, page?.region);
+  private region(userId: string, pageId: string) {
+    return inferenceRegion(this.prisma, userId, pageId);
   }
 
   private async deleteClip(row: Pick<VideoTryOn, "id" | "clipPath" | "clipDeletedAt">) {

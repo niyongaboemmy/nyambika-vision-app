@@ -4,6 +4,10 @@
 import { BASE, signIn, start } from "./crawl-lib.mjs";
 
 const { browser, context, page, shot, finish, issues } = await start("social");
+// The pilot "did it help you decide?" survey can rise over any screen after an order: dismiss it whenever it does.
+await page.addLocatorHandler(page.getByText("Did Nyambika help you decide?"), async () => {
+  await page.getByRole("button", { name: "Not now" }).click();
+});
 const out = new URL("./crawl-output/social/", import.meta.url).pathname;
 const assert = (cond, msg) => {
   if (!cond) {
@@ -129,7 +133,12 @@ await page.getByRole("button", { name: /pickup in/i }).click();
 const walletNo = page.getByRole("dialog").getByLabel(/number \(/i);
 if (await walletNo.count()) await walletNo.first().fill("0712345678");
 await shot("winner-hold-sheet");
+// Since E41 the winner can be a cross-border (Kenyan) piece: that sheet asks for an M-Pesa number first.
+const mpesa = page.getByRole("dialog").getByPlaceholder("0712 345 678");
+if (await mpesa.count()) await mpesa.fill("0712345678");
 const hold = page.getByRole("button", { name: /hold to buy/i });
+await hold.scrollIntoViewIfNeeded(); // the taller cross-border sheet puts it below the fold
+await page.waitForTimeout(300);
 const box = await hold.boundingBox();
 await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
 await page.mouse.down();
@@ -170,6 +179,8 @@ await page.waitForURL(/\/wardrobe\/item\//);
 await page.getByRole("heading", { name: /styled by the muse/i }).waitFor();
 await shot("wardrobe-item");
 await page.getByRole("button", { name: /restyle for an event/i }).click();
+await page.getByRole("dialog").waitFor();
+await page.waitForTimeout(600); // sheet rise animation: the moving form intercepts clicks until it settles
 await page.getByRole("dialog").getByRole("button", { name: "Office", exact: true }).click();
 await page.getByRole("dialog").getByPlaceholder(/e\.g\./).fill("Board presentation");
 await page.getByRole("dialog").getByRole("button", { name: "In 3 days" }).click();

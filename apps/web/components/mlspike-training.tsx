@@ -10,7 +10,19 @@ import { useApi } from "@/lib/use-api";
 interface TrainingState {
   optedIn: boolean;
   decidedAt: string | null;
-  products: { id: string; title: string; category: string; image: string | null; photos: number; included: boolean; override: "IN" | "OUT" | null; inDataset: boolean }[];
+  products: {
+    id: string;
+    title: string;
+    category: string;
+    image: string | null;
+    photos: number;
+    included: boolean;
+    override: "IN" | "OUT" | null;
+    inDataset: boolean;
+    /** Cooperative pages: credited makers, each must say yes too. */
+    makers?: { name: string; consented: boolean }[];
+    waitingForMaker?: boolean;
+  }[];
   tombstones: number;
   latestDataset: { version: number; at: string; itemsFromThisPage: number } | null;
 }
@@ -116,26 +128,125 @@ export function TrainingDataConsent({ pageId }: { pageId: string }) {
             <li key={p.id} className="overflow-hidden rounded-[20px] bg-paper ring-1 ring-inset ring-hairline">
               <div className="relative aspect-[4/5] bg-white">
                 {p.image ? <img src={p.image} alt="" className="size-full object-cover" /> : <span className="grid size-full place-items-center text-cocoa-3"><Icon name="camera" className="size-6" /></span>}
-                <span className={`absolute left-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-black ${p.included ? "bg-mint-ink text-white" : "bg-white/90 text-cocoa-2"}`}>{p.included ? "Shared" : "Private"}</span>
+                <span className={`absolute left-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-black ${p.included ? "bg-mint-ink text-white" : p.waitingForMaker ? "bg-amber-100 text-gold-ink" : "bg-white/90 text-cocoa-2"}`}>{p.included ? "Shared" : p.waitingForMaker ? "Waiting" : "Private"}</span>
                 {p.inDataset && <span className="absolute bottom-2 left-2 rounded-full bg-violet-ink/90 px-2 py-0.5 text-[10px] font-black text-white">In dataset</span>}
               </div>
               <div className="space-y-1.5 p-2.5">
                 <p className="truncate text-sm font-bold text-cocoa">{p.title}</p>
+                {p.waitingForMaker && (
+                  <p className="flex items-center gap-1 text-xs font-bold text-gold-ink">
+                    <Icon name="clock" className="size-3.5 shrink-0" />
+                    <span className="truncate">Waiting for {(p.makers ?? []).filter((m) => !m.consented).map((m) => m.name.split(" ")[0]).join(", ") || "the maker"}</span>
+                  </p>
+                )}
                 <button
                   type="button"
                   disabled={busy}
-                  aria-pressed={p.included}
-                  aria-label={`${p.included ? "Keep private" : "Share"}: ${p.title}`}
-                  onClick={() => put(`/pages/${pageId}/training-data/products/${p.id}`, { included: !p.included }, p.included ? `${p.title} is private again.` : `${p.title} is shared.`)}
-                  className={`st-press min-h-11 w-full rounded-xl text-sm font-bold ring-1 ring-inset disabled:opacity-50 ${p.included ? "bg-white text-cocoa ring-hairline" : "bg-violet-ink text-white ring-violet-ink"}`}
+                  aria-pressed={(p.included || p.waitingForMaker)}
+                  aria-label={`${(p.included || p.waitingForMaker) ? "Keep private" : "Share"}: ${p.title}`}
+                  onClick={() => put(`/pages/${pageId}/training-data/products/${p.id}`, { included: !(p.included || p.waitingForMaker) }, (p.included || p.waitingForMaker) ? `${p.title} is private again.` : `${p.title} is shared.`)}
+                  className={`st-press min-h-11 w-full rounded-xl text-sm font-bold ring-1 ring-inset disabled:opacity-50 ${(p.included || p.waitingForMaker) ? "bg-white text-cocoa ring-hairline" : "bg-violet-ink text-white ring-violet-ink"}`}
                 >
-                  {p.included ? "Keep private" : "Share"}
+                  {(p.included || p.waitingForMaker) ? "Keep private" : "Share"}
                 </button>
               </div>
             </li>
           ))}
         </ul>
       </Card>
+    </div>
+  );
+}
+
+interface MakerTrainingState {
+  maker: string;
+  consented: boolean;
+  decidedAt: string | null;
+  pieces: { id: string; title: string; image: string | null; coopShares: boolean; included: boolean }[];
+}
+
+/** "My products" link for a cooperative maker (one line on the products page). */
+export function MakerTrainingLink({ pageId }: { pageId: string }) {
+  const { data } = useApi<MakerTrainingState>(`/pages/${pageId}/training-data/maker`);
+  if (!data) return null;
+  return (
+    <Link href={`/studio/${pageId}/training`} className="st-card st-press st-lift flex items-center gap-3 rounded-[24px] p-4">
+      <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-violet-100 text-violet-ink"><Icon name="layers" className="size-5" /></span>
+      <span className="min-w-0 flex-1">
+        <span className="block font-extrabold text-cocoa">Your photos for training: your choice</span>
+        <span className="block text-sm text-cocoa-2">{data.consented ? "You share photos of pieces you made · change any time" : "Off · nothing you made is shared without your OK"}</span>
+      </span>
+      <Icon name="chevron" className="size-5 shrink-0 text-cocoa-3" />
+    </Link>
+  );
+}
+
+/**
+ * Cooperative maker's own consent (on top of the admin's): a piece credited to a maker only enters a dataset
+ * version when both said yes; either one stopping takes it out of every future version.
+ */
+export function MakerTrainingConsent({ pageId }: { pageId: string }) {
+  const { locale } = useSession();
+  const { data, setData, error } = useApi<MakerTrainingState>(`/pages/${pageId}/training-data/maker`);
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+
+  async function set(consented: boolean) {
+    setBusy(true);
+    setErr(null);
+    setMsg(null);
+    try {
+      setData(await api<MakerTrainingState>(`/pages/${pageId}/training-data/maker`, { method: "PUT", json: { consented, locale } }));
+      setMsg(consented ? "Thank you! Pieces you made can help train the helper when your cooperative shares them too." : "Stopped. Pieces you made leave the next dataset version.");
+      navigator.vibrate?.(8);
+    } catch (e) {
+      setErr((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (error) return <Note error="Only a maker of this cooperative can decide this." />;
+  if (!data) return <Skeleton className="h-48" />;
+  return (
+    <div className="space-y-4">
+      <section className="st-hero relative overflow-hidden rounded-[28px] p-5">
+        <p className="relative text-sm font-bold text-violet-ink">Your work, your choice</p>
+        <h2 className="relative font-display text-2xl font-black tracking-tight text-cocoa">Share photos of pieces you made?</h2>
+        <p className="relative mt-1.5 text-sm leading-relaxed text-cocoa-2">
+          Your cooperative can share garment photos to train a helper that knows Rwandan fashion. Pieces credited to you are only used if you say yes too. It is off until you switch it on.
+        </p>
+      </section>
+      <Card className="space-y-3">
+        <Switch
+          checked={data.consented}
+          disabled={busy}
+          onChange={set}
+          label="Share photos of pieces I made"
+          description={data.decidedAt ? `Last changed ${new Date(data.decidedAt).toLocaleDateString()} · recorded in your consent ledger` : "Recorded in your consent ledger. Stop any time."}
+        />
+        <Note error={err} ok={msg} />
+      </Card>
+      {data.pieces.length > 0 && (
+        <Card className="space-y-3">
+          <h3 className="font-display text-lg font-black tracking-tight text-cocoa">Pieces credited to you</h3>
+          <ul className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+            {data.pieces.map((p) => (
+              <li key={p.id} className="overflow-hidden rounded-[20px] bg-paper ring-1 ring-inset ring-hairline">
+                <div className="relative aspect-[4/5] bg-white">
+                  {p.image ? <img src={p.image} alt="" className="size-full object-cover" /> : <span className="grid size-full place-items-center text-cocoa-3"><Icon name="camera" className="size-6" /></span>}
+                  <span className={`absolute left-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-black ${p.included ? "bg-mint-ink text-white" : "bg-white/90 text-cocoa-2"}`}>{p.included ? "Shared" : "Private"}</span>
+                </div>
+                <div className="space-y-0.5 p-2.5">
+                  <p className="truncate text-sm font-bold text-cocoa">{p.title}</p>
+                  <p className="text-xs text-cocoa-2">{p.coopShares ? "Cooperative: sharing" : "Cooperative: not sharing"}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </Card>
+      )}
     </div>
   );
 }
