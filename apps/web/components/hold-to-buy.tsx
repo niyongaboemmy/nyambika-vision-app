@@ -242,7 +242,7 @@ function HoldRing({ label, disabled, busy, onHeld, hint }: { label: string; disa
           {busy ? <Spinner /> : progress > 0 ? <>{t("buy.holding")}</> : <>✋<br />{t("buy.title")}</>}
         </span>
       </button>
-      <p className="text-xs text-mut">{hint}</p>
+      <p className="text-center text-xs text-mut">{hint}</p>
     </div>
   );
 }
