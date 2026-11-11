@@ -7,6 +7,7 @@ import { Twin3dCard } from "@/components/twin3d-card";
 import { Button, ErrorNote, InfoTip, Screen, Spinner, TopBar } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { useSession } from "@/lib/session";
+import { Icon } from "@/components/icons";
 
 type Step = "intro" | "camera" | "review" | "saving" | "ready";
 type Checks = Record<string, { pass: boolean; note: string }>;
@@ -113,7 +114,7 @@ export default function Mirror() {
           <div className="space-y-3">
             <ConsentCard consent={consent} setConsent={setConsent} />
             <ErrorNote error={error} />
-            <Button className="w-full" disabled={!consent} onClick={() => setStep("camera")}>📷 Open camera</Button>
+            <Button className="w-full" disabled={!consent} onClick={() => setStep("camera")}><Icon name="camera" className="size-5" /> Open camera</Button>
             <label className={`glass flex min-h-12 w-full items-center justify-center rounded-2xl font-semibold ${!consent ? "pointer-events-none opacity-50" : "cursor-pointer"}`}>
               {t("mirror.upload")}
               <input type="file" accept="image/*" className="sr-only" disabled={!consent} onChange={(e) => e.target.files?.[0] && review(e.target.files[0])} />
@@ -129,7 +130,7 @@ export default function Mirror() {
                 ))}
               </div>
             </details>
-            <Link href="/mirror/3d" className="flex min-h-11 items-center justify-center text-sm text-gold">🧊 Prefer 3D? Make a 3D twin →</Link>
+            <Link href="/mirror/3d" className="flex min-h-11 items-center justify-center gap-1.5 text-sm text-gold"><Icon name="cube" className="size-4" /> Prefer 3D? Make a 3D twin →</Link>
           </div>
         </main>
       )}
@@ -167,7 +168,7 @@ export default function Mirror() {
           </div>
           <div className="w-full space-y-2">
             <Twin3dCard />
-            <Link href="/" className="block"><Button className="w-full">✨ Ask the Muse</Button></Link>
+            <Link href="/" className="block"><Button className="w-full"><Icon name="sparkle" className="size-5" /> Ask the Muse</Button></Link>
             <div className="grid grid-cols-2 gap-2">
               <Link href="/trust" className="flex min-h-11 items-center justify-center text-sm text-mut underline">Manage or delete my twin</Link>
               <button onClick={() => setStep("intro")} className="min-h-11 text-sm text-mut underline">Retake twin</button>
@@ -184,7 +185,7 @@ function ConsentCard({ consent, setConsent }: { consent: boolean; setConsent: (v
   return (
     <div className="glass flex items-center gap-2 rounded-3xl p-4">
       <label className="flex flex-1 cursor-pointer items-center gap-3">
-        <span className="text-2xl" aria-hidden>🔒</span>
+        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white/10 text-gold" aria-hidden><Icon name="lock" className="size-5" /></span>
         <span className="flex-1 text-sm font-bold">{t("mirror.consentTitle")}</span>
         <input type="checkbox" role="switch" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="peer sr-only" aria-label="I consent to creating my private twin" />
         <span aria-hidden className={`relative h-7 w-12 shrink-0 rounded-full transition peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-gold ${consent ? "bg-[#0f8a5f]" : "bg-white/20"}`}>
@@ -283,8 +284,9 @@ function Camera({ onCapture, onCancel }: { onCapture: (b: Blob) => void; onCance
       </div>
       {count && <div className="absolute inset-0 grid place-items-center font-display text-8xl font-black">{count}</div>}
       <div className="absolute inset-x-0 top-3 text-center">
-        <span className="glass rounded-full px-3 py-1 text-sm">
-          {error ? "📷 " + error : light === "dark" ? "💡 Find more light" : light === "bright" ? "☀️ Too bright, step out of direct sun" : "Stand back · whole body in the outline"}
+        <span className="glass inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm">
+          <Icon name={error ? "camera" : light === "dark" ? "bulb" : light === "bright" ? "sun" : "person"} className="size-4" />
+          {error ? error : light === "dark" ? "Find more light" : light === "bright" ? "Too bright · out of direct sun" : "Stand back · whole body in the outline"}
         </span>
       </div>
       <div className="absolute inset-x-0 bottom-4 flex items-center justify-center gap-6">

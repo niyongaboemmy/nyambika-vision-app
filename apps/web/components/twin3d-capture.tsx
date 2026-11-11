@@ -148,9 +148,9 @@ export function TurnCapture({
   const hint = error
     ? error
     : live.light === "dark"
-      ? "💡 Find more light"
+      ? "Find more light"
       : live.light === "bright"
-        ? "☀️ Too bright, step out of direct sun"
+        ? "Too bright · out of direct sun"
         : live.framing === "far"
           ? "Step into the frame, head to feet"
           : live.framing === "near"

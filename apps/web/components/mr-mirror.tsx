@@ -8,6 +8,8 @@ import type { MirrorEngine, XrMode } from "@/components/mr-engine";
 import { api } from "@/lib/api";
 import type { FitView, GarmentInfo, Twin3dState, WardrobeItem } from "@/lib/twin3d";
 import { hasWebGL2, load3d, prefersReducedMotion, type Garment3d } from "@/lib/xr";
+import { Icon } from "@/components/icons";
+import { Fact, LearnMore } from "@/components/kit";
 
 export interface MirrorPiece {
   productId: string;
@@ -153,7 +155,7 @@ export function MrMirror({ pieces, wardrobe, twin, arPilot, initial }: { pieces:
             {busy}
           </span>
         )}
-        <p className="absolute inset-x-3 bottom-3 mx-auto w-fit max-w-[calc(100%-24px)] rounded-full bg-black/60 px-3 py-1 text-center text-[11px] text-txt/90 backdrop-blur">{body === "twin" ? "🔒 Your 3D twin · only you see it" : "Synthetic body · approximate fit"}</p>
+        <p className="absolute inset-x-3 bottom-3 mx-auto w-fit max-w-[calc(100%-24px)] rounded-full bg-black/60 px-3 py-1 text-center text-[11px] text-txt/90 backdrop-blur">{body === "twin" ? "Your 3D twin · only you see it" : "Synthetic body · approximate fit"}</p>
         {ready && (
           <div className="absolute right-3 top-3 flex gap-1.5">
             <button onClick={() => engine.current?.rotate(-0.5)} aria-label="Turn left" className="hit glass grid size-10 place-items-center rounded-full">⟲</button>
@@ -175,7 +177,7 @@ export function MrMirror({ pieces, wardrobe, twin, arPilot, initial }: { pieces:
                   onClick={() => setBody(b)}
                   className={`min-h-11 flex-1 rounded-full text-sm font-bold transition disabled:opacity-45 ${body === b ? "bg-[#e5395f] text-white" : "text-white/80"}`}
                 >
-                  {b === "twin" ? "🧍 My 3D twin" : "🧩 Synthetic body"}
+                  <span className="inline-flex items-center gap-1.5"><Icon name={b === "twin" ? "person" : "cube"} className="size-4" />{b === "twin" ? "My 3D twin" : "Synthetic body"}</span>
                 </button>
               ))}
             </div>
@@ -234,11 +236,11 @@ export function MrMirror({ pieces, wardrobe, twin, arPilot, initial }: { pieces:
         <section className="space-y-2">
           {support.ar ? (
             <button onClick={() => void enter("ar")} className="grad-cta flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl text-base font-bold shadow-[0_12px_32px_rgba(139,92,246,.4)]">
-              🥽 Place the mirror in my room
+              <Icon name="headset" className="size-5" /> Place the mirror in my room
             </button>
           ) : (
             <button onClick={() => void enter("vr")} className="grad-cta flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl text-base font-bold">
-              🥽 Open the virtual fitting room
+              <Icon name="headset" className="size-5" /> Open the virtual fitting room
             </button>
           )}
           {support.ar && support.vr && (
@@ -258,16 +260,22 @@ export function MrMirror({ pieces, wardrobe, twin, arPilot, initial }: { pieces:
           {arPilot && wardrobe.length ? (
             <ArMirror items={wardrobe} initial={piece?.assets[0]?.variantId ?? null} />
           ) : (
-            <Link href="/mirror/3d" className="grad-cta flex min-h-12 items-center justify-center rounded-2xl font-semibold text-white">
-              🧊 Open my 3D twin
+            <Link href="/mirror/3d" className="grad-cta flex min-h-12 items-center justify-center gap-2 rounded-2xl font-semibold text-white">
+              <Icon name="cube" className="size-5" /> Open my 3D twin
             </Link>
           )}
         </section>
       )}
 
-      <p className="rounded-2xl bg-white/5 p-3 text-[11px] leading-relaxed text-mut">
-        🔒 Passthrough is drawn by your headset or phone. This page never receives camera images, and nothing is recorded or uploaded. Your 3D twin loads through a private 5-minute link and only you see it. Works on Meta Quest and Android phones with ARCore (Chrome); Apple Vision Pro opens the virtual fitting room.
-      </p>
+      <div className="space-y-1">
+        <ul aria-label="Privacy" className="flex flex-wrap gap-2">
+          <li><Fact icon="lock">Page never receives camera images</Fact></li>
+          <li><Fact icon="shield">Nothing recorded</Fact></li>
+        </ul>
+        <LearnMore>
+          Passthrough is drawn by your headset or phone. This page never receives camera images, and nothing is recorded or uploaded. Your 3D twin loads through a private 5-minute link and only you see it. Works on Meta Quest and Android phones with ARCore (Chrome); Apple Vision Pro opens the virtual fitting room.
+        </LearnMore>
+      </div>
 
       {/* DOM overlay for phone AR sessions (Chrome Android): status + exit over the camera view. */}
       <div ref={overlay} className={xr === "ar" ? "pointer-events-none fixed inset-0 z-50" : "hidden"}>

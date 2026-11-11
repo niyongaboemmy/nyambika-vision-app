@@ -5,6 +5,7 @@ import { useEffect, useMemo } from "react";
 import type { OrderView } from "@/lib/orders";
 import { liveActivityPlugin } from "@/lib/native";
 import { useSession } from "@/lib/session";
+import { Icon } from "@/components/icons";
 
 /** Same state model as the push payloads, the iOS Live Activity and the Android Live Update. */
 export function ambientFor(o: OrderView): AmbientOrderState {
@@ -23,7 +24,7 @@ export function ambientFor(o: OrderView): AmbientOrderState {
   });
 }
 
-const ICON: Record<string, string> = { CUSTOM: "🧵", READY_MADE: "🛍️" };
+const ICON = { CUSTOM: "needle", READY_MADE: "bag" } as const;
 
 /** The ambient moment (prototype v2 · 17): a lock-screen style live card that mirrors the native activity. */
 export function AmbientOrder({ order }: { order: OrderView }) {
@@ -55,8 +56,8 @@ export function AmbientOrder({ order }: { order: OrderView }) {
   return (
     <section className="glass relative overflow-hidden rounded-3xl p-4" aria-live="polite" data-testid="ambient-order">
       <div className="flex items-start gap-3">
-        <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-terra to-violet text-2xl shadow-[0_6px_20px_rgba(139,92,246,.35)]" aria-hidden>
-          {stopped ? "⏸" : ICON[state.kind]}
+        <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-terra to-violet text-[#fff] shadow-[0_6px_20px_rgba(139,92,246,.35)]" aria-hidden>
+          <Icon name={stopped ? "pause" : ICON[state.kind as keyof typeof ICON] ?? "bag"} filled className="size-6" />
         </span>
         <div className="min-w-0 flex-1">
           <p className="font-display text-lg font-black leading-tight">{copy.headline}</p>

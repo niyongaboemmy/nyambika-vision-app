@@ -5,6 +5,7 @@ import { Button } from "@/components/ui";
 import { haptic, isNative, liveActivityPlugin } from "@/lib/native";
 import { enablePush, pushState, type PushState } from "@/lib/push";
 import { useSession } from "@/lib/session";
+import { Icon } from "@/components/icons";
 
 const DISMISS_KEY = "nya_push_ask_dismissed";
 
@@ -34,8 +35,8 @@ export function PushAsk({ moment = "paid" }: { moment?: "paid" | "live" }) {
 
   if (justEnabled) {
     return (
-      <p className="glass animate-rise rounded-2xl px-4 py-3 text-center text-sm font-semibold text-mint" role="status" data-testid="push-on">
-        🔔 {t("push.on")}
+      <p className="glass animate-rise flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-center text-sm font-semibold text-mint" role="status" data-testid="push-on">
+        <Icon name="bell" filled className="spring-pop size-4" /> {t("push.on")}
       </p>
     );
   }
@@ -65,7 +66,7 @@ export function PushAsk({ moment = "paid" }: { moment?: "paid" | "live" }) {
   return (
     <section className="glass animate-rise rounded-3xl p-4" aria-labelledby="push-ask-title" data-testid="push-ask">
       <div className="flex items-start gap-3">
-        <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-gold/20 text-2xl" aria-hidden>🔔</span>
+        <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-gold/20 text-gold" aria-hidden><Icon name="bell" className="size-6" /></span>
         <div className="min-w-0 flex-1">
           <p id="push-ask-title" className="font-semibold">{live ? t("push.liveTitle") : t("push.askTitle")}</p>
           <p className="mt-0.5 text-sm text-mut">{live ? t("push.liveBody") : t("push.askBody")}</p>

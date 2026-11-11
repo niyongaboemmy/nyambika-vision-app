@@ -7,6 +7,7 @@ import { Button, Chip, ErrorNote, Screen, Spinner, TopBar } from "@/components/u
 import { api, rwf } from "@/lib/api";
 import { useApi } from "@/lib/use-api";
 import { CO_LABEL, JOURNEY, journeyIndex, kigaliTime, specChips, type CustomOrderView } from "@/lib/tailor";
+import { Icon } from "@/components/icons";
 
 const PENDING = ["DEPOSIT_PENDING", "BALANCE_PENDING"];
 
@@ -51,7 +52,7 @@ function CustomOrder() {
       <main className="space-y-4 px-4 pb-12">
         {fresh && o.status === "REQUESTED" && (
           <section className="flex animate-rise flex-col items-center gap-1.5 rounded-3xl bg-gradient-to-br from-violet/30 to-terra/25 p-5 text-center">
-            <span className="text-4xl">🪡</span>
+            <span className="spring-pop grid size-14 place-items-center rounded-2xl bg-white/15" aria-hidden><Icon name="needle" className="size-7" /></span>
             <p className="font-display text-2xl font-black">Sent to {o.page.name}</p>
             <p className="text-sm text-txt/85">Price, deposit and date soon · on WhatsApp</p>
           </section>
@@ -62,7 +63,7 @@ function CustomOrder() {
             {o.image || o.productImage ? (
               <img src={o.image ?? o.productImage!} alt={o.image ? `${o.title}, AI preview` : o.title} className="h-36 w-28 shrink-0 rounded-2xl bg-black/40 object-cover" />
             ) : (
-              <div className="grid h-36 w-28 place-items-center rounded-2xl bg-white/10 text-4xl" aria-hidden>✂️</div>
+              <div className="grid h-36 w-28 place-items-center rounded-2xl bg-white/10 text-mut" aria-hidden><Icon name="scissors" className="size-8" /></div>
             )}
             <div className="min-w-0 flex-1 py-1">
               <p className="font-display text-xl font-black leading-tight">{o.title}</p>
@@ -71,7 +72,7 @@ function CustomOrder() {
                 {specChips(o.spec, o.colour?.name).map((c) => <span key={c} className="rounded-full bg-white/10 px-2 py-0.5 text-xs font-semibold">{c}</span>)}
                 {o.size && <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs font-semibold">Size {o.size}</span>}
               </div>
-              {o.image && <p className="mt-2 text-[11px] text-mut">✨ AI preview · {o.previewShared ? "a copy was shared with the tailor" : "only you see it"}</p>}
+              {o.image && <p className="mt-2 flex items-center gap-1 text-[11px] text-mut"><Icon name="sparkle" className="size-3" /> AI preview · {o.previewShared ? "a copy was shared with the tailor" : "only you see it"}</p>}
             </div>
           </div>
         </section>
@@ -88,7 +89,7 @@ function CustomOrder() {
 
         {pendingPay && (
           <section className="glass flex flex-col items-center gap-2 rounded-3xl p-5 text-center" role="status">
-            <span className="text-4xl">📲</span>
+            <span className="grid size-14 place-items-center rounded-2xl bg-white/10 text-gold" aria-hidden><Icon name="phone" className="size-7" /></span>
             <p className="font-display text-lg font-black">Approve {rwf(pendingPay.amountRwf)} on your phone</p>
             <p className="text-sm text-mut">Paid directly to <b className="text-white">{o.page.name}</b></p>
             <Spinner />
@@ -120,7 +121,7 @@ function CustomOrder() {
 
         {o.status === "READY" && o.quote && o.quote.balanceRwf > 0 && (
           <section className="animate-rise rounded-3xl bg-gradient-to-br from-mint/25 to-violet/20 p-4">
-            <p className="font-display text-xl font-black">Your piece is ready ✨</p>
+            <p className="flex items-center gap-2 font-display text-xl font-black"><Icon name="sparkle" className="size-5 text-gold" /> Your piece is ready</p>
             <p className="text-sm text-txt/85">Pay the balance · collect{o.page.sector ? ` in ${o.page.sector}` : ""}</p>
             <Wallets wallet={wallet} setWallet={setWallet} />
             <Button className="mt-3 w-full" disabled={busy} onClick={() => act("pay-balance", { wallet })}>Pay balance {rwf(o.quote.balanceRwf)}</Button>
@@ -129,12 +130,12 @@ function CustomOrder() {
 
         {["DEPOSIT_PAID", "CUTTING", "SEWING", "FITTING", "FINISHING"].includes(o.status) && <Fitting order={o} onBooked={setData} />}
         {o.fitting && !["DEPOSIT_PAID", "CUTTING", "SEWING", "FITTING", "FINISHING"].includes(o.status) && (
-          <p className="glass rounded-2xl px-4 py-3 text-sm">📅 Fitting {kigaliTime(o.fitting.startsAt, { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })} · {o.fitting.location}</p>
+          <p className="glass flex items-center gap-2 rounded-2xl px-4 py-3 text-sm"><Icon name="calendar" className="size-4 shrink-0 text-gold" /> Fitting {kigaliTime(o.fitting.startsAt, { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })} · {o.fitting.location}</p>
         )}
 
         {o.measurementShare && (
           <section className="glass flex items-center gap-3 rounded-3xl p-4 text-sm">
-            <span className="text-2xl" aria-hidden>📏</span>
+            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white/10 text-gold" aria-hidden><Icon name="ruler" className="size-5" /></span>
             <div className="min-w-0 flex-1">
               {o.measurementShare.active ? (
                 <p>Measurements shared with {first} until <b>{kigaliTime(o.measurementShare.expiresAt, { day: "numeric", month: "short" })}</b></p>
@@ -164,7 +165,7 @@ function CustomOrder() {
           </ol>
         </section>
 
-        <a href={`https://wa.me/${o.page.whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(`Muraho! About my custom order ${o.code}`)}`} target="_blank" rel="noreferrer" className="glass flex min-h-12 items-center justify-center rounded-2xl font-semibold">💬 Message {first}</a>
+        <a href={`https://wa.me/${o.page.whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(`Muraho! About my custom order ${o.code}`)}`} target="_blank" rel="noreferrer" className="glass press flex min-h-12 items-center justify-center gap-2 rounded-2xl font-semibold"><Icon name="chat" className="size-5" /> Message {first}</a>
       </main>
     </Screen>
   );
@@ -173,8 +174,8 @@ function CustomOrder() {
 function Wallets({ wallet, setWallet }: { wallet: string; setWallet: (w: "MTN_MOMO" | "AIRTEL_MONEY") => void }) {
   return (
     <div className="mt-3 flex flex-wrap gap-2" role="radiogroup" aria-label="Pay with">
-      <Chip active={wallet === "MTN_MOMO"} onClick={() => setWallet("MTN_MOMO")}>🟡 MTN MoMo</Chip>
-      <Chip active={wallet === "AIRTEL_MONEY"} onClick={() => setWallet("AIRTEL_MONEY")}>🔴 Airtel Money</Chip>
+      <Chip active={wallet === "MTN_MOMO"} onClick={() => setWallet("MTN_MOMO")}><span aria-hidden className="size-2.5 rounded-full bg-[#ffcc00]" /> MTN MoMo</Chip>
+      <Chip active={wallet === "AIRTEL_MONEY"} onClick={() => setWallet("AIRTEL_MONEY")}><span aria-hidden className="size-2.5 rounded-full bg-[#e40000]" /> Airtel Money</Chip>
     </div>
   );
 }
@@ -204,7 +205,7 @@ function Fitting({ order, onBooked }: { order: CustomOrderView; onBooked: (o: Cu
   }
   return (
     <section className="glass rounded-3xl p-4">
-      <p className="font-display text-lg font-black">📅 {order.fitting ? "Your fitting" : "Book a fitting"}</p>
+      <p className="flex items-center gap-2 font-display text-lg font-black"><Icon name="calendar" className="size-5 text-gold" /> {order.fitting ? "Your fitting" : "Book a fitting"}</p>
       {order.fitting && (
         <p className="mt-1 text-sm">
           <b>{kigaliTime(order.fitting.startsAt, { weekday: "long", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</b> · {order.fitting.location} · {order.fitting.durationMin} min
@@ -237,7 +238,7 @@ function Fitting({ order, onBooked }: { order: CustomOrderView; onBooked: (o: Cu
         </>
       )}
       <ErrorNote error={err} />
-      <p className="mt-2 text-xs text-mut">📲 WhatsApp reminder the day before</p>
+      <p className="mt-2 flex items-center gap-1.5 text-xs text-mut"><Icon name="bell" className="size-3.5" /> WhatsApp reminder the day before</p>
     </section>
   );
 }

@@ -9,6 +9,7 @@ import { api } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import type { Twin3dState, WardrobeItem } from "@/lib/twin3d";
 import { load3d } from "@/lib/xr";
+import { Icon } from "@/components/icons";
 
 export default function MrMirrorPage() {
   return (
@@ -64,10 +65,10 @@ function MrPage() {
           <div className="skeleton h-[60dvh] rounded-[32px]" />
         ) : !enabled ? (
           <section className="glass mt-6 space-y-3 rounded-3xl p-5 text-center">
-            <p className="text-4xl" aria-hidden>🥽</p>
+            <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-white/10 text-gold" aria-hidden><Icon name="headset" className="size-7" /></span>
             <p className="font-display text-xl font-black">Mixed-reality mirror is an experiment</p>
             <p className="text-sm text-mut">Headset · not on for you yet</p>
-            <Link href="/mirror/ar" className="grad-cta inline-flex min-h-12 items-center justify-center rounded-2xl px-5 font-semibold text-white">🪞 Open the AR mirror</Link>
+            <Link href="/mirror/ar" className="grad-cta inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl px-5 font-semibold text-white"><Icon name="mirror" className="size-5" /> Open the AR mirror</Link>
           </section>
         ) : (
           <>

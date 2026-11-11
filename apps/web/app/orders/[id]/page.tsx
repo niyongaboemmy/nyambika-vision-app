@@ -13,6 +13,7 @@ import { ORDER_LABEL, type OrderView } from "@/lib/orders";
 import { useSession } from "@/lib/session";
 import { OrderMoneyPanel, useOrderMoney } from "@/components/region-pay";
 import { useApi } from "@/lib/use-api";
+import { Icon } from "@/components/icons";
 
 /** Order: MoMo approval → “Paid ✓ directly to the maker” → ambient timeline (prototype v2 · 15/16/17). */
 function Order() {
@@ -48,7 +49,7 @@ function Order() {
       <main className="space-y-4 px-4 pb-10">
         {o.status === "AWAITING_PAYMENT" && (
           <section className="glass flex flex-col items-center gap-3 rounded-3xl p-6 text-center" role="status">
-            <span className="text-5xl">📲</span>
+            <span className="grid size-16 place-items-center rounded-2xl bg-white/10 text-gold" aria-hidden><Icon name="phone" className="size-8" /></span>
             <p className="font-display text-xl font-black">{t("buy.approve")}</p>
             <p className="text-sm text-mut">{amount} to <b className="text-white">{o.payoutLabel}</b> · {money ? money.methodLabel : o.wallet === "MTN_MOMO" ? "MTN MoMo" : "Airtel Money"}</p>
             <Spinner />
@@ -68,7 +69,7 @@ function Order() {
             <span className="grid size-20 place-items-center rounded-full bg-mint text-4xl text-ink">✓</span>
             <p className="font-display text-3xl font-black">{t("buy.paid")}</p>
             <p className="text-sm">{t("buy.paidDirect")} <b>{o.payoutLabel}</b> · {amount}</p>
-            <p className="text-xs text-mut">💬 Maker notified on WhatsApp</p>
+            <p className="flex items-center gap-1.5 text-xs text-mut"><Icon name="chat" className="size-3.5" /> Maker notified on WhatsApp</p>
           </section>
         )}
 
@@ -84,7 +85,7 @@ function Order() {
               </>
             )}
             <p className="text-sm font-semibold">{amount}</p>
-            <p className="truncate text-xs text-mut">{o.deliveryMode === "DELIVERY" ? `🛵 ${o.address}` : "🏪 Pickup"}</p>
+            <p className="flex items-center gap-1 text-xs text-mut"><Icon name={o.deliveryMode === "DELIVERY" ? "moto" : "store"} className="size-3.5 shrink-0" /><span className="truncate">{o.deliveryMode === "DELIVERY" ? o.address : "Pickup"}</span></p>
             <Link href={`/m/${o.page.handle}`} className="hit mt-0.5 inline-block text-sm text-gold">{o.page.name} →</Link>
           </div>
         </section>
@@ -108,7 +109,7 @@ function Order() {
         </section>
 
         <div className="grid grid-cols-2 gap-2">
-          <a href={`https://wa.me/${o.page.whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(`Muraho! About my order ${o.code}`)}`} target="_blank" rel="noreferrer" className="glass inline-flex min-h-12 items-center justify-center rounded-2xl font-semibold">💬 Message maker</a>
+          <a href={`https://wa.me/${o.page.whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(`Muraho! About my order ${o.code}`)}`} target="_blank" rel="noreferrer" className="glass press inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl font-semibold"><Icon name="chat" className="size-5" /> Message maker</a>
           {o.next.includes("COMPLETED") && (
             <Button onClick={() => void api<OrderView>(`/orders/${o.id}/transition`, { method: "POST", json: { to: "COMPLETED" } }).then(setData, setActionError)}>I received it</Button>
           )}

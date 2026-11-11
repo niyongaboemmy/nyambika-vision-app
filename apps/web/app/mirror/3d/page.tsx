@@ -25,6 +25,7 @@ import {
   type Twin3dState,
   type WardrobeItem,
 } from "@/lib/twin3d";
+import { Icon } from "@/components/icons";
 
 type Step = "home" | "capture" | "persona";
 
@@ -292,14 +293,14 @@ function Start({
       )}
       <ErrorNote error={error} />
       <button onClick={onCamera} className="glass flex w-full items-center gap-4 rounded-3xl p-4 text-left transition active:scale-[.98]">
-        <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-sky/20 text-2xl">↻</span>
+        <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-sky/20 text-sky" aria-hidden><Icon name="rotate" className="size-7" /></span>
         <span>
           <span className="block font-display text-lg font-black">Turn once in front of the camera</span>
           <span className="block text-sm text-mut">~10 s · step back, turn slowly</span>
         </span>
       </button>
       <button onClick={onMeasurements} className="glass flex w-full items-center gap-4 rounded-3xl p-4 text-left transition active:scale-[.98]">
-        <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-gold/20 text-2xl">📏</span>
+        <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-gold/20 text-gold" aria-hidden><Icon name="ruler" className="size-7" /></span>
         <span>
           <span className="block font-display text-lg font-black">From my measurements</span>
           <span className="block text-sm text-mut">No photos · {state.hasProfile ? "your measurements" : "your size"} + skin tone</span>
@@ -421,7 +422,7 @@ function Viewer({
         <p className="glass rounded-2xl px-3 py-2 text-xs text-mut" role="status">Last rebuild {rejected.status.toLowerCase()} · showing current twin</p>
       )}
       <Twin3dViewer src={src} poster={poster} alt={alt} pose={pose} spin={spin} label={state.label} busy={dressing} onLoaded={() => setDressing(null)} />
-      <p className="text-center text-xs text-mut">🤏 pinch to zoom · drag to spin · {t("twin3d.disclaimer")}</p>
+      <p className="flex items-center justify-center gap-1.5 text-center text-xs text-mut"><Icon name="hand" className="size-3.5" /> pinch to zoom · drag to spin · {t("twin3d.disclaimer")}</p>
 
       <div className="flex items-center justify-between gap-2">
         <div className="glass flex rounded-full p-1" role="radiogroup" aria-label="Pose">
@@ -432,7 +433,7 @@ function Viewer({
           ))}
         </div>
         <button role="switch" aria-checked={spin} onClick={() => setSpin((s) => !s)} className={`glass min-h-10 rounded-full px-4 text-sm font-semibold ${spin ? "text-gold" : "text-white/70"}`}>
-          {spin ? "⟳ Spin on" : "⟳ Spin off"}
+          <span className="inline-flex items-center gap-1.5"><Icon name="refresh" className="size-4" />{spin ? "Spin on" : "Spin off"}</span>
         </button>
       </div>
 
@@ -484,17 +485,17 @@ function Viewer({
       </section>
 
       <div className="grid grid-cols-2 gap-2">
-        <Button variant="glass" onClick={onAdjust}>📏 Adjust body</Button>
-        <Button variant="glass" onClick={() => setMenu(true)}>⋯ My 3D twin</Button>
+        <Button variant="glass" onClick={onAdjust}><Icon name="ruler" className="size-5" /> Adjust body</Button>
+        <Button variant="glass" onClick={() => setMenu(true)}><Icon name="more" className="size-5" /> My 3D twin</Button>
       </div>
 
       <TwinDrapePanel bodySize={avatar.bodySize ?? null} />
 
       <nav aria-label="Mirror mode" className="fixed inset-x-0 bottom-[max(env(safe-area-inset-bottom),14px)] z-30 flex justify-center">
         <div className="glass flex rounded-full p-1.5 shadow-[0_12px_40px_rgba(0,0,0,.45)]">
-          <span aria-current="page" className="flex min-h-11 items-center rounded-full bg-white/20 px-5 text-sm font-bold">🧊 {t("twin3d.title")}</span>
+          <span aria-current="page" className="flex min-h-11 items-center gap-1.5 rounded-full bg-white/20 px-5 text-sm font-bold"><Icon name="cube" className="size-4" /> {t("twin3d.title")}</span>
           {state.arMirrorPilot && (
-            <Link href={`/mirror/ar${fit ? `?variant=${fit.variantId}` : ""}`} className="flex min-h-11 items-center rounded-full px-5 text-sm font-bold text-white/80">🪞 {t("twin3d.ar")}</Link>
+            <Link href={`/mirror/ar${fit ? `?variant=${fit.variantId}` : ""}`} className="flex min-h-11 items-center gap-1.5 rounded-full px-5 text-sm font-bold text-white/80"><Icon name="mirror" className="size-4" /> {t("twin3d.ar")}</Link>
           )}
         </div>
       </nav>

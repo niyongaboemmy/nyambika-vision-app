@@ -1,13 +1,14 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AddressesCard } from "@/components/bag";
 import { NotificationPrefsCard } from "@/components/notification-prefs";
 import { PasskeysCard } from "@/components/passkeys";
 import { Icon, type IconName } from "@/components/icons";
-import { Button, ErrorNote, Fact, LearnMore, Screen, Sheet, TopBar } from "@/components/ui";
+import { Button, ErrorNote, LearnMore, Screen, Sheet, TopBar } from "@/components/ui";
+import { Group, GroupRow } from "@/components/ios";
+import { ShopperSwitch } from "@/components/shopper-switch";
 import { api } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { useApi } from "@/lib/use-api";
@@ -20,21 +21,22 @@ interface Privacy {
   deletionJobs: { id: string; scope: string; status: string; steps: { step: string; detail?: string }[]; completedAt: string | null }[];
 }
 
-const PURPOSE: Record<string, { title: string; body: string }> = {
-  TWIN_PROCESSING: { title: "Keep my private twin", body: "Encrypted · looks appear on you" },
-  TRYON_GENERATION: { title: "Render looks on my twin", body: "AI previews · off pauses looks" },
-  VOICE_PROCESSING: { title: "Voice Muse", body: "Speech → text · audio never stored" },
-  MARKETING: { title: "News from makers I follow", body: "WhatsApp · new collections" },
-  AVATAR_3D: { title: "Keep my private 3D twin", body: "Encrypted · off deletes it" },
+const PURPOSE: Record<string, { title: string; body: string; icon: IconName; tone: Tone }> = {
+  TWIN_PROCESSING: { title: "Keep my private twin", body: "Encrypted · looks appear on you", icon: "user", tone: "violet" },
+  TRYON_GENERATION: { title: "Render looks on my twin", body: "AI previews · off pauses looks", icon: "sparkle", tone: "terra" },
+  VOICE_PROCESSING: { title: "Voice Muse", body: "Speech → text · audio never stored", icon: "mic", tone: "sky" },
+  MARKETING: { title: "News from makers I follow", body: "WhatsApp · new collections", icon: "chat", tone: "mint" },
+  AVATAR_3D: { title: "Keep my private 3D twin", body: "Encrypted · off deletes it", icon: "cube", tone: "violet" },
 };
+type Tone = "terra" | "violet" | "mint" | "sky" | "gold" | "red" | "stone";
 
 /** The five promises as scannable tiles; the full wording sits behind "Learn more". */
-const PROMISES: { icon: IconName; label: string }[] = [
-  { icon: "lock", label: "Twin encrypted · only you" },
-  { icon: "shield", label: "Never shared with makers" },
-  { icon: "sparkle", label: "AI label · C2PA" },
-  { icon: "wallet", label: "Paid directly to the maker" },
-  { icon: "mic", label: "Audio never stored" },
+const PROMISES: { icon: IconName; label: string; tone: Tone }[] = [
+  { icon: "lock", label: "Twin encrypted · only you", tone: "violet" },
+  { icon: "shield", label: "Never shared with makers", tone: "mint" },
+  { icon: "sparkle", label: "AI label · C2PA", tone: "terra" },
+  { icon: "wallet", label: "Paid directly to the maker", tone: "gold" },
+  { icon: "mic", label: "Audio never stored", tone: "sky" },
 ];
 
 /** Trust centre (prototype v2 structure · FR-PRV): consents, data, deletion. */
@@ -69,19 +71,16 @@ export default function Trust() {
 
   return (
     <Screen>
-      <TopBar back="/" title={t("trust.title")} />
-      <main className="space-y-4 px-4 pb-10">
+      <TopBar back="/" title={t("trust.title")} large />
+      <main className="space-y-6 px-4 pb-12">
         <ErrorNote error={error} />
-        <section className="glass rounded-3xl p-4" aria-labelledby="promise">
-          <h2 id="promise" className="font-display text-lg font-black">Your promise</h2>
-          <ul aria-label="Our promises" className="mt-3 flex flex-wrap gap-2">
+        <div>
+          <Group header="Your promise">
             {PROMISES.map((p) => (
-              <li key={p.label}>
-                <Fact icon={p.icon}>{p.label}</Fact>
-              </li>
+              <GroupRow key={p.label} icon={p.icon} tone={p.tone} title={p.label} />
             ))}
-          </ul>
-          <LearnMore className="mt-2">
+          </Group>
+          <LearnMore className="mt-1.5 px-4">
             <ul className="space-y-1.5">
               <li>Your twin is encrypted and only you can see it.</li>
               <li>Makers never receive your twin or your looks, only what you order.</li>
@@ -90,60 +89,55 @@ export default function Trust() {
               <li>When you speak to the Muse, your recording is turned into text and deleted straight away; no audio is kept.</li>
             </ul>
           </LearnMore>
-        </section>
+        </div>
 
         {data && (
           <>
-            <section className="glass rounded-3xl p-4">
-              <div className="flex items-center justify-between">
-                <p className="flex items-center gap-2 font-semibold"><Icon name="mirror" className="size-4 text-gold" /> My twin</p>
-                <Link href="/mirror" className="hit text-sm font-semibold text-gold">{data.twin ? "View / retake" : "Create"}</Link>
-              </div>
-              <p className="mt-1 text-sm text-mut">
-                {data.twin ? `v${data.twin.version} · size ${data.twin.size ?? "—"} · ${new Date(data.twin.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}` : "No twin · looks use an AI model"}
-              </p>
-              <dl className="mt-3 grid grid-cols-3 gap-2 text-center">
-                {([["Looks", data.counts.looks], ["Saved", data.counts.saved], ["Orders", data.counts.orders]] as const).map(([k, v]) => (
-                  <div key={k} className="rounded-2xl bg-white/[.06] py-2">
-                    <dt className="text-[11px] font-bold uppercase tracking-wider text-mut">{k}</dt>
-                    <dd className="tabular font-display text-xl font-black">{v}</dd>
-                  </div>
-                ))}
-              </dl>
-            </section>
+            <Group header="My data">
+              <GroupRow
+                icon="mirror"
+                tone="violet"
+                title="My twin"
+                subtitle={data.twin ? `v${data.twin.version} · size ${data.twin.size ?? "—"} · ${new Date(data.twin.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}` : "No twin · looks use an AI model"}
+                value={data.twin ? "View" : "Create"}
+                href="/mirror"
+              />
+              <GroupRow icon="sparkle" tone="terra" title="Looks" value={<span className="tabular">{data.counts.looks}</span>} />
+              <GroupRow icon="heart" tone="red" title="Saved looks" value={<span className="tabular">{data.counts.saved}</span>} href="/saved" />
+              <GroupRow icon="bag" tone="gold" title="Orders" value={<span className="tabular">{data.counts.orders}</span>} href="/orders" />
+            </Group>
 
-            <section className="glass space-y-3 rounded-3xl p-4">
-              <div className="flex items-center justify-between">
-                <p className="font-semibold">Consents</p>
-                <span className={`text-xs ${data.ledgerVerified ? "text-mint" : "text-terra"}`}>{data.ledgerVerified ? "✓ ledger verified" : "⚠ ledger check failed"}</span>
-              </div>
+            <Group
+              header="Consents"
+              footer={
+                <span className={`inline-flex items-center gap-1 ${data.ledgerVerified ? "text-mint" : "text-terra"}`}>
+                  <Icon name={data.ledgerVerified ? "checkCircle" : "alert"} className="size-3.5" />
+                  {data.ledgerVerified ? "ledger verified" : "ledger check failed"}
+                </span>
+              }
+            >
               {data.consents.map((c) => (
-                <label key={c.purpose} className="flex min-h-12 cursor-pointer items-center gap-3">
-                  <span className="flex-1">
-                    <span className="block text-sm font-semibold">{PURPOSE[c.purpose]?.title ?? c.purpose}</span>
-                    <span className="block text-xs text-mut">{PURPOSE[c.purpose]?.body}</span>
-                  </span>
-                  <input type="checkbox" role="switch" className="sr-only" checked={c.granted} onChange={(e) => toggle(c.purpose, e.target.checked)} aria-label={PURPOSE[c.purpose]?.title} />
-                  <span aria-hidden className={`relative h-7 w-12 shrink-0 rounded-full transition ${c.granted ? "bg-[#0f8a5f]" : "bg-white/20"}`}>
-                    <span className={`absolute top-0.5 size-6 rounded-full bg-[#fff] shadow transition-all duration-200 ${c.granted ? "left-[22px]" : "left-0.5"}`} />
-                  </span>
-                </label>
+                <GroupRow
+                  key={c.purpose}
+                  icon={PURPOSE[c.purpose]?.icon}
+                  tone={PURPOSE[c.purpose]?.tone}
+                  title={PURPOSE[c.purpose]?.title ?? c.purpose}
+                  subtitle={PURPOSE[c.purpose]?.body}
+                  accessory={<ShopperSwitch checked={c.granted} onChange={(v) => toggle(c.purpose, v)} label={PURPOSE[c.purpose]?.title ?? c.purpose} />}
+                />
               ))}
-            </section>
+            </Group>
 
             <NotificationPrefsCard />
             <PasskeysCard />
             <AddressesCard />
 
-            <section className="glass space-y-2 rounded-3xl p-4">
-              <p className="font-semibold">My data</p>
-              <a href="/api/privacy/export" className="glass press flex min-h-12 items-center justify-center gap-2 rounded-2xl font-semibold"><Icon name="download" className="size-4" /> Download my data (JSON)</a>
-              <div className="grid grid-cols-2 gap-2">
-                <Button variant="glass" disabled={!data.twin} onClick={() => setConfirm("TWIN")}>Delete twin</Button>
-                <Button variant="glass" onClick={() => setConfirm("LOOKS")}>Delete looks</Button>
-              </div>
-              <Button variant="danger" className="w-full" onClick={() => setConfirm("ACCOUNT")}>Delete my account</Button>
-            </section>
+            <Group header="Export & delete">
+              <GroupRow icon="download" tone="sky" title="Download my data" value="JSON" onClick={() => window.location.assign("/api/privacy/export")} />
+              {data.twin && <GroupRow icon="trash" tone="red" title="Delete twin" destructive onClick={() => setConfirm("TWIN")} />}
+              <GroupRow icon="trash" tone="red" title="Delete looks" destructive onClick={() => setConfirm("LOOKS")} />
+              <GroupRow icon="logout" tone="red" title="Delete my account" destructive onClick={() => setConfirm("ACCOUNT")} />
+            </Group>
           </>
         )}
       </main>

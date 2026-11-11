@@ -8,6 +8,7 @@ import { RestyleSheet } from "@/components/wardrobe-restyle";
 import { rwf } from "@/lib/api";
 import { nice, type OwnedItem } from "@/lib/social";
 import { useApi } from "@/lib/use-api";
+import { Icon } from "@/components/icons";
 
 type Item = OwnedItem & { outfits: { id: string; eventId: string; event: string; image: string }[] };
 
@@ -62,7 +63,7 @@ export default function WardrobeItem() {
             )}
           </section>
           <div className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-[480px] px-5 pb-[max(env(safe-area-inset-bottom),16px)] pt-6 fade-bottom">
-            <button onClick={() => setRestyle(true)} className="grad-cta min-h-14 w-full rounded-2xl font-display text-lg font-black">✨ Restyle for an event</button>
+            <button onClick={() => setRestyle(true)} className="grad-cta press flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl font-display text-lg font-black"><Icon name="sparkle" className="size-5" /> Restyle for an event</button>
           </div>
           <RestyleSheet open={restyle} onClose={() => setRestyle(false)} />
         </>

@@ -8,6 +8,7 @@ import { rwf } from "@/lib/api";
 import { isRendering } from "@/lib/looks";
 import { whenLabel, type WardrobeEventView } from "@/lib/social";
 import { useApi } from "@/lib/use-api";
+import { Icon } from "@/components/icons";
 
 /** Three outfits for one event, rendered on the twin; swipe between them. */
 export default function EventOutfits() {
@@ -43,9 +44,9 @@ export default function EventOutfits() {
             <h1 className="font-display text-[28px] font-black leading-tight">{data.title} {whenLabel(data.daysUntil)}</h1>
             <p className="text-sm text-txt/80">{data.rendering ? "The Muse is styling…" : `${data.ready} outfit${data.ready === 1 ? "" : "s"} ready · swipe to compare`}</p>
             {data.reminderSentAt ? (
-              <p className="mt-2 inline-block rounded-full bg-[#25D366]/20 px-3 py-1 text-xs font-semibold text-[#7ff0a8]">📲 WhatsApp reminder sent</p>
+              <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-[#25D366]/20 px-3 py-1 text-xs font-semibold text-[#7ff0a8]"><Icon name="bell" className="size-3.5" /> WhatsApp reminder sent</p>
             ) : data.daysUntil > 3 ? (
-              <p className="mt-2 inline-block rounded-full bg-white/10 px-3 py-1 text-xs text-txt/80">📲 WhatsApp reminder · 3 days before</p>
+              <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-xs text-txt/80"><Icon name="bell" className="size-3.5" /> WhatsApp reminder · 3 days before</p>
             ) : null}
           </>
         ) : (
@@ -67,7 +68,7 @@ export default function EventOutfits() {
                 </div>
               )}
               {o && <span className="absolute left-3 top-3 rounded-full bg-black/55 px-3 py-1 text-xs font-bold">Look {i + 1} / {data!.looks.length}</span>}
-              {o?.c2pa && <span className="absolute right-3 top-3 rounded-full bg-black/55 px-2.5 py-1 text-[10px] font-semibold">🔏 C2PA</span>}
+              {o?.c2pa && <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-black/55 px-2.5 py-1 text-[10px] font-semibold text-[#fff]"><Icon name="shield" className="size-3" /> C2PA</span>}
             </div>
             {o && (
               <div className="glass mt-3 rounded-3xl p-4">
@@ -87,7 +88,7 @@ export default function EventOutfits() {
                     </li>
                   ))}
                 </ul>
-                <p className="mt-3 text-xs text-txt/80">✨ {o.reasons.join(" · ")}</p>
+                <p className="mt-3 flex items-start gap-1.5 text-xs text-txt/80"><Icon name="sparkle" className="mt-px size-3.5 shrink-0 text-gold" /> {o.reasons.join(" · ")}</p>
                 {o.newCostRwf > 0 && <p className="mt-1 text-xs text-mut">New: {rwf(o.newCostRwf)} · paid directly to the makers</p>}
               </div>
             )}

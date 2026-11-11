@@ -8,6 +8,7 @@ import { api } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { useApi } from "@/lib/use-api";
 import { kigaliTime, MEASUREMENT_LABEL, type MeasurementsView } from "@/lib/tailor";
+import { Icon } from "@/components/icons";
 
 /** Private measurement profile (FR-SIZE-01/04/08): encrypted, shared only by explicit time-limited choice. */
 export default function MeasurementsPage() {
@@ -54,7 +55,7 @@ export default function MeasurementsPage() {
           </ul>
           {fromTwin && (
             <p className="mt-2 flex items-center gap-1 rounded-2xl bg-black/30 px-3 py-2 text-sm">
-              ✨ From your twin ({data!.twinSize}) · ±3 cm
+              <Icon name="sparkle" className="size-4 text-gold" /> From your twin ({data!.twinSize}) · ±3 cm
               <InfoTip label="About twin estimates">Prefilled from your twin&apos;s size estimate. Expect ±3 cm: check with a tape measure.</InfoTip>
             </p>
           )}
@@ -67,7 +68,7 @@ export default function MeasurementsPage() {
             <div className="grid grid-cols-2 gap-3">
               {fields.map((k) => (
                 <label key={k} className="block rounded-2xl bg-black/25 p-3">
-                  <span className="flex items-center gap-1.5 text-sm font-semibold"><span aria-hidden>{MEASUREMENT_LABEL[k].icon}</span>{MEASUREMENT_LABEL[k].label}</span>
+                  <span className="flex items-center gap-1.5 text-sm font-semibold"><Icon name={MEASUREMENT_LABEL[k].glyph} className="size-4 text-gold" />{MEASUREMENT_LABEL[k].label}</span>
                   <span className="mt-1 flex items-baseline gap-1">
                     <input
                       inputMode="decimal"
