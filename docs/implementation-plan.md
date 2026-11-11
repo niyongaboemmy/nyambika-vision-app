@@ -505,6 +505,7 @@ Full network migrated (≥ 95% of active pages) · paid page conversion ≥ 30% 
 Physics-based drape and **fit heatmaps** (pattern-based garments) · **tailor pattern-to-3D** custom previews · mixed-reality fitting mirror · multi-user VR events · **fine-tuned local model** on consented African garment data · advanced trend insights for members. Each item starts with a spike and an NLB-style evaluation before commitment.
 
 * **Spike 1, physics drape + fit heatmaps + tailor pattern-to-3D (Nov 2026):** flag-gated CPU prototype, NLB-style harness on synthetic bodies S..3XL. Outcome **Iterate**; see [`docs/spikes/r4-drape-pattern-3d.md`](spikes/r4-drape-pattern-3d.md).
+* **Spike 2, mixed-reality fitting mirror + multi-user VR events (Nov 2026):** flag-gated WebXR immersive-ar mirror and a WebSocket presence gateway (Redis bus) in the E35 showroom; load test 20/50/100 per room, comfort/safety review. Outcome **Iterate** (MR mirror: lean No-go for 2027); see [`docs/spikes/r4-mr-mirror-multiuser-vr.md`](spikes/r4-mr-mirror-multiuser-vr.md).
 
 ---
 
