@@ -3,36 +3,35 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
+import { Icon, type IconName } from "@/components/studio";
 
-/** Tailor desk sub-navigation: pill tabs on top, a floating dock on phones (brief §4). */
+/**
+ * Tailor desk sub-navigation: one pill row at every width. The studio shell already owns the
+ * floating dock on phones, so this section must not add a second one.
+ */
 export function DeskNav({ pageId }: { pageId: string }) {
   const path = usePathname();
   const base = `/studio/${pageId}/tailor`;
-  const items = [
-    { href: base, label: "Orders", icon: "🪡" },
-    { href: `${base}/slots`, label: "Fittings", icon: "📅" },
-    { href: `${base}/services`, label: "Services", icon: "🧾" },
+  const items: { href: string; label: string; icon: IconName }[] = [
+    { href: base, label: "Orders", icon: "scissors" },
+    { href: `${base}/slots`, label: "Fittings", icon: "clock" },
+    { href: `${base}/services`, label: "Services", icon: "list" },
   ];
   const active = (h: string) => (h === base ? path === base || /\/tailor\/(?!slots|services)[^/]+$/.test(path) : path.startsWith(h));
   return (
-    <>
-      <nav aria-label="Tailor desk" className="mb-4 hidden gap-2 sm:flex">
-        {items.map((i) => (
-          <Link key={i.href} href={i.href} aria-current={active(i.href) ? "page" : undefined} className={`inline-flex min-h-11 items-center gap-2 rounded-full px-4 text-sm font-semibold transition ${active(i.href) ? "bg-stone-900 text-white" : "border border-stone-300 bg-white text-stone-700"}`}>
-            <span aria-hidden>{i.icon}</span>
-            {i.label}
-          </Link>
-        ))}
-      </nav>
-      <nav aria-label="Tailor desk" className="fixed inset-x-3 bottom-[max(env(safe-area-inset-bottom),12px)] z-40 mx-auto flex max-w-sm justify-around rounded-[22px] border border-stone-200 bg-white/95 p-1.5 shadow-[0_12px_40px_rgba(28,25,23,.18)] backdrop-blur sm:hidden">
-        {items.map((i) => (
-          <Link key={i.href} href={i.href} aria-current={active(i.href) ? "page" : undefined} className={`flex min-h-12 flex-1 flex-col items-center justify-center rounded-2xl text-[11px] font-bold ${active(i.href) ? "bg-stone-900 text-white" : "text-stone-600"}`}>
-            <span aria-hidden className="text-lg leading-none">{i.icon}</span>
-            {i.label}
-          </Link>
-        ))}
-      </nav>
-    </>
+    <nav aria-label="Tailor desk" className="no-scrollbar -mx-4 mb-4 flex gap-2 overflow-x-auto px-4">
+      {items.map((i) => (
+        <Link
+          key={i.href}
+          href={i.href}
+          aria-current={active(i.href) ? "page" : undefined}
+          className={`inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full px-4 text-sm font-semibold transition ${active(i.href) ? "bg-stone-900 text-white" : "border border-stone-300 bg-white text-stone-700"}`}
+        >
+          <Icon name={i.icon} className="size-4" />
+          {i.label}
+        </Link>
+      ))}
+    </nav>
   );
 }
 
