@@ -59,7 +59,7 @@ export class AgentAccessService implements OnModuleInit, OnModuleDestroy {
   constructor(private prisma: PrismaService) {}
 
   onModuleInit() {
-    this.redis = new Redis(config.redisUrl, { maxRetriesPerRequest: 1, enableOfflineQueue: false });
+    this.redis = new Redis(config.redisUrl, { maxRetriesPerRequest: 1, enableOfflineQueue: false, keyPrefix: config.redisKeyPrefix });
     this.redis.on("error", () => undefined);
     this.redis.on("ready", () => (this.counters = new RedisCounterStore(this.redis!)));
     this.redis.on("end", () => (this.counters = new MemoryCounterStore()));

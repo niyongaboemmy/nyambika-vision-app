@@ -2,6 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   assertCatalogueImage,
   consentState,
+  coopEligibility,
+  makerConsents,
+  makerPurpose,
   needsTombstone,
   normaliseCategory,
   normaliseColour,
@@ -32,6 +35,30 @@ describe("training-data consent gating", () => {
     const withdrawn = consentState("pg", [...rows, row(pagePurpose("pg"), false, 4)]);
     expect(productEligibility(withdrawn, "p1")).toEqual({ eligible: false, reason: "PAGE_WITHDRAWN" });
     expect(productEligibility(withdrawn, "p3")).toMatchObject({ eligible: true, scope: "product" });
+  });
+
+  it("on a cooperative page needs every credited maker's own consent; a withdrawal by either side takes it out", () => {
+    const admin = [row(pagePurpose("co"), true, 1)];
+    const s = consentState("co", admin);
+    // The coop admin said yes, the maker has not decided: out.
+    expect(coopEligibility(s, "p1", ["m1"], makerConsents("co", []))).toEqual({ eligible: false, reason: "MAKER_NOT_CONSENTED" });
+    const yes = makerConsents("co", [{ ...row(makerPurpose("co", "m1"), true, 2), userId: "maker" }]);
+    expect(coopEligibility(s, "p1", ["m1"], yes)).toMatchObject({ eligible: true, consentRecordId: "r1", makerConsentRecordIds: ["r2"] });
+    // Two credited makers: both must agree.
+    expect(coopEligibility(s, "p1", ["m1", "m2"], yes)).toEqual({ eligible: false, reason: "MAKER_NOT_CONSENTED" });
+    // Maker withdraws (latest record wins).
+    const no = makerConsents("co", [row(makerPurpose("co", "m1"), true, 2), row(makerPurpose("co", "m1"), false, 5)]);
+    expect(coopEligibility(s, "p1", ["m1"], no)).toEqual({ eligible: false, reason: "MAKER_WITHDRAWN" });
+    // Admin withdraws: out even though the maker still says yes.
+    const adminOut = consentState("co", [...admin, row(pagePurpose("co"), false, 6)]);
+    expect(coopEligibility(adminOut, "p1", ["m1"], yes)).toEqual({ eligible: false, reason: "PAGE_WITHDRAWN" });
+    // The maker's yes alone never opts a piece in.
+    expect(coopEligibility(consentState("co", []), "p1", ["m1"], yes)).toEqual({ eligible: false, reason: "NOT_OPTED_IN" });
+    // Uncredited coop piece: the cooperative's own work, admin decides alone.
+    expect(coopEligibility(s, "p9", [], {})).toMatchObject({ eligible: true });
+    // Maker records are never read as a product override, and other pages' makers are ignored.
+    expect(consentState("co", [row(makerPurpose("co", "m1"), false, 3)]).products).toEqual({});
+    expect(makerConsents("co", [row(makerPurpose("co2", "m1"), true, 3)])).toEqual({});
   });
 
   it("ignores other pages and other purposes", () => {

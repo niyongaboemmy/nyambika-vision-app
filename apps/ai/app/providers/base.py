@@ -28,4 +28,5 @@ class VTONProvider(ABC):
 
     @abstractmethod
     def generate(self, twin: Image.Image, garment: Image.Image, category: str, tier: str,
-                 frame: tuple[int, int, int, int] | None = None) -> VTONResult: ...
+                 frame: tuple[int, int, int, int] | None = None, region: str | None = None) -> VTONResult:
+        """`region` is the shopper's data-residency region; providers that run in one place may ignore it."""

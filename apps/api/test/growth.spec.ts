@@ -198,8 +198,28 @@ describe("assisted mode consent + USSD (E31)", () => {
 });
 
 describe("full-network wave: concurrency window and rollback-all (E21)", () => {
+  it("imports two pages of one new owner at the same time (owner upsert race)", async () => {
+    const { MigrationController, LegacyPage } = await import("../src/modules/migration/migration.module");
+    const importer = app.get(MigrationController);
+    const host = await prisma.user.findUniqueOrThrow({ where: { phone: "+250788900001" } });
+    const wave = await prisma.migrationWave.create({ data: { name: `IT race ${uniq}`, createdBy: host.id } });
+    const ownerPhone = `0789${uniq}`;
+    const src = (i: number) => LegacyPage.parse({ legacyUrl: `https://old.nyambika.rw/shop/race-${uniq}-${i}`, handle: `race-${uniq}-${i}`, name: `Race ${i}`, memberType: "SELLER", ownerPhone });
+    // Several rounds so the find-then-create window is hit deterministically, not by luck.
+    for (let round = 0; round < 3; round++) {
+      await prisma.user.deleteMany({ where: { phone: e164(ownerPhone) } }).catch(() => undefined);
+      const rs = await Promise.allSettled([0, 1, 2, 3].map((i) => importer.importPage(wave.id, src(round * 10 + i))));
+      expect(rs.map((r) => (r.status === "rejected" ? String(r.reason) : "ok"))).toEqual(["ok", "ok", "ok", "ok"]);
+      expect(await prisma.page.count({ where: { handle: { startsWith: `race-${uniq}-` }, roles: { some: { user: { phone: e164(ownerPhone) } } } } })).toBe(4);
+      await prisma.migrationItem.deleteMany({ where: { waveId: wave.id } });
+      await prisma.redirect.deleteMany({ where: { fromPath: { startsWith: `/shop/race-${uniq}-` } } });
+      await prisma.page.deleteMany({ where: { handle: { startsWith: `race-${uniq}-` } } });
+    }
+  });
+
   it("imports on the queue within the window, chases unsigned owners and rolls the whole wave back", async () => {
     const host = await login("0788900001");
+    // `.slice(0, 10)` cuts the index off, so all pages share one new owner and concurrent imports race on that user.
     const page = (i: number) => ({ legacyUrl: `https://old.nyambika.rw/shop/net-${uniq}-${i}`, handle: `net-${uniq}-${i}`, name: `Net Shop ${i}`, memberType: "SELLER", ownerPhone: `0787${uniq}${i}`.slice(0, 10), story: "A short story about this synthetic shop and its kitenge." });
     const pages = Array.from({ length: 8 }, (_, i) => page(i));
     pages.push({ ...page(0), legacyUrl: `https://old.nyambika.rw/shop/net-${uniq}-dup` }); // duplicate handle → fails
@@ -207,7 +227,8 @@ describe("full-network wave: concurrency window and rollback-all (E21)", () => {
     const waveId = start.body.waveId as string;
 
     let d: { run: { status: string; done: number; failed: number; maxRunning: number; concurrency: number } } = { run: { status: "", done: 0, failed: 0, maxRunning: 0, concurrency: 0 } };
-    for (let i = 0; i < 60 && d.run.status !== "IMPORTED"; i++) {
+    // Wait for the terminal state, not a fixed number of polls: under a loaded machine 9 imports can take > 15 s.
+    for (const until = Date.now() + 75_000; d.run.status !== "IMPORTED" && Date.now() < until; ) {
       await wait(250);
       d = (await host.get(`/admin/migration/network/${waveId}`).expect(200)).body;
     }
@@ -239,5 +260,5 @@ describe("full-network wave: concurrency window and rollback-all (E21)", () => {
 
     const shopper = await login(`0784${uniq}7`);
     await shopper.get(`/admin/migration/network/${waveId}`).expect(403);
-  });
+  }, 120_000);
 });

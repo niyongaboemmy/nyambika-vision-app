@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useMemo, useState } from "react";
+import { MakerTrainingLink } from "@/components/mlspike-training";
 import { Badge, Empty, Icon, ScreenSkeleton, SButton, SectionTitle, Segmented } from "@/components/studio";
 import { api, rwf } from "@/lib/api";
 import type { StudioProduct } from "@/lib/types";
@@ -72,6 +73,8 @@ function Products() {
           </SButton>
         }
       />
+
+      {member && page.memberType === "COOPERATIVE" && <MakerTrainingLink pageId={page.id} />}
 
       {pending.length > 0 && (
         <section aria-labelledby="pending-title" className="rounded-[26px] bg-amber-50 p-4 ring-1 ring-inset ring-amber-200">

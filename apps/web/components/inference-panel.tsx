@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Badge, Chip, Field, Icon, Input, Note, ScreenSkeleton, SButton, Segmented, StudioSheet, Switch } from "@/components/studio";
 import { api, ApiError } from "@/lib/api";
 
-type Route = "tryon" | "stt" | "llm" | "avatar" | "video";
+type Route = "tryon" | "stt" | "llm" | "avatar" | "video" | "attr";
 type Strategy = "cost" | "latency" | "pool-first" | "hosted-only" | "pool-only";
 type ChaosMode = "healthy" | "slow" | "flaky" | "failing" | "down";
 interface RoutePolicy {
@@ -60,7 +60,7 @@ interface Overview {
   videoModels: VideoModel[];
 }
 
-const ROUTE_LABEL: Record<Route, string> = { tryon: "Photo try-on", stt: "Speech to text", llm: "LLM phrasing", avatar: "3D avatar", video: "Video try-on" };
+const ROUTE_LABEL: Record<Route, string> = { tryon: "Photo try-on", stt: "Speech to text", llm: "LLM phrasing", avatar: "3D avatar", video: "Video try-on", attr: "Garment attributes · spike" };
 const STRATEGY: { value: Strategy; label: string }[] = [
   { value: "cost", label: "Cheapest in SLO" },
   { value: "latency", label: "Fastest" },

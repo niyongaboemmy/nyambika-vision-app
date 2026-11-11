@@ -41,6 +41,8 @@ class TryOnIn(BaseModel):
     tier: Literal["PREVIEW", "HD"] = "PREVIEW"
     request_id: str = Field(default_factory=lambda: uuid.uuid4().hex)
     garment_frame: list[int] | None = Field(default=None, min_length=4, max_length=4)
+    # Data-residency region of the shopper (E41 code, e.g. "RW"); only the routed provider uses it (E42 in-region policy).
+    region: str | None = Field(default=None, max_length=8)
 
 
 class IntentIn(BaseModel):
@@ -99,7 +101,7 @@ def tryon(body: TryOnIn):
     garment_img = _image(body.garment_b64).convert("RGBA")
     try:
         result = provider.generate(_image(body.twin_b64), garment_img, body.garment_category, body.tier,
-                                   tuple(body.garment_frame) if body.garment_frame else None)
+                                   tuple(body.garment_frame) if body.garment_frame else None, region=body.region)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     labelled, label_box = _label(result.image)

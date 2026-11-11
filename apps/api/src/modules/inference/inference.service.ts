@@ -7,7 +7,7 @@ import { Access } from "../../common/auth";
 import { aiInferenceCalls, aiInferenceCost } from "../../common/metrics";
 import { PrismaService } from "../../common/prisma.service";
 import { StorageService } from "../../common/storage.service";
-import { counterDeltas, enforceInvariants, poolShare, policySchema, ROUTES, type BackendStats, type Policy, type Route, type RoutePolicy } from "./inference-rules";
+import { counterDeltas, enforceInvariants, poolShare, policySchema, ROUTES, upgradePolicy, type BackendStats, type Policy, type Route, type RoutePolicy } from "./inference-rules";
 import { activationDecision, NLB_GATED_TIERS } from "./nlb-gate";
 
 export interface GatewayBackend extends BackendStats {
@@ -83,8 +83,14 @@ export class InferenceService implements OnModuleInit, OnModuleDestroy {
     const s = await this.ai.get<GatewayStatus>("/v1/inference/status");
     let row = await this.prisma.inferencePolicy.findUnique({ where: { id: POLICY_ID } });
     if (!row) {
-      const initial = enforceInvariants({ ...s.policy, version: 1 });
+      const initial = enforceInvariants({ ...upgradePolicy(s.policy).policy, version: 1 });
       row = await this.prisma.inferencePolicy.create({ data: { id: POLICY_ID, policy: initial as unknown as Prisma.InputJsonValue, version: 1 } });
+    }
+    // Stored before a route existed (e.g. `attr`)? Complete it in place; same version, the gateway already runs those defaults.
+    const up = upgradePolicy(row.policy, s.policy);
+    if (up.changed) {
+      const policy = enforceInvariants({ ...up.policy, version: row.version });
+      row = await this.prisma.inferencePolicy.update({ where: { id: POLICY_ID }, data: { policy: policy as unknown as Prisma.InputJsonValue } });
     }
     if (s.policy.version !== row.version) {
       await this.ai.put("/v1/inference/policy", { ...(row.policy as unknown as Policy), version: row.version });
@@ -119,10 +125,11 @@ export class InferenceService implements OnModuleInit, OnModuleDestroy {
       chaos = await this.ai.get<{ mode: string }>("/v1/inference/pool/chaos").catch(() => null);
     }
     const routes = gateway
-      ? ROUTES.map((route) => {
-          const r = gateway!.routes[route];
-          return { route, policy: gateway!.policy.routes[route], health: r.health, backends: r.backends, poolShare: poolShare(r.backends) };
-        })
+      ? ROUTES.filter((route) => gateway!.routes[route]) // an older gateway may not serve every route yet
+          .map((route) => {
+            const r = gateway!.routes[route];
+            return { route, policy: gateway!.policy.routes[route], health: r.health, backends: r.backends, poolShare: poolShare(r.backends) };
+          })
       : [];
     return {
       reachable: Boolean(gateway),
@@ -140,7 +147,7 @@ export class InferenceService implements OnModuleInit, OnModuleDestroy {
 
   async setRoutePolicy(userId: string, route: Route, input: RoutePolicy, breaker?: Policy["breaker"]) {
     const row = await this.prisma.inferencePolicy.findUnique({ where: { id: POLICY_ID } });
-    const base = (row?.policy as unknown as Policy | undefined) ?? (await this.sync()).policy;
+    const base = row ? upgradePolicy(row.policy).policy : upgradePolicy((await this.sync()).policy).policy;
     const next = enforceInvariants(policySchema.parse({ ...base, version: (row?.version ?? 0) + 1, breaker: breaker ?? base.breaker, routes: { ...base.routes, [route]: input } }));
     await this.prisma.inferencePolicy.upsert({
       where: { id: POLICY_ID },

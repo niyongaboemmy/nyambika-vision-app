@@ -19,6 +19,7 @@ process.env.MOCK_AUTO_APPROVE_MS = "0";
 // E36 agentic commerce + E37 Try-on as a Service, against the real app, database, Redis and AI gateway.
 let app: INestApplication;
 let base: string;
+const onThisApp = (url: string) => { const u = new URL(url); return `${base}${u.pathname}${u.search}`; };
 let prisma: import("../src/common/prisma.service").PrismaService;
 let payments: import("../src/modules/payments/payments.module").PaymentsService;
 let checkout: import("../src/modules/agents/checkout.service").AgentCheckoutService;
@@ -323,10 +324,11 @@ describe("Try-on as a Service (E37, FR-AGT-06)", () => {
     expect(doneA.status).toBe("delivered");
     expect(doneA.result).toMatchObject({ watermarked: false, ai_label: "AI preview", c2pa: { signed: true } });
     expect(doneA.billing).toEqual({ billable: true, band: "included", price: { amount: 0, currency: "RWF" } });
-    const img = await fetch(doneA.result.image_url);
+    // The URL names SELF_URL; ask this test app, not a dev API that may or may not be running.
+    const img = await fetch(onThisApp(doneA.result.image_url));
     expect(img.status).toBe(200);
     expect(img.headers.get("content-type")).toBe("image/png");
-    expect((await fetch(doneA.result.image_url.replace(/sig=\w{4}/, "sig=0000"))).status).toBe(404);
+    expect((await fetch(onThisApp(doneA.result.image_url.replace(/sig=\w{4}/, "sig=0000")))).status).toBe(404);
 
     const b = (await http.post("/v1/partner/tryon").set(bearer(live.secret)).send(job).expect(202)).body;
     const doneB = await waitFor(live.secret, b.id);

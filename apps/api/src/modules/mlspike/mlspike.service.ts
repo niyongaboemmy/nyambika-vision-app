@@ -10,6 +10,10 @@ import { pseudonymise } from "../pilot/privacy";
 import {
   assertCatalogueImage,
   consentState,
+  coopEligibility,
+  MAKER_TRAINING_PURPOSE,
+  makerConsents,
+  makerPurpose,
   needsTombstone,
   normaliseCategory,
   normaliseColour,
@@ -105,9 +109,37 @@ export class MlSpikeService {
     });
   }
 
+  /** Maker ledger rows of one page (TRAINING_DATA_MAKER:<page>:<coopMember>). */
+  private makerLedger(pageId: string): Promise<LedgerRow[]> {
+    return this.prisma.consentRecord.findMany({
+      where: { purpose: { startsWith: `${MAKER_TRAINING_PURPOSE}:${pageId}:` } },
+      select: { id: true, userId: true, purpose: true, granted: true, createdAt: true },
+      orderBy: { createdAt: "asc" },
+    });
+  }
+
+  /** Credited makers per product, on cooperative pages only (elsewhere the page owner is the maker). */
+  private async credits(pageId: string): Promise<Map<string, string[]>> {
+    const page = await this.prisma.page.findUnique({ where: { id: pageId }, select: { memberType: true } });
+    const out = new Map<string, string[]>();
+    if (page?.memberType !== "COOPERATIVE") return out;
+    for (const pm of await this.prisma.productMaker.findMany({ where: { product: { pageId } }, select: { productId: true, coopMemberId: true } })) {
+      out.set(pm.productId, [...(out.get(pm.productId) ?? []), pm.coopMemberId]);
+    }
+    return out;
+  }
+
+  private async eligibility(pageId: string) {
+    const [state, makers, credits] = await Promise.all([this.ledger(pageId).then((r) => consentState(pageId, r)), this.makerLedger(pageId).then((r) => makerConsents(pageId, r)), this.credits(pageId)]);
+    return { state, makers, credits, of: (productId: string) => coopEligibility(state, productId, credits.get(productId) ?? [], makers) };
+  }
+
   async trainingState(userId: string, pageId: string) {
     await this.access.requirePage(userId, pageId, MANAGE);
-    const state = consentState(pageId, await this.ledger(pageId));
+    const elig = await this.eligibility(pageId);
+    const state = elig.state;
+    const members = elig.credits.size ? await this.prisma.coopMember.findMany({ where: { pageId }, select: { id: true, name: true } }) : [];
+    const memberName = new Map(members.map((m) => [m.id, m.name]));
     const products = await this.prisma.product.findMany({
       where: { pageId, status: { not: "ARCHIVED" } },
       include: { variants: { select: { imagePath: true } } },
@@ -122,8 +154,11 @@ export class MlSpikeService {
       decidedAt: state.page?.at ?? null,
       consentRecordId: state.page?.recordId ?? null,
       products: products.map((p) => {
-        const e = productEligibility(state, p.id);
+        const e = elig.of(p.id);
+        const makers = (elig.credits.get(p.id) ?? []).map((id) => ({ name: memberName.get(id) ?? "Maker", consented: elig.makers[id]?.granted ?? false }));
         return {
+          makers,
+          waitingForMaker: !e.eligible && (e.reason === "MAKER_NOT_CONSENTED" || e.reason === "MAKER_WITHDRAWN"),
           id: p.id,
           title: p.title,
           category: p.category,
@@ -154,14 +189,57 @@ export class MlSpikeService {
     await this.access.requirePage(userId, pageId, MANAGE);
     const product = await this.prisma.product.findFirst({ where: { id: productId, pageId } });
     if (!product) throw new NotFoundException("Product not found on this page");
-    const state = consentState(pageId, await this.ledger(pageId));
-    const wasIn = productEligibility(state, productId).eligible;
+    const wasIn = (await this.eligibility(pageId)).of(productId).eligible;
     const rec = await this.consent.record(userId, productPurpose(pageId, productId), included, locale);
     if (wasIn && !included) {
       await this.prisma.trainingTombstone.create({ data: { pageId, productId, consentRecordId: rec.id, userId, reason: "product withdrawn" } });
     }
     await this.access.audit(userId, "training_data.product_consent", { pageId, productId, included, consentRecordId: rec.id }, pageId);
     return this.trainingState(userId, pageId);
+  }
+
+  // ── consent: the credited coop maker's own say (cooperative pages) ─────────
+  private async makerOf(userId: string, pageId: string) {
+    const m = await this.prisma.coopMember.findFirst({ where: { pageId, userId, active: true }, select: { id: true, name: true } });
+    if (!m) throw new ForbiddenException("Only a maker of this cooperative can decide this");
+    return m;
+  }
+
+  async makerTrainingState(userId: string, pageId: string) {
+    const me = await this.makerOf(userId, pageId);
+    const elig = await this.eligibility(pageId);
+    const mine = await this.prisma.product.findMany({
+      where: { pageId, status: { not: "ARCHIVED" }, makers: { some: { coopMemberId: me.id } } },
+      include: { variants: { select: { imagePath: true } } },
+      orderBy: { createdAt: "desc" },
+    });
+    const own = elig.makers[me.id];
+    return {
+      maker: me.name,
+      consented: own?.granted ?? false,
+      decidedAt: own?.at ?? null,
+      pieces: mine.map((p) => ({
+        id: p.id,
+        title: p.title,
+        image: this.storage.publicUrl(p.variants.find((v) => v.imagePath)?.imagePath),
+        coopShares: productEligibility(elig.state, p.id).eligible, // the admin's side of the decision
+        included: elig.of(p.id).eligible,
+      })),
+    };
+  }
+
+  async setMakerConsent(userId: string, pageId: string, granted: boolean, locale: string) {
+    const me = await this.makerOf(userId, pageId);
+    const elig = await this.eligibility(pageId);
+    const wasIn = [...elig.credits.entries()].filter(([, ms]) => ms.includes(me.id)).map(([productId]) => productId).filter((id) => elig.of(id).eligible);
+    const before = elig.makers[me.id];
+    const rec = await this.consent.record(userId, makerPurpose(pageId, me.id), granted, locale);
+    if (needsTombstone(before, granted)) {
+      // Every piece of theirs leaves the next dataset version (and its pixels every later one), whatever the admin chose.
+      for (const productId of wasIn) await this.prisma.trainingTombstone.create({ data: { pageId, productId, consentRecordId: rec.id, userId, reason: "maker withdrawn" } });
+    }
+    await this.access.audit(userId, "training_data.maker_consent", { pageId, coopMemberId: me.id, granted, consentRecordId: rec.id, withdrawnPieces: granted ? 0 : wasIn.length }, pageId);
+    return this.makerTrainingState(userId, pageId);
   }
 
   // ── dataset versions ────────────────────────────────────────────────────────
@@ -186,10 +264,11 @@ export class MlSpikeService {
     if (!contributors.length) throw new BadRequestException("No page has opted in to training-data contribution yet");
     const catalogue = [];
     const tombRows = await this.prisma.trainingTombstone.findMany({ orderBy: { createdAt: "desc" } });
-    for (const { pageId, state } of pages) {
+    for (const { pageId } of pages) {
+      const elig = await this.eligibility(pageId); // admin consent + (coop) every credited maker's own
       const products = await this.prisma.product.findMany({ where: { pageId, status: { in: ["PUBLISHED", "OUT_OF_STOCK"] } }, include: { variants: true } });
       for (const p of products) {
-        let e = productEligibility(state, p.id);
+        let e = elig.of(p.id);
         if (!e.eligible) {
           // Withdrawn pieces still go to the builder as *withdrawal references*: it only hashes them to drop the
           // same pixels wherever else they appear (another product reusing the photo), then forgets them.

@@ -28,6 +28,18 @@ export class MlSpikeController {
     return this.svc.setProductConsent(user.id, pageId, productId, b.included, b.locale);
   }
 
+  /** Cooperative maker's own decision for the pieces credited to them (required on top of the admin's). */
+  @Get("pages/:pageId/training-data/maker")
+  makerState(@CurrentUser() user: AuthUser, @Param("pageId") pageId: string) {
+    return this.svc.makerTrainingState(user.id, pageId);
+  }
+
+  @Put("pages/:pageId/training-data/maker")
+  setMaker(@CurrentUser() user: AuthUser, @Param("pageId") pageId: string, @Body() body: unknown) {
+    const b = parse(z.object({ consented: z.boolean(), locale: Locale }), body);
+    return this.svc.setMakerConsent(user.id, pageId, b.consented, b.locale);
+  }
+
   @Get("products/:id/attr-suggest")
   suggest(@CurrentUser() user: AuthUser, @Param("id") id: string) {
     return this.svc.suggest(user.id, id);
