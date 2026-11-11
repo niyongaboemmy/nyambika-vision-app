@@ -1,4 +1,5 @@
 import type { MorphLength, MorphSleeve, MorphSpec, MorphTemplateInput, Measurements, SizeRecommendation } from "@nyambika/contracts";
+import type { IconName } from "@/components/icons";
 
 export interface MorphTemplateView {
   customizable: boolean;
@@ -109,15 +110,19 @@ export function journeyIndex(status: string) {
   return JOURNEY.indexOf((alias[status] ?? status) as (typeof JOURNEY)[number]);
 }
 
-export const MEASUREMENT_LABEL: Record<string, { label: string; hint: string; icon: string }> = {
-  heightCm: { label: "Height", hint: "Barefoot, back to a wall", icon: "📏" },
-  bustCm: { label: "Bust / chest", hint: "Fullest part, tape level", icon: "⭕" },
-  waistCm: { label: "Waist", hint: "Narrowest part, above the navel", icon: "〰️" },
-  hipsCm: { label: "Hips", hint: "Fullest part of the hips", icon: "🍐" },
-  inseamCm: { label: "Inseam", hint: "Crotch to ankle", icon: "🦵" },
-  shoulderCm: { label: "Shoulder", hint: "Shoulder point to shoulder point", icon: "🤷" },
-  sleeveCm: { label: "Arm length", hint: "Shoulder to wrist, arm relaxed", icon: "💪" },
-  neckCm: { label: "Neck", hint: "Around the base of the neck", icon: "👔" },
+/**
+ * `glyph` is the SF-style icon to render with `<Icon name={glyph} />`. `icon` is kept (empty) only so older
+ * call sites that printed the emoji keep compiling; render `glyph` instead.
+ */
+export const MEASUREMENT_LABEL: Record<string, { label: string; hint: string; glyph: IconName; icon: string }> = {
+  heightCm: { label: "Height", hint: "Barefoot, back to a wall", glyph: "ruler", icon: "" },
+  bustCm: { label: "Bust / chest", hint: "Fullest part, tape level", glyph: "dress", icon: "" },
+  waistCm: { label: "Waist", hint: "Narrowest part, above the navel", glyph: "needle", icon: "" },
+  hipsCm: { label: "Hips", hint: "Fullest part of the hips", glyph: "person", icon: "" },
+  inseamCm: { label: "Inseam", hint: "Crotch to ankle", glyph: "move", icon: "" },
+  shoulderCm: { label: "Shoulder", hint: "Shoulder point to shoulder point", glyph: "user", icon: "" },
+  sleeveCm: { label: "Arm length", hint: "Shoulder to wrist, arm relaxed", glyph: "hand", icon: "" },
+  neckCm: { label: "Neck", hint: "Around the base of the neck", glyph: "ring", icon: "" },
 };
 
 export const hueColour = (h: number) => `hsl(${h} 72% 50%)`;

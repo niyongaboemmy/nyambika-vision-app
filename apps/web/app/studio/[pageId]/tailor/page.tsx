@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Empty } from "@/components/studio";
+import { Empty, Icon } from "@/components/studio";
 import { Bento, DeskNav, StatusChip } from "@/components/tailor-studio";
 import { rwf } from "@/lib/api";
 import { useApi } from "@/lib/use-api";
@@ -55,9 +55,9 @@ export default function TailorDesk() {
         {!data && [0, 1, 2].map((i) => <div key={i} className="h-36 animate-pulse rounded-3xl bg-stone-200" />)}
         {data && rows.length === 0 && <Empty icon="scissors" title={filter === "open" ? "Nothing to do" : "No orders here"}>{filter === "open" ? "New requests land here and on WhatsApp." : null}</Empty>}
         {rows.map((o) => (
-          <Link key={o.id} href={`/studio/${page.id}/tailor/${o.id}`} className="group flex gap-3 rounded-3xl bg-white p-3 ring-1 ring-stone-200 transition hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-stone-900">
+          <Link key={o.id} href={`/studio/${page.id}/tailor/${o.id}`} className="st-press group flex gap-3 rounded-3xl bg-white p-3 ring-1 ring-stone-200 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-stone-900">
             <div className="relative h-32 w-24 shrink-0 overflow-hidden rounded-2xl bg-stone-100">
-              {o.image || o.productImage ? <img loading="lazy" decoding="async" src={o.image ?? o.productImage!} alt="" className="h-full w-full object-cover" /> : <span className="grid h-full place-items-center text-3xl" aria-hidden>✂️</span>}
+              {o.image || o.productImage ? <img loading="lazy" decoding="async" src={o.image ?? o.productImage!} alt="" className="h-full w-full object-cover" /> : <span className="grid h-full place-items-center text-stone-400" aria-hidden><Icon name="scissors" className="size-8" /></span>}
               {o.spec.hue !== null && <span className="absolute bottom-1.5 left-1.5 size-5 rounded-full ring-2 ring-white" style={{ background: `hsl(${o.spec.hue} 72% 50%)` }} aria-label={`Custom colour ${o.spec.hue}°`} />}
               {o.image && <span className="absolute right-1 top-1 rounded bg-black/60 px-1 text-[9px] font-semibold text-white">AI preview</span>}
             </div>
@@ -74,7 +74,7 @@ export default function TailorDesk() {
                 <StatusChip status={o.status} label={CO_TAILOR_LABEL[o.status] ?? o.status} />
                 <span className="text-sm font-semibold">{o.quote ? rwf(o.quote.priceRwf) : `~${rwf(o.estimateRwf)}`}</span>
               </div>
-              {o.fitting && <p className="mt-1 text-xs text-stone-600">📅 {kigaliTime(o.fitting.startsAt, { weekday: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</p>}
+              {o.fitting && <p className="mt-1.5 flex items-center gap-1 text-xs text-stone-600"><Icon name="calendar" className="size-3.5" />{kigaliTime(o.fitting.startsAt, { weekday: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</p>}
             </div>
           </Link>
         ))}
