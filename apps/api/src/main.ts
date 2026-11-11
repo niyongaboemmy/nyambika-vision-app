@@ -8,6 +8,8 @@ import { config } from "./config";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bodyParser: false });
+  // Migration bundles may embed product photos (base64); everything else stays small.
+  app.use("/admin/migration", json({ limit: "40mb" }));
   app.use(json({ limit: "2mb" }));
   app.use(cookieParser());
   app.enableShutdownHooks();

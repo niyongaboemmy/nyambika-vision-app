@@ -66,6 +66,12 @@ const BADGE: Record<string, string> = {
   CANCELLED: "bg-red-100 text-red-800",
   DECLINED: "bg-red-100 text-red-800",
   DISPUTED: "bg-red-100 text-red-800",
+  LIVE: "bg-emerald-100 text-emerald-800",
+  SIGNED_OFF: "bg-sky-100 text-sky-800",
+  IN_REVIEW: "bg-amber-100 text-amber-800",
+  IMPORTED: "bg-stone-200 text-stone-700",
+  CHANGES_REQUESTED: "bg-red-100 text-red-800",
+  ROLLED_BACK: "bg-stone-300 text-stone-800",
 };
 
 export function Badge({ value, label }: { value: string; label?: string }) {

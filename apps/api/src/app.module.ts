@@ -22,6 +22,7 @@ import { OrdersModule } from "./modules/orders/orders.module";
 import { AnalyticsModule } from "./modules/analytics/analytics.module";
 import { PrivacyModule } from "./modules/privacy/privacy.module";
 import { AdminModule } from "./modules/admin/admin.module";
+import { MigrationModule } from "./modules/migration/migration.module";
 
 @Controller()
 class HealthController {
@@ -57,6 +58,7 @@ class HealthController {
     AnalyticsModule,
     PrivacyModule,
     AdminModule,
+    MigrationModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: AuthGuard }],

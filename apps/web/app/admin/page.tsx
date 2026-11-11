@@ -20,7 +20,7 @@ interface Overview {
   openModeration: number;
 }
 
-const TABS = ["Overview", "Verify", "Moderation", "Flags & models", "Outbox", "Audit"] as const;
+const TABS = ["Overview", "Verify", "Moderation", "Migration", "Flags & models", "Outbox", "Audit"] as const;
 
 /** Host admin console (FR-ADM). Host roles only. */
 export default function Admin() {
@@ -47,6 +47,7 @@ export default function Admin() {
         {tab === "Overview" && <OverviewTab />}
         {tab === "Verify" && <VerifyTab />}
         {tab === "Moderation" && <ModerationTab />}
+        {tab === "Migration" && <MigrationTab />}
         {tab === "Flags & models" && <FlagsTab />}
         {tab === "Outbox" && <OutboxTab />}
         {tab === "Audit" && <AuditTab />}
@@ -223,5 +224,103 @@ function Stat({ label, value, warn }: { label: string; value: string | number; w
       <p className="text-xs text-stone-500">{label}</p>
       <p className="mt-1 text-xl font-bold">{value}</p>
     </Card>
+  );
+}
+
+interface Wave {
+  id: string;
+  name: string;
+  createdAt: string;
+  items: {
+    id: string;
+    status: string;
+    legacyUrl: string;
+    checksum: string;
+    defects: { severity: string; message: string }[];
+    ownerNote: string;
+    reviewUrl: string;
+    page: { id: string; name: string; handle: string; status: string; products: number } | null;
+    redirect: { from: string; active: boolean; hits: number } | null;
+  }[];
+}
+
+/** Migration waves (plan §16): import → owner review → sign-off → go live, with rollback and 404 monitoring. */
+function MigrationTab() {
+  const { data: waves, reload } = useApi<Wave[]>("/admin/migration/waves");
+  const { data: misses } = useApi<{ path: string; hits: number; lastSeen: string }[]>("/admin/migration/not-found");
+  const [report, setReport] = useState<{ handle: string; ok: boolean; defects: unknown[]; error?: string }[] | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  async function upload(file: File) {
+    setBusy(true);
+    setErr(null);
+    try {
+      const r = await api<{ report: typeof report }>("/admin/migration/waves", { method: "POST", body: await file.text(), headers: { "content-type": "application/json" } });
+      setReport(r.report);
+      await reload();
+    } catch (e) {
+      setErr((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+  const act = async (id: string, action: string) => {
+    setErr(null);
+    try {
+      await api(`/admin/migration/items/${id}/${action}`, { method: "POST" });
+      await reload();
+    } catch (e) {
+      setErr((e as Error).message);
+    }
+  };
+
+  return (
+    <>
+      <Card className="space-y-2">
+        <p className="font-semibold">Import a wave</p>
+        <p className="text-sm text-stone-500">JSON bundle from the legacy export (format in docs/migration.md). Pages are imported hidden; photos go through the readiness pipeline.</p>
+        <label className={`flex min-h-11 cursor-pointer items-center justify-center rounded-xl border border-dashed border-stone-400 text-sm font-semibold ${busy ? "opacity-50" : ""}`}>
+          {busy ? "Importing…" : "Choose bundle (.json)"}
+          <input type="file" accept="application/json,.json" className="sr-only" disabled={busy} onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} />
+        </label>
+        {err && <p className="text-sm text-red-700">{err}</p>}
+        {report && (
+          <ul className="text-sm">
+            {report.map((r) => <li key={r.handle}>{r.ok ? "✓" : "✕"} {r.handle} {r.ok ? `· ${r.defects.length} item(s) to check` : `· ${r.error}`}</li>)}
+          </ul>
+        )}
+      </Card>
+      {waves?.map((w) => (
+        <section key={w.id} className="space-y-2">
+          <h3 className="font-bold">{w.name} <span className="text-sm font-normal text-stone-500">· {new Date(w.createdAt).toLocaleString()}</span></h3>
+          {w.items.map((i) => (
+            <Card key={i.id} className="space-y-2">
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="font-semibold">{i.page?.name} <span className="text-sm font-normal text-stone-500">· {i.page?.products} products</span></p>
+                  <p className="truncate text-xs text-stone-500">{i.redirect?.from} → /m/{i.page?.handle} · redirect {i.redirect?.active ? `on (${i.redirect.hits} hits)` : "off"} · sha {i.checksum}</p>
+                  {i.defects.length > 0 && <p className="text-xs text-amber-700">{i.defects.length} item(s): {i.defects.map((d) => d.message).join(" · ").slice(0, 160)}</p>}
+                  {i.ownerNote && <p className="text-xs text-red-700">Owner: “{i.ownerNote}”</p>}
+                </div>
+                <Badge value={i.status} label={i.status.replace(/_/g, " ").toLowerCase()} />
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {["IMPORTED", "CHANGES_REQUESTED", "IN_REVIEW"].includes(i.status) && <SButton variant="outline" onClick={() => act(i.id, "send-review")}>{i.status === "IMPORTED" ? "Send review link" : "Resend review link"}</SButton>}
+                {i.status === "SIGNED_OFF" && <SButton onClick={() => act(i.id, "go-live")}>Go live + redirect</SButton>}
+                {(i.status === "LIVE" || i.status === "SIGNED_OFF") && <SButton variant="outline" onClick={() => act(i.id, "rollback")}>Roll back</SButton>}
+                <a href={i.reviewUrl} target="_blank" rel="noreferrer" className="self-center text-xs underline">review link</a>
+              </div>
+            </Card>
+          ))}
+        </section>
+      ))}
+      {misses && misses.length > 0 && (
+        <Card>
+          <p className="mb-1 font-semibold">Unmatched legacy URLs (404s)</p>
+          <ul className="text-sm text-stone-600">{misses.map((m) => <li key={m.path} className="flex justify-between"><span className="truncate">{m.path}</span><span>{m.hits}</span></li>)}</ul>
+        </Card>
+      )}
+    </>
   );
 }

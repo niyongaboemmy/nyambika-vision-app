@@ -6,6 +6,8 @@ const nextConfig: NextConfig = {
   transpilePackages: ["@nyambika/i18n"],
   poweredByHeader: false,
   devIndicators: false,
+  // Migration bundles embed product photos; the API enforces its own per-route limits.
+  experimental: { proxyClientMaxBodySize: "40mb" },
   async rewrites() {
     // Same-origin API so auth cookies stay first-party.
     return [{ source: "/api/:path*", destination: `${API}/:path*` }];

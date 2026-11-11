@@ -536,3 +536,46 @@ model DeletionJob {
   createdAt   DateTime  @default(now())
   completedAt DateTime?
 }
+
+/// Migration of existing member pages (plan §16, FR-MIG-01..05).
+model MigrationWave {
+  id        String          @id @default(cuid())
+  name      String
+  status    String          @default("IMPORTED")
+  createdBy String?
+  createdAt DateTime        @default(now())
+  items     MigrationItem[]
+}
+
+model MigrationItem {
+  id          String        @id @default(cuid())
+  waveId      String
+  wave        MigrationWave @relation(fields: [waveId], references: [id], onDelete: Cascade)
+  pageId      String        @unique
+  legacyUrl   String
+  checksum    String
+  /// IMPORTED → IN_REVIEW → SIGNED_OFF → LIVE | CHANGES_REQUESTED | ROLLED_BACK
+  status      String        @default("IMPORTED")
+  defects     Json
+  reviewToken String        @unique
+  ownerNote   String        @default("")
+  signedOffAt DateTime?
+  liveAt      DateTime?
+  createdAt   DateTime      @default(now())
+}
+
+/// Legacy URL → new Maker Space. Disabling a redirect is the per-page rollback.
+model Redirect {
+  fromPath  String   @id
+  toPath    String
+  active    Boolean  @default(false)
+  hits      Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+/// Unmatched legacy paths, for post-cutover 404 monitoring.
+model NotFoundHit {
+  path     String   @id
+  hits     Int      @default(1)
+  lastSeen DateTime @default(now())
+}
