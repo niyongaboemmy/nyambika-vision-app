@@ -328,7 +328,7 @@ function defectTags(defects: { message: string }[]) {
     if (m.includes("momo")) tags.add("No MoMo number");
     else if (m.includes("photo")) tags.add("Photo");
     else if (m.includes("image")) tags.add("Image missing");
-    else if (m.includes("no products")) tags.add("No products");
+    else if (m.includes("no products")) continue; // the header already says "0 products"
     else tags.add("Other");
   }
   return [...tags];
