@@ -1,6 +1,6 @@
 "use client";
 
-import { ambientCopy, craftFromEvents, liveActivityState, orderAmbient, type AmbientOrderState } from "@nyambika/contracts";
+import { ambientCopy, craftFromEvents, liveActivityState, orderAmbient, type AmbientOrderState } from "@nyambika/contracts/ambient-model";
 import { useEffect, useMemo } from "react";
 import type { OrderView } from "@/lib/orders";
 import { liveActivityPlugin } from "@/lib/native";

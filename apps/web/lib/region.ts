@@ -1,6 +1,7 @@
 "use client";
 
-import { displayPrice, isCurrency, isRegion, type CurrencyCode, type RateTable, type RegionCode } from "@nyambika/contracts";
+import { displayPrice, isCurrency, type CurrencyCode, type RateTable } from "@nyambika/contracts/money";
+import { isRegion, type RegionCode } from "@nyambika/contracts/region-data";
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { useSession } from "@/lib/session";

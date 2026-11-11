@@ -1,6 +1,6 @@
 "use client";
 
-import { normalizePhone, WALLET_LABEL, type Wallet } from "@nyambika/contracts";
+import { normalizePhone, WALLET_LABEL, type Wallet } from "@nyambika/contracts/region-data";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { AddToBag } from "@/components/bag";

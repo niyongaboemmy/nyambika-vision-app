@@ -1,6 +1,7 @@
 "use client";
 
-import { CURRENCY_CODES, formatMoney, normalizePhone, pickZone, REGIONS, REGION_CODES, WALLET_LABEL, type CurrencyCode, type Wallet } from "@nyambika/contracts";
+import { CURRENCY_CODES, formatMoney, type CurrencyCode } from "@nyambika/contracts/money";
+import { normalizePhone, pickZone, REGIONS, REGION_CODES, WALLET_LABEL, type Wallet } from "@nyambika/contracts/region-data";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
