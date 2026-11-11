@@ -14,7 +14,7 @@ await page.getByText("Uwase Couture").first().click();
 await page.waitForURL(/\/m\/uwase-couture/);
 await page.getByRole("listbox", { name: "Collection" }).waitFor();
 await shot("maker-space");
-await page.getByRole("option", { selected: true }).click();
+await page.getByRole("listbox", { name: "Collection" }).getByRole("option", { selected: true }).click(); // the 3D shelf is a second listbox
 await page.getByText(/order on whatsapp/i).waitFor();
 await shot("maker-product-sheet");
 
@@ -35,7 +35,7 @@ await shot("studio-new-product");
 await page.getByRole("button", { name: /save and add photos/i }).click();
 await page.getByText(/now add a clear photo/i).waitFor();
 await page.locator("input[type=file]").setInputFiles(photo);
-await page.getByText(/try-on cut-out/i).waitFor();
+await page.getByText(/try-on cut-out \(auto\)/i).waitFor(); // the 3D panel also mentions the cut-out
 await page.locator('img[alt="Teal cut-out"]').waitFor({ timeout: 20000 });
 await shot("studio-photo-assessed");
 await page.getByRole("button", { name: "Publish" }).click();
@@ -49,8 +49,10 @@ await signIn(maker, "0788100004");
 await maker.goto(`${BASE}/studio`);
 await maker.getByText("Abahizi Sewing Cooperative").click();
 await maker.getByRole("navigation", { name: "Studio" }).getByRole("link", { name: "My products" }).click();
-await maker.getByRole("button", { name: "Add product" }).click();
-await maker.getByPlaceholder("Indigo wrap dress").fill("Jeanne's gold skirt");
+await maker.getByRole("button", { name: "Add product" }).click({ timeout: 30000 }).catch(async (e) => { await maker.screenshot({ path: new URL("./crawl-output/s1/89-maker-products-failed.png", import.meta.url).pathname, fullPage: true }); throw e; });
+// Unique per run: a busy dev DB keeps earlier runs' submissions in the approval queue.
+const skirt = `Jeanne's gold skirt ${String(Date.now()).slice(-4)}`;
+await maker.getByPlaceholder("Indigo wrap dress").fill(skirt);
 await maker.locator("input[inputmode=numeric]").fill("19000");
 await maker.getByLabel("Colour name").fill("Gold");
 await maker.getByRole("button", { name: /save and add photos/i }).click();
@@ -67,8 +69,11 @@ await admin.getByText("Abahizi Sewing Cooperative").click();
 await admin.getByRole("navigation", { name: "Studio" }).getByRole("link", { name: "Products" }).click();
 await admin.getByText(/waiting for approval/i).waitFor();
 await admin.screenshot({ path: new URL("./crawl-output/s1/91-admin-approval-queue.png", import.meta.url).pathname });
-await admin.getByRole("button", { name: "Approve" }).first().click();
-await admin.getByText(/waiting for approval/i).waitFor({ state: "detached" });
+const approve = admin.getByRole("link", { name: skirt }).locator("xpath=ancestor::*[.//button[normalize-space()='Approve']][1]").getByRole("button", { name: "Approve" });
+const approved = admin.waitForResponse((r) => /\/api\/products\/[^/]+\/status$/.test(r.url()) && r.request().method() === "POST");
+await approve.click();
+if (!(await approved).ok()) throw new Error("approval failed");
+await admin.waitForLoadState("networkidle");
 await admin.getByRole("navigation", { name: "Studio" }).getByRole("link", { name: "Makers" }).click();
 await admin.getByRole("heading", { name: /Makers \(/ }).waitFor();
 await admin.screenshot({ path: new URL("./crawl-output/s1/92-coop-makers.png", import.meta.url).pathname });

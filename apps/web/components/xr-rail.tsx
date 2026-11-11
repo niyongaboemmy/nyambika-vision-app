@@ -1,5 +1,6 @@
 "use client";
 
+import { isExpectedText, LimitState } from "@/components/limit-state";
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { XrStage } from "@/components/xr-viewer";
@@ -138,7 +139,7 @@ function MotionRail({ look, anchor }: { look: Look; anchor: React.RefObject<HTML
           <li>🔒 Private to you. Makers never receive it.</li>
         </ul>
         {state && !state.eligible && <p className="mt-3 text-sm text-gold">{state.reason}</p>}
-        {error && <p className="mt-3 text-sm text-red-300" role="alert">{error}</p>}
+        {error && (isExpectedText(error) ? <LimitState error={error} /> : <p className="mt-3 text-sm text-red-300" role="alert">{error}</p>)}
         <Button className="mt-4 w-full" onClick={start} disabled={busy || (state ? !state.eligible : false)}>
           {busy ? "Starting…" : `▶ ${t("xr.seeItMove")}`}
         </Button>

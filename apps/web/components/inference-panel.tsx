@@ -103,7 +103,8 @@ export function InferencePanel() {
       if (ok) out = { ok };
       await load();
     } catch (e) {
-      out = { error: e instanceof ApiError ? e.message : (e as Error).message };
+      // NLB gate refusals: the card already says "Activation refused", so show the gate's own reason.
+      out = { error: e instanceof ApiError ? (e.code === "NLB_GATE" ? e.raw : e.message) : (e as Error).message };
     } finally {
       setBusy(null);
     }
@@ -131,7 +132,7 @@ export function InferencePanel() {
 
       {/* Controls: synthetic traffic + dev chaos */}
       <div className="st-card grid gap-4 rounded-[24px] p-4 lg:grid-cols-2">
-        <div className="space-y-2">
+        <div className="min-w-0 space-y-2">
           <p className="text-[13px] font-bold text-cocoa">Test traffic (synthetic personas only)</p>
           <Segmented label="Route for test traffic" value={probeRoute} onChange={setProbeRoute} options={(["tryon", "llm", "stt", "avatar"] as const).map((r) => ({ value: r, label: ROUTE_LABEL[r] }))} />
           <SButton
@@ -147,7 +148,7 @@ export function InferencePanel() {
             <Icon name="refresh" className="size-4" /> {busy === "probe" ? "Sending…" : "Send 10 calls"}
           </SButton>
         </div>
-        <div className="space-y-2">
+        <div className="min-w-0 space-y-2">
           <p className="text-[13px] font-bold text-cocoa">
             Pool {data.fakePool ? <Chip tone="gold" className="ml-1">dev fake pool · {data.fakePool.mode}</Chip> : null}
           </p>

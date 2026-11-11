@@ -1,7 +1,19 @@
-import { readFileSync } from "node:fs";
+import { execFileSync, execSync } from "node:child_process";
+import { existsSync, mkdirSync, readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { BASE, signIn, start } from "./crawl-lib.mjs";
 
 const bundlePath = new URL("./crawl-output/wave0.json", import.meta.url).pathname;
+// Build a fresh synthetic Wave 0 bundle every run (new handle suffix): re-importing an old bundle finds its
+// pages already migrated, so the "✓ handle" row never appears. MIG_BUNDLE_KEEP=1 reuses the existing file.
+if (!(process.env.MIG_BUNDLE_KEEP && existsSync(bundlePath))) {
+  const root = new URL("..", import.meta.url).pathname;
+  const mainRoot = dirname(execSync("git rev-parse --path-format=absolute --git-common-dir", { cwd: root }).toString().trim());
+  const py = [process.env.AI_PYTHON, join(root, "apps/ai/.venv/bin/python"), join(mainRoot, "apps/ai/.venv/bin/python")].find((p) => p && existsSync(p));
+  if (!py) throw new Error("No AI venv python found to build wave0.json (set AI_PYTHON)");
+  mkdirSync(dirname(bundlePath), { recursive: true });
+  execFileSync(py, [join(root, "scripts/migration/make-sample-wave.py"), bundlePath, dirname(bundlePath)], { stdio: "inherit" });
+}
 const bundle = JSON.parse(readFileSync(bundlePath, "utf8"));
 const [tailor, seller] = bundle.pages;
 const { browser, context, page, shot, finish } = await start("migration");

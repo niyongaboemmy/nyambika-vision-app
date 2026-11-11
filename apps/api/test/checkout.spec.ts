@@ -14,7 +14,7 @@ let app: INestApplication;
 let prisma: import("../src/common/prisma.service").PrismaService;
 let payments: import("../src/modules/payments/payments.module").PaymentsService;
 const phone = `0787${String(Date.now()).slice(-6)}`;
-const variants: Record<string, { id: string; stock: number }> = {};
+const variants: Record<string, { id: string; stock: number; original: number }> = {};
 
 async function login(p: string) {
   const agent = request.agent(app.getHttpServer());
@@ -24,8 +24,11 @@ async function login(p: string) {
 }
 
 async function stocked(handle: string, title: string) {
-  const v = await prisma.variant.findFirstOrThrow({ where: { stock: { gte: 3 }, product: { title, status: "PUBLISHED", page: { handle } } } });
-  return { id: v.id, stock: v.stock };
+  // Crawls on a shared dev DB buy these pieces too: top the variant up for the test, restore it in afterAll.
+  const v = await prisma.variant.findFirstOrThrow({ where: { product: { title, status: "PUBLISHED", page: { handle } } }, orderBy: { stock: "desc" } });
+  const stock = v.stock < 3 ? 10 : v.stock;
+  if (stock !== v.stock) await prisma.variant.update({ where: { id: v.id }, data: { stock } });
+  return { id: v.id, stock, original: v.stock };
 }
 
 beforeAll(async () => {
@@ -45,7 +48,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   // Give the stock back so reruns and other suites see the seed unchanged.
-  for (const v of Object.values(variants)) await prisma?.variant.update({ where: { id: v.id }, data: { stock: v.stock } });
+  for (const v of Object.values(variants)) await prisma?.variant.update({ where: { id: v.id }, data: { stock: v.original } });
   await app?.close();
 });
 

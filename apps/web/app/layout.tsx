@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Nunito, Plus_Jakarta_Sans } from "next/font/google";
+import { ErrorToaster } from "@/components/error-toaster";
 import { NativeBridge } from "@/components/native-bridge";
 import { PilotSurvey } from "@/components/pilot-survey";
 import { SessionProvider } from "@/lib/session";
@@ -31,6 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {children}
           <PilotSurvey />
           <NativeBridge />
+          <ErrorToaster />
         </SessionProvider>
       </body>
     </html>

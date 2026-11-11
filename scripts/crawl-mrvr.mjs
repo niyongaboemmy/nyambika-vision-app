@@ -7,9 +7,9 @@
 // Run: BASE_URL=http://localhost:3102 node scripts/crawl-mrvr.mjs   (needs psql access to nyambika_mrvr)
 import { execSync } from "node:child_process";
 import { createRequire } from "node:module";
-import { BASE, signIn, start } from "./crawl-lib.mjs";
+import { BASE, CRAWL_DB, signIn, start } from "./crawl-lib.mjs";
 
-const DB = process.env.CRAWL_DB ?? "nyambika_mrvr"; // CRAWL_DB=nyambika_dev for the main stack
+const DB = CRAWL_DB; // CRAWL_DB env, else the database in apps/api/.env
 const sql = (q) => execSync(`psql -d ${DB} -tAc ${JSON.stringify(q)}`).toString().trim();
 const setFlag = (key, on) => sql(`update "FeatureFlag" set enabled=${on} where key='${key}'`);
 const { devices } = createRequire(new URL("../apps/web/package.json", import.meta.url))("@playwright/test");
@@ -121,9 +121,21 @@ try {
   await signIn(g1.p, phone(5));
   await signIn(g2.p, phone(4));
   const enter = async (x) => {
-    await x.p.goto(`${BASE}/m/uwase-couture/showroom`);
-    await x.p.locator("canvas").waitFor({ timeout: 60000 });
-    await x.p.waitForFunction(() => !document.body.innerText.includes("Bringing in pieces") && Boolean(window.__vrShowroom), null, { timeout: 90000 });
+    // Seeded accounts collect paid orders / viewed looks across crawls, so the pilot micro-survey sheet (E26) can
+    // pop up over the showroom: answer it "not now" first (the pilot crawl covers the survey UI).
+    for (const trigger of ["ORDER_PAID", "LOOKS_5"]) await x.p.request.post(`${BASE}/api/survey`, { data: { trigger, helped: null, nps: null, dismissed: true } });
+    // SwiftShader WebGL on a busy machine can stall the first scene load: one reload before giving up.
+    for (let attempt = 0; ; attempt++) {
+      await x.p.goto(`${BASE}/m/uwase-couture/showroom`);
+      try {
+        await x.p.locator("canvas").waitFor({ timeout: 60000 });
+        await x.p.waitForFunction(() => !document.body.innerText.includes("Bringing in pieces") && Boolean(window.__vrShowroom), null, { timeout: 90000 });
+        break;
+      } catch (e) {
+        if (attempt >= 1) throw e;
+        console.log("ℹ showroom scene slow to load, reloading once");
+      }
+    }
     await x.p.getByRole("button", { name: /Shared room/ }).click();
     await x.p.getByRole("checkbox", { name: /18 or older/ }).check();
     await x.p.getByRole("button", { name: "Join the shared room" }).click();

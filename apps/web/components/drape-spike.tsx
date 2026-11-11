@@ -1,5 +1,6 @@
 "use client";
 
+import { isExpectedText, LimitState } from "@/components/limit-state";
 import { useEffect, useState } from "react";
 import { Twin3dViewer } from "@/components/twin3d-viewer";
 import { api } from "@/lib/api";
@@ -247,7 +248,7 @@ export function TwinDrapePanel({ bodySize }: { bodySize: string | null }) {
       <button onClick={run} disabled={busy} className="grad-cta min-h-12 w-full rounded-2xl font-bold transition active:scale-[.98] disabled:opacity-60">
         {busy ? "Sewing and draping…" : r ? "Drape again" : "🧵 Drape it on my twin"}
       </button>
-      {error && <p role="alert" className="text-sm text-rose-300">{error}</p>}
+      {error && (isExpectedText(error) ? <LimitState error={error} /> : <p role="alert" className="text-sm text-rose-300">{error}</p>)}
       {busy && !r && <div className="skeleton h-[min(64dvh,580px)] w-full rounded-[32px]" role="status" aria-label="Simulating drape" />}
       {r && (
         <div className="space-y-3">
@@ -335,7 +336,7 @@ export function PatternPreview3D({ orderId, shareActive, defaultGarment }: { ord
           <button type="button" onClick={run} disabled={busy} className="min-h-14 w-full rounded-2xl bg-stone-900 text-base font-bold text-white transition active:scale-[.98] disabled:opacity-60">
             {busy ? "Sewing and draping…" : r ? "Update 3D preview" : "🧵 Preview in 3D"}
           </button>
-          {error && <p role="alert" className="text-sm font-semibold text-rose-700">{error}</p>}
+          {error && (isExpectedText(error) ? <LimitState error={error} /> : <p role="alert" className="text-sm font-semibold text-rose-700">{error}</p>)}
           {busy && !r && <div className="h-80 animate-pulse rounded-[32px] bg-stone-200" role="status" aria-label="Simulating drape" />}
           {r && (
             <div className="space-y-3">

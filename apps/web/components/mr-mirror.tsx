@@ -1,5 +1,6 @@
 "use client";
 
+import { isExpectedText, LimitState } from "@/components/limit-state";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ArMirror } from "@/components/ar-mirror";
@@ -245,7 +246,7 @@ export function MrMirror({ pieces, wardrobe, twin, arPilot, initial }: { pieces:
               Use a virtual room instead
             </button>
           )}
-          {error && <p className="text-center text-xs text-terra" role="alert">{error}</p>}
+          {error && (isExpectedText(error) ? <LimitState error={error} /> : <p className="text-center text-xs text-terra" role="alert">{error}</p>)}
           <p className="text-center text-[11px] text-mut">{support.ar ? "Point at the floor, then pinch, pull the trigger or tap to place it. Switch colour and size on the floating panel." : "Your headset shows the mirror in a virtual room (passthrough mixed reality isn't offered by this browser)."}</p>
         </section>
       ) : (

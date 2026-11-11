@@ -1,14 +1,14 @@
 import "multer";
 import { BadRequestException, Body, Controller, Get, Injectable, Module, NotFoundException, Param, Post, UploadedFile, UseInterceptors } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
-import { EXPERIMENTS, Intent, IntentRequest, LOOK_GUARDRAILS } from "@nyambika/contracts";
+import { countryOfPhone, EXPERIMENTS, Intent, IntentRequest, isRegion, LOOK_GUARDRAILS, type RegionCode } from "@nyambika/contracts";
 import { AiClient } from "../../common/ai.client";
 import { AuthUser, CurrentUser, Public } from "../../common/auth";
 import { PrismaService } from "../../common/prisma.service";
 import { parse } from "../../common/zod";
 import { LooksModule, LooksService } from "../looks/looks.module";
 import { ExperimentsService, PilotService } from "../pilot/pilot.service";
-import { diversify, rank, type Candidate } from "./ranking";
+import { diversify, rank, visibleForShopper, type Candidate } from "./ranking";
 
 @Injectable()
 export class IntentService {
@@ -28,10 +28,29 @@ export class IntentService {
   }
 
   /** Grounding: only published, try-on-ready products from live pages are ever recommended (plan §15.2). */
-  async candidates(): Promise<Candidate[]> {
+  /**
+   * Error sweep: pages a shopper may see in looks, by E41 region rules (same as the maker directory): home-country
+   * makers, plus cross-border-listed makers only when the shopper opted in. Before this, a Rwandan shopper's Muse
+   * could rank a Kenyan maker whose hold-to-buy then failed with "hasn't set up Mobile Money".
+   */
+  async visiblePageIds(userId: string): Promise<Set<string> | null> {
+    const regions = await this.prisma.pageRegion.findMany({ select: { pageId: true, region: true, crossBorder: true } });
+    if (!regions.some((r) => r.region !== "RW")) return null; // single-country catalogue: nothing to filter
+    const [prefs, user] = await Promise.all([
+      this.prisma.shopperPrefs.findUnique({ where: { userId } }),
+      this.prisma.user.findUnique({ where: { id: userId }, select: { phone: true } }),
+    ]);
+    const country: RegionCode = prefs && isRegion(prefs.country) ? prefs.country : (user ? countryOfPhone(user.phone) : null) ?? "RW";
+    const pages = await this.prisma.page.findMany({ where: { status: "PUBLISHED" }, select: { id: true } });
+    return visibleForShopper(pages.map((p) => p.id), regions, { country, crossBorder: prefs?.crossBorder ?? false });
+  }
+
+  async candidates(userId?: string): Promise<Candidate[]> {
     const cohort = await this.pilot.rankablePageIds(); // pilot.allowlist: rank cohort pages only
+    const visible = userId ? await this.visiblePageIds(userId) : null;
+    const allowed = cohort && visible ? [...cohort].filter((id) => visible.has(id)) : cohort ? [...cohort] : visible ? [...visible] : null;
     const products = await this.prisma.product.findMany({
-      where: { status: "PUBLISHED", readiness: "READY", page: { status: "PUBLISHED" }, ...(cohort ? { pageId: { in: [...cohort] } } : {}) },
+      where: { status: "PUBLISHED", readiness: "READY", page: { status: "PUBLISHED" }, ...(allowed ? { pageId: { in: allowed } } : {}) },
       include: { page: true, variants: { where: { cutoutPath: { not: null } } } },
     });
     return products.map((p) => ({
@@ -68,7 +87,7 @@ export class IntentService {
   }
 
   async fromIntent(userId: string, input: string, source: string, intent: Intent) {
-    const ranked = rank(await this.candidates(), intent, userId + input);
+    const ranked = rank(await this.candidates(userId), intent, userId + input);
     return this.session(userId, input, source, intent, ranked);
   }
 
@@ -154,7 +173,8 @@ export class IntentController {
     );
     const best = new Map<string, (typeof rows)[number]>();
     const cohort = await this.pilot.rankablePageIds();
-    for (const r of rows) if (!best.has(r.productId) && (!cohort || cohort.has(r.pageId))) best.set(r.productId, r);
+    const visible = await this.intents.visiblePageIds(user.id);
+    for (const r of rows) if (!best.has(r.productId) && (!cohort || cohort.has(r.pageId)) && (!visible || visible.has(r.pageId))) best.set(r.productId, r);
     const ranked = diversify([...best.values()], 9).map((r) => ({ productId: r.productId, variantId: r.variantId, score: Number(r.sim) }));
     const intent: Intent = {
       occasion: null,

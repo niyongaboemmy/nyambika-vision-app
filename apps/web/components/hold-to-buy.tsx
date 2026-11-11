@@ -29,7 +29,7 @@ export function HoldToBuy({ look, autoOpen = false }: { look: Look; /** E35: ope
   const [wallet, setWallet] = useState<"MTN_MOMO" | "AIRTEL_MONEY">("MTN_MOMO");
   const [address, setAddress] = useState("");
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
   const [discount, setDiscount] = useState<AppliedDiscount | null>(null);
   const key = useRef<string>("");
   // Hardening pass 1 (E41): pages outside Rwanda sell in their own currency and wallets through the region checkout.
@@ -60,7 +60,7 @@ export function HoldToBuy({ look, autoOpen = false }: { look: Look; /** E35: ope
       track("hold_started", { lookId: look.id, orderId: o.id, pageId: look.maker.pageId });
       router.push(`/orders/${o.id}?fresh=1`);
     } catch (e) {
-      setError((e as Error).message);
+      setError(e); // ApiError: DAILY/limit/offline codes render calmly via ErrorNote → LimitState
       setBusy(false);
       key.current = "";
       throw e;

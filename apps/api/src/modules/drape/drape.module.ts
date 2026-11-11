@@ -88,7 +88,7 @@ export class DrapeSpikeService {
     await this.requireEnabled();
     const input = parse(TwinDrapeInput, body);
     const st = await this.twin3d.state(userId);
-    if (!st.consent) throw new BadRequestException({ message: "Turn on your 3D twin first.", code: "NO_CONSENT" });
+    if (!st.consent) throw new BadRequestException({ message: "Turn on your 3D twin first.", code: "NO_CONSENT", purpose: "AVATAR_3D" });
     const avatar = await this.twin3d.ready(userId);
     if (!avatar) throw new BadRequestException({ message: "Build your 3D twin first.", code: "NO_AVATAR" });
     const p = this.twin3d.params(avatar);

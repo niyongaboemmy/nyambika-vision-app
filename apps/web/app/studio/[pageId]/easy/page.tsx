@@ -1,5 +1,6 @@
 "use client";
 
+import { isExpectedText, LimitState } from "@/components/limit-state";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { ScreenSkeleton } from "@/components/studio";
@@ -351,7 +352,7 @@ function AddFlow({ pageId, makerId, assist, l, say, onDone }: { pageId: string; 
               <p className="font-display text-2xl font-black text-cocoa">{rwf(Number(price))}</p>
             </div>
           </div>
-          {err && <p className="rounded-2xl bg-red-50 p-3 font-bold text-red-800">{err}</p>}
+          {err && (isExpectedText(err) ? <LimitState error={err} tone="light" /> : <p className="rounded-2xl bg-red-50 p-3 font-bold text-red-800">{err}</p>)}
           <button type="button" onClick={send} disabled={state === "sending"} className="st-press st-cta flex min-h-20 w-full items-center justify-center gap-3 rounded-[28px] font-display text-2xl font-black text-white disabled:opacity-60">
             <span aria-hidden>📤</span> {state === "sending" ? S.sending[l] : S.send[l]}
           </button>

@@ -1,5 +1,6 @@
 "use client";
 
+import { isExpectedText, LimitState } from "@/components/limit-state";
 import { morphPrice, quantizeHue, type MorphLength, type MorphSleeve, type MorphSpec } from "@nyambika/contracts";
 import { useCallback, useEffect, useRef, useState, type PointerEvent as RPointerEvent } from "react";
 import { AskTailorSheet } from "@/components/ask-tailor";
@@ -121,7 +122,7 @@ function MorphSheet({ look, tpl, onClose }: { look: Look; tpl: MorphTemplateView
           <button onClick={() => setHue(null)} className="rounded-full border border-white/20 px-2 py-0.5 font-semibold text-txt">Original colour</button>
         )}
       </div>
-      {error && <p role="alert" className="mt-1 text-center text-xs text-red-200">{error}</p>}
+      {error && (isExpectedText(error) ? <LimitState error={error} /> : <p role="alert" className="mt-1 text-center text-xs text-red-200">{error}</p>)}
 
       <div className="glass mt-3 space-y-3 rounded-3xl p-3.5">
         {(tpl.lengths?.length ?? 0) > 1 && <Segmented legend={t("morph.length")} value={length} options={tpl.lengths!} onChange={(v) => setLength(v as MorphLength)} delta={(k) => o.lengths[k as MorphLength] ?? 0} />}

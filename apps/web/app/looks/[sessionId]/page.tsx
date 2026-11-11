@@ -6,7 +6,8 @@ import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { HoldToBuy } from "@/components/hold-to-buy";
 import { LookView } from "@/components/look-view";
 import { TwinNudge } from "@/components/twin-nudge";
-import { ErrorNote, Screen, Spinner } from "@/components/ui";
+import { LimitState } from "@/components/limit-state";
+import { Screen, Spinner } from "@/components/ui";
 import { api } from "@/lib/api";
 import { isRendering, type Look } from "@/lib/looks";
 import { track, trackOnce } from "@/lib/track";
@@ -32,23 +33,23 @@ function Stream() {
   const snap = useSearchParams().get("snap");
   const [data, setData] = useState<SessionData | null>(null);
   const [index, setIndex] = useState(0);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
   const advanced = useRef(new Set<number>());
   const container = useRef<HTMLDivElement>(null);
 
   const load = useCallback(async () => setData(await api<SessionData>(`/intent/${sessionId}`)), [sessionId]);
   useEffect(() => {
-    load().catch((e) => setError(e.message));
+    load().catch(setError);
   }, [load]);
 
   // Poll while any visible-soon look is still rendering.
   useEffect(() => {
-    if (!data) return;
+    if (!data || error) return; // a limit stops the poll; the card offers retry
     const pending = data.looks.slice(0, index + 3).some((l) => isRendering(l.status) && l.status !== "PENDING");
     if (!pending) return;
     const id = setTimeout(() => void load(), 1000);
     return () => clearTimeout(id);
-  }, [data, index, load]);
+  }, [data, index, load, error]);
 
   // Progressive generation: when the shopper reaches look n−1, render the next two.
   useEffect(() => {
@@ -56,7 +57,10 @@ function Stream() {
     advanced.current.add(index);
     api<{ queued: number }>(`/intent/${sessionId}/advance`, { method: "POST", json: { index } })
       .then((r) => { if (r.queued) void load(); })
-      .catch((e) => setError(e.message));
+      .catch((e) => {
+        advanced.current.delete(index); // allow a retry (countdown over, consent on, back online)
+        setError(e);
+      });
   }, [index, data, sessionId, load]);
 
   useEffect(() => {
@@ -75,7 +79,11 @@ function Stream() {
 
   const replace = (l: Look) => setData((d) => (d ? { ...d, looks: d.looks.map((x) => (x.id === l.id ? l : x)) } : d));
 
-  if (error && !data) return <Screen><div className="p-6 pt-20"><ErrorNote error={error} /></div></Screen>;
+  const retry = () => {
+    setError(null);
+    void load().catch(setError);
+  };
+  if (error && !data) return <Screen><div className="p-6 pt-20"><LimitState error={error} onRetry={retry} /></div></Screen>;
   if (!data) return <Screen><div className="grid min-h-dvh place-items-center"><Spinner /></div></Screen>;
   if (!data.looks.length) return <Screen><p className="p-6 pt-24 text-center text-mut">No matching looks yet. Try asking differently.</p></Screen>;
 
@@ -107,7 +115,12 @@ function Stream() {
         </section>
       ))}
       <TwinNudge place="stream" index={index} />
-      {error && <div className="fixed inset-x-4 top-20 z-40"><ErrorNote error={error} /></div>}
+      {/* Daily cap, kill switch, consent…: a calm card over the feed (centred while the current look can't render). */}
+      {error != null && (
+        <div className={`fixed inset-x-4 z-40 mx-auto max-w-[448px] ${current && !current.image ? "top-1/3" : "top-20"}`}>
+          <LimitState error={error} onRetry={retry} onDismiss={() => setError(null)} />
+        </div>
+      )}
     </div>
   );
 }

@@ -127,7 +127,9 @@ await T.snap("insights", true);
 const H = await ctx("host");
 await signIn(H.p, "0788900001");
 await H.p.goto(`${BASE}/admin?tab=Outbox`);
-await H.p.getByText(/broadcast_new_collection/).first().waitFor({ timeout: 15000 });
+// The outbox lists the newest messages only: on a busy dev DB (broadcast already sent today) older rows scroll out.
+if (broadcastSent) await H.p.getByText(/broadcast_new_collection/).first().waitFor({ timeout: 15000 });
+else await H.p.waitForLoadState("networkidle");
 await H.snap("outbox-broadcast");
 const shopperE164 = `+250${shopperPhone.slice(1)}`;
 const outbox = await api(H.p, "/admin/notifications");

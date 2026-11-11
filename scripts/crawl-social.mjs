@@ -141,7 +141,11 @@ await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
 await page.mouse.down();
 await page.waitForTimeout(1500);
 await page.mouse.up();
-await page.waitForURL(/\/orders\/.+fresh=1/, { timeout: 15000 });
+await page.waitForURL(/\/orders\/.+fresh=1/, { timeout: 15000 }).catch(async (e) => {
+  const why = await page.locator('[role="alert"], [role="status"][data-limit]').allInnerTexts().catch(() => []);
+  await shot("winner-hold-failed");
+  throw new Error(`hold to buy did not reach the order page: ${why.join(" | ") || e.message}`);
+});
 const orderId = new URL(page.url()).pathname.split("/").pop();
 await shot("winner-order");
 
@@ -175,6 +179,11 @@ await page.getByRole("link", { name: /owned/i }).first().click();
 await page.waitForURL(/\/wardrobe\/item\//);
 await page.getByRole("heading", { name: /styled by the muse/i }).waitFor();
 await shot("wardrobe-item");
+// The pilot micro-survey (E26) pops up after the paid order and would cover the restyle sheet: answer it
+// "not now" through the API first (the pilot crawl covers the survey UI).
+for (const trigger of ["ORDER_PAID", "LOOKS_5"]) await page.request.post(`${BASE}/api/survey`, { data: { trigger, helped: null, nps: null, dismissed: true } });
+await page.reload();
+await page.getByRole("heading", { name: /styled by the muse/i }).waitFor();
 await page.getByRole("button", { name: /restyle for an event/i }).click();
 await page.getByRole("dialog").waitFor();
 await page.waitForTimeout(600); // sheet rise animation: the moving form intercepts clicks until it settles
