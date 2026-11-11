@@ -3,13 +3,13 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AdminShell } from "@/components/admin-shell";
+import { ADMIN_TABS, adminTabHref } from "../tabs";
 import { Badge, Card, Chip, Empty, Field, Icon, Input, Kpi, Meter, Monogram, Note, ScreenSkeleton, SButton, SectionTitle, Select, StudioSheet, Switch } from "@/components/studio";
 import { api, rwf } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { useApi } from "@/lib/use-api";
 import { Fact, LearnMore } from "@/components/kit";
 
-const TABS = ["Overview", "Verify", "Moderation", "Migration", "Flags & models", "Outbox", "Audit", "Pilot", "Agents & partners"] as const;
 const SCOPES = ["catalogue:read", "checkout:write", "mcp:use", "tryon:write", "usage:read"] as const;
 // Categorical series colours (validated: lightness band, chroma, CVD ΔE ≥ 17 on the light surface).
 const SERIES = [
@@ -52,7 +52,7 @@ export default function AgentsAdmin() {
   const [newClient, setNewClient] = useState(false);
   if (!me?.isHost) return null;
   return (
-    <AdminShell tabs={TABS} tab="Agents & partners" onTab={(t) => (t === "Pilot" ? router.push("/admin/pilot") : t !== "Agents & partners" && router.push(`/admin?tab=${encodeURIComponent(t)}`))}>
+    <AdminShell tabs={ADMIN_TABS} tab="Agents & partners" onTab={(t) => t !== "Agents & partners" && router.push(adminTabHref(t))}>
       {!data ? (
         <ScreenSkeleton />
       ) : (

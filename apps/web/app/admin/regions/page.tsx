@@ -5,13 +5,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AdminShell } from "@/components/admin-shell";
+import { ADMIN_TABS, adminTabHref } from "../tabs";
 import { Badge, Card, Chip, Field, Icon, Input, Kpi, Meter, Note, ScreenSkeleton, SButton, Segmented, Switch, Textarea } from "@/components/studio";
 import { api } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { useApi } from "@/lib/use-api";
 import { Fact, InfoTip, LearnMore } from "@/components/kit";
 
-const TABS = ["Overview", "Verify", "Moderation", "Migration", "Flags & models", "Outbox", "Audit", "Pilot", "Agents & partners", "Regions"] as const;
 
 interface Item { key: string; label: string; kind: "auto" | "manual"; done: boolean; detail: string; by?: string | null; at?: string | null }
 interface Region {
@@ -67,7 +67,7 @@ export default function RegionsAdmin() {
   }
 
   return (
-    <AdminShell tabs={TABS} tab="Regions" onTab={(t) => (t === "Pilot" ? router.push("/admin/pilot") : t === "Agents & partners" ? router.push("/admin/agents") : t !== "Regions" && router.push(`/admin?tab=${encodeURIComponent(t)}`))}>
+    <AdminShell tabs={ADMIN_TABS} tab="Regions" onTab={(t) => t !== "Regions" && router.push(adminTabHref(t))}>
       {!data || !r ? (
         <ScreenSkeleton />
       ) : (

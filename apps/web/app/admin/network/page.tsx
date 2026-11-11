@@ -3,12 +3,12 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { AdminShell } from "@/components/admin-shell";
+import { ADMIN_TABS, adminTabHref } from "../tabs";
 import { Card, Chip, Empty, Icon, Kpi, Note, ScreenSkeleton, SButton, Select } from "@/components/studio";
 import { api } from "@/lib/api";
 import { useApi } from "@/lib/use-api";
 import { InfoTip } from "@/components/kit";
 
-const TABS = ["Overview", "Verify", "Moderation", "Migration", "Flags & models", "Outbox", "Audit", "Pilot"] as const;
 
 interface RunRow {
   waveId: string;
@@ -100,13 +100,10 @@ export default function NetworkMigration() {
   ] : [];
 
   return (
-    <AdminShell tabs={TABS} tab="Migration" onTab={(t) => (t === "Pilot" ? router.push("/admin/pilot") : router.push(`/admin?tab=${encodeURIComponent(t)}`))}>
+    <AdminShell tabs={ADMIN_TABS} tab="Migration" onTab={(t) => router.push(adminTabHref(t))}>
       <div className="space-y-4">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-terra-ink">E21 · full network</p>
-            <h1 className="font-display text-2xl font-black tracking-tight text-cocoa">Network migration</h1>
-          </div>
+        <div className="-mt-2 flex items-center justify-between gap-3">
+          <h2 className="font-display text-lg font-black tracking-tight text-cocoa">Whole network</h2>
           <a href="/admin?tab=Migration" className="st-press inline-flex min-h-11 items-center gap-1 rounded-2xl px-2 text-sm font-bold text-violet-ink hover:bg-paper-2">Per-page view <Icon name="chevron" className="size-4" /></a>
         </div>
 
@@ -117,7 +114,7 @@ export default function NetworkMigration() {
               <Select value={concurrency} onChange={(e) => setConcurrency(e.target.value)}>{[1, 2, 4, 6, 8, 12, 16].map((n) => <option key={n}>{n}</option>)}</Select>
             </label>
             <label className={`st-press flex min-h-12 flex-1 cursor-pointer items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-paper-3 bg-paper px-4 text-sm font-bold text-cocoa hover:border-cocoa-3 focus-within:outline focus-within:outline-[2.5px] focus-within:outline-violet-ink ${busy === "upload" ? "opacity-50" : ""}`}>
-              <Icon name="upload" className="size-4" /> {busy === "upload" ? "Uploading…" : "Start a network wave (.json)"}
+              <Icon name="upload" className="size-4" /> {busy === "upload" ? "Uploading…" : "Start wave (.json)"}
               <input type="file" accept="application/json,.json" className="sr-only" disabled={!!busy} onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} />
             </label>
           </div>

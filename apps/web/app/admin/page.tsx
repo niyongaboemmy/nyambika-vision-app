@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AdminShell } from "@/components/admin-shell";
+import { ADMIN_TABS as TABS, adminTabHref } from "./tabs";
 import { Badge, Card, Chip, Empty, Icon, Kpi, Meter, Monogram, Note, ScreenSkeleton, SButton, Skeleton, Switch } from "@/components/studio";
 import { api, rwf } from "@/lib/api";
 import { useSession } from "@/lib/session";
@@ -26,7 +27,6 @@ interface Overview {
   openModeration: number;
 }
 
-const TABS = ["Overview", "Verify", "Moderation", "Migration", "Flags & models", "Outbox", "Audit", "Pilot", "Agents & partners", "Regions"] as const;
 
 /** Host admin console (FR-ADM). Host roles only. */
 export default function Admin() {
@@ -42,7 +42,7 @@ export default function Admin() {
   const { data: counts } = useApi<Overview>(me?.isHost ? "/admin/overview" : null);
   if (!me?.isHost) return null;
   return (
-    <AdminShell tabs={TABS} tab={tab} onTab={(t) => (t === "Pilot" ? router.push("/admin/pilot") : t === "Agents & partners" ? router.push("/admin/agents") : t === "Regions" ? router.push("/admin/regions") : setTab(t))} counts={{ Verify: counts?.pages.PENDING_VERIFICATION ?? 0, Moderation: counts?.openModeration ?? 0 }}>
+    <AdminShell tabs={TABS} tab={tab} onTab={(t) => (t === "Pilot" || t === "Agents & partners" || t === "Regions" ? router.push(adminTabHref(t)) : setTab(t))} counts={{ Verify: counts?.pages.PENDING_VERIFICATION ?? 0, Moderation: counts?.openModeration ?? 0 }}>
         {tab === "Overview" && <OverviewTab />}
         {tab === "Verify" && <VerifyTab />}
         {tab === "Moderation" && <ModerationTab />}

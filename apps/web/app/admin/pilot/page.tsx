@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AdminShell } from "@/components/admin-shell";
+import { ADMIN_TABS, adminTabHref } from "../tabs";
 import { Card, Chip, Empty, Icon, Kpi, Meter, Note, ScreenSkeleton, SButton, Select, Switch } from "@/components/studio";
 import { api, rwf } from "@/lib/api";
 import { useSession } from "@/lib/session";
@@ -68,7 +69,6 @@ interface Summary {
   recommendation: { decision: "Scale" | "Iterate" | "Pivot"; reasons: string[] };
 }
 
-const TABS = ["Overview", "Verify", "Moderation", "Migration", "Flags & models", "Outbox", "Audit", "Pilot", "Agents & partners"] as const;
 const RAG: Record<Rag, { tone: "mint" | "gold" | "red" | "stone"; label: string; icon: string }> = {
   green: { tone: "mint", label: "On target", icon: "●" },
   amber: { tone: "gold", label: "Near target", icon: "▲" },
@@ -101,7 +101,7 @@ export default function PilotAdmin() {
   const { data, reload, error } = useApi<Summary>(me?.isHost ? "/admin/pilot" : null);
   if (!me?.isHost) return null;
   return (
-    <AdminShell tabs={TABS} tab="Pilot" onTab={(t) => (t === "Agents & partners" ? router.push("/admin/agents") : t !== "Pilot" && router.push(`/admin?tab=${encodeURIComponent(t)}`))}>
+    <AdminShell tabs={ADMIN_TABS} tab="Pilot" onTab={(t) => t !== "Pilot" && router.push(adminTabHref(t))}>
       {error && <Note error={error} />}
       {!data ? <ScreenSkeleton /> : <Dashboard s={data} reload={reload} />}
     </AdminShell>
@@ -134,7 +134,7 @@ function Dashboard({ s, reload }: { s: Summary; reload: () => Promise<void> }) {
           </div>
         </section>
         <Kpi label="Pilot day" value={`${dayOf} / 26`} hint={`${new Date(s.cohort.start).toLocaleDateString("en-GB", { day: "numeric", month: "short" })} → ${new Date(s.cohort.end).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}`} />
-        <Kpi label="KPIs on target" value={`${green} / ${measured}`} tone="mint" warn={measured > 0 && green / measured < 0.75} hint="Scale needs ≥ 75% and no red" />
+        <Kpi label="KPIs on target" value={`${green} / ${measured}`} tone="mint" warn={measured > 0 && green / measured < 0.75} hint="Scale: ≥ 75%, no red" />
         <Kpi label="Cohort" value={`${s.cohort.pages} pages`} hint={`${s.cohort.shoppers} shoppers`} tone="violet" />
         <AllowlistCard on={s.allowlist} reload={reload} />
       </div>
@@ -196,12 +196,13 @@ function KpiCard({ k }: { k: KpiRow }) {
 function AllowlistCard({ on, reload }: { on: boolean; reload: () => Promise<void> }) {
   const [busy, setBusy] = useState(false);
   return (
-    <div className="st-card flex min-w-0 flex-col gap-2 rounded-[22px] p-4">
+    <div className="st-card flex min-w-0 flex-col gap-1.5 rounded-[22px] p-4">
+      <p className="text-xs font-bold text-cocoa-2">Closed pilot allowlist</p>
+      <p className="text-sm font-bold text-cocoa">{on ? "On · cohort shoppers only" : "Off · everyone can ask"}</p>
       <Switch
         checked={on}
         disabled={busy}
-        label="Closed pilot allowlist"
-        description={on ? "On · cohort shoppers only" : "Off · everyone can ask"}
+        ariaLabel="Closed pilot allowlist"
         onChange={async (v) => {
           setBusy(true);
           await api("/admin/flags/pilot.allowlist", { method: "PATCH", json: { enabled: v } }).catch(() => {});
