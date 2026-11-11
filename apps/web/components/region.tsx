@@ -20,7 +20,7 @@ export function Price({ minor, currency, className = "", approxClassName = "text
   return (
     <span className={className}>
       {d.primary}
-      {d.approx && <span className={`ml-1.5 text-[0.85em] font-medium ${approxClassName}`}>{d.approx}</span>}
+      {d.approx && <span className={`${approxClassName.includes("block") ? "" : "ml-1.5 "}text-[0.85em] font-medium ${approxClassName}`}>{d.approx}</span>}
     </span>
   );
 }

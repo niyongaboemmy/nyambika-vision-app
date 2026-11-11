@@ -95,7 +95,7 @@ export default function RegionStudio() {
           </div>
           {allowed.includes("MPESA") && (
             <form className="flex items-end gap-2" onSubmit={(e) => { e.preventDefault(); void save({ mpesaTill: tillValue.trim() }, "M-Pesa till saved. Payments go straight to it."); }}>
-              <div className="flex-1"><Field label="M-Pesa till (Buy Goods)" hint="5–8 digits. Money goes straight to your till."><Input inputMode="numeric" value={tillValue} onChange={(e) => setTill(e.target.value.replace(/\D/g, ""))} /></Field></div>
+              <div className="flex-1"><Field label="M-Pesa till (Buy Goods) · 5–8 digits, money goes straight to your till"><Input inputMode="numeric" value={tillValue} onChange={(e) => setTill(e.target.value.replace(/\D/g, ""))} /></Field></div>
               <SButton variant="dark" disabled={tillValue === s.mpesaTill}>Save</SButton>
             </form>
           )}

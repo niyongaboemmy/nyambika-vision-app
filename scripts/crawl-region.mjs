@@ -94,6 +94,7 @@ await R.snap("product-sheet");
 await R.p.getByRole("button", { name: /Buy · KES/ }).click();
 await R.p.getByLabel("Delivery address").fill("KG 7 Ave 3, Kacyiru, Kigali");
 await R.p.getByText(/≈ USD .* reference only/).waitFor();
+await R.p.waitForTimeout(600);
 await R.snap("card-checkout-summary");
 await R.p.getByRole("button", { name: /Continue to card/ }).click();
 await R.p.getByRole("heading", { name: "Pay by card" }).waitFor();
