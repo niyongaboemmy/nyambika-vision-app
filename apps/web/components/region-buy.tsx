@@ -10,6 +10,7 @@ import { api } from "@/lib/api";
 import type { MakerProduct, MakerSpace } from "@/lib/maker";
 import { COUNTRY_NAMES, useRegion, type Commerce, type OrderMoney } from "@/lib/region";
 import { useSession } from "@/lib/session";
+import { Icon } from "@/components/icons";
 import { track } from "@/lib/track";
 
 /** Maker Space checkout in the maker's own currency (E40/E41), split from region.tsx so it loads on demand. */
@@ -85,7 +86,7 @@ export function RegionBuy({ maker, product, variantIndex, commerce }: { maker: M
         }}
         disabled={!v.inStock}
       >
-        🛍️ {t("region.buy")} · {formatMoney(price, commerce.currency)}
+        <Icon name="bag" className="size-5" /> {t("region.buy")} · {formatMoney(price, commerce.currency)}
       </Button>
       <Sheet open={open} onClose={() => !busy && (setOpen(false), setCard(null))}>
         <div className="max-h-[78dvh] overflow-y-auto overscroll-contain pr-1">
@@ -94,7 +95,7 @@ export function RegionBuy({ maker, product, variantIndex, commerce }: { maker: M
           ) : (
             <>
               <h3 className="font-display text-2xl font-black">{product.title}</h3>
-              <p className="text-sm text-mut">{commerce.flag} {maker.name} · {v.colourName} · {t("buy.paidTo")} {maker.name}</p>
+              <p className="text-sm text-mut">{maker.name} · {v.colourName} · {t("buy.paidTo")} {maker.name}</p>
 
               <div className="mt-4 space-y-4">
                 <fieldset>
@@ -105,9 +106,9 @@ export function RegionBuy({ maker, product, variantIndex, commerce }: { maker: M
                 <fieldset>
                   <legend className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-mut">Delivery</legend>
                   <div className="flex flex-wrap gap-2">
-                    <Chip active={delivery === "DELIVERY"} onClick={() => setDelivery("DELIVERY")}>🛵 In {commerce.country} · +{formatMoney(commerce.domesticDeliveryMinor, commerce.currency)}</Chip>
-                    <Chip active={delivery === "PICKUP"} onClick={() => setDelivery("PICKUP")}>🏪 Pickup in {maker.sector}</Chip>
-                    {shipCountries.length > 0 && <Chip active={delivery === "SHIP"} onClick={() => setDelivery("SHIP")}>✈️ {t("region.ship")}</Chip>}
+                    <Chip active={delivery === "DELIVERY"} onClick={() => setDelivery("DELIVERY")}><Icon name="moto" className="size-4" /> In {commerce.country} · +{formatMoney(commerce.domesticDeliveryMinor, commerce.currency)}</Chip>
+                    <Chip active={delivery === "PICKUP"} onClick={() => setDelivery("PICKUP")}><Icon name="store" className="size-4" /> Pickup in {maker.sector}</Chip>
+                    {shipCountries.length > 0 && <Chip active={delivery === "SHIP"} onClick={() => setDelivery("SHIP")}><Icon name="globe" className="size-4" /> {t("region.ship")}</Chip>}
                   </div>
                 </fieldset>
                 {delivery === "SHIP" && (
@@ -247,7 +248,7 @@ function CardStep({ result, payee, onDone }: { result: CheckoutResult; payee: st
       )}
       <ErrorNote error={error} />
       <Button className="mt-4 w-full text-lg" disabled={busy} onClick={confirm}>{busy ? <Spinner /> : `Pay ${result.money.total}`}</Button>
-      <p className="mt-2 text-center text-[11px] text-mut">🔐 Charged on {payee}&apos;s own Stripe account. Nyambika never holds the money.</p>
+      <p className="mt-2 flex items-center justify-center gap-1.5 text-[11px] text-mut"><Icon name="lock" className="size-3.5" /> Paid directly to {payee} · own Stripe account</p>
     </div>
   );
 }

@@ -9,6 +9,7 @@
  */
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { Icon, type IconName } from "@/components/icons";
 import { api } from "@/lib/api";
 import { describeError, formatCountdown, recallFriendly, type Described } from "@/lib/api-errors";
 import { useSession } from "@/lib/session";
@@ -39,16 +40,16 @@ function useCountdown(until: number | null) {
   return until ? Math.max(0, until - now) : null;
 }
 
-const ICON: Partial<Record<Described["kind"], string>> = {
-  "daily-cap": "🌅",
-  resting: "🌙",
-  consent: "🔐",
-  rate: "⏳",
-  pilot: "🎟️",
-  gate: "🛡️",
-  payment: "📲",
-  offline: "📶",
-  auth: "👋",
+const ICON: Partial<Record<Described["kind"], IconName>> = {
+  "daily-cap": "sunrise",
+  resting: "moon",
+  consent: "lock",
+  rate: "hourglass",
+  pilot: "ticket",
+  gate: "shield",
+  payment: "phone",
+  offline: "signal",
+  auth: "user",
 };
 
 export function LimitState({
@@ -131,7 +132,7 @@ export function LimitState({
   return (
     <section role="status" aria-live="polite" data-limit={d.kind} className={`${card} p-5 ${className}`}>
       <div className="flex items-start gap-3">
-        <span aria-hidden className="text-2xl leading-none">{ICON[d.kind]}</span>
+        <span aria-hidden className={`grid size-10 shrink-0 place-items-center rounded-full ${dark ? "bg-white/10" : "bg-white"}`}><Icon name={ICON[d.kind] ?? "info"} className="size-5" /></span>
         <div className="min-w-0 flex-1">
           <h2 className="font-display text-lg font-black leading-snug">{d.title}</h2>
           {d.body && <p className={`mt-1 text-sm leading-relaxed ${sub}`}>{d.body}</p>}
@@ -143,7 +144,7 @@ export function LimitState({
           )}
         </div>
         {onDismiss && (
-          <button type="button" onClick={onDismiss} aria-label={t("err.dismiss")} className={`-m-1 grid size-8 shrink-0 place-items-center rounded-full ${sub}`}>✕</button>
+          <button type="button" onClick={onDismiss} aria-label={t("err.dismiss")} className={`hit -m-1 grid size-8 shrink-0 place-items-center rounded-full ${sub}`}><Icon name="x" className="size-4" /></button>
         )}
       </div>
 

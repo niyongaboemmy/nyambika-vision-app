@@ -9,7 +9,7 @@ import { describe, it } from "node:test";
 
 const web = new URL("..", import.meta.url).pathname;
 const roots = ["app", "components", "lib"].map((d) => join(web, d)).concat(join(web, "../../packages/i18n/src"));
-const EMOJI = /[\p{Extended_Pictographic}\u{FE0F}]/u;
+const EMOJI = /[\p{Extended_Pictographic}\u{FE0F}\u{1F1E6}-\u{1F1FF}]/u; // + regional indicators (flags)
 const ALLOWED = new Set(["©", "®", "™"]);
 
 function* files(dir: string): Generator<string> {

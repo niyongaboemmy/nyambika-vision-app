@@ -9,8 +9,10 @@ import { Button, Chip } from "@/components/ui";
 import { api } from "@/lib/api";
 import { COUNTRY_NAMES, type Commerce, type OrderMoney } from "@/lib/region";
 import { useSession } from "@/lib/session";
+import { Icon } from "@/components/icons";
 
-const WALLET_ICON: Record<Wallet, string> = { MTN_MOMO: "🟡", AIRTEL_MONEY: "🔴", MPESA: "🟢" };
+/** Brand-colour dot per wallet (no emoji). */
+const WALLET_DOT: Record<Wallet, string> = { MTN_MOMO: "#ffcb05", AIRTEL_MONEY: "#e40000", MPESA: "#4caf50" };
 
 /** Pay-with chips + the payer's wallet number for the maker's country. Shared by the Maker Space sheet and Looks hold-to-buy. */
 export function WalletPhone<M extends Wallet | "CARD">({ commerce, methods, method, onMethod, phone, onPhone }: { commerce: Commerce; methods: readonly M[]; method: M | undefined; onMethod: (m: M) => void; phone: string; onPhone: (p: string) => void }) {
@@ -22,7 +24,7 @@ export function WalletPhone<M extends Wallet | "CARD">({ commerce, methods, meth
         <legend className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-mut">{t("region.payWith")}</legend>
         <div className="flex flex-wrap gap-2">
           {methods.map((m) => (
-            <Chip key={m} active={method === m} onClick={() => onMethod(m)}>{m === "CARD" ? `💳 ${t("region.card")}` : `${WALLET_ICON[m as Wallet]} ${WALLET_LABEL[m as Wallet]}`}</Chip>
+            <Chip key={m} active={method === m} onClick={() => onMethod(m)}>{m === "CARD" ? <><Icon name="wallet" className="size-4" /> {t("region.card")}</> : <><span aria-hidden className="size-2.5 rounded-full" style={{ background: WALLET_DOT[m as Wallet] }} /> {WALLET_LABEL[m as Wallet]}</>}</Chip>
           ))}
         </div>
         {!methods.length && <p className="text-sm text-gold">This maker takes orders on WhatsApp for now.</p>}
@@ -84,10 +86,10 @@ export function OrderMoneyPanel({ money: m, payee, onChange }: { money: OrderMon
         <dt className="text-mut">{m.shipCountry ? `Shipping to ${COUNTRY_NAMES[m.shipCountry] ?? m.shipCountry}` : "Delivery"}</dt><dd className="text-right">{formatMoney(m.deliveryMinor, m.currency)}</dd>
         {m.refundedMinor > 0 && <><dt className="text-mut">Refunded</dt><dd className="text-right text-gold">{formatMoney(m.refundedMinor, m.currency)}</dd></>}
       </dl>
-      <p className="text-xs text-mut">🔐 {t("buy.paidTo")} {payee}{m.method === "CARD" ? " (their own Stripe account)" : ""}.</p>
+      <p className="flex items-center gap-1.5 text-xs text-mut"><Icon name="lock" className="size-3.5 shrink-0" /> {t("buy.paidTo")} {payee}{m.method === "CARD" ? " (their own Stripe account)" : ""}.</p>
       {simulated && (
         <div className="mt-2 rounded-2xl border border-mint/40 bg-mint/10 p-3" role="group" aria-label="Simulated phone prompt">
-          <p className="text-sm font-semibold">📲 {t("region.approve")}</p>
+          <p className="flex items-center gap-1.5 text-sm font-semibold"><Icon name="phone" className="size-4" /> {t("region.approve")}</p>
           <p className="text-xs text-mut">Dev simulator: this is what the {m.methodLabel} prompt on {m.payment?.ref.startsWith("MPESA") ? "the Safaricom" : "the"} phone asks.</p>
           <p className="mt-2 text-sm">Pay <b>{m.total}</b> to <b>{payee}</b>?</p>
           <div className="mt-2 flex gap-2">

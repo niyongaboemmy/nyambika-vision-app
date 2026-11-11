@@ -5,6 +5,7 @@ import { REGIONS } from "@nyambika/contracts/region-data";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useState } from "react";
+import { Icon } from "@/components/icons";
 import { rwf } from "@/lib/api";
 import { useCommerce, useRegion } from "@/lib/region";
 import { useSession } from "@/lib/session";
@@ -38,9 +39,9 @@ export function RegionPill({ className = "" }: { className?: string }) {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className={`glass inline-flex min-h-10 items-center gap-1.5 rounded-full px-3 text-sm font-semibold ${className}`} aria-label={`Country ${REGIONS[prefs.country].name}, prices shown in ${prefs.displayCurrency}. Change`}>
-        <span aria-hidden>{REGIONS[prefs.country].flag}</span> {prefs.displayCurrency}
-        <span aria-hidden className="text-mut">▾</span>
+      <button type="button" onClick={() => setOpen(true)} className={`hit glass press inline-flex min-h-10 items-center gap-1.5 rounded-full px-3 text-sm font-semibold ${className}`} aria-label={`Country ${REGIONS[prefs.country].name}, prices shown in ${prefs.displayCurrency}. Change`}>
+        <Icon name="globe" className="size-4" /> <span className="tabular-nums">{prefs.country}</span> · {prefs.displayCurrency}
+        <Icon name="chevron" className="size-3.5 rotate-90 text-mut" />
       </button>
       <RegionSheet open={open} onClose={() => setOpen(false)} />
     </>
@@ -56,7 +57,7 @@ export function PassportLink({ productId }: { productId: string }) {
   const { t } = useSession();
   return (
     <Link href={`/p/${productId}`} className="glass inline-flex min-h-11 items-center gap-2 rounded-2xl px-4 text-sm font-semibold">
-      🪪 {t("region.passport")} <span aria-hidden className="text-mut">→</span>
+      <Icon name="tag" className="size-4" /> {t("region.passport")} <Icon name="chevron" className="size-4 text-mut" />
     </Link>
   );
 }

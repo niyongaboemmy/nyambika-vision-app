@@ -174,7 +174,7 @@ async function copyMetrics(page) {
       if (w < 43.5 || h < 43.5) small.push(`${el.tagName.toLowerCase()} ${Math.round(w)}x${Math.round(h)} "${(el.getAttribute("aria-label") ?? el.innerText ?? "").trim().slice(0, 30)}"`);
     }
     // iOS pass: no emoji in rendered text or in names/placeholders (Extended_Pictographic + U+FE0F; © ® ™ allowed).
-    const EMO = /[\p{Extended_Pictographic}\u{FE0F}]/u;
+    const EMO = /[\p{Extended_Pictographic}\u{FE0F}\u{1F1E6}-\u{1F1FF}]/u; // + regional indicators (flags)
     const emo = (s) => [...(s ?? "")].filter((c) => EMO.test(c) && !"©®™".includes(c)).join("");
     const emoji = [];
     const bodyEmo = emo(document.body.innerText);
