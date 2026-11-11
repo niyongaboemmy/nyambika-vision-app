@@ -1,0 +1,32 @@
+{
+  "name": "@nyambika/native",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Capacitor shell (iOS/Android) around the Nyambika PWA. The web app stays the single source of UI (ADR-03).",
+  "scripts": {
+    "prepare-www": "node scripts/prepare-www.mjs",
+    "icons": "node scripts/icons.mjs",
+    "validate": "node scripts/validate.mjs",
+    "sync": "node scripts/prepare-www.mjs && cap sync",
+    "doctor": "cap doctor",
+    "open:ios": "cap open ios",
+    "open:android": "cap open android",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@capacitor/android": "8.5.3",
+    "@capacitor/app": "8.1.2",
+    "@capacitor/core": "8.5.3",
+    "@capacitor/haptics": "8.0.2",
+    "@capacitor/ios": "8.5.3",
+    "@capacitor/push-notifications": "8.1.3",
+    "@capacitor/share": "8.0.3",
+    "@capacitor/splash-screen": "8.0.2",
+    "@capacitor/status-bar": "8.0.4"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.5.3",
+    "sharp": "0.35.5",
+    "typescript": "5.9.3"
+  }
+}

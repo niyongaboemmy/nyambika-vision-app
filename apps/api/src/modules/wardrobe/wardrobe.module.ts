@@ -8,6 +8,7 @@ import { MessagingService } from "../../common/messaging.service";
 import { MeteringService } from "../../common/metering.service";
 import { aiSpend, generations } from "../../common/metrics";
 import { PrismaService } from "../../common/prisma.service";
+import { PushService } from "../../common/push/push.service";
 import { StorageService } from "../../common/storage.service";
 import { parse } from "../../common/zod";
 import { config } from "../../config";
@@ -56,6 +57,7 @@ export class WardrobeService implements OnModuleInit, OnModuleDestroy {
     private messaging: MessagingService,
     private looks: LooksService,
     private generations: GenerationService,
+    private push: PushService,
   ) {}
 
   onModuleInit() {
@@ -287,6 +289,7 @@ export class WardrobeService implements OnModuleInit, OnModuleDestroy {
       `${e.title} ${when}: your outfit is ready ✨ ${ready} look${ready > 1 ? "s" : ""} styled from your wardrobe. ${config.webUrl}/wardrobe/events/${e.id}`,
       e.id,
     );
+    await this.push.event(e.userId, "wardrobe.reminder", { url: `/wardrobe/events/${e.id}`, refId: e.id, vars: { event: e.title, when } });
     return true;
   }
 

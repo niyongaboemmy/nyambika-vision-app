@@ -24,6 +24,7 @@ import { z } from "zod";
 import { AuthUser, CurrentUser, Public } from "../../common/auth";
 import { ConsentService } from "../../common/consent.service";
 import { PrismaService } from "../../common/prisma.service";
+import { PushService } from "../../common/push/push.service";
 import { StorageService } from "../../common/storage.service";
 import { parse } from "../../common/zod";
 import { config } from "../../config";
@@ -86,6 +87,7 @@ export class CircleService implements OnModuleInit, OnModuleDestroy {
     private consent: ConsentService,
     private looks: LooksService,
     private live: CircleLive,
+    private push: PushService,
   ) {}
 
   onModuleInit() {
@@ -268,6 +270,9 @@ export class CircleService implements OnModuleInit, OnModuleDestroy {
     });
     this.memo.delete(p.id);
     await this.live.publish(p.id);
+    // E38: tell the owner, at most once per poll every 10 minutes.
+    const votes = await this.prisma.circleVote.count({ where: { pollId: p.id } });
+    await this.push.event(p.ownerId, "circle.vote", { url: `/circle/${p.id}`, refId: p.id, vars: { votes: String(votes), question: p.question }, throttleMs: 10 * 60_000 });
     return this.publicView(token, deviceId);
   }
 

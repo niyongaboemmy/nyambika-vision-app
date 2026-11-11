@@ -7,6 +7,7 @@ import type { Generation } from "@prisma/client";
 import { AiClient } from "../../common/ai.client";
 import { MeteringService } from "../../common/metering.service";
 import { PrismaService } from "../../common/prisma.service";
+import { PushService } from "../../common/push/push.service";
 import { StorageService } from "../../common/storage.service";
 import { TwinService } from "../twin/twin.module";
 
@@ -48,6 +49,7 @@ export class GenerationService implements OnModuleInit, OnModuleDestroy {
     private twins: TwinService,
     private metering: MeteringService,
     private consent: ConsentService,
+    private push: PushService,
   ) {}
 
   onModuleInit() {
@@ -168,6 +170,11 @@ export class GenerationService implements OnModuleInit, OnModuleDestroy {
       generationDuration.observe({ tier: gen.tier, status: "DELIVERED" }, (Date.now() - gen.createdAt.getTime()) / 1000);
       const first = await this.prisma.look.findFirst({ where: { generationId: id, rank: 0 }, include: { intentSession: true } });
       if (first) firstLook.observe((Date.now() - first.intentSession.createdAt.getTime()) / 1000);
+      // E38 / FR-TRY-06: HD renders (hold-to-buy, full detail) take long enough to deserve a ping.
+      if (gen.tier === "HD") {
+        const look = await this.prisma.look.findFirst({ where: { generationId: id }, select: { id: true, intentSessionId: true } });
+        await this.push.event(gen.userId, "look.ready", { url: look ? `/looks/${look.intentSessionId}?look=${look.id}` : "/saved", refId: id, vars: { item: gen.variant.product.title } });
+      }
     } catch (e) {
       await this.prisma.generation.update({ where: { id }, data: { status: "FAILED", guard: { error: (e as Error).message } } });
       generations.inc({ status: "FAILED", model: gen.modelVersion });

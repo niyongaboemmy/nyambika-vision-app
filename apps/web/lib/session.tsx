@@ -3,6 +3,7 @@
 import { translate, type Locale, type MessageKey } from "@nyambika/i18n";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { api } from "./api";
+import { revokePushForSignOut } from "./push";
 
 export interface Me {
   id: string;
@@ -86,6 +87,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   );
 
   const signOut = useCallback(async () => {
+    await revokePushForSignOut(); // E38: this device stops getting the old account's notifications
     await api("/auth/logout", { method: "POST" }).catch(() => {});
     setMe(null);
   }, []);

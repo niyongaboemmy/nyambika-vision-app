@@ -36,6 +36,7 @@ import { AgentsModule } from "./modules/agents/agents.module";
 import { GrowthModule } from "./modules/growth/growth.module";
 import { CoopVoiceModule } from "./modules/coopvoice/coopvoice.module";
 import { NetworkMigrationModule } from "./modules/migration/network";
+import { PushModule } from "./common/push/push.module";
 
 @Controller()
 class HealthController {
@@ -85,6 +86,7 @@ class HealthController {
     GrowthModule,
     CoopVoiceModule,
     NetworkMigrationModule,
+    PushModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: AuthGuard }],

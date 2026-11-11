@@ -31,6 +31,7 @@ import { randomBytes } from "node:crypto";
 import { z } from "zod";
 import { Access, AuthUser, CurrentUser, MANAGE } from "../../common/auth";
 import { MessagingService } from "../../common/messaging.service";
+import { PushService } from "../../common/push/push.service";
 import { PrismaService } from "../../common/prisma.service";
 import { StorageService } from "../../common/storage.service";
 import { parse } from "../../common/zod";
@@ -82,6 +83,7 @@ export class CustomOrdersService implements OnModuleInit, OnModuleDestroy {
     private messaging: MessagingService,
     private measurements: MeasurementsService,
     private morph: MorphService,
+    private push: PushService,
   ) {}
 
   onModuleInit() {
@@ -123,6 +125,8 @@ export class CustomOrdersService implements OnModuleInit, OnModuleDestroy {
     if (mirror && co.orderId) {
       await this.prisma.order.update({ where: { id: co.orderId }, data: { status: mirror } });
       await this.prisma.orderEvent.create({ data: { orderId: co.orderId, status: mirror, note: `${to.replace(/_/g, " ").toLowerCase()}${note ? `: ${note}` : ""}`, actorId } });
+      // E38: cutting → sewing → … drive the same live activity as ready-made orders.
+      await this.push.orderUpdate(co.orderId, { craft: (["CUTTING", "SEWING", "FITTING", "FINISHING"] as string[]).includes(to) ? (to as "CUTTING") : null });
     }
     const copy = STATUS_COPY[to];
     if (copy) {
@@ -131,6 +135,10 @@ export class CustomOrdersService implements OnModuleInit, OnModuleDestroy {
         this.prisma.user.findUniqueOrThrow({ where: { id: co.shopperId } }),
       ]);
       await this.messaging.send("WHATSAPP", shopper.phone, `custom_${to.toLowerCase()}`, `${page.name} ${copy} (${co.code}).${note ? ` “${note}”` : ""}`, co.id);
+      if (to === "QUOTED") {
+        const fresh = await this.prisma.customOrder.findUniqueOrThrow({ where: { id: co.id } });
+        await this.push.event(co.shopperId, "custom.quote", { url: `/custom/${co.id}`, refId: co.id, vars: { maker: page.name, item: co.title, price: (fresh.quotePriceRwf ?? 0).toLocaleString("en-US") } });
+      }
     }
   }
 

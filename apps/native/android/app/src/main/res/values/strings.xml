@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Nyambika</string>
+    <string name="title_activity_main">Nyambika</string>
+    <string name="package_name">rw.nyambika.app</string>
+    <string name="custom_url_scheme">rw.nyambika.app</string>
+</resources>

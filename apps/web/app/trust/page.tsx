@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AddressesCard } from "@/components/bag";
+import { NotificationPrefsCard } from "@/components/notification-prefs";
 import { PasskeysCard } from "@/components/passkeys";
 import { Button, ErrorNote, Screen, Sheet, TopBar } from "@/components/ui";
 import { api } from "@/lib/api";
@@ -103,6 +104,7 @@ export default function Trust() {
               ))}
             </section>
 
+            <NotificationPrefsCard />
             <PasskeysCard />
             <AddressesCard />
 

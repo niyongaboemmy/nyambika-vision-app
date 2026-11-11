@@ -5,6 +5,7 @@ import { randomBytes } from "node:crypto";
 import { z } from "zod";
 import { Access, AuthUser, CurrentUser, MANAGE } from "../../common/auth";
 import { MessagingService } from "../../common/messaging.service";
+import { PushService } from "../../common/push/push.service";
 import { PrismaService } from "../../common/prisma.service";
 import { parse } from "../../common/zod";
 import { LooksModule, LooksService } from "../looks/looks.module";
@@ -32,6 +33,7 @@ export class OrdersController {
     private messaging: MessagingService,
     private looks: LooksService,
     private discounts: DiscountService,
+    private push: PushService,
   ) {}
 
   /**
@@ -179,6 +181,7 @@ export class OrdersController {
     await this.prisma.orderEvent.create({ data: { orderId: id, status: to as OrderStatus, note: note ?? "", actorId: user.id } });
     const copy = STATUS_COPY[to as OrderStatus];
     if (copy) await this.messaging.send("WHATSAPP", o.shopper.phone, `order_${to.toLowerCase()}`, `${o.page.name} ${copy} (${o.code}).${note ? ` “${note}”` : ""}`, id);
+    await this.push.orderUpdate(id); // E38: shipped/delivered alerts, silent live-activity steps
     return this.view(id, !isShopper);
   }
 

@@ -1373,3 +1373,40 @@ model MigrationOutreach {
   @@index([itemId])
   @@index([waveId, kind])
 }
+
+// ==== E38 Native shell: push devices, notification preferences ====
+
+/// One push endpoint: an FCM/APNs device token, an iOS live-activity token, or a Web Push subscription.
+/// Tokens move to the newest user that registers them (shared phones) and are revoked on sign-out/deletion.
+model PushDevice {
+  id             String    @id @default(cuid())
+  userId         String
+  installationId String
+  platform       String // IOS | ANDROID | WEB
+  transport      String // FCM | APNS | WEBPUSH
+  kind           String    @default("DEVICE") // DEVICE | LIVE_ACTIVITY | LIVE_ACTIVITY_START
+  token          String    @unique // FCM/APNs token or Web Push endpoint
+  p256dh         String?
+  auth           String?
+  orderId        String?
+  locale         String    @default("en")
+  appVersion     String?
+  failures       Int       @default(0)
+  createdAt      DateTime  @default(now())
+  lastSeenAt     DateTime  @default(now())
+  revokedAt      DateTime?
+
+  @@index([userId, revokedAt])
+  @@index([installationId])
+}
+
+model NotificationPreference {
+  userId       String   @id
+  orders       Boolean  @default(true)
+  looks        Boolean  @default(true)
+  circle       Boolean  @default(true)
+  custom       Boolean  @default(true)
+  wardrobe     Boolean  @default(true)
+  liveActivity Boolean  @default(true)
+  updatedAt    DateTime @updatedAt
+}
