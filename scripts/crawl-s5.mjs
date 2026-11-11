@@ -36,7 +36,7 @@ await shopper.getByText(/your twin is ready/i).waitFor({ timeout: 20000 });
 await shopper.goto(`${BASE}/m/imena-styles`);
 await shopper.getByRole("listbox", { name: "Collection" }).getByRole("option", { selected: true }).click();
 await shopper.getByRole("button", { name: /try on me/i }).click();
-await shopper.getByText(/looks are paused/i).waitFor({ timeout: 15000 });
+await shopper.getByText(/looks are resting/i).waitFor({ timeout: 15000 }); // KILL_SWITCH → calm LimitState card
 await shopper.screenshot({ path: new URL("./crawl-output/s5/90-killswitch-blocks-shopper.png", import.meta.url).pathname });
 await page.getByLabel("ai.kill_switch").uncheck();
 await page.waitForTimeout(400);
@@ -57,7 +57,8 @@ await shopper.waitForTimeout(500);
 await shopper.goto(`${BASE}/m/kigali-kitenge-house`);
 await shopper.getByRole("listbox", { name: "Collection" }).getByRole("option", { selected: true }).click();
 await shopper.getByRole("button", { name: /try on me/i }).click();
-await shopper.getByText(/paused looks on your twin/i).waitFor({ timeout: 15000 });
+await shopper.getByText(/looks on your twin are paused/i).waitFor({ timeout: 15000 }); // CONSENT_WITHDRAWN → LimitState with inline "Turn on"
+await shopper.getByRole("button", { name: "Turn on" }).waitFor();
 await shopper.screenshot({ path: new URL("./crawl-output/s5/92-consent-withdrawn-blocks.png", import.meta.url).pathname });
 const exp = await shopper.request.get(`${BASE}/api/privacy/export`);
 console.log(`data export: HTTP ${exp.status()} · ${(await exp.body()).length} bytes`);

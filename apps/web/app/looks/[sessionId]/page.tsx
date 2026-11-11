@@ -7,7 +7,7 @@ import { HoldToBuy } from "@/components/hold-to-buy";
 import { LookView } from "@/components/look-view";
 import { TwinNudge } from "@/components/twin-nudge";
 import { LimitState } from "@/components/limit-state";
-import { ErrorNote, Screen, Spinner } from "@/components/ui";
+import { Screen, Spinner } from "@/components/ui";
 import { api } from "@/lib/api";
 import { isRendering, type Look } from "@/lib/looks";
 import { track, trackOnce } from "@/lib/track";
@@ -44,12 +44,12 @@ function Stream() {
 
   // Poll while any visible-soon look is still rendering.
   useEffect(() => {
-    if (!data) return;
+    if (!data || error) return; // a limit stops the poll; the card offers retry
     const pending = data.looks.slice(0, index + 3).some((l) => isRendering(l.status) && l.status !== "PENDING");
     if (!pending) return;
     const id = setTimeout(() => void load(), 1000);
     return () => clearTimeout(id);
-  }, [data, index, load]);
+  }, [data, index, load, error]);
 
   // Progressive generation: when the shopper reaches look n−1, render the next two.
   useEffect(() => {
@@ -83,7 +83,7 @@ function Stream() {
     setError(null);
     void load().catch(setError);
   };
-  if (error && !data) return <Screen><div className="p-6 pt-20"><ErrorNote error={error} onRetry={retry} /></div></Screen>;
+  if (error && !data) return <Screen><div className="p-6 pt-20"><LimitState error={error} onRetry={retry} /></div></Screen>;
   if (!data) return <Screen><div className="grid min-h-dvh place-items-center"><Spinner /></div></Screen>;
   if (!data.looks.length) return <Screen><p className="p-6 pt-24 text-center text-mut">No matching looks yet. Try asking differently.</p></Screen>;
 

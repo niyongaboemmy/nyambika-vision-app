@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { AmbientOrder } from "@/components/ambient-order";
+import { LimitState } from "@/components/limit-state";
 import { PushAsk } from "@/components/push-ask";
 import { Button, Chip, ErrorNote, Screen, Spinner, TopBar } from "@/components/ui";
 import { api, rwf } from "@/lib/api";
@@ -18,13 +19,16 @@ function Order() {
   const { id } = useParams<{ id: string }>();
   const fresh = useSearchParams().get("fresh") === "1";
   const { t } = useSession();
+  const router = useRouter();
+  const [actionError, setActionError] = useState<unknown>(null);
   const { data: o, setData, error } = useApi<OrderView>(`/orders/${id}`);
   const money = useOrderMoney(id, o?.status); // E40/E41: charged currency + method (null for legacy RWF orders)
   const amount = money ? money.total : o ? rwf(o.totalRwf) : "";
 
   useEffect(() => {
     if (!o || o.status !== "AWAITING_PAYMENT") return;
-    const tm = setTimeout(async () => setData(await api<OrderView>(`/orders/${id}`)), 1500);
+    // Polling must never throw into the void (unhandled rejection): a failed poll just tries again next tick.
+    const tm = setTimeout(() => void api<OrderView>(`/orders/${id}`).then(setData, () => setData({ ...o })), 1500);
     return () => clearTimeout(tm);
   }, [o, id, setData]);
 
@@ -34,6 +38,7 @@ function Order() {
   }, [paidNow]);
 
   if (error) return <Screen><div className="p-6 pt-20"><ErrorNote error={error} /></div></Screen>;
+  const paymentFailed = o?.status === "CANCELLED" && o.payment?.status === "FAILED";
   if (!o) return <Screen><div className="grid min-h-dvh place-items-center"><Spinner /></div></Screen>;
 
   const justPaid = fresh && o.status === "PAID";
@@ -53,6 +58,10 @@ function Order() {
           </section>
         )}
         {o.status === "AWAITING_PAYMENT" && <PushAsk moment="paid" />}
+
+        {paymentFailed && (
+          <LimitState error={{ status: 402, body: { code: "PAYMENT_FAILED" } }} onRetry={() => router.push(`/m/${o.page.handle}`)} />
+        )}
 
         {justPaid && (
           <section className="flex animate-rise flex-col items-center gap-2 rounded-3xl bg-gradient-to-br from-mint/30 to-violet/20 p-6 text-center">
@@ -100,10 +109,11 @@ function Order() {
         <div className="grid grid-cols-2 gap-2">
           <a href={`https://wa.me/${o.page.whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(`Muraho! About my order ${o.code}`)}`} target="_blank" rel="noreferrer" className="glass inline-flex min-h-12 items-center justify-center rounded-2xl font-semibold">💬 Message maker</a>
           {o.next.includes("COMPLETED") && (
-            <Button onClick={async () => setData(await api(`/orders/${o.id}/transition`, { method: "POST", json: { to: "COMPLETED" } }))}>I received it</Button>
+            <Button onClick={() => void api<OrderView>(`/orders/${o.id}/transition`, { method: "POST", json: { to: "COMPLETED" } }).then(setData, setActionError)}>I received it</Button>
           )}
         </div>
 
+        <ErrorNote error={actionError} />
         {["DELIVERED", "COMPLETED"].includes(o.status) && !o.review && <Review id={o.id} onDone={setData} />}
         {o.review && <p className="text-center text-sm text-mut">You rated {"★".repeat(o.review.rating)}</p>}
       </main>
@@ -114,11 +124,13 @@ function Order() {
 function Review({ id, onDone }: { id: string; onDone: (o: OrderView) => void }) {
   const [rating, setRating] = useState(5);
   const [text, setText] = useState("");
+  const [err, setErr] = useState<unknown>(null);
   return (
-    <form className="glass space-y-3 rounded-3xl p-4" onSubmit={async (e) => { e.preventDefault(); onDone(await api(`/orders/${id}/review`, { method: "POST", json: { rating, text } })); }}>
+    <form className="glass space-y-3 rounded-3xl p-4" onSubmit={(e) => { e.preventDefault(); setErr(null); void api<OrderView>(`/orders/${id}/review`, { method: "POST", json: { rating, text } }).then(onDone, setErr); }}>
       <p className="font-semibold">How was it?</p>
       <div className="flex gap-1">{[1, 2, 3, 4, 5].map((n) => <Chip key={n} active={n <= rating} onClick={() => setRating(n)}>★</Chip>)}</div>
       <textarea value={text} onChange={(e) => setText(e.target.value)} placeholder="Fit, fabric, service…" className="glass min-h-20 w-full rounded-2xl p-3 outline-none placeholder:text-white/40" />
+      <ErrorNote error={err} />
       <Button className="w-full">Post review</Button>
     </form>
   );

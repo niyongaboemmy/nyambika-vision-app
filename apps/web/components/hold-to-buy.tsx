@@ -27,7 +27,7 @@ export function HoldToBuy({ look, autoOpen = false }: { look: Look; /** E35: ope
   const [address, setAddress] = useState("");
   const [progress, setProgress] = useState(0);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
   const [discount, setDiscount] = useState<AppliedDiscount | null>(null);
   const raf = useRef<number | null>(null);
   const started = useRef(0);
@@ -75,7 +75,7 @@ export function HoldToBuy({ look, autoOpen = false }: { look: Look; /** E35: ope
       track("hold_started", { lookId: look.id, orderId: o.id, pageId: look.maker.pageId });
       router.push(`/orders/${o.id}?fresh=1`);
     } catch (e) {
-      setError((e as Error).message);
+      setError(e); // ApiError: DAILY/limit/offline codes render calmly via ErrorNote → LimitState
       setBusy(false);
       setProgress(0);
       key.current = "";

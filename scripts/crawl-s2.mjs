@@ -1,8 +1,16 @@
+import { existsSync } from "node:fs";
 import { BASE, signIn, start } from "./crawl-lib.mjs";
 
 const persona = new URL("../apps/api/storage/personas/persona-4.png", import.meta.url).pathname;
 const bad = new URL("./crawl-output/bad-twin.png", import.meta.url).pathname;
 const { page, shot, finish } = await start("s2");
+// A dark, person-less photo the quality checks must reject (generated on fresh checkouts).
+if (!existsSync(bad)) {
+  await page.setViewportSize({ width: 320, height: 240 });
+  await page.setContent('<body style="margin:0;background:#19161e"></body>');
+  await page.screenshot({ path: bad });
+  await page.setViewportSize({ width: 412, height: 839 });
+}
 const phone = `07882${String(Date.now()).slice(-5)}`;
 
 await signIn(page, phone);
@@ -32,7 +40,7 @@ await shot("mirror-twin-ready");
 
 // Maker Space → try on → guarded, labelled look on the twin
 await page.goto(`${BASE}/m/uwase-couture`);
-await page.getByRole("option", { selected: true }).click();
+await page.getByRole("listbox", { name: "Collection" }).getByRole("option", { selected: true }).click(); // the 3D shelf is a second listbox
 await page.getByRole("button", { name: /try on me/i }).click();
 await page.waitForURL(/looks\/try/);
 await page.locator('img[alt*="AI preview on your twin"]').waitFor({ timeout: 30000 });

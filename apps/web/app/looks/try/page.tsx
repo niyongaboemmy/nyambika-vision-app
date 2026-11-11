@@ -1,10 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { HoldToBuy } from "@/components/hold-to-buy";
 import { LookView } from "@/components/look-view";
-import { ErrorNote, Screen, Spinner } from "@/components/ui";
+import { LimitState } from "@/components/limit-state";
+import { Screen, Spinner } from "@/components/ui";
 import { api } from "@/lib/api";
 import type { Look } from "@/lib/looks";
 import { useSession } from "@/lib/session";
@@ -15,8 +17,10 @@ function TryOn() {
   const { me, loading } = useSession();
   const router = useRouter();
   const [initial, setInitial] = useState<Look | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
   const started = useRef(false);
+  const [attempt, setAttempt] = useState(0);
+  const retry = () => { started.current = false; setError(null); setAttempt((n) => n + 1); };
   const { look, save, variant } = useLook(initial);
 
   useEffect(() => {
@@ -24,10 +28,13 @@ function TryOn() {
     if (!me) return router.replace(`/signin?next=${encodeURIComponent(`/looks/try?variant=${variantId}`)}`);
     if (!variantId || started.current) return;
     started.current = true;
-    api<Look>("/looks/try", { method: "POST", json: { variantId } }).then(setInitial).catch((e) => setError(e.message));
-  }, [loading, me, variantId, router]);
+    api<Look>("/looks/try", { method: "POST", json: { variantId } }).then(setInitial).catch(setError);
+  }, [loading, me, variantId, router, attempt]);
 
-  if (error) return <Screen><div className="p-6 pt-20"><ErrorNote error={error} /></div></Screen>;
+  if (error) return <Screen><div className="p-6 pt-20"><LimitState error={error} onRetry={retry} /></div></Screen>;
+  // No (or a stale) ?variant= link used to spin forever: send the shopper somewhere useful instead.
+  if (!variantId && !loading && me)
+    return <Screen><div className="p-6 pt-24 text-center"><p className="text-mut">Pick a piece in a Maker Space to try it on.</p><Link href="/makers" className="glass mt-4 inline-flex min-h-12 items-center rounded-2xl px-5 font-semibold">Browse makers →</Link></div></Screen>;
   if (!look) return <Screen><div className="grid min-h-dvh place-items-center"><Spinner /></div></Screen>;
   return (
     <div className="mx-auto h-dvh w-full max-w-[480px]">
