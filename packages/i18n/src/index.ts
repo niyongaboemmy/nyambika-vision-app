@@ -62,6 +62,13 @@ const en = {
   "common.save": "Save",
   "common.cancel": "Cancel",
   "common.delete": "Delete",
+  "circle.title": "Ask your circle",
+  "circle.voteFor": "Vote for",
+  "circle.hint": "Swipe to compare · tap a look to vote · no account needed",
+  "circle.yourVote": "Your vote",
+  "circle.addComment": "Add a comment",
+  "wardrobe.title": "Your wardrobe",
+  "wardrobe.restyle": "Restyle for an event",
 };
 
 type Messages = typeof en;
@@ -124,6 +131,13 @@ const rw: Messages = {
   "common.save": "Bika",
   "common.cancel": "Reka",
   "common.delete": "Siba",
+  "circle.title": "Baza inshuti zawe",
+  "circle.voteFor": "Tora",
+  "circle.hint": "Nyereza urebe indi · kanda ku mwambaro utore · nta konti ikenewe",
+  "circle.yourVote": "Itora ryawe",
+  "circle.addComment": "Ongeraho igitekerezo",
+  "wardrobe.title": "Imyenda yawe",
+  "wardrobe.restyle": "Tegura imyambarire y'ibirori",
 };
 
 const fr: Messages = {
@@ -183,6 +197,13 @@ const fr: Messages = {
   "common.save": "Enregistrer",
   "common.cancel": "Annuler",
   "common.delete": "Supprimer",
+  "circle.title": "Demande à ton cercle",
+  "circle.voteFor": "Voter pour",
+  "circle.hint": "Balayez pour comparer · touchez un look pour voter · sans compte",
+  "circle.yourVote": "Votre vote",
+  "circle.addComment": "Ajouter un commentaire",
+  "wardrobe.title": "Votre garde-robe",
+  "wardrobe.restyle": "Relooker pour un événement",
 };
 
 export const catalogues: Record<Locale, Messages> = { en, rw, fr };
