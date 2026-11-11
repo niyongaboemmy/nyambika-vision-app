@@ -8,6 +8,7 @@ import { Card, Chip, Empty, Icon, Kpi, Note, ScreenSkeleton, SButton, Select } f
 import { api } from "@/lib/api";
 import { useApi } from "@/lib/use-api";
 import { InfoTip } from "@/components/kit";
+import { MoreActions } from "@/components/ios";
 
 
 interface RunRow {
@@ -195,10 +196,16 @@ export default function NetworkMigration() {
                   <Chip tone="sky">{d.outreach.invites} invited</Chip>
                   {d.outreach.byReminder.map((n, i) => <Chip key={i} tone={n ? "gold" : "stone"}>reminder {i + 1}: {n}</Chip>)}
                 </div>
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                  <SButton onClick={() => act("outreach", "Review links sent")} disabled={!!busy || d.run.status === "ROLLED_BACK"}><Icon name="mail" className="size-4" /> Send review links</SButton>
-                  <SButton variant="outline" onClick={() => act("chase", "Reminders sent")} disabled={!!busy}>Chase unsigned now</SButton>
-                  <SButton variant="ghost" className="sm:col-span-2" onClick={() => act("chase", "Rehearsal reminders", { asOf: new Date(Date.now() + 3 * 86400_000).toISOString() })} disabled={!!busy}>Rehearse cadence (+3 days, dev)</SButton>
+                <div className="flex items-center gap-2">
+                  <SButton className="flex-1" onClick={() => act("outreach", "Review links sent")} disabled={!!busy || d.run.status === "ROLLED_BACK"}><Icon name="mail" className="size-4" /> Send review links</SButton>
+                  <MoreActions
+                    label="More outreach actions"
+                    title="Owner outreach"
+                    actions={[
+                      { label: "Chase unsigned now", icon: "bell", disabled: !!busy, onSelect: () => act("chase", "Reminders sent") },
+                      { label: "Rehearse cadence (+3 days, dev)", icon: "clock", disabled: !!busy, onSelect: () => act("chase", "Rehearsal reminders", { asOf: new Date(Date.now() + 3 * 86400_000).toISOString() }) },
+                    ]}
+                  />
                 </div>
               </Card>
               <Card className="space-y-3">

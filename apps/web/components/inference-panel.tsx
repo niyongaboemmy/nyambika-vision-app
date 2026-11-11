@@ -154,16 +154,24 @@ export function InferencePanel() {
             Pool {data.fakePool ? <Chip tone="gold" className="ml-1">dev fake pool · {data.fakePool.mode}</Chip> : null}
           </p>
           {data.fakePool ? (
-            <div role="group" aria-label="Fake pool failure mode" className="flex flex-wrap gap-1.5">
-              {(["healthy", "slow", "flaky", "failing", "down"] as const).map((m) => (
-                <SButton key={m} variant={data.fakePool?.mode === m ? "dark" : "outline"} aria-pressed={data.fakePool?.mode === m} disabled={busy !== null} onClick={() => run(`chaos-${m}`, async () => {
+            <Segmented
+              label="Fake pool failure mode"
+              value={data.fakePool.mode as "healthy" | "slow" | "flaky" | "failing" | "down"}
+              options={[
+                { value: "healthy", label: "Healthy" },
+                { value: "slow", label: "Slow" },
+                { value: "flaky", label: "Flaky" },
+                { value: "failing", label: "Fail" },
+                { value: "down", label: "Down" },
+              ]}
+              onChange={(m) => {
+                if (busy !== null) return;
+                void run(`chaos-${m}`, async () => {
                   await api("/admin/inference/chaos", { method: "POST", json: { mode: m } });
                   return `Fake pool set to ${m}`;
-                })}>
-                  {m === "healthy" ? "Healthy" : m === "slow" ? "Slow" : m === "flaky" ? "Flaky" : m === "failing" ? "Fail" : "Down"}
-                </SButton>
-              ))}
-            </div>
+                });
+              }}
+            />
           ) : (
             <p className="text-sm text-cocoa-2">Chaos: local fake pool only</p>
           )}

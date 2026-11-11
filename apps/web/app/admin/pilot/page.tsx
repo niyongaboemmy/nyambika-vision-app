@@ -9,6 +9,7 @@ import { api, rwf } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { useApi } from "@/lib/use-api";
 import { InfoTip } from "@/components/kit";
+import { Group, GroupRow } from "@/components/ios";
 import type { IconName } from "@/components/icons";
 
 type Rag = "green" | "amber" | "red" | "none";
@@ -512,24 +513,29 @@ function CohortPanel() {
             {data.invites.map((i) => <li key={i.code}><Chip tone={i.uses >= i.maxUses ? "stone" : "sky"}><span className="font-mono">{i.code}</span> · {i.kind === "PAGE" ? "member" : "shopper"} · {i.uses}/{i.maxUses}</Chip></li>)}
           </ul>
         </Card>
-        <Card className="space-y-2">
-          <h3 className="font-extrabold text-cocoa">Member pages in the pilot</h3>
-          <ul className="max-h-80 divide-y divide-hairline overflow-y-auto">
+        <div role="region" aria-label="Member pages in the pilot" tabIndex={0} className="max-h-[26rem] overflow-y-auto rounded-[var(--radius-md)]">
+          <Group header={`Member pages · ${members} in`}>
             {data.pages.map((p) => (
-              <li key={p.id} className="py-1 [&>label]:min-h-11 [&>label]:items-center">
-                <Switch
-                  checked={p.member}
-                  label={<span className="font-bold">{p.name}</span>}
-                  description={`${p.memberType.toLowerCase()} · ${p.status.replace(/_/g, " ").toLowerCase()}`}
-                  onChange={async (v) => {
-                    await api("/admin/pilot/cohort/pages", { method: "POST", json: { pageId: p.id, member: v } });
-                    await reload();
-                  }}
-                />
-              </li>
+              <GroupRow
+                key={p.id}
+                icon={p.memberType === "COOPERATIVE" ? "users" : p.memberType === "TAILOR" ? "scissors" : "store"}
+                tone={p.member ? "mint" : "stone"}
+                title={p.name}
+                subtitle={`${p.memberType.toLowerCase()} · ${p.status.replace(/_/g, " ").toLowerCase()}`}
+                accessory={
+                  <Switch
+                    checked={p.member}
+                    ariaLabel={`${p.name} in the pilot`}
+                    onChange={async (v) => {
+                      await api("/admin/pilot/cohort/pages", { method: "POST", json: { pageId: p.id, member: v } });
+                      await reload();
+                    }}
+                  />
+                }
+              />
             ))}
-          </ul>
-        </Card>
+          </Group>
+        </div>
       </div>
     </section>
   );
