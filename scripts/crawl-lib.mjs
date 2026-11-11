@@ -15,7 +15,7 @@ export const CRAWL_DB = process.env.CRAWL_DB ?? dbFromEnv() ?? "nyambika_dev";
  */
 export function isCrawlArtifact(text) {
   if (!/hydrated but some attributes/i.test(text)) return false;
-  const diff = text.split("\n").filter((l) => /^\s*[+-]\s/.test(l));
+  const diff = text.split("\n").filter((l) => /^\s*[+-]\s{2,}\S/.test(l)); // diff rows ("-      style=…"), not the "- A server/client branch" hints
   return diff.length > 0 && diff.every((l) => /caret-color/.test(l));
 }
 function dbFromEnv() {

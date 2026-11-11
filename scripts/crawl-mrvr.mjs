@@ -121,6 +121,9 @@ try {
   await signIn(g1.p, phone(5));
   await signIn(g2.p, phone(4));
   const enter = async (x) => {
+    // Seeded accounts collect paid orders / viewed looks across crawls, so the pilot micro-survey sheet (E26) can
+    // pop up over the showroom: answer it "not now" first (the pilot crawl covers the survey UI).
+    for (const trigger of ["ORDER_PAID", "LOOKS_5"]) await x.p.request.post(`${BASE}/api/survey`, { data: { trigger, helped: null, nps: null, dismissed: true } });
     // SwiftShader WebGL on a busy machine can stall the first scene load: one reload before giving up.
     for (let attempt = 0; ; attempt++) {
       await x.p.goto(`${BASE}/m/uwase-couture/showroom`);

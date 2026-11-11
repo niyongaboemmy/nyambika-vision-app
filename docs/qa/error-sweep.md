@@ -59,7 +59,7 @@ No hydration warnings, broken images or 5xx responses were found on any route or
 | s5 | Asserted the old raw copy | Asserts the designed cards ("Looks are resting", "Looks on your twin are paused" + Turn on) |
 | mig | `wave0.json` missing / re-imported pages never show "✓" | Fresh synthetic bundle every run (`MIG_BUNDLE_KEEP=1` to reuse) |
 | agentic, mlspike, mrvr | Hard-coded agent ports / DB names | `crawl-lib` exports `API_BASE` (web 310N ↔ API 410N) and `CRAWL_DB` (env, else `apps/api/.env`) |
-| mrvr | SwiftShader showroom load stalls on a busy machine | One reload before failing |
+| mrvr | SwiftShader showroom load stalls on a busy machine; the pilot survey sheet (seeded accounts accumulate orders/looks) covered "Shared room" | One reload before failing; pre-answers the survey via API |
 | growth | Outbox lists newest rows only; broadcast already sent today | Only expects the broadcast row when this run sent it |
 | pilot | "Not now" closes the survey before the dismissal is stored | Polls `/survey/pending` briefly |
 | social | Pilot survey sheet covered the restyle sheet after the paid order; hold-to-buy failure was silent | Pre-answers the survey via API; prints the on-screen reason on failure |
@@ -87,3 +87,26 @@ No hydration warnings, broken images or 5xx responses were found on any route or
 - **Kigali time for every shopper.** The cap resets at midnight Kigali time for all users, including the Kenya /
   Uganda / Tanzania pilots (UTC+3 → 01:00 local). Recommendation taken: keep one reset instant for now (simple,
   matches cost accounting); switch to the shopper's E41 country timezone if the EAC pilots grow.
+
+## Final run (slot 3, after merging both hardening passes)
+
+| Crawl | Result | | Crawl | Result |
+|---|---|---|---|---|
+| agentic | ✅ | | region | ✅ (rerun¹) |
+| drape | ✅ | | s1 | ✅ |
+| e05 | ✅ | | s2 | ✅ |
+| growth | ✅ (rerun¹) | | s3 | ✅ |
+| harden-commerce | ✅ (rerun¹) | | s4 | ✅ |
+| infer | ✅ (rerun¹, own gateway :8103 + fake pool) | | s5 | ✅ |
+| mig | ✅ | | social | ✅ |
+| mlspike | ✅ | | studio-ui | ✅ |
+| mrvr | ✅ (after the survey fix) | | **sweep** | ✅ 696 visits, 0 open findings |
+| native | ✅ | | tailor | ✅ |
+| phase0 | ✅ | | twin3d | ✅ |
+| pilot | ✅ | | voice | ✅ |
+| | | | vr | ✅ |
+| | | | xr | ✅ |
+
+¹ Failed in the sequential run while the API was recompiling after the main merge (and under machine load average
+15–70 from parallel agents); green when rerun right after with no code change, except region, which needed the
+`caret-color` artifact filter above.
