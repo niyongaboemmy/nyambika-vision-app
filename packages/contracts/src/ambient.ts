@@ -8,6 +8,9 @@ import { z } from "zod";
 // payloads already localised, so the native code never re-implements order logic.
 
 type AmbientLocale = "rw" | "en" | "fr";
+/** Any UI locale; copy exists for RW/EN/FR, others (e.g. the E41 Swahili starter) fall back to English. */
+type AnyLocale = AmbientLocale | (string & {});
+const loc = (l: AnyLocale): AmbientLocale => (l === "rw" ? "rw" : l === "fr" ? "fr" : "en");
 
 // ── push events, categories and preferences ─────────────────────────────────
 
@@ -285,7 +288,8 @@ function headKey(s: AmbientOrderState): HeadKey {
 }
 
 /** Kigali is UTC+2 all year (no DST). */
-export function kigaliWeekday(d: string | Date, locale: AmbientLocale): string {
+export function kigaliWeekday(d: string | Date, anyLocale: AnyLocale): string {
+  const locale = loc(anyLocale);
   const t = new Date(new Date(d).getTime() + 2 * 3600_000);
   return WEEKDAYS[locale][t.getUTCDay()];
 }
@@ -296,7 +300,8 @@ export interface AmbientCopy {
   stepLabels: [string, string, string, string];
 }
 
-export function ambientCopy(s: AmbientOrderState, locale: AmbientLocale): AmbientCopy {
+export function ambientCopy(s: AmbientOrderState, anyLocale: AnyLocale): AmbientCopy {
+  const locale = loc(anyLocale);
   const v: Vars = { maker: s.makerName, item: s.itemTitle || ITEM_FALLBACK[locale] };
   const stepLabels = s.steps.map((k) => STEP_LABELS[locale][k]) as AmbientCopy["stepLabels"];
   const current = s.stepIndex >= 0 ? (s.craft ? STEP_LABELS[locale][s.craft === "CUTTING" ? "CUTTING" : "SEWING"] : stepLabels[s.stepIndex]) : "";
@@ -327,7 +332,7 @@ export type LiveActivityContentState = z.infer<typeof LiveActivityContentState>;
 export const LiveActivityAttributes = z.object({ orderId: z.string(), code: z.string(), makerName: z.string(), itemTitle: z.string() });
 export type LiveActivityAttributes = z.infer<typeof LiveActivityAttributes>;
 
-export function liveActivityState(s: AmbientOrderState, locale: AmbientLocale): LiveActivityContentState {
+export function liveActivityState(s: AmbientOrderState, locale: AnyLocale): LiveActivityContentState {
   const c = ambientCopy(s, locale);
   const secs = (d: string | null) => (d ? Math.floor(new Date(d).getTime() / 1000) : null);
   return {
@@ -380,8 +385,8 @@ const EVENT_COPY: Record<AmbientLocale, Record<"look.ready" | "circle.vote" | "c
   },
 };
 
-export function eventCopy(event: keyof (typeof EVENT_COPY)["en"], locale: AmbientLocale, p: Record<string, string>) {
-  return EVENT_COPY[locale][event](p);
+export function eventCopy(event: keyof (typeof EVENT_COPY)["en"], locale: AnyLocale, p: Record<string, string>) {
+  return EVENT_COPY[loc(locale)][event](p);
 }
 
 /** Order event → push event (alerts only on the moments the shopper waits for). */

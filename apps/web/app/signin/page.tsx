@@ -9,7 +9,7 @@ import { api } from "@/lib/api";
 import { offerDismissed, passkeysSupported } from "@/lib/passkeys";
 import { useSession } from "@/lib/session";
 
-const LABELS: Record<Locale, string> = { rw: "Kinyarwanda", en: "English", fr: "Français" };
+const LABELS: Record<Locale, string> = { rw: "Kinyarwanda", en: "English", fr: "Français", sw: "Kiswahili (beta)" };
 
 function SignIn() {
   const { t, locale, setLocale, reload } = useSession();

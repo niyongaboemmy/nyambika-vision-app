@@ -9,12 +9,13 @@ const OCCASION: Record<Locale, Record<string, string>> = {
   en: { wedding: "a wedding", "traditional-ceremony": "a traditional ceremony", office: "the office", church: "church", party: "a party", graduation: "a graduation", casual: "every day" },
   rw: { wedding: "ubukwe", "traditional-ceremony": "umuhango gakondo", office: "akazi", church: "urusengero", party: "ibirori", graduation: "kurangiza amashuri", casual: "buri munsi" },
   fr: { wedding: "un mariage", "traditional-ceremony": "une cérémonie traditionnelle", office: "le bureau", church: "l'église", party: "une fête", graduation: "une remise de diplômes", casual: "tous les jours" },
+  sw: {}, // E41: Swahili replies fall back to English wording until reviewed
 };
 
 const money = (n: number) => n.toLocaleString("en-US");
 
 export function museReply(i: Intent, locale: Locale, signedIn: boolean): string {
-  const occ = i.occasion ? OCCASION[locale][i.occasion] ?? i.occasion : null;
+  const occ = i.occasion ? (OCCASION[locale][i.occasion] ?? OCCASION.en[i.occasion] ?? i.occasion) : null;
   const budget = i.budgetMax;
   if (locale === "rw") {
     const what = occ ? `imyenda yo ${occ === "ubukwe" ? "mu bukwe" : `mu ${occ}`}` : "imyenda";

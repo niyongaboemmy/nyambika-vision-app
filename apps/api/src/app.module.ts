@@ -37,6 +37,7 @@ import { GrowthModule } from "./modules/growth/growth.module";
 import { CoopVoiceModule } from "./modules/coopvoice/coopvoice.module";
 import { NetworkMigrationModule } from "./modules/migration/network";
 import { PushModule } from "./common/push/push.module";
+import { RegionModule } from "./modules/region/region.module";
 import { Twin3dModule } from "./modules/twin3d/twin3d.module";
 
 @Controller()
@@ -88,6 +89,7 @@ class HealthController {
     CoopVoiceModule,
     NetworkMigrationModule,
     PushModule,
+    RegionModule,
     Twin3dModule,
   ],
   controllers: [HealthController],
