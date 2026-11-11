@@ -21,7 +21,7 @@ Contact sheets (390 px, the screens in crawl order) live in `docs/design/screens
 |---|---|---|---|
 | Shopper | `before-shopper-dark.jpg` | `after-shopper-light.jpg` | `after-shopper-dark.jpg` |
 | Studio + admin | `before-studio-light.jpg` | `after-studio-light.jpg` | `after-studio-dark.jpg` |
-| Desktop 1280 | `before-desktop.jpg` | `after-desktop-light.jpg` | |
+| Desktop 1280 | `before-desktop.jpg` | `after-desktop-light.jpg` | `after-desktop-dark.jpg` |
 
 ## 1. Findings by screen (before)
 
@@ -166,8 +166,48 @@ Reading it
 
 ## 5. Accessibility
 
-AXE_SUMMARY
+`@axe-core/playwright` 4.14.0, tags `wcag2a wcag2aa wcag21a wcag21aa wcag22aa`, all 49 screens at 390 px,
+`<canvas>` excluded (WebGL/QR pixels are not text).
+
+| | Screens with serious/critical violations | Notes |
+|---|---:|---|
+| Before, dark (shopper) / light (studio) | 14 of 49 | colour contrast ×4 screens, name ≠ visible text ×5, ARIA children ×1, link name ×1, scrollable region ×2, list markup ×1 |
+| After, light | **0 of 49** | |
+| After, dark | **0 of 49** | |
+
+What changed to get there: AA-safe CTA gradient and avatar fill; accessible names come from visible content (or a
+visible-text-first `sr-only` prefix) for carousel options, piece pickers and order cards; the 3D shelf's buttons
+moved out of its `listbox`; scrollable regions are focusable and labelled; invites are `<li>`; dimmed rows use a
+fill instead of 60 % opacity; studio-dark re-inks every tint (`emerald/amber/sky/red/violet/rose/teal/fuchsia/
+orange/stone` 50–300 and 700–950) and keeps white type only on true colour fills; shopper-light maps light text
+tints written for the dark canvas to their deep counterparts. Focus rings are tokens (gold on the dark aurora,
+violet on light and on studio), 2.5 px with 2 px offset.
+
+Beyond axe: every control keeps an accessible name (icon-only buttons have `aria-label`, the theme toggle is a
+labelled group of `aria-pressed` buttons, ⓘ tips are `aria-expanded` buttons with `role="note"` popovers), sheets
+move focus in and back and lock page scroll, `prefers-reduced-motion` disables motion and view transitions.
 
 ## 6. Known gaps
 
-KNOWN_GAPS
+- **JS budget not met on commerce routes** (sign in 202, Maker page 223, Looks 236–238 KB gz at load vs 170). Next
+  step: move the contracts' pure money/phone/region helpers (`REGIONS`, `displayPrice`, `normalizePhone`,
+  `formatMoney`, `signInPhone`, `morphPrice`) into a zod-free module that `index.ts` re-exports, so the browser
+  never evaluates zod schemas; and split hold-to-buy so the sheet body loads on first press. I did not restructure
+  `packages/contracts` while the commerce/platform hardening branches were editing it.
+- **Route view transitions** are off (see decision 10); only theme switches cross-fade.
+- **`next/image` not adopted** (signed, per-request storage URLs); thumbnails use explicit sizes + native lazy loading.
+  No blur placeholders: the API does not expose a low-res preview; skeleton tiles fill the box instead.
+- **Field data**: LCP/CLS/INP are lab numbers from Playwright on one machine with throttling; INP is a one-tap proxy.
+  `web-vitals` field reporting (RUM) is not wired.
+- **Not every screen was rewritten for "fewer words"**: done for trust centre, 3D twin, measurements, AR/MR pilots,
+  share sheet, empty states and admin intros. Hold-to-buy, sign-in and region screens were kept as merged from the
+  hardening branches apart from the pinned hold ring (visual only). Studio forms (product editor, settings) keep
+  their helper text; it is short and task-relevant.
+- **Emoji** remain as expressive content (occasion chips, maker type, VR reactions) and in a few secondary controls
+  inside sheets owned by other epics (wallet chips, video rail); primary controls, the menu and empty states use the
+  SVG icon set.
+- **Studio dark** is token-driven; one-off hard-coded light gradients inside a few spike components (drape heatmap
+  legend, studio-3d preview tiles) read fine but are not re-tuned for dark.
+- Crawl robustness fixes in older crawls (s1, s2, e05, xr, tailor, growth, social, pilot, region) were needed because
+  the E35 3D shelf added a second `listbox` with a selected `option` on Maker Space and because slot databases are
+  reused between runs; `crawl-infer` needs its own gateway with the fake inference pool (documented in the crawl).
