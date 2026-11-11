@@ -52,6 +52,22 @@ export class DiscountService {
     if (n === 0) throw new ConflictException({ message: "This code has just been used up", code: "DISCOUNT_USED_UP" });
     await tx.discountRedemption.create({ data: { discountId: d.rule.id, orderId, shopperId, pageId: d.rule.pageId, amountRwf: d.amountRwf } });
   }
+
+  /**
+   * Give the use back when the order doesn't go through (payment failed / declined / timed out, or the order
+   * was cancelled or declined). Exactly once: whoever deletes the redemption row restores the counts, so
+   * duplicate webhooks, the reconciliation job and a maker cancel can all call this safely.
+   */
+  async release(orderId: string): Promise<boolean> {
+    return this.prisma.$transaction(async (tx) => {
+      const red = await tx.discountRedemption.findUnique({ where: { orderId } });
+      if (!red) return false;
+      const gone = await tx.discountRedemption.deleteMany({ where: { id: red.id } });
+      if (gone.count === 0) return false;
+      await tx.$executeRaw`UPDATE "DiscountCode" SET uses = uses - 1 WHERE id = ${red.discountId} AND uses > 0`;
+      return true;
+    });
+  }
 }
 
 @Module({ providers: [DiscountService], exports: [DiscountService] })

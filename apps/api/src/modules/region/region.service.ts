@@ -410,6 +410,7 @@ export class RegionService implements OnModuleInit, OnModuleDestroy {
       await this.prisma.order.update({ where: { id: order.id }, data: { status: "CANCELLED" } });
       await this.prisma.orderEvent.create({ data: { orderId: order.id, status: "CANCELLED", note: "Payment was declined or timed out. No money was taken." } });
       for (const it of order.items) await this.prisma.variant.updateMany({ where: { id: it.variantId, product: { madeToOrder: false } }, data: { stock: { increment: it.qty } } });
+      await this.discounts.release(order.id); // E30: wallet failure, Stripe failure/cancel and the 15-minute expiry
     }
     return pay;
   }
@@ -448,6 +449,7 @@ export class RegionService implements OnModuleInit, OnModuleDestroy {
     await this.prisma.orderMoney.update({ where: { orderId }, data: { refundedMinor: refundedTotal } });
     const full = refundedTotal >= pay.amountMinor;
     if (full) await this.prisma.order.update({ where: { id: orderId }, data: { status: "CANCELLED" } });
+    if (full) await this.discounts.release(orderId);
     await this.prisma.orderEvent.create({ data: { orderId, status: full ? "CANCELLED" : "PAID", note: `${full ? "Refunded in full" : "Partly refunded"}: ${formatMoney(refundedTotal, pay.currency as CurrencyCode)} back to the card (${note})` } });
   }
 

@@ -64,6 +64,12 @@ function writeCookie(name: string, value: string) {
   document.cookie = `${name}=${value}; path=/; max-age=${YEAR}; samesite=lax`;
 }
 
+/** The shopper's country from the region cookie, if they (or their phone) already set one. */
+export function savedCountry(): RegionCode | null {
+  const cc = readCookie(COOKIE.cc);
+  return cc && isRegion(cc) ? cc : null;
+}
+
 let fxCache: Promise<FxSnapshot | null> | null = null;
 const listeners = new Set<(p: RegionPrefs) => void>();
 
@@ -124,6 +130,20 @@ export function useRegion() {
   const show = useCallback((amountMinor: number, currency: CurrencyCode) => displayPrice({ amountMinor, currency }, prefs.displayCurrency, fx?.rates), [prefs.displayCurrency, fx]);
 
   return { prefs, fx, update, show };
+}
+
+const commerceCache = new Map<string, Promise<Commerce | null>>();
+
+/** A page's selling currency, wallets and prices (cached per handle). `undefined` while loading, `null` if unavailable. */
+export function useCommerce(handle: string) {
+  const [c, setC] = useState<Commerce | null | undefined>(undefined);
+  useEffect(() => {
+    let live = true;
+    if (!commerceCache.has(handle)) commerceCache.set(handle, api<Commerce>(`/region/pages/by-handle/${encodeURIComponent(handle)}/commerce`).catch(() => null));
+    void commerceCache.get(handle)!.then((v) => live && setC(v));
+    return () => void (live = false);
+  }, [handle]);
+  return c;
 }
 
 export const COUNTRY_NAMES: Record<string, string> = {

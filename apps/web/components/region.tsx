@@ -5,13 +5,39 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button, Chip, ErrorNote, Sheet, Spinner } from "@/components/ui";
-import { api } from "@/lib/api";
+import { api, rwf } from "@/lib/api";
 import type { MakerProduct, MakerSpace } from "@/lib/maker";
-import { COUNTRY_NAMES, useRegion, type Commerce, type OrderMoney } from "@/lib/region";
+import { COUNTRY_NAMES, useCommerce, useRegion, type Commerce, type OrderMoney } from "@/lib/region";
 import { useSession } from "@/lib/session";
 import { track } from "@/lib/track";
 
 const WALLET_ICON: Record<Wallet, string> = { MTN_MOMO: "🟡", AIRTEL_MONEY: "🔴", MPESA: "🟢" };
+
+/** Pay-with chips + the payer's wallet number for the maker's country. Shared by the Maker Space sheet and Looks hold-to-buy. */
+export function WalletPhone<M extends Wallet | "CARD">({ commerce, methods, method, onMethod, phone, onPhone }: { commerce: Commerce; methods: readonly M[]; method: M | undefined; onMethod: (m: M) => void; phone: string; onPhone: (p: string) => void }) {
+  const { t } = useSession();
+  const phoneCheck = method && method !== "CARD" ? normalizePhone(phone, commerce.region) : null;
+  return (
+    <>
+      <fieldset>
+        <legend className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-mut">{t("region.payWith")}</legend>
+        <div className="flex flex-wrap gap-2">
+          {methods.map((m) => (
+            <Chip key={m} active={method === m} onClick={() => onMethod(m)}>{m === "CARD" ? `💳 ${t("region.card")}` : `${WALLET_ICON[m as Wallet]} ${WALLET_LABEL[m as Wallet]}`}</Chip>
+          ))}
+        </div>
+        {!methods.length && <p className="text-sm text-gold">This maker takes orders on WhatsApp for now.</p>}
+      </fieldset>
+      {method && method !== "CARD" && (
+        <div>
+          <label htmlFor="payer" className="text-xs font-semibold text-mut">{WALLET_LABEL[method as Wallet]} number ({REGIONS[commerce.region].name})</label>
+          <input id="payer" inputMode="tel" value={phone} onChange={(e) => onPhone(e.target.value)} placeholder={commerce.phoneExample} aria-invalid={phone.length > 3 && !phoneCheck?.ok} className="glass mt-1 h-12 w-full rounded-2xl px-4 outline-none placeholder:text-white/40" />
+          {phone.length > 3 && phoneCheck && !phoneCheck.ok && <p className="mt-1 text-xs text-gold">{phoneCheck.message}</p>}
+        </div>
+      )}
+    </>
+  );
+}
 
 /** A price in the maker's currency, with "≈" in the shopper's display currency when it differs (E40). */
 export function Price({ minor, currency, className = "", approxClassName = "text-mut" }: { minor: number; currency: CurrencyCode; className?: string; approxClassName?: string }) {
@@ -23,6 +49,15 @@ export function Price({ minor, currency, className = "", approxClassName = "text
       {d.approx && <span className={`${approxClassName.includes("block") ? "" : "ml-1.5 "}text-[0.85em] font-medium ${approxClassName}`}>{d.approx}</span>}
     </span>
   );
+}
+
+/** A look's price in its maker's currency (hardening pass 1: KES/UGX/TZS pages no longer show an RWF figure in the Looks feed). */
+export function LookPrice({ handle, productId, priceRwf }: { handle: string; productId: string; priceRwf: number }) {
+  const c = useCommerce(handle);
+  if (c === undefined) return <span className="inline-block h-4 w-24 animate-pulse rounded bg-white/10 align-middle" aria-hidden />;
+  if (!c || c.currency === "RWF") return <>{rwf(priceRwf)}</>;
+  const minor = c.prices[productId];
+  return minor == null ? <>{c.currency} · ask the maker</> : <Price minor={minor} currency={c.currency} />;
 }
 
 /** Pill that opens the country / display-currency / cross-border sheet. */
@@ -85,7 +120,7 @@ export function RegionSheet({ open, onClose }: { open: boolean; onClose: () => v
 
 // ------------------------------------------------------------------------------ checkout
 
-interface CheckoutResult {
+export interface CheckoutResult {
   orderId: string;
   code: string;
   status: string;
@@ -207,22 +242,7 @@ export function RegionBuy({ maker, product, variantIndex, commerce }: { maker: M
                   <input value={address} onChange={(e) => setAddress(e.target.value)} placeholder={delivery === "SHIP" ? "Street, city, postcode" : "Delivery address"} aria-label="Delivery address" className="glass h-12 w-full rounded-2xl px-4 outline-none placeholder:text-white/40" />
                 )}
 
-                <fieldset>
-                  <legend className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-mut">{t("region.payWith")}</legend>
-                  <div className="flex flex-wrap gap-2">
-                    {methods.map((m) => (
-                      <Chip key={m} active={method === m} onClick={() => setMethod(m)}>{m === "CARD" ? `💳 ${t("region.card")}` : `${WALLET_ICON[m]} ${WALLET_LABEL[m]}`}</Chip>
-                    ))}
-                  </div>
-                  {!methods.length && <p className="text-sm text-gold">This maker takes orders on WhatsApp for now.</p>}
-                </fieldset>
-                {method && method !== "CARD" && (
-                  <div>
-                    <label htmlFor="payer" className="text-xs font-semibold text-mut">{WALLET_LABEL[method]} number ({REGIONS[commerce.region].name})</label>
-                    <input id="payer" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder={commerce.phoneExample} aria-invalid={phone.length > 3 && !phoneCheck?.ok} className="glass mt-1 h-12 w-full rounded-2xl px-4 outline-none placeholder:text-white/40" />
-                    {phone.length > 3 && phoneCheck && !phoneCheck.ok && <p className="mt-1 text-xs text-gold">{phoneCheck.message}</p>}
-                  </div>
-                )}
+                <WalletPhone commerce={commerce} methods={methods} method={method} onMethod={setMethod} phone={phone} onPhone={setPhone} />
                 <input value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="Discount code (optional)" aria-label="Discount code" maxLength={24} className="glass h-11 w-full rounded-2xl px-4 text-sm uppercase outline-none placeholder:normal-case placeholder:text-white/40" />
               </div>
 

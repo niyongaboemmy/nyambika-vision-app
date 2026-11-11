@@ -26,6 +26,7 @@ import { PushService } from "../../common/push/push.service";
 import { PrismaService } from "../../common/prisma.service";
 import { parse } from "../../common/zod";
 import { serverEvent } from "../pilot/pilot.service";
+import { DiscountService, DiscountsModule } from "../growth/discounts";
 import { config } from "../../config";
 import { payments as paymentsMetric } from "../../common/metrics";
 import { MockMomoProvider, MtnMomoProvider, sign, type PaymentProvider, type PayRequest } from "./providers";
@@ -40,6 +41,7 @@ export class PaymentsService implements OnModuleInit, OnModuleDestroy {
     private prisma: PrismaService,
     private messaging: MessagingService,
     private push: PushService,
+    private discounts: DiscountService,
   ) {}
 
   /** Extension point: a hook that returns true has fully handled the settlement (e.g. custom-order stages, E24). */
@@ -103,6 +105,7 @@ export class PaymentsService implements OnModuleInit, OnModuleDestroy {
       for (const it of order.items) {
         await this.prisma.variant.updateMany({ where: { id: it.variantId, product: { madeToOrder: false } }, data: { stock: { increment: it.qty } } });
       }
+      await this.discounts.release(order.id); // E30: the code/offer use goes back (webhook, poll and timeout all land here)
       await this.push.orderUpdate(order.id); // E38: ends any live activity
     }
     return payment;
@@ -184,5 +187,5 @@ export class PaymentsController {
 }
 
 @Global()
-@Module({ controllers: [PaymentsController], providers: [PaymentsService], exports: [PaymentsService] })
+@Module({ imports: [DiscountsModule], controllers: [PaymentsController], providers: [PaymentsService], exports: [PaymentsService] })
 export class PaymentsModule {}

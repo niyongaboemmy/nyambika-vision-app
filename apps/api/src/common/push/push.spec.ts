@@ -1,6 +1,7 @@
 import {
   ambientCopy,
   craftFromEvents,
+  eventCopy,
   DEFAULT_NOTIFICATION_PREFS,
   LiveActivityContentState,
   liveActivityState,
@@ -72,6 +73,25 @@ describe("ambient order state (shared contract)", () => {
       "order.shipped",
       "order.delivered",
     ]);
+  });
+});
+
+describe("wardrobe reminder copy (hardening pass 1)", () => {
+  it.each([
+    ["en", "3", "Wedding in 3 days", "Your outfit is ready ✨"],
+    ["en", "1", "Wedding tomorrow", "Your outfit is ready ✨"],
+    ["rw", "3", "Wedding mu minsi 3", "Imyambaro yawe yiteguye ✨"],
+    ["rw", "0", "Wedding uyu munsi", "Imyambaro yawe yiteguye ✨"],
+    ["fr", "3", "Wedding dans 3 jours", "Votre tenue est prête ✨"],
+    ["fr", "1", "Wedding demain", "Votre tenue est prête ✨"],
+    ["sw", "3", "Wedding baada ya siku 3", "Mavazi yako yako tayari ✨"],
+    ["sw", "1", "Wedding kesho", "Mavazi yako yako tayari ✨"],
+  ])("%s, %s days", (l, days, title, body) => {
+    expect(eventCopy("wardrobe.reminder", l, { event: "Wedding", days })).toEqual({ title, body });
+  });
+
+  it("falls back to English for Swahili on events without Swahili copy", () => {
+    expect(eventCopy("look.ready", "sw", { item: "Kikoi" }).title).toBe("Your look is ready ✨");
   });
 });
 
