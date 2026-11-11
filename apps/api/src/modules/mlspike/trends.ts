@@ -361,7 +361,10 @@ export function bootstrapStability(signals: Signal[], supply: SupplyRow[], opts:
   }
   const people = [...byPerson.keys()];
   const full = computeTrends(signals, supply, opts);
-  const fullRising = full.rising.slice(0, top).map((r) => r.key);
+  // Rank stability is measured on the national list (what every member sees first); regional items are judged by
+  // per-item stability below, since near-tied small regional cells legitimately swap places between resamples.
+  const national = (xs: RisingItem[]) => xs.filter((r) => r.region === "ALL").slice(0, top).map((r) => r.key);
+  const fullRising = national(full.rising);
   const fullGaps = full.gaps.slice(0, 3).map((g) => g.key);
   const fullHints = full.priceHints.map((h) => h.key);
   const seen = new Map<string, number>();
@@ -376,7 +379,7 @@ export function bootstrapStability(signals: Signal[], supply: SupplyRow[], opts:
     }
     const r = computeTrends(sample, supply, opts);
     for (const key of new Set([...r.rising.map((x) => x.key), ...r.gaps.map((g) => g.key), ...r.priceHints.map((h) => h.key)])) seen.set(key, (seen.get(key) ?? 0) + 1);
-    risingJ += jaccard(fullRising, r.rising.slice(0, top).map((x) => x.key));
+    risingJ += jaccard(fullRising, national(r.rising));
     gapJ += jaccard(fullGaps, r.gaps.slice(0, 3).map((g) => g.key));
     hintJ += jaccard(fullHints, r.priceHints.map((h) => h.key));
   }

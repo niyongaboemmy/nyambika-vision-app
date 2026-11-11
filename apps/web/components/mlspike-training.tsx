@@ -10,7 +10,7 @@ import { useApi } from "@/lib/use-api";
 interface TrainingState {
   optedIn: boolean;
   decidedAt: string | null;
-  products: { id: string; title: string; category: string; image: string | null; photos: number; included: boolean; override: "IN" | "OUT" | null }[];
+  products: { id: string; title: string; category: string; image: string | null; photos: number; included: boolean; override: "IN" | "OUT" | null; inDataset: boolean }[];
   tombstones: number;
   latestDataset: { version: number; at: string; itemsFromThisPage: number } | null;
 }
@@ -77,14 +77,6 @@ export function TrainingDataConsent({ pageId }: { pageId: string }) {
         <p className="relative mt-1.5 text-sm leading-relaxed text-cocoa-2">
           Nyambika is testing a small model that recognises umushanana, imigongo, kitenge and wax so it can fill in your listings for you. Sharing your garment photos makes it better for every maker. It is off until you switch it on.
         </p>
-        <ul className="relative mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {WHAT.map((w) => (
-            <li key={w.text} className="flex items-center gap-2.5 rounded-2xl bg-white/80 p-2.5 text-sm text-cocoa">
-              <span className={`grid size-8 shrink-0 place-items-center rounded-xl ${w.ok ? "bg-emerald-100 text-mint-ink" : "bg-orange-100 text-terra-ink"}`}><Icon name={w.icon} className="size-4" /></span>
-              {w.text}
-            </li>
-          ))}
-        </ul>
       </section>
 
       <Card className="space-y-3">
@@ -104,6 +96,15 @@ export function TrainingDataConsent({ pageId }: { pageId: string }) {
         )}
       </Card>
 
+      <ul aria-label="What sharing means" className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        {WHAT.map((w) => (
+          <li key={w.text} className="flex items-center gap-2.5 rounded-2xl bg-white p-2.5 text-sm text-cocoa ring-1 ring-inset ring-hairline">
+            <span className={`grid size-8 shrink-0 place-items-center rounded-xl ${w.ok ? "bg-emerald-100 text-mint-ink" : "bg-orange-100 text-terra-ink"}`}><Icon name={w.icon} className="size-4" /></span>
+            {w.text}
+          </li>
+        ))}
+      </ul>
+
       <Card className="space-y-3">
         <div className="flex items-baseline justify-between gap-2">
           <h3 className="font-display text-lg font-black tracking-tight text-cocoa">Choose pieces</h3>
@@ -116,6 +117,7 @@ export function TrainingDataConsent({ pageId }: { pageId: string }) {
               <div className="relative aspect-[4/5] bg-white">
                 {p.image ? <img src={p.image} alt="" className="size-full object-cover" /> : <span className="grid size-full place-items-center text-cocoa-3"><Icon name="camera" className="size-6" /></span>}
                 <span className={`absolute left-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-black ${p.included ? "bg-mint-ink text-white" : "bg-white/90 text-cocoa-2"}`}>{p.included ? "Shared" : "Private"}</span>
+                {p.inDataset && <span className="absolute bottom-2 left-2 rounded-full bg-violet-ink/90 px-2 py-0.5 text-[10px] font-black text-white">In dataset</span>}
               </div>
               <div className="space-y-1.5 p-2.5">
                 <p className="truncate text-sm font-bold text-cocoa">{p.title}</p>

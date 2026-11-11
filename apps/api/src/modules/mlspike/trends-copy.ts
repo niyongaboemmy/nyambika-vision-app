@@ -66,7 +66,7 @@ export function gapText(g: GapItem, l: Locale) {
   const makers = g.makers === 0 ? { rw: "nta mudozi", en: "no maker", fr: "aucun créateur" }[l] : g.makers === 1 ? { rw: "umudozi 1 gusa", en: "only 1 maker", fr: "un seul créateur" }[l] : { rw: `abadozi ${g.makers} gusa`, en: `only ${g.makers} makers`, fr: `seulement ${g.makers} créateurs` }[l];
   return {
     rw: `Abantu ≈${g.asks} basabye ${cat} by'${c}${occ ? ` by'${occ}` : ""} mu byumweru 4, ariko ${makers} ni bo babifite.`,
-    en: `About ${g.asks} shoppers asked for ${c} ${cat}${occ ? ` for ${occ}` : ""} in 4 weeks, but ${makers} offer${g.makers === 1 ? "s" : ""} it.`,
+    en: `About ${g.asks} shoppers asked for ${c} ${cat}${occ ? ` for ${occ}` : ""} in 4 weeks, but ${makers} offer${g.makers <= 1 ? "s" : ""} it.`,
     fr: `Environ ${g.asks} clients ont demandé des ${cat} ${c}${occ ? ` pour ${occ}` : ""} en 4 semaines, mais ${makers} en propose${g.makers > 1 ? "nt" : ""}.`,
   }[l];
 }

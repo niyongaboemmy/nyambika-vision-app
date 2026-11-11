@@ -114,7 +114,9 @@ export class MlSpikeService {
       orderBy: { createdAt: "desc" },
     });
     const latest = await this.prisma.trainingDataset.findFirst({ orderBy: { version: "desc" } });
-    const inLatest = latest ? (latest.manifest as unknown as Manifest).items.filter((i) => i.page_id === pageId && i.source === "catalogue").length : 0;
+    const latestItems = latest ? (latest.manifest as unknown as Manifest).items.filter((i) => i.page_id === pageId && i.source === "catalogue") : [];
+    const inLatest = latestItems.length;
+    const inDataset = new Set(latestItems.map((i) => i.product_id));
     return {
       optedIn: state.page?.granted ?? false,
       decidedAt: state.page?.at ?? null,
@@ -129,6 +131,7 @@ export class MlSpikeService {
           photos: p.variants.filter((v) => v.imagePath).length,
           included: e.eligible,
           override: state.products[p.id] ? (state.products[p.id].granted ? "IN" : "OUT") : null,
+          inDataset: inDataset.has(p.id),
         };
       }),
       tombstones: await this.prisma.trainingTombstone.count({ where: { pageId } }),
@@ -262,6 +265,7 @@ export class MlSpikeService {
   /** Activate an attribute model through the registry gate (passing ATTR_SPIKE eval ≤ 92 days, commercial licence). */
   async activate(userId: string, modelId: string) {
     await this.access.requireHost(userId);
+    if (!(await this.prisma.modelVersion.findUnique({ where: { id: modelId } }))) throw new NotFoundException("Unknown model");
     try {
       await assertActivationAllowed(this.prisma, modelId);
     } catch (e) {
@@ -315,7 +319,9 @@ export class MlSpikeService {
     const col = top("colour");
     if (col && col.p >= r.threshold) {
       const name = DISPLAY[col.label] ?? col.label;
-      suggestions.push({ field: "colour", value: col.label, label: name, confidence: col.p, current: v.colourName, matches: normaliseColour(v.colourName) === col.label, apply: { path: `/variants/${v.id}`, body: { colourName: name } } });
+      // Only correct a colour name that maps to a *different* palette colour (a likely slip); local names (e.g. Kinyarwanda) are kept.
+      const known = normaliseColour(v.colourName);
+      suggestions.push({ field: "colour", value: col.label, label: name, confidence: col.p, current: v.colourName, matches: known === col.label, apply: known && known !== col.label ? { path: `/variants/${v.id}`, body: { colourName: name } } : null });
     }
     return {
       enabled: true as const,

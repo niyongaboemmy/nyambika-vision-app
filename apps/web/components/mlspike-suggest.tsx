@@ -65,7 +65,7 @@ export function AttrSuggest({ productId, canEdit, onApplied }: { productId: stri
             <li key={s.field} className="flex items-center gap-3 rounded-2xl bg-white/85 p-3 ring-1 ring-inset ring-hairline">
               <span className="min-w-0 flex-1">
                 <span className="block text-[11px] font-black uppercase tracking-wider text-cocoa-2">{FIELD[s.field]}</span>
-                <span className="block text-[15px] font-extrabold capitalize text-cocoa">{s.label}</span>
+                <span className="block text-[15px] font-extrabold text-cocoa">{s.label}</span>
                 <span className="block text-xs text-cocoa-2">{Math.round(s.confidence * 100)}% sure{s.current ? ` · now: ${s.current}` : ""}</span>
               </span>
               {ok ? (
@@ -74,7 +74,9 @@ export function AttrSuggest({ productId, canEdit, onApplied }: { productId: stri
                 <button type="button" disabled={busy !== null} onClick={() => use(s)} className="st-press inline-flex min-h-11 items-center rounded-xl bg-violet-ink px-4 text-sm font-bold text-white disabled:opacity-50">
                   {busy === s.field ? "Saving…" : s.field === "pattern" ? "Add tag" : "Use"}
                 </button>
-              ) : null}
+              ) : (
+                <span className="inline-flex min-h-10 items-center rounded-xl bg-paper px-3 text-xs font-bold text-cocoa-2">Your name kept</span>
+              )}
             </li>
           );
         })}
