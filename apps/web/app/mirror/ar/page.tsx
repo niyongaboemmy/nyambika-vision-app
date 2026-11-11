@@ -49,7 +49,7 @@ function ArPage() {
   return (
     <Screen>
       <TopBar back="/mirror/3d" title={t("twin3d.ar")} />
-      <main className="px-4 pb-24">
+      <main className="px-4 pb-32">
         <ErrorNote error={error} />
         {enabled === null || items === null ? (
           <div className="skeleton h-[60dvh] rounded-[32px]" />
