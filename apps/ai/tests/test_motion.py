@@ -63,8 +63,9 @@ def test_it_actually_moves_and_loops(clip):
 def test_label_watermark_and_c2pa(clip):
     lab = np.asarray(clip["_frames"][0])
     h = lab.shape[0]
-    corner = lab[h - 26: h - 8, 8: 120].astype(np.int16)
-    bare = np.asarray(clip["_twin"])[h - 26: h - 8, 8: 120].astype(np.int16)
+    w = lab.shape[1]
+    corner = lab[8: 26, w - 120: w - 8].astype(np.int16)
+    bare = np.asarray(clip["_twin"])[8: 26, w - 120: w - 8].astype(np.int16)
     assert np.abs(corner - bare).mean() > 3  # "AI motion preview" label pill drawn on every frame
     cred = clip["c2pa"]
     expected = hmac.new(config.C2PA_SIGNING_KEY, _canonical(cred["manifest"]), hashlib.sha256).hexdigest()

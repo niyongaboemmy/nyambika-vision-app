@@ -43,9 +43,9 @@ def test_render_labels_guards_and_signs(assets, cutouts):
     assert gen["kind"] == "video_tryon" and gen["source"] == "CLIP"
     webp = Image.open(io.BytesIO(r["webp"]))
     assert 1 < webp.n_frames <= 10 and b"nyambika:c2pa" in r["webp"]  # libwebp merges identical frames
-    # Visible label: dark pill bottom-left on every frame.
+    # Visible label: dark pill top-right on every frame.
     f = np.asarray(r["_frames"][3])
-    assert f[f.shape[0] - 14, 14].mean() < 120
+    assert f[14, f.shape[1] - 14].mean() < 120
 
 
 class Flicker(vt.MotionComposeProvider):
