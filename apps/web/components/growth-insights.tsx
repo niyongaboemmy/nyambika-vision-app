@@ -25,7 +25,7 @@ function SuggestionText({ text }: { text: string }) {
   if (!long) return <p className="mt-1.5 text-[15px] font-semibold leading-snug text-cocoa">{text}</p>;
   return (
     <button type="button" aria-expanded={open} onClick={() => setOpen((o) => !o)} className="st-press mt-1.5 block w-full text-left">
-      <span className={`block text-[15px] font-semibold leading-snug text-cocoa ${open ? "" : "line-clamp-2"}`}>{text}</span>
+      <span className={`text-[15px] font-semibold leading-snug text-cocoa ${open ? "block" : "line-clamp-2"}`}>{text}</span>
       <span className="mt-0.5 inline-flex items-center gap-0.5 text-xs font-bold opacity-80">
         {open ? "Less" : "More"} <Icon name="chevron" className={`size-3.5 transition-transform ${open ? "-rotate-90" : "rotate-90"}`} />
       </span>
@@ -144,7 +144,7 @@ export function GrowthHomeCard({ pageId }: { pageId: string }) {
     <section aria-labelledby="grow-home" className="space-y-3">
       <div className="flex items-end justify-between">
         <h2 id="grow-home" className="font-display text-xl font-black tracking-tight text-cocoa">Grow your page</h2>
-        <Link href={`/studio/${pageId}/grow`} className="text-sm font-bold text-violet-ink underline-offset-2 hover:underline">Share kit &amp; offers</Link>
+        <Link href={`/studio/${pageId}/grow`} className="inline-flex min-h-11 items-center text-sm font-bold text-violet-ink underline-offset-2 hover:underline">Share kit &amp; offers</Link>
       </div>
       <GrowthInsights pageId={pageId} compact />
     </section>

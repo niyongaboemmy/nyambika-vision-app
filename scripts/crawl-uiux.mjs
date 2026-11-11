@@ -158,7 +158,7 @@ async function copyMetrics(page) {
       if (own.length < 40) continue;
       const cs = getComputedStyle(el);
       const lh = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.4;
-      const lines = Math.round(el.getBoundingClientRect().height / lh);
+      const lines = Math.round((el.getBoundingClientRect().height - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom)) / lh); // content lines, not padding
       if (lines > 2) paras.push({ lines, text: el.innerText.slice(0, 90) });
     }
     const small = [];
@@ -166,11 +166,12 @@ async function copyMetrics(page) {
       if (!vis(el) || el.disabled) continue;
       if (el.tagName === "A" && getComputedStyle(el).display === "inline" && el.parentElement?.closest("p,li")) continue; // inline text link
       const r = el.getBoundingClientRect();
-      const hr = (el.closest("label") ?? el).getBoundingClientRect();
-      const af = getComputedStyle(el, "::after");
-      const exp = af.content !== "none" && af.position === "absolute";
-      const w = Math.max(r.width, hr.width, exp ? parseFloat(af.width) || 0 : 0);
-      const h = Math.max(r.height, hr.height, exp ? parseFloat(af.height) || 0 : 0);
+      const host = el.closest("label") ?? el;
+      const hr = host.getBoundingClientRect();
+      // `.hit` expansion on the control itself or on its wrapping <label> (inputs can't have ::after).
+      const hits = [el, host].map((x) => getComputedStyle(x, "::after")).filter((af) => af.content !== "none" && af.position === "absolute");
+      const w = Math.max(r.width, hr.width, ...hits.map((af) => parseFloat(af.width) || 0));
+      const h = Math.max(r.height, hr.height, ...hits.map((af) => parseFloat(af.height) || 0));
       if (w < 43.5 || h < 43.5) small.push(`${el.tagName.toLowerCase()} ${Math.round(w)}x${Math.round(h)} "${(el.getAttribute("aria-label") ?? el.innerText ?? "").trim().slice(0, 30)}"`);
     }
     // iOS pass: no emoji in rendered text or in names/placeholders (Extended_Pictographic + U+FE0F; © ® ™ allowed).
