@@ -50,13 +50,64 @@ Screenshots are produced in `scripts/crawl-output/drape/` (not committed; regene
 
 ## 3. Results
 
-RESULTS_PLACEHOLDER
+Full run, 84 drapes, 191 s wall (standard quality). Gate: **stability ✗ · runtime ✓ · agreement ✓** → not passed.
+
+### 3.1 Summary
+
+| Metric | Result | Gate |
+|---|---|---|
+| Stable runs (all 84) | **74 / 84 = 88.1%** | ≥ 95% ✗ |
+| Stable runs, matching size only (54) | 47 / 54 = 87.0% | |
+| Runtime per drape, p50 / p95 / max | **2.1 s / 3.5 s / 5.5 s** (one core) | p95 ≤ 5 s ✓ |
+| Heatmap vs size chart, assessed lines | **93 / 96 = 96.9%** | ≥ 85% ✓ |
+| "One size down reads tight" (dress + shirt, bust + hips) | 79% (rest read comfortable inside the ±1.5 cm dead zone, e.g. shirt bust −1 cm) | |
+| Max penetration (any run) | 5.6 mm (one run; p99 penetration 0 in all runs) | ≤ 5 mm per run |
+| Worst seam gap p95 | 9.7 mm | ≤ 10 mm per run |
+
+Runtime caveat: the dev machine is shared with other agents (load average 20–30 during the runs); a quieter earlier run of the same grid gave p95 2.8 s / max 3.2 s, and an earlier run with heavy contention had outliers up to 20 s.
+
+### 3.2 Stability by garment, fabric and body
+
+| | Stable | Notes |
+|---|---|---|
+| A-line dress | 27 / 28 (96%) | one 3XL body / XXL dress run: 5.6 mm penetration at the underarm |
+| Shirt | 23 / 28 (82%) | all failures on the **3XL body** (strain p99 21–27%: the sleeve underarm is pinched between a 3XL arm and torso) |
+| Wrap skirt | 24 / 28 (86%) | all failures are **jersey on L..3XL** (strain p99 27–36% around the tied waistband: hoop stress in a soft knit) |
+| Cotton / kitenge / jersey (matching size) | 17/18 · 17/18 · 13/18 | |
+| Body S / M / L / XL / XXL / 3XL | 15/15 · 15/15 · 14/15 · 14/15 · 10/12 · **6/12** | the larger the body, the less room under the arm in the fixed A-pose |
+
+No run produced NaNs or left the scene; "exploded" here means the 99th-percentile edge strain passed 25%.
+
+### 3.3 Heatmap agreement with size-chart expectations
+
+| Garment size vs body | Lines agreeing | Readings |
+|---|---|---|
+| one size down | 36 / 36 | 25 tight, 11 comfortable (dead zone) |
+| same size | 33 / 36 | 27 comfortable, 9 tight (wrap skirt waistband is snug by design) |
+| two sizes up | 24 / 24 | 16 loose, 7 tight (wrap waist: it is tied to the body), 1 comfortable |
+
+The 3 disagreements are all "tight" where the chart says comfortable: wrap skirt S on S and 3XL on 3XL at the hips (+4.6 cm chart ease, local stretch where the cone meets the elliptical hip), dress 3XL on 3XL at the bust (+4 cm chart ease, 1.8 cm measured). The canonical example works: **size M on an L body reads tight at bust and hips for the dress** (bust −3 cm → 56% of the ring tight) and the shirt reads tight at the hips.
+
+Measured ease (cloth hull − body ring) systematically under-reads the chart ease (e.g. XXL dress on L: chart +23 cm, measured +12 cm) because excess fabric folds and is slightly compressed rather than standing off evenly; the loose threshold (9 cm measured) is calibrated for that.
+
+### 3.4 Fabric sensitivity
+
+Mean hem circumference (matching size): dress cotton 131 cm / kitenge 133 cm / jersey 129 cm; wrap skirt 79 / 81 / 68 cm (jersey skirt numbers come from unstable runs). The crisper kitenge stands off a little more and the knit clings, which is the right direction, but the **differences are small and below what a tailor would see**: fabric bending is a distance-constraint proxy, not a real bending model.
+
+### 3.5 Things that work well
+* Sewing from flat panels around the body closes every seam (p95 gap < 1 cm) in about 0.5 s; dresses hang from the shoulders, skirts stay up from the tied waistband, sleeves set into the armholes.
+* The print keeps real-world scale across panels and sizes (UVs in pattern metres), so a tailor sees where the print motifs land on the cut.
+* The heatmap explains itself with numbers (measured ease per line), and the tailor panel turns length/ease/sleeve changes into a new drape in about 3 s.
+
+### 3.6 Things that do not
+* Large bodies in a fixed A-pose (underarm pinch), soft knits with tied waists, no self-collision (overlapping wrap layers rely on a thickness offset), the waistband settles 6–9 cm below the waist on some bodies (compliant girth loop), and fabric differences are weak.
+
 
 ## 4. Cost and latency
 
 * **Compute:** 2–3 s of one CPU core per drape at standard quality (1.3–2k cloth vertices), about 1.2 s at `fast`. On a 2-vCPU cloud instance (≈ USD 0.05/h) that is ≈ USD 0.00004 per drape, effectively free next to image generation (RWF ≤ 120/look). No GPU, no third-party API, no per-call licence.
-* **Payload:** two GLBs of ≈ 1.1–1.3 MB each (body + cloth, uncompressed) + two posters, ≈ 3.5 MB base64 JSON per preview. Production would send one GLB with Draco/meshopt compression and the heatmap as a second vertex-colour attribute (≈ 300 KB).
-* **Latency budget:** sync request ≈ 3–4 s end to end on the dev machine (gateway 2–3 s + transfer). Acceptable for a deliberate "Drape it" tap, not for scrolling.
+* **Payload:** two GLBs of ≈ 210 KB each (static body + cloth, uncompressed) + two PNG posters, ≈ 640 KB of JSON per preview (base64). Production would send one Draco/meshopt-compressed GLB with the heatmap as a second vertex-colour attribute (≈ 80 KB).
+* **Latency budget:** sync request ≈ 2.5–3.5 s end to end on the dev machine (gateway ≈ 2 s incl. posters + transfer). Acceptable for a deliberate "Drape it" tap, not for scrolling.
 
 ## 5. Expert review checklist (template for real tailors)
 
@@ -96,4 +147,15 @@ Pass bar for production: median ≥ 4 on 1–4, ≥ 3 on 5, and "yes" on 7 from 
 
 ## 8. Recommendation: **Iterate** (not Go, not No-go)
 
-DECISION_PLACEHOLDER
+**Why not Go:** the stability gate fails (88% vs 95%), and the failures sit exactly in the segments that matter for Rwandan custom tailoring: larger bodies (3XL 6/12) and soft knits. Fabric behaviour is barely distinguishable, and nothing has been validated against real garments or real tailors yet. Agreement (97%) is an internal-consistency check on synthetic bodies with thresholds tuned on the same bodies.
+
+**Why not No-go:** the core loop is cheap and works: pattern → sewn → draped → fit map in about 2–3 s on one CPU core at near-zero cost, with no licence exposure, and the privacy model holds (shopper: own twin, nothing stored; tailor: shared measurements only, synthetic body, audited, refused when the share ends). The tailor pattern-to-3D preview is the strongest product signal (made-to-measure is our differentiator, and the tailor already holds the pattern).
+
+**Iterate, in this order (each with a pass/fail criterion):**
+1. *Tailor review first* (2 weeks): run the §5 checklist with 3–5 tailors on the existing flag-gated studio panel. **Go criterion:** median ≥ 4 on questions 1–4 and at least half say the preview would change a quote or alteration. If they don't, stop (No-go): physics accuracy won't rescue a preview tailors don't value.
+2. *Fix the known failure modes* (2–3 weeks): per-size arm abduction or a T-pose for simulation, then pose back; a proper bending model (dihedral) with measured parameters for 3 local fabrics; a sewn waistband panel instead of the girth loop; self-collision for overlaps. **Criterion:** stability ≥ 95% across S..3XL × 3 fabrics, runtime p95 ≤ 5 s.
+3. *Pattern import* (DXF-AAMA) for one partner tailor's real blocks plus 30 physical comparisons (garment on person vs preview at the same sizes). **Criterion:** tailors agree with ≥ 80% of tight/loose zones, and line ease is within ±3 cm of tape-measured ease.
+4. Only then decide between a GPU/open-source solver (NVIDIA Warp) and a commercial engine (Style3D / CLO) for the production path, with the model-registry `DRAPE` gate.
+
+Until then the flag stays **off** in production. The spike code is isolated (`apps/ai/app/drape/`, `modules/drape`, `components/drape-spike.tsx`) and can be deleted without touching E33/E34.
+

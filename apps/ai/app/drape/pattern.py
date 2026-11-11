@@ -192,9 +192,9 @@ def _bodice(m: dict, H: float, bust_f: float, hips_f: float, length: float, slee
     bust_drop, hip_drop = 0.096 * H + 0.012 + slope, 0.296 * H + slope
     Bq, Hq = bust_f / 400, hips_f / 400
     if sleeved:  # drop shoulder: shoulder point 4 cm past the shoulder, deeper straight armhole
-        SP = (sh_half + 0.04, -slope - 0.012)
+        SP = (min(sh_half + 0.04, Bq - 0.012), -slope - 0.012)
         ad = 0.12 * H + 0.03 + slope * 0.5
-        AP = (max(Bq, SP[0] + 0.01), -ad)
+        AP = (Bq, -ad)
         arm = _bezier(AP, (SP[0] + 0.012, -ad + 0.035), SP, 7)
     else:
         SP = (sh_half, -slope)
@@ -222,7 +222,8 @@ def _bodice(m: dict, H: float, bust_f: float, hips_f: float, length: float, slee
     o.add("armhole_neg", [(-x, y) for x, y in reversed(arm)])
     o.add("side_neg", [(-x, y) for x, y in reversed(side_pts)])
     pts, edges = o.close()
-    return pts, edges, {"bust": bust_drop, "hips": hip_drop, "armpit": ad}
+    # Drop-shoulder bodies are measured at the underarm (the bust line falls inside the armhole).
+    return pts, edges, {"bust": max(bust_drop, ad + 0.005) if sleeved else bust_drop, "hips": hip_drop, "armpit": ad}
 
 
 def _sleeve(m: dict, H: float, armhole_front: float, armhole_back: float, kind: str):
