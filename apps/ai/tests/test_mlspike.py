@@ -97,6 +97,19 @@ def test_reconsent_after_withdrawal_covers_only_new_contributions():
     assert "fresh" in ids and "again" not in ids and old["item_id"] not in ids
 
 
+def test_withdrawn_pixels_are_excluded_whatever_the_candidate_order():
+    # Two products share the same photo (common when makers reuse a picture). The first one is kept as the
+    # unique copy in v1; withdrawing the *second* product must still take the shared pixels out of v2.
+    base = _cands()[:3]
+    twin = {**base[0], "item_id": "dup", "product_id": "other-product"}
+    v1 = dataset.build_version(base + [twin], _load(), run_screen=False)
+    assert base[0]["item_id"] in {i["item_id"] for i in v1["items"]}
+    v2 = dataset.build_version(base + [twin], _load(), previous=v1, run_screen=False,
+                               tombstones=[{"id": "t", "page_id": twin["page_id"], "product_id": "other-product"}])
+    assert base[0]["item_id"] not in {i["item_id"] for i in v2["items"]}
+    assert base[0]["item_id"] in v2["diff"]["removed_by_withdrawal"]
+
+
 def test_product_level_withdrawal_only_removes_that_product():
     cands = _cands()
     target = cands[0]
@@ -149,6 +162,11 @@ def test_train_eval_reports_subgroups_calibration_and_drift(small_run):
     assert 0 <= r["heads"]["colour"]["ece"] <= 1 and r["heads"]["colour"]["temperature"] > 0
     assert r["drift"]["passed"] and r["drift"]["n_prev"] > r["drift"]["n_cur"]
     assert (pipeline.MODEL_DIR / f"{r['model_version']}.json").exists() and r["artifact_bytes"] < 80_000
+    # Out-of-distribution probe on garments from a different generator + per-head release.
+    assert r["ood"]["n"] == 40 and r["ood"]["heads"]["pattern"]["passed"] is False
+    assert set(r["heads_passed"]) | set(r["heads_blocked"]) == {"category", "pattern", "colour"}
+    assert "pattern" in r["heads_blocked"]  # no evidence outside our own generator -> never served
+    assert r["passed"] == bool(r["heads_passed"])
 
 
 def test_eval_flags_unfair_or_weak_models():

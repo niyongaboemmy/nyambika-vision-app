@@ -21,6 +21,14 @@ const OCCASION: Record<string, Record<Locale, string>> = {
   casual: { rw: "buri munsi", en: "everyday wear", fr: "le quotidien" },
   graduation: { rw: "isozwa ry'amashuri", en: "graduations", fr: "les remises de diplômes" },
 };
+const OCCASION_OUTFIT: Record<string, Record<Locale, string>> = {
+  wedding: { rw: "ubukwe", en: "wedding", fr: "mariage" },
+  church: { rw: "gusenga", en: "church", fr: "église" },
+  party: { rw: "ibirori", en: "party", fr: "fête" },
+  office: { rw: "akazi", en: "office", fr: "bureau" },
+  casual: { rw: "buri munsi", en: "everyday", fr: "quotidien" },
+  graduation: { rw: "isozwa ry'amashuri", en: "graduation", fr: "remise de diplômes" },
+};
 const CATEGORY: Record<string, Record<Locale, string>> = {
   dress: { rw: "amakanzu", en: "dresses", fr: "robes" },
   umushanana: { rw: "imishanana", en: "umushanana", fr: "umushanana" },
@@ -44,8 +52,10 @@ const where = (r: string, l: Locale) => (r === "ALL" ? { rw: "mu Rwanda hose", e
 export function risingText(r: RisingItem, l: Locale) {
   const pct = Math.round(r.growth * 100);
   const v = labelOf(r.dimension, r.value, l);
-  if (r.dimension === "occasion")
-    return { rw: `Abashaka imyenda y'${v} biyongereyeho ${pct}% ${where(r.region, l)} mu byumweru 2 bishize.`, en: `Shoppers asking for ${v} outfits are up ${pct}% ${where(r.region, l)} over the last 2 weeks.`, fr: `Les demandes pour ${v} ont augmenté de ${pct} % ${where(r.region, l)} ces 2 dernières semaines.` }[l];
+  if (r.dimension === "occasion") {
+    const o = t(OCCASION_OUTFIT, r.value, l);
+    return { rw: `Abashaka imyenda y'${o} biyongereyeho ${pct}% ${where(r.region, l)} mu byumweru 2 bishize.`, en: `Shoppers asking for ${o} outfits are up ${pct}% ${where(r.region, l)} over the last 2 weeks.`, fr: `Les demandes de tenues de ${o} ont augmenté de ${pct} % ${where(r.region, l)} ces 2 dernières semaines.` }[l];
+  }
   return { rw: `${v[0].toUpperCase()}${v.slice(1)} irazamuka: +${pct}% ${where(r.region, l)} mu byumweru 2 bishize.`, en: `${v[0].toUpperCase()}${v.slice(1)} is rising: +${pct}% ${where(r.region, l)} over the last 2 weeks.`, fr: `${v[0].toUpperCase()}${v.slice(1)} est en hausse : +${pct} % ${where(r.region, l)} ces 2 dernières semaines.` }[l];
 }
 

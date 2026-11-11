@@ -180,7 +180,9 @@ function risingFor(signals: Signal[], weeks: string[], recentWeeks: number, k: n
 
 function gapsFor(signals: Signal[], supply: SupplyRow[], weeks: string[], k: number, viewerPageId?: string | null) {
   const window = new Set(weeks.slice(-4));
+  const recentWeeks = new Set(weeks.slice(-2));
   const asks = new Map<string, Set<string>>();
+  const recent = new Map<string, Set<string>>(); // last 2 weeks: used only to rank (rising demand first)
   for (const s of signals) {
     if (s.source !== "ASK" || !window.has(s.week) || !s.colour || !s.category) continue;
     for (const occ of [s.occasion ?? null, null]) {
@@ -188,9 +190,15 @@ function gapsFor(signals: Signal[], supply: SupplyRow[], weeks: string[], k: num
       let set = asks.get(key);
       if (!set) asks.set(key, (set = new Set()));
       set.add(s.pseudoId);
+      if (recentWeeks.has(s.week)) {
+        let r = recent.get(key);
+        if (!r) recent.set(key, (r = new Set()));
+        r.add(s.pseudoId);
+      }
       if (!s.occasion) break;
     }
   }
+  const rank = new Map<string, number>();
   const mine = new Set(supply.filter((r) => r.pageId === viewerPageId).map((r) => r.category));
   const out: GapItem[] = [];
   let suppressed = 0;
@@ -203,11 +211,12 @@ function gapsFor(signals: Signal[], supply: SupplyRow[], weeks: string[], k: num
     const occasion = occ || null;
     const makers = new Set(supply.filter((r) => r.category === category && r.colours.includes(colour) && (!occasion || r.occasions.includes(occasion))).map((r) => r.pageId)).size;
     if (makers > 3) continue;
+    rank.set(`gap:${key}`, (recent.get(key)?.size ?? 0) / Math.max(1, makers));
     out.push({ key: `gap:${key}`, colour, category, occasion, asks: round5(people.size), makers, ratio: Math.round((people.size / Math.max(1, makers)) * 10) / 10, youMakeIt: mine.has(category) });
   }
   // Prefer the most specific statement (with occasion) when both exist for the same colour × category.
   const specific = new Set(out.filter((g) => g.occasion).map((g) => `${g.colour}|${g.category}`));
-  return { items: out.filter((g) => g.occasion || !specific.has(`${g.colour}|${g.category}`)).sort((a, b) => b.ratio - a.ratio), suppressed };
+  return { items: out.filter((g) => g.occasion || !specific.has(`${g.colour}|${g.category}`)).sort((a, b) => (rank.get(b.key) ?? 0) - (rank.get(a.key) ?? 0)), suppressed };
 }
 
 // ── price-band conversion hints (sales-derived: maker rule applies) ──────────

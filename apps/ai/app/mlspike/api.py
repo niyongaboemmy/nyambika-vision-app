@@ -65,13 +65,14 @@ class BuildIn(BaseModel):
     previous: dict | None = None
     per_cell: int = Field(default=10, ge=1, le=40)
     seed: int = 7
+    generator: int = Field(default=synth.DEFAULT_GEN, ge=1, le=2)
     consented_at: str = "2026-11-01T00:00:00+00:00"
 
 
 @router.post("/v1/ml/dataset/build")
 def build(body: BuildIn):
     t0 = time.time()
-    specs = synth.corpus(body.per_cell, seed=body.seed) if body.contributors else []
+    specs = synth.corpus(body.per_cell, seed=body.seed, gen=body.generator) if body.contributors else []
     cands = dataset.synthetic_candidates(specs, [c.model_dump() for c in body.contributors], body.consented_at) if specs else []
     images = {}
     for c in body.catalogue:
@@ -81,7 +82,7 @@ def build(body: BuildIn):
         manifest = dataset.build_version(cands, pipeline.image_loader(images), tombstones=body.tombstones, previous=body.previous)
     except dataset.ShopperDataError as exc:
         raise HTTPException(422, f"Refused: {exc}") from exc
-    manifest["generator"] = synth.GENERATOR_VERSION
+    manifest["generator"] = f"synth-garments/{body.generator}"
     manifest["build_ms"] = int((time.time() - t0) * 1000)
     return manifest
 

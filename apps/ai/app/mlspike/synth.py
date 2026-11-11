@@ -39,7 +39,8 @@ SKIN_TONES = {"mst3": "#E7C9A9", "mst5": "#D7A47F", "mst6": "#A8735A", "mst7": "
               "mst9": "#4A2F22", "mst10": "#2E211B"}
 
 W, H = 120, 150
-GENERATOR_VERSION = "synth-garments/1"
+GENERATOR_VERSION = "synth-garments/1"  # default; v2 (domain-randomised silhouettes) is kept for the comparison in the report
+DEFAULT_GEN = 1
 
 
 def hex_rgb(h: str) -> tuple[int, int, int]:
@@ -110,8 +111,8 @@ def _pattern(size: tuple[int, int], base_hex: str, family: str, rng: random.Rand
     return tile
 
 
-def _silhouette(kind: str, rng: random.Random) -> Image.Image:
-    """Garment mask (L) on the canvas, with jitter in scale and position."""
+def _silhouette_v1(kind: str, rng: random.Random) -> Image.Image:
+    """Generator v1 (default): one polygon per garment type, jitter in scale and position."""
     m = Image.new("L", (W, H), 0)
     d = ImageDraw.Draw(m)
     s = rng.uniform(0.86, 1.0)
@@ -135,12 +136,57 @@ def _silhouette(kind: str, rng: random.Random) -> Image.Image:
     return m
 
 
-def garment_image(kind: str, family: str, colour: str, quality: str, seed: int) -> Image.Image:
+def _silhouette_v2(kind: str, rng: random.Random) -> Image.Image:
+    """Garment mask (L). Generator v2 = domain randomisation: style variants per garment type (sleeves,
+    sash side, hem shape), scale 0.62–1.0, horizontal stretch 0.8–1.25 and per-vertex jitter, because v1's
+    single fixed polygon per type did not transfer to garments drawn any other way (see the spike report)."""
+    m = Image.new("L", (W, H), 0)
+    d = ImageDraw.Draw(m)
+    s = rng.uniform(0.62, 1.0)
+    sx = s * rng.uniform(0.8, 1.25)
+    ox, oy = rng.randint(-5, 5), rng.randint(-5, 5)
+    cx = W / 2 + ox
+    j = 3.0
+
+    def P(pts, jitter=True):
+        return [(cx + (x + (rng.uniform(-j, j) if jitter else 0)) * sx, H / 2 + oy + (y + (rng.uniform(-j, j) if jitter else 0)) * s) for x, y in pts]
+
+    v = rng.random()
+    if kind == "dress":  # bodice + flared skirt; sleeveless, cap or long sleeves; knee to ankle length
+        hem = rng.uniform(46, 66)
+        flare = rng.uniform(32, 48)
+        body = [(-16, -62), (-24, -56), (-20, -20), (-flare, hem), (flare, hem), (20, -20), (24, -56), (16, -62), (8, -56), (-8, -56)]
+        d.polygon(P(body), fill=255)
+        if v < 0.66:
+            ln = 14 if v < 0.33 else 40
+            for sgn in (-1, 1):
+                d.polygon(P([(sgn * 20, -60), (sgn * 38, -50 + ln * 0.2), (sgn * (30 + ln * 0.3), -50 + ln), (sgn * 20, -44 + ln * 0.5)]), fill=255)
+    elif kind == "umushanana":  # long column skirt to the floor + sash across the body over one shoulder
+        side = 1 if v < 0.5 else -1
+        d.polygon(P([(-26, -44), (-28, 10), (-rng.uniform(36, 46), 66), (rng.uniform(36, 46), 66), (28, 10), (26, -44)]), fill=255)
+        d.polygon(P([(side * 14, -70), (side * 34, -62), (-side * 22, 22), (-side * 38, 12)]), fill=255)
+    elif kind == "shirt":  # T shape, short or long sleeves, hip length
+        hem = rng.uniform(34, 50)
+        long = v < 0.5
+        sl = [(-50, -30), (-42, -10)] if not long else [(-56, -26), (-50, 34), (-38, 34), (-36, -12)]
+        sr = [(-x, y) for x, y in reversed(sl)]
+        d.polygon(P([(-18, -46), *sl, (-28, -18), (-28, hem), (28, hem), (28, -18), *sr, (18, -46), (6, -40), (-6, -40)]), fill=255)
+    elif kind == "skirt":  # A-line, straight or flared; mini to midi
+        top, hem = -rng.uniform(26, 40), rng.uniform(26, 50)
+        flare = [30, 40, 50][int(v * 3)]
+        d.polygon(P([(-22, top), (22, top), (flare, hem), (-flare, hem)]), fill=255)
+    else:  # trousers: straight or wide legs
+        wide = 6 if v < 0.5 else 14
+        d.polygon(P([(-26, -60), (26, -60), (26 + wide, 64), (6, 64), (0, -10), (-6, 64), (-26 - wide, 64)]), fill=255)
+    return m
+
+
+def garment_image(kind: str, family: str, colour: str, quality: str, seed: int, gen: int = DEFAULT_GEN) -> Image.Image:
     rng = random.Random(seed)
     bg = _mix((244, 241, 236), (226, 222, 214), rng.random())
     canvas = Image.new("RGB", (W, H), bg)
     cloth = _pattern((W, H), COLOURS[colour], family, rng)
-    mask = _silhouette(kind, rng)
+    mask = (_silhouette_v2 if gen == 2 else _silhouette_v1)(kind, rng)
     canvas.paste(cloth, (0, 0), mask)
     if quality == "low_light":
         arr = np.asarray(canvas).astype(np.float32)
@@ -173,14 +219,14 @@ def person_image(skin: str, seed: int, garment: str = "dress") -> Image.Image:
     d.arc((cx - r // 2, ey + 3, cx + r // 2, ey + r // 2 + 5), 20, 160, fill=(60, 30, 24), width=1)
     d.rectangle((cx - 4, top + 2 * r + 2, cx + 4, top + 2 * r + 9), fill=tone)  # neck
     body = garment_image(garment, rng.choice(PATTERNS), rng.choice(list(COLOURS)), "good", seed + 7)
-    m = _silhouette(garment, rng).resize((int(W * 0.8), int(H * 0.8)))
+    m = _silhouette_v1(garment, rng).resize((int(W * 0.8), int(H * 0.8)))
     img.paste(body.resize(m.size), (W // 2 - m.width // 2, top + 2 * r + 6), m)
     for s in (-1, 1):  # arms
         d.rectangle((cx + s * 26 - 3, top + 2 * r + 14, cx + s * 26 + 3, top + 2 * r + 60), fill=tone)
     return img
 
 
-def corpus(per_cell: int, seed: int = 7, colours: tuple[str, ...] | None = None) -> list[dict]:
+def corpus(per_cell: int, seed: int = 7, colours: tuple[str, ...] | None = None, gen: int = DEFAULT_GEN) -> list[dict]:
     """Balanced synthetic specs: `per_cell` items in every garment × pattern × quality cell, colours cycled."""
     pal = list(colours or COLOURS)
     rng = random.Random(seed)
@@ -191,11 +237,11 @@ def corpus(per_cell: int, seed: int = 7, colours: tuple[str, ...] | None = None)
             for q in QUALITIES:
                 start = rng.randrange(len(pal))
                 for k in range(per_cell):
-                    out.append({"seed": seed * 1_000_003 + i, "labels": {"category": g, "pattern": p, "colour": pal[(start + k) % len(pal)], "quality": q}})
+                    out.append({"seed": seed * 1_000_003 + i, "gen": gen, "labels": {"category": g, "pattern": p, "colour": pal[(start + k) % len(pal)], "quality": q}})
                     i += 1
     return out
 
 
 def render(spec: dict) -> Image.Image:
     lb = spec["labels"]
-    return garment_image(lb["category"], lb["pattern"], lb["colour"], lb["quality"], spec["seed"])
+    return garment_image(lb["category"], lb["pattern"], lb["colour"], lb["quality"], spec["seed"], spec.get("gen") or DEFAULT_GEN)

@@ -98,6 +98,9 @@ def build_version(candidates: list[dict], load_image: Callable[[dict], Image.Ima
     dropped: list[dict] = []
     removed_by_withdrawal: list[str] = []
     seen_hashes: set[str] = set()
+    # Pass 1: validate, hash, and collect every withdrawn image first, so the same pixels under another
+    # product or page are excluded regardless of candidate order.
+    staged: list[tuple[dict, Image.Image, str]] = []
     for c in candidates:
         assert_trainable(c)  # hard error: shopper data must never be silently "dropped" and forgotten
         missing = [k for k in REQUIRED if not c.get(k)]
@@ -112,7 +115,10 @@ def build_version(candidates: list[dict], load_image: Callable[[dict], Image.Ima
             removed_by_withdrawal.append(c["item_id"])
             dropped.append({"item_id": c["item_id"], "reason": "withdrawn", "tombstone": t.get("id")})
             continue
+        staged.append((c, img, digest))
+    for c, img, digest in staged:
         if digest in withdrawn_hashes:
+            removed_by_withdrawal.append(c["item_id"])
             dropped.append({"item_id": c["item_id"], "reason": "withdrawn image re-submitted"})
             continue
         if digest in seen_hashes:
@@ -124,7 +130,7 @@ def build_version(candidates: list[dict], load_image: Callable[[dict], Image.Ima
             continue
         seen_hashes.add(digest)
         items.append({**{k: c.get(k) for k in ("item_id", "source", "page_id", "product_id", "variant_id", "licence",
-                                                "consent_record_id", "consented_at", "image_ref", "seed")},
+                                                "consent_record_id", "consented_at", "image_ref", "seed", "gen")},
                       "captured_at": c.get("captured_at") or c.get("consented_at"), "sha256": digest,
                       "labels": c.get("labels", {}), "screen": {"score": sc["score"], "version": sc["version"]}})
     items.sort(key=lambda i: i["item_id"])
@@ -176,5 +182,5 @@ def synthetic_candidates(specs: list[dict], contributors: list[dict], consented_
         out.append({"item_id": f"syn-{s['seed']}", "source": "synthetic", "page_id": c["page_id"],
                     "product_id": f"syn-product-{c['page_id'][-6:]}-{n // len(contributors) % 12}", "variant_id": None,
                     "licence": SYNTHETIC_LICENCE, "consent_record_id": c["consent_record_id"], "consented_at": c.get("consented_at") or consented_at,
-                    "image_ref": f"synthetic://{s['seed']}", "seed": s["seed"], "labels": s["labels"]})
+                    "image_ref": f"synthetic://{s['seed']}", "seed": s["seed"], "gen": s.get("gen", 1), "labels": s["labels"]})
     return out

@@ -30,14 +30,14 @@ BENCHMARK_PER_CELL = 10  # 60 garment × pattern × quality cells × 10 = 600 he
 
 def benchmark(per_cell: int = BENCHMARK_PER_CELL) -> list[dict]:
     """Fixed, versioned synthetic test set (like the NLB persona set): disjoint seeds from any manifest."""
-    return [{"item_id": f"bench-{s['seed']}", "source": "synthetic", "seed": s["seed"], "labels": s["labels"]}
+    return [{"item_id": f"bench-{s['seed']}", "source": "synthetic", "seed": s["seed"], "gen": 1, "labels": s["labels"]}
             for s in synth.corpus(per_cell, seed=BENCHMARK_SEED)]
 
 
 def image_loader(catalogue_images: dict[str, Image.Image]):
     def load(item: dict) -> Image.Image:
         if item.get("source") == "synthetic":
-            return synth.render({"seed": item["seed"], "labels": item["labels"]})
+            return synth.render({"seed": item["seed"], "gen": item.get("gen"), "labels": item["labels"]})
         img = catalogue_images.get(item["item_id"])
         if img is None:
             raise KeyError(f"no pixels for catalogue item {item['item_id']}")
@@ -78,14 +78,23 @@ def train_and_evaluate(manifest: dict, catalogue_images: dict[str, Image.Image],
     report = evaluate.evaluate_model(model, X["test"], L["test"])
     drift = None
     if previous and previous.get("items"):
-        prev_items = previous["items"]
+        # Withdrawn catalogue items of the previous version are never re-read: drift uses what is still available.
+        prev_items = [i for i in previous["items"] if i.get("source") == "synthetic" or i["item_id"] in catalogue_images]
         drift = evaluate.drift(featurise(prev_items, load), [i["labels"] for i in prev_items], featurise(items, load), [i["labels"] for i in items])
         if not drift["passed"]:
             report["failing"].append(f"drift PSI {drift['worst']:.2f} between dataset v{previous.get('version')} and v{manifest['version']}")
     scr = evaluate.evaluate_screen() if screen_eval else None
     if scr and not scr["passed"]:
         report["failing"].extend(scr["failing"])
-    report["passed"] = not report["failing"]
+    ood = evaluate.evaluate_ood(model)
+    for h, o in ood["heads"].items():
+        if not o["passed"]:
+            report["failing"].append(f"{h}: out-of-distribution " + (f"accuracy {o['accuracy']:.2f}, overconfidence {o['overconfidence']:.2f}" if o["accuracy"] is not None else "not measurable"))
+    # Per-head release: a head is served only if all of its own checks pass, including OOD evidence.
+    # The model as a whole may be activated when the shared checks (screen, drift) pass and >= 1 head passes.
+    heads_passed = [h for h, r in report["heads"].items() if not r["failing"] and ood["heads"].get(h, {}).get("passed")]
+    shared_ok = (scr is None or scr["passed"]) and (drift is None or drift["passed"])
+    report["passed"] = shared_ok and bool(heads_passed)
     if save:
         model.save(MODEL_DIR / f"{version}.json")
         with _lock:
@@ -101,6 +110,10 @@ def train_and_evaluate(manifest: dict, catalogue_images: dict[str, Image.Image],
         "heads": report["heads"],
         "cells": report["cells"],
         "failing": report["failing"],
+        "heads_passed": heads_passed,
+        "heads_blocked": [h for h in report["heads"] if h not in heads_passed],
+        "all_heads_passed": not report["failing"],
+        "ood": ood,
         "drift": drift,
         "screen": scr,
         "artifact_bytes": (MODEL_DIR / f"{version}.json").stat().st_size if save else None,

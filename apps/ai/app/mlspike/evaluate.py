@@ -22,6 +22,8 @@ THRESHOLDS = {
     "ece_max": 0.05,                # per head, after temperature scaling (15 bins)
     "drift_psi_max": 0.20,          # label + feature PSI between consecutive dataset versions
     "suggest_p_min": 0.60,          # suggestions below this calibrated confidence are not shown
+    "ood_accuracy_min": 0.80,       # per head, on garments drawn by a different generator (no OOD evidence = not served)
+    "ood_overconfidence_max": 0.10, # per head, mean confidence minus accuracy out of distribution
     "screen_recall_min": 0.98,      # persons caught, per skin tone
     "screen_false_drop_max": 0.03,  # garment photos wrongly dropped
 }
@@ -146,8 +148,52 @@ def evaluate_model(model: AttrModel, X: np.ndarray, labels: list[dict]) -> dict:
             failing.append(f"{name}: macro-F1 {res['macro_f1']:.2f}")
         if res["ece"] > THRESHOLDS["ece_max"]:
             failing.append(f"{name}: ECE {res['ece']:.3f}")
+        res["failing"] = [f for f in failing if f.startswith(f"{name}:")]
         heads[name] = res
     return {"heads": heads, "failing": failing, "cells": cells_out, "passed": not failing}
+
+
+# Out-of-distribution probe: the 40 seed catalogue garments drawn by a *different* generator
+# (apps/ai/scripts/make_seed_assets.py: other silhouettes, outlines, motif vocabulary). Labels exist for
+# garment type and colour only (its motifs are not pattern families), so the pattern head has no OOD evidence.
+OOD_COLOURS = {"black-white": "black"}
+
+
+_OOD_CACHE: dict[str, np.ndarray] = {}
+
+
+def evaluate_ood(model: AttrModel) -> dict:
+    import sys
+    import tempfile
+    from pathlib import Path
+
+    from PIL import Image
+
+    from .features import features
+
+    scripts = Path(__file__).resolve().parents[2] / "scripts"
+    if str(scripts) not in sys.path:
+        sys.path.insert(0, str(scripts))
+    import make_seed_assets as seeds  # noqa: PLC0415
+
+    rows = []
+    with tempfile.TemporaryDirectory() as d:
+        for it in seeds.catalogue_manifest():
+            if it["slug"] not in _OOD_CACHE:  # drawn at the generator's native 800x1000 (its coordinates are absolute)
+                p = seeds.garment(it["kind"], it["hex"], it["pattern"], Path(d) / f"{it['slug']}.png")
+                _OOD_CACHE[it["slug"]] = features(Image.open(p))
+            pr = model.predict(_OOD_CACHE[it["slug"]], top=1)[0]
+            rows.append({"category": it["category"], "colour": OOD_COLOURS.get(it["colour"], it["colour"]), "pred": pr})
+    out: dict = {"n": len(rows), "source": "make_seed_assets.catalogue_manifest (different generator)", "heads": {}}
+    for head in ("category", "colour"):
+        ok = [r["pred"][head][0]["label"] == r[head] for r in rows]
+        conf = [r["pred"][head][0]["p"] for r in rows]
+        acc = float(np.mean(ok))
+        out["heads"][head] = {"accuracy": round(acc, 4), "mean_confidence": round(float(np.mean(conf)), 4),
+                              "overconfidence": round(float(np.mean(conf)) - acc, 4),
+                              "passed": acc >= THRESHOLDS["ood_accuracy_min"] and float(np.mean(conf)) - acc <= THRESHOLDS["ood_overconfidence_max"]}
+    out["heads"]["pattern"] = {"accuracy": None, "passed": False, "note": "no pattern-family labels outside our generator"}
+    return out
 
 
 def evaluate_screen(per_tone: int = 12, garments: int = 2, seed: int = 99) -> dict:

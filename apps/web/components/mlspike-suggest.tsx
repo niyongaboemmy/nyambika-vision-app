@@ -12,11 +12,11 @@ interface Suggestion {
   confidence: number;
   current: string | null;
   matches: boolean;
-  apply: Record<string, unknown> | null;
+  apply: { path: string; body: Record<string, unknown> } | null;
 }
 type Suggest =
   | { enabled: false }
-  | { enabled: true; model: { id: string; evalPassed?: boolean } | null; reason?: string; servedBy?: string; suggestions: Suggestion[] };
+  | { enabled: true; model: { id: string; evalPassed?: boolean } | null; reason?: string; servedBy?: string; blocked?: string[]; suggestions: Suggestion[] };
 
 const FIELD: Record<Suggestion["field"], string> = { category: "Type", pattern: "Pattern family", colour: "Main colour" };
 
@@ -37,7 +37,7 @@ export function AttrSuggest({ productId, canEdit, onApplied }: { productId: stri
     setBusy(s.field);
     setErr(null);
     try {
-      await api(`/products/${productId}`, { method: "PATCH", json: s.apply });
+      await api(s.apply.path, { method: "PATCH", json: s.apply.body });
       navigator.vibrate?.(8);
       setDone((d) => [...d, s.field]);
       await onApplied();
@@ -74,14 +74,17 @@ export function AttrSuggest({ productId, canEdit, onApplied }: { productId: stri
                 <button type="button" disabled={busy !== null} onClick={() => use(s)} className="st-press inline-flex min-h-11 items-center rounded-xl bg-violet-ink px-4 text-sm font-bold text-white disabled:opacity-50">
                   {busy === s.field ? "Saving…" : s.field === "pattern" ? "Add tag" : "Use"}
                 </button>
-              ) : (
-                <span className="text-xs font-semibold text-cocoa-2">Check your colour name</span>
-              )}
+              ) : null}
             </li>
           );
         })}
       </ul>
       <Note error={err} />
+      {data.blocked && data.blocked.length > 0 && (
+        <p className="mt-2 rounded-xl bg-white/70 px-3 py-2 text-xs text-cocoa-2">
+          {data.blocked.map((b) => FIELD[b as Suggestion["field"]] ?? b).join(" and ")} suggestions stay off until they pass Nyambika&apos;s fairness and accuracy checks.
+        </p>
+      )}
       <p className="mt-2 text-[11px] leading-relaxed text-cocoa-2">
         Made by Nyambika&apos;s own small model, run in Rwanda ({data.servedBy === "pool" ? "self-hosted" : "simple colour rules"}). Trained on synthetic garments and photos makers chose to share. Experimental.
       </p>

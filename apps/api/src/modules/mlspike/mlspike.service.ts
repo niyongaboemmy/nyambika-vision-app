@@ -30,6 +30,11 @@ export const ATTR_TIER = "ATTR_SUGGEST";
 export const ATTR_EVAL = "ATTR_SPIKE";
 export const TRENDS_MODEL = "trends-spike@1";
 export const TRENDS_EVAL = "TRENDS_PRIVACY";
+const DISPLAY: Record<string, string> = {
+  dress: "Dress", umushanana: "Umushanana", shirt: "Shirt", skirt: "Skirt", trousers: "Trousers",
+  imigongo: "Imigongo", kitenge: "Kitenge", wax: "Wax print", solid: "Plain",
+  terracotta: "Terracotta", indigo: "Indigo", gold: "Gold", teal: "Teal", crimson: "Crimson", "forest-green": "Forest green", "royal-purple": "Royal purple", black: "Black",
+};
 const PAID = ["PAID", "ACCEPTED", "IN_PREPARATION", "READY", "SHIPPED", "DELIVERED", "COMPLETED"] as const;
 
 interface Manifest {
@@ -177,11 +182,18 @@ export class MlSpikeService {
     const contributors = pages.filter((p) => p.state.page?.granted).map((p) => ({ page_id: p.pageId, consent_record_id: p.state.page!.recordId, consented_at: p.state.page!.at.toISOString() }));
     if (!contributors.length) throw new BadRequestException("No page has opted in to training-data contribution yet");
     const catalogue = [];
+    const tombRows = await this.prisma.trainingTombstone.findMany({ orderBy: { createdAt: "desc" } });
     for (const { pageId, state } of pages) {
       const products = await this.prisma.product.findMany({ where: { pageId, status: { in: ["PUBLISHED", "OUT_OF_STOCK"] } }, include: { variants: true } });
       for (const p of products) {
-        const e = productEligibility(state, p.id);
-        if (!e.eligible) continue;
+        let e = productEligibility(state, p.id);
+        if (!e.eligible) {
+          // Withdrawn pieces still go to the builder as *withdrawal references*: it only hashes them to drop the
+          // same pixels wherever else they appear (another product reusing the photo), then forgets them.
+          const t = tombRows.find((x) => x.pageId === pageId && (!x.productId || x.productId === p.id));
+          if (!t) continue;
+          e = { eligible: true, consentRecordId: t.consentRecordId, consentedAt: t.createdAt, scope: t.productId ? "product" : "page" };
+        }
         for (const v of p.variants) {
           if (!v.imagePath) continue;
           const ref = assertCatalogueImage(v.imagePath); // shopper data can never get here
@@ -201,7 +213,7 @@ export class MlSpikeService {
         }
       }
     }
-    const tombstones = (await this.prisma.trainingTombstone.findMany()).map((t) => ({ id: t.id, page_id: t.pageId, product_id: t.productId, at: t.createdAt.toISOString() }));
+    const tombstones = tombRows.map((t) => ({ id: t.id, page_id: t.pageId, product_id: t.productId, at: t.createdAt.toISOString() }));
     const previous = await this.prisma.trainingDataset.findFirst({ orderBy: { version: "desc" } });
     const m = await this.ai.post<Manifest>("/v1/ml/dataset/build", { contributors, catalogue, tombstones, previous: previous?.manifest ?? null, per_cell: perCell }, 300_000);
     const row = await this.prisma.trainingDataset.create({
@@ -288,23 +300,30 @@ export class MlSpikeService {
     const region = (await this.prisma.pageRegion.findUnique({ where: { pageId: p.pageId } }))?.region?.toLowerCase() ?? "rw";
     const img = await this.storage.read(assertCatalogueImage(v.imagePath));
     const r = await this.ai.post<SuggestOut>("/v1/ml/attr/suggest", { image_b64: img.toString("base64"), model_version: model.id, region }, 15_000);
-    const top = (h: string) => r.heads[h]?.[0];
+    // Per-head release: only heads that passed every check of the latest eval (incl. out-of-distribution) are offered.
+    const passedHeads = new Set(((lastEval?.summary ?? {}) as { heads_passed?: string[] }).heads_passed ?? []);
+    const top = (h: string) => (passedHeads.has(h) ? r.heads[h]?.[0] : undefined);
     const suggestions = [];
     const cat = top("category");
-    if (cat && cat.p >= r.threshold) suggestions.push({ field: "category", value: cat.label, label: labelOf("category", cat.label, "en"), confidence: cat.p, current: p.category, matches: normaliseCategory(p.category) === cat.label, apply: { category: cat.label } });
+    if (cat && cat.p >= r.threshold)
+      suggestions.push({ field: "category", value: cat.label, label: DISPLAY[cat.label] ?? cat.label, confidence: cat.p, current: p.category, matches: normaliseCategory(p.category) === cat.label, apply: { path: `/products/${p.id}`, body: { category: cat.label } } });
     const pat = top("pattern");
     if (pat && pat.p >= r.threshold) {
       const styles = [...p.styles.filter((s) => !(PATTERNS as readonly string[]).includes(s.toLowerCase())), pat.label];
-      suggestions.push({ field: "pattern", value: pat.label, label: labelOf("pattern", pat.label, "en"), confidence: pat.p, current: patternFromStyles(p.styles), matches: patternFromStyles(p.styles) === pat.label, apply: { styles } });
+      suggestions.push({ field: "pattern", value: pat.label, label: DISPLAY[pat.label] ?? pat.label, confidence: pat.p, current: patternFromStyles(p.styles), matches: patternFromStyles(p.styles) === pat.label, apply: { path: `/products/${p.id}`, body: { styles } } });
     }
     const col = top("colour");
-    if (col && col.p >= r.threshold) suggestions.push({ field: "colour", value: col.label, label: labelOf("colour", col.label, "en"), confidence: col.p, current: v.colourName, matches: normaliseColour(v.colourName) === col.label, apply: null });
+    if (col && col.p >= r.threshold) {
+      const name = DISPLAY[col.label] ?? col.label;
+      suggestions.push({ field: "colour", value: col.label, label: name, confidence: col.p, current: v.colourName, matches: normaliseColour(v.colourName) === col.label, apply: { path: `/variants/${v.id}`, body: { colourName: name } } });
+    }
     return {
       enabled: true as const,
       model: { id: model.id, evalPassed: lastEval?.passed ?? false, evaluatedAt: lastEval?.createdAt ?? null },
       servedBy: r.served_by,
       threshold: r.threshold,
       photo: this.storage.publicUrl(v.imagePath),
+      blocked: ["category", "pattern", "colour"].filter((h) => !passedHeads.has(h)),
       suggestions,
     };
   }
