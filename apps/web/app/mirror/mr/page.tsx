@@ -66,7 +66,7 @@ function MrPage() {
           <section className="glass mt-6 space-y-3 rounded-3xl p-5 text-center">
             <p className="text-4xl" aria-hidden>🥽</p>
             <p className="font-display text-xl font-black">Mixed-reality mirror is an experiment</p>
-            <p className="text-sm text-mut">We&apos;re testing a fitting mirror you can place in your room with a headset. It isn&apos;t switched on for you yet.</p>
+            <p className="text-sm text-mut">A fitting mirror for your room, with a headset · not on for you yet.</p>
             <Link href="/mirror/ar" className="grad-cta inline-flex min-h-12 items-center justify-center rounded-2xl px-5 font-semibold text-white">🪞 Open the AR mirror</Link>
           </section>
         ) : (

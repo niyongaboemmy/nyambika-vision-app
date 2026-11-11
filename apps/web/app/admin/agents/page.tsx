@@ -7,6 +7,7 @@ import { Badge, Card, Chip, Empty, Field, Icon, Input, Kpi, Meter, Monogram, Not
 import { api, rwf } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { useApi } from "@/lib/use-api";
+import { Fact, LearnMore } from "@/components/kit";
 
 const TABS = ["Overview", "Verify", "Moderation", "Migration", "Flags & models", "Outbox", "Audit", "Pilot", "Agents & partners"] as const;
 const SCOPES = ["catalogue:read", "checkout:write", "mcp:use", "tryon:write", "usage:read"] as const;
@@ -56,7 +57,12 @@ export default function AgentsAdmin() {
         <ScreenSkeleton />
       ) : (
         <>
-          <p className="-mt-2 max-w-2xl text-sm text-cocoa-2">AI shopping agents read the public catalogue and start checkouts that shoppers confirm in Nyambika; partners buy guarded try-ons on synthetic models. Keys are stored as hashes only.</p>
+          <div className="-mt-2 flex flex-wrap items-center gap-2">
+            <Fact icon="store">Agents: catalogue + checkouts</Fact>
+            <Fact icon="shield">Shopper confirms in Nyambika</Fact>
+            <Fact icon="lock">Keys hashed</Fact>
+            <LearnMore>AI shopping agents read the public catalogue and start checkouts that shoppers confirm in Nyambika; partners buy guarded try-ons on synthetic models. Keys are stored as hashes only.</LearnMore>
+          </div>
           <div className="flex flex-wrap items-center gap-2">
             <Chip tone={data.killSwitch["agents.kill_switch"] ? "red" : "mint"}>{data.killSwitch["agents.kill_switch"] ? "■ Agent channel paused" : "● Agent channel open"}</Chip>
             <Chip tone={data.killSwitch["partners.kill_switch"] ? "red" : "mint"}>{data.killSwitch["partners.kill_switch"] ? "■ Partner API paused" : "● Partner API open"}</Chip>

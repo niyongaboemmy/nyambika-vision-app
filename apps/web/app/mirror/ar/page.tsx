@@ -64,7 +64,7 @@ function ArPage() {
           <section className="glass mt-6 space-y-3 rounded-3xl p-5 text-center">
             <p className="text-4xl" aria-hidden>🪞</p>
             <p className="font-display text-xl font-black">AR mirror is a pilot</p>
-            <p className="text-sm text-mut">The live mirror is being tested with a small group and isn&apos;t switched on for you yet. Your 3D twin shows the same pieces in 3D.</p>
+            <p className="text-sm text-mut">Testing with a small group · not on for you yet. Your 3D twin shows the same pieces.</p>
             <Link href={`/mirror/3d${variant ? `?variant=${variant}` : ""}`} className="grad-cta inline-flex min-h-12 items-center justify-center rounded-2xl px-5 font-semibold text-white">🧊 Open my 3D twin</Link>
           </section>
         ) : (

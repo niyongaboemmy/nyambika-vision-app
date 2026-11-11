@@ -8,6 +8,7 @@ import { Badge, Card, Chip, Empty, Icon, Kpi, Meter, Monogram, Note, ScreenSkele
 import { api, rwf } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { useApi } from "@/lib/use-api";
+import { LearnMore } from "@/components/kit";
 
 // Lazy (below the fold / on demand): keeps this route's first-load JS small.
 const InferencePanel = dynamic(() => import("@/components/inference-panel").then((m) => m.InferencePanel), { ssr: false, loading: () => <Skeleton className="h-72" /> });
@@ -354,7 +355,8 @@ function MigrationTab() {
           <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-paper-2 text-cocoa"><Icon name="upload" className="size-5" /></span>
           <div>
             <p className="font-extrabold text-cocoa">Import a wave</p>
-            <p className="text-sm text-cocoa-2">JSON bundle from the legacy export (format in docs/migration.md). Pages are imported hidden; photos go through the readiness pipeline.</p>
+            <p className="text-sm text-cocoa-2">Legacy JSON bundle · imported hidden</p>
+            <LearnMore>JSON bundle from the legacy export (format in docs/migration.md). Pages are imported hidden; photos go through the readiness pipeline.</LearnMore>
             <a href="/admin/network" className="mt-1 inline-block text-sm font-bold text-violet-ink underline">Whole network (waves, outreach, cut-over) →</a>
           </div>
         </div>
