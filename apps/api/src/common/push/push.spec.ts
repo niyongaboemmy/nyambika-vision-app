@@ -10,10 +10,10 @@ import {
   PushDeviceRegister,
   type PushMessage,
 } from "@nyambika/contracts";
-import { createECDH, createVerify, generateKeyPairSync, randomBytes } from "node:crypto";
+import { createECDH, createVerify, generateKeyPairSync, randomBytes, verify as cryptoVerify } from "node:crypto";
 import webpush from "web-push";
 import { describe, expect, it, vi } from "vitest";
-import { fcmMessage, FcmPushProvider, serviceAccountAssertion, WebPushProvider, webPushPayload, type PushTarget } from "./providers";
+import { ApnsPushProvider, apnsJwt, apnsRequest, fcmMessage, FcmPushProvider, serviceAccountAssertion, WebPushProvider, webPushPayload, type PushTarget } from "./providers";
 
 const base = { orderId: "o1", code: "NY-ABC123", makerName: "Uwase Couture", itemTitle: "dress", readyBy: "2026-11-19T10:00:00Z", updatedAt: "2026-11-14T08:24:00Z" };
 
@@ -95,6 +95,8 @@ describe("preferences and device registration", () => {
     expect(ok({ installationId: inst, platform: "ANDROID", transport: "FCM", token: "x".repeat(40) })).toBe(true);
     expect(ok({ installationId: inst, platform: "IOS", transport: "APNS", kind: "LIVE_ACTIVITY", token: "ab".repeat(32) })).toBe(false); // no order
     expect(ok({ installationId: inst, platform: "ANDROID", transport: "FCM", kind: "LIVE_ACTIVITY", orderId: "o", token: "x".repeat(40) })).toBe(false);
+    expect(ok({ installationId: inst, platform: "ANDROID", transport: "APNS", token: "x".repeat(40) })).toBe(false);
+    expect(ok({ installationId: inst, platform: "IOS", transport: "APNS", token: "ab".repeat(32) })).toBe(true);
     expect(ok({ installationId: "bad id!", platform: "ANDROID", transport: "FCM", token: "x".repeat(40) })).toBe(false);
   });
 });
@@ -120,26 +122,74 @@ describe("FCM HTTP v1 payloads", () => {
     expect(m.android.notification.channel_id).toBe("general");
   });
 
+});
+
+describe("APNs requests (iOS)", () => {
   it("maps iOS alerts and silent updates to APNs headers", () => {
-    const alert = fcmMessage(target({ platform: "IOS" }), orderMsg("PAID", true)) as { apns: { headers: Record<string, string> }; notification?: object };
-    expect(alert.apns.headers).toMatchObject({ "apns-push-type": "alert", "apns-priority": "10", "apns-collapse-id": "order-o1" });
-    expect(alert.notification).toBeDefined();
-    const silent = fcmMessage(target({ platform: "IOS" }), orderMsg("ACCEPTED", false)) as { apns: { headers: Record<string, string>; payload: { aps: object } }; notification?: object };
-    expect(silent.notification).toBeUndefined();
-    expect(silent.apns.payload.aps).toEqual({ "content-available": 1 });
+    const ios = target({ platform: "IOS", transport: "APNS", token: "ab".repeat(32) });
+    const alert = apnsRequest(ios, orderMsg("PAID", true), "rw.nyambika.app", 1000);
+    expect(alert.path).toBe(`/3/device/${"ab".repeat(32)}`);
+    expect(alert.headers).toMatchObject({ "apns-topic": "rw.nyambika.app", "apns-push-type": "alert", "apns-priority": "10", "apns-collapse-id": "order-o1" });
+    expect(alert.payload).toMatchObject({ aps: { alert: { title: "Paid directly to Uwase Couture" }, "thread-id": "order-o1" }, url: "/orders/o1" });
+    const silent = apnsRequest(ios, orderMsg("ACCEPTED", false), "rw.nyambika.app", 1000);
+    expect(silent.headers["apns-push-type"]).toBe("background");
+    expect(silent.payload.aps).toEqual({ "content-available": 1 });
   });
 
-  it("updates, ends and push-starts iOS Live Activities through apns.live_activity_token", () => {
-    const la = target({ platform: "IOS", transport: "APNS", kind: "LIVE_ACTIVITY", token: "la-token", fcmToken: "fcm-ios" });
-    const upd = fcmMessage(la, orderMsg("IN_PREPARATION", false), 1000) as { token: string; apns: { live_activity_token: string; payload: { aps: Record<string, unknown> } } };
-    expect(upd.token).toBe("fcm-ios");
-    expect(upd.apns.live_activity_token).toBe("la-token");
-    expect(upd.apns.payload.aps).toMatchObject({ event: "update", timestamp: 1000 });
-    expect(upd.apns.payload.aps.alert).toBeUndefined();
-    const end = fcmMessage(la, orderMsg("DELIVERED", true), 1000) as { apns: { payload: { aps: Record<string, unknown> } } };
-    expect(end.apns.payload.aps).toMatchObject({ event: "end", "dismissal-date": 1000 + 4 * 3600 });
-    const start = fcmMessage({ ...la, kind: "LIVE_ACTIVITY_START" }, orderMsg("PAID", true), 1000) as { apns: { payload: { aps: Record<string, unknown> } } };
-    expect(start.apns.payload.aps).toMatchObject({ event: "start", "attributes-type": "OrderActivityAttributes", attributes: { orderId: "o1" } });
+  it("updates, ends and push-starts Live Activities with the liveactivity push type", () => {
+    const la = target({ platform: "IOS", transport: "APNS", kind: "LIVE_ACTIVITY", token: "la-token" });
+    const upd = apnsRequest(la, orderMsg("IN_PREPARATION", false), "rw.nyambika.app", 1000);
+    expect(upd.headers).toMatchObject({ "apns-topic": "rw.nyambika.app.push-type.liveactivity", "apns-push-type": "liveactivity", "apns-priority": "5" });
+    const aps = upd.payload.aps as Record<string, unknown>;
+    expect(aps).toMatchObject({ event: "update", timestamp: 1000, "stale-date": 1000 + 86400 });
+    expect(aps.alert).toBeUndefined();
+    expect(LiveActivityContentState.parse(aps["content-state"])).toBeTruthy();
+    const end = apnsRequest(la, orderMsg("DELIVERED", true), "rw.nyambika.app", 1000);
+    expect(end.payload.aps).toMatchObject({ event: "end", "dismissal-date": 1000 + 4 * 3600, alert: { title: "Delivered. Enjoy it!" } });
+    const start = apnsRequest({ ...la, kind: "LIVE_ACTIVITY_START" }, orderMsg("PAID", true), "rw.nyambika.app", 1000);
+    expect(start.headers["apns-priority"]).toBe("10");
+    expect(start.payload.aps).toMatchObject({ event: "start", "attributes-type": "OrderActivityAttributes", attributes: { orderId: "o1", code: "NY-ABC123" } });
+  });
+});
+
+describe("APNs provider (mocked HTTP/2)", () => {
+  const { privateKey, publicKey } = generateKeyPairSync("ec", { namedCurve: "prime256v1", privateKeyEncoding: { type: "pkcs8", format: "pem" }, publicKeyEncoding: { type: "spki", format: "pem" } });
+  const cfg = { keyId: "ABC123DEFG", teamId: "TEAM123456", key: privateKey, topic: "rw.nyambika.app", production: false };
+
+  it("signs an ES256 provider token with a raw r||s signature", () => {
+    const jwt = apnsJwt(cfg, 1_800_000_000);
+    const [h, c, s] = jwt.split(".");
+    expect(JSON.parse(Buffer.from(h, "base64url").toString())).toEqual({ alg: "ES256", kid: "ABC123DEFG" });
+    expect(JSON.parse(Buffer.from(c, "base64url").toString())).toEqual({ iss: "TEAM123456", iat: 1_800_000_000 });
+    expect(Buffer.from(s, "base64url")).toHaveLength(64);
+    expect(cryptoVerify("sha256", Buffer.from(`${h}.${c}`), { key: publicKey, dsaEncoding: "ieee-p1363" }, Buffer.from(s, "base64url"))).toBe(true);
+  });
+
+  it("posts to the sandbox, reuses the token and revokes BadDeviceToken / 410", async () => {
+    const calls: { authority: string; path: string; headers: Record<string, string>; body: string }[] = [];
+    let next = { status: 200, body: "", apnsId: "id-1" };
+    const p = new ApnsPushProvider(cfg, async (r) => {
+      calls.push(r);
+      return next;
+    });
+    const ios = target({ platform: "IOS", transport: "APNS", token: "ab".repeat(32) });
+    expect(await p.send(ios, orderMsg("PAID", true))).toEqual({ ok: true, providerId: "id-1" });
+    await p.send(ios, orderMsg("ACCEPTED", false));
+    expect(calls[0].authority).toBe("https://api.sandbox.push.apple.com");
+    expect(calls[0].headers.authorization).toMatch(/^bearer /);
+    expect(calls[0].headers.authorization).toBe(calls[1].headers.authorization);
+    expect(JSON.parse(calls[0].body).aps.alert.title).toBe("Paid directly to Uwase Couture");
+    next = { status: 400, body: '{"reason":"BadDeviceToken"}', apnsId: "" };
+    expect(await p.send(ios, orderMsg("PAID", true))).toMatchObject({ ok: false, gone: true });
+    next = { status: 410, body: '{"reason":"Unregistered"}', apnsId: "" };
+    expect(await p.send(ios, orderMsg("PAID", true))).toMatchObject({ ok: false, gone: true });
+    next = { status: 429, body: '{"reason":"TooManyRequests"}', apnsId: "" };
+    expect(await p.send(ios, orderMsg("PAID", true))).toMatchObject({ ok: false, gone: false });
+  });
+
+  it("reads its configuration from env and stays off without it", () => {
+    expect(ApnsPushProvider.fromEnv({})).toBeNull();
+    expect(ApnsPushProvider.fromEnv({ APNS_KEY_ID: "K", APNS_TEAM_ID: "T", APNS_KEY_P8: Buffer.from(privateKey).toString("base64") })).toBeInstanceOf(ApnsPushProvider);
   });
 });
 
@@ -176,8 +226,6 @@ describe("FCM provider (mocked HTTP)", () => {
     expect(JSON.parse(send.body).message.token).toBe("fcm-token-123");
     sendStatus = 404;
     expect(await p.send(target({}), orderMsg("PAID", true))).toMatchObject({ ok: false, gone: true });
-    // Live-activity token without an FCM token on the installation cannot be delivered.
-    expect(await p.send(target({ kind: "LIVE_ACTIVITY", platform: "IOS" }), orderMsg("PAID", true))).toMatchObject({ ok: false });
   });
 });
 

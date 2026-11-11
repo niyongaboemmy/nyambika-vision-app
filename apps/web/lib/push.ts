@@ -91,7 +91,10 @@ export async function enablePush(locale?: string): Promise<PushState> {
     });
     await api("/push/devices", {
       method: "POST",
-      json: { installationId: installationId(), platform: nativePlatform() === "ios" ? "IOS" : "ANDROID", transport: "FCM", token, locale },
+      // iOS: the plugin hands back the raw APNs token (no Firebase SDK on iOS); Android: an FCM token.
+      json: nativePlatform() === "ios"
+        ? { installationId: installationId(), platform: "IOS", transport: "APNS", token, locale }
+        : { installationId: installationId(), platform: "ANDROID", transport: "FCM", token, locale },
     });
     flag.set(true);
     return "on";

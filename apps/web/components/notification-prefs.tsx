@@ -104,7 +104,7 @@ export function NotificationPrefsCard() {
                     <span className="flex-1">
                       {DEVICE_LABEL[d.platform]}
                       {d.installationId === here && <span className="ml-1 text-xs text-gold">· this device</span>}
-                      <span className="block text-xs text-mut">{new Date(d.lastSeenAt).toLocaleDateString(locale === "rw" ? "en-GB" : locale)}{d.appVersion ? ` · v${d.appVersion}` : ""}</span>
+                      <span className="block text-xs text-mut">{new Date(d.lastSeenAt).toLocaleDateString(locale === "fr" ? "fr-FR" : "en-GB", { day: "numeric", month: "short", year: "numeric" })}{d.appVersion ? ` · v${d.appVersion}` : ""}</span>
                     </span>
                     <button
                       type="button"

@@ -1,5 +1,6 @@
 import type { PushMessage } from "@nyambika/contracts";
-import { createHash, createSign } from "node:crypto";
+import { createHash, createPrivateKey, createSign, sign as cryptoSign } from "node:crypto";
+import { connect, type ClientHttp2Session } from "node:http2";
 import webpush from "web-push";
 
 /**
@@ -7,8 +8,9 @@ import webpush from "web-push";
  *
  * - `DevOutboxPushProvider`: default outside production. Nothing leaves the machine; every push is a
  *   row in the outbox (`Notification`, channel PUSH) so crawls and tests can assert on it.
- * - `FcmPushProvider`: Firebase Cloud Messaging HTTP v1 for Android and iOS (APNs via FCM),
- *   including iOS Live Activity updates through `apns.live_activity_token`.
+ * - `FcmPushProvider`: Firebase Cloud Messaging HTTP v1 for Android (FCM registration tokens).
+ * - `ApnsPushProvider`: Apple Push Notification service over HTTP/2 with a token (.p8) key, for iOS
+ *   alerts and ActivityKit Live Activity start/update/end. No Firebase SDK ships in the iOS app.
  * - `WebPushProvider`: RFC 8030/8291 Web Push with VAPID for the PWA.
  */
 
@@ -20,8 +22,6 @@ export interface PushTarget {
   token: string;
   p256dh?: string | null;
   auth?: string | null;
-  /** iOS live-activity tokens are delivered through FCM together with this installation's FCM token. */
-  fcmToken?: string | null;
 }
 
 export interface PushResult {
@@ -44,7 +44,9 @@ export class DevOutboxPushProvider implements PushProvider {
   }
 }
 
-// ── FCM HTTP v1 ──────────────────────────────────────────────────────────────
+const b64url = (b: Buffer | string) => Buffer.from(b).toString("base64url");
+
+// ── FCM HTTP v1 (Android) ────────────────────────────────────────────────────
 
 export interface ServiceAccount {
   project_id: string;
@@ -54,8 +56,6 @@ export interface ServiceAccount {
 }
 
 type FetchLike = (url: string, init: { method: string; headers: Record<string, string>; body: string }) => Promise<{ status: number; ok: boolean; json(): Promise<unknown>; text(): Promise<string> }>;
-
-const b64url = (b: Buffer | string) => Buffer.from(b).toString("base64url");
 
 /** Google OAuth2 service-account assertion (RFC 7523), signed RS256. */
 export function serviceAccountAssertion(sa: ServiceAccount, nowSec = Math.floor(Date.now() / 1000)) {
@@ -74,64 +74,23 @@ export function serviceAccountAssertion(sa: ServiceAccount, nowSec = Math.floor(
   return `${header}.${claims}.${signer.sign(sa.private_key).toString("base64url")}`;
 }
 
-/** Builds the FCM v1 `message` for one target. Pure, so the payload shape is unit-tested. */
-export function fcmMessage(t: PushTarget, msg: PushMessage, nowSec = Math.floor(Date.now() / 1000)): Record<string, unknown> {
+/** Builds the FCM v1 `message` for one Android target. Pure, so the payload shape is unit-tested. */
+export function fcmMessage(t: PushTarget, msg: PushMessage): Record<string, unknown> {
   const data: Record<string, string> = { event: msg.event, url: msg.url, tag: msg.tag, title: msg.title, body: msg.body, alert: msg.alert ? "1" : "0" };
   if (msg.order) {
     data.order = JSON.stringify(msg.order.attributes);
     data.state = JSON.stringify(msg.order.state);
   }
-
-  if (t.kind === "LIVE_ACTIVITY" || t.kind === "LIVE_ACTIVITY_START") {
-    if (!msg.order) throw new Error("Live activity pushes need an order state");
-    const ended = msg.order.state.phase === "DONE" || msg.order.state.phase === "STOPPED";
-    const start = t.kind === "LIVE_ACTIVITY_START";
-    return {
-      token: t.fcmToken,
-      apns: {
-        live_activity_token: t.token,
-        headers: { "apns-priority": msg.alert || start ? "10" : "5" },
-        payload: {
-          aps: {
-            timestamp: nowSec,
-            event: start ? "start" : ended ? "end" : "update",
-            "content-state": msg.order.state,
-            ...(start ? { "attributes-type": "OrderActivityAttributes", attributes: msg.order.attributes } : {}),
-            ...(ended ? { "dismissal-date": nowSec + 4 * 3600 } : {}),
-            ...(msg.alert || start ? { alert: { title: msg.title, body: msg.body } } : {}),
-          },
-        },
-      },
-    };
-  }
-
-  if (t.platform === "ANDROID") {
-    // Order updates are data-only: the app's messaging service renders the ongoing Live Update and
-    // refreshes the widget itself. Other events carry a display notification for the system tray.
-    return {
-      token: t.token,
-      data,
-      android: {
-        priority: msg.alert || msg.order ? "HIGH" : "NORMAL",
-        collapse_key: msg.tag,
-        ttl: "86400s",
-        ...(msg.order ? {} : { notification: { title: msg.title, body: msg.body, tag: msg.tag, channel_id: "general", icon: "ic_stat_nyambika" } }),
-      },
-    };
-  }
-
-  // iOS app (FCM token, APNs underneath).
+  // Order updates are data-only: the app's messaging service (NyambikaMessagingService.kt) renders the
+  // ongoing Live Update and refreshes the widget. Other events carry a tray notification.
   return {
     token: t.token,
     data,
-    ...(msg.alert ? { notification: { title: msg.title, body: msg.body } } : {}),
-    apns: {
-      headers: {
-        "apns-collapse-id": msg.tag.slice(0, 64),
-        "apns-priority": msg.alert ? "10" : "5",
-        "apns-push-type": msg.alert ? "alert" : "background",
-      },
-      payload: { aps: msg.alert ? { sound: "default", "thread-id": msg.tag, "mutable-content": 1 } : { "content-available": 1 } },
+    android: {
+      priority: msg.alert || msg.order ? "HIGH" : "NORMAL",
+      collapse_key: msg.tag,
+      ttl: "86400s",
+      ...(msg.order ? {} : { notification: { title: msg.title, body: msg.body, tag: msg.tag, channel_id: "general", icon: "ic_stat_nyambika" } }),
     },
   };
 }
@@ -166,7 +125,6 @@ export class FcmPushProvider implements PushProvider {
   }
 
   async send(t: PushTarget, msg: PushMessage): Promise<PushResult> {
-    if ((t.kind !== "DEVICE") && !t.fcmToken) return { ok: false, error: "No FCM token for this installation" };
     const token = await this.accessToken();
     const res = await this.fetchImpl(`https://fcm.googleapis.com/v1/projects/${this.sa.project_id}/messages:send`, {
       method: "POST",
@@ -184,6 +142,155 @@ export class FcmPushProvider implements PushProvider {
   }
 }
 
+// ── APNs (iOS alerts + Live Activities) ──────────────────────────────────────
+
+export interface ApnsConfig {
+  keyId: string;
+  teamId: string;
+  /** Contents of the AuthKey_XXXX.p8 file. */
+  key: string;
+  /** App bundle id, e.g. rw.nyambika.app. */
+  topic: string;
+  production: boolean;
+}
+
+export interface ApnsRequest {
+  path: string;
+  headers: Record<string, string>;
+  payload: Record<string, unknown>;
+}
+
+/** Provider authentication token (ES256, raw r||s signature), valid for up to an hour. */
+export function apnsJwt(c: Pick<ApnsConfig, "keyId" | "teamId" | "key">, nowSec = Math.floor(Date.now() / 1000)) {
+  const header = b64url(JSON.stringify({ alg: "ES256", kid: c.keyId }));
+  const claims = b64url(JSON.stringify({ iss: c.teamId, iat: nowSec }));
+  const sig = cryptoSign("sha256", Buffer.from(`${header}.${claims}`), { key: createPrivateKey(c.key), dsaEncoding: "ieee-p1363" });
+  return `${header}.${claims}.${sig.toString("base64url")}`;
+}
+
+/**
+ * Builds the APNs request for one iOS target. Live Activity tokens use the `liveactivity` push type
+ * and the `<bundle>.push-type.liveactivity` topic; `content-state` decodes into
+ * `OrderActivityAttributes.ContentState` (apps/native/ios/App/NyambikaWidgets/OrderActivityAttributes.swift).
+ */
+export function apnsRequest(t: PushTarget, msg: PushMessage, topic: string, nowSec = Math.floor(Date.now() / 1000)): ApnsRequest {
+  const path = `/3/device/${t.token}`;
+  if (t.kind === "LIVE_ACTIVITY" || t.kind === "LIVE_ACTIVITY_START") {
+    if (!msg.order) throw new Error("Live activity pushes need an order state");
+    const ended = msg.order.state.phase === "DONE" || msg.order.state.phase === "STOPPED";
+    const start = t.kind === "LIVE_ACTIVITY_START";
+    const loud = msg.alert || start;
+    return {
+      path,
+      headers: { "apns-topic": `${topic}.push-type.liveactivity`, "apns-push-type": "liveactivity", "apns-priority": loud ? "10" : "5", "apns-expiration": String(nowSec + 8 * 3600) },
+      payload: {
+        aps: {
+          timestamp: nowSec,
+          event: start ? "start" : ended ? "end" : "update",
+          "content-state": msg.order.state,
+          ...(start ? { "attributes-type": "OrderActivityAttributes", attributes: msg.order.attributes } : {}),
+          ...(ended ? { "dismissal-date": nowSec + 4 * 3600 } : { "stale-date": nowSec + 24 * 3600 }),
+          ...(loud ? { alert: { title: msg.title, body: msg.body }, sound: "default" } : {}),
+        },
+      },
+    };
+  }
+  const custom: Record<string, unknown> = { event: msg.event, url: msg.url };
+  if (msg.order) custom.order = { attributes: msg.order.attributes, state: msg.order.state };
+  return {
+    path,
+    headers: {
+      "apns-topic": topic,
+      "apns-push-type": msg.alert ? "alert" : "background",
+      "apns-priority": msg.alert ? "10" : "5",
+      "apns-collapse-id": msg.tag.slice(0, 64),
+      "apns-expiration": String(nowSec + 86400),
+    },
+    payload: {
+      aps: msg.alert
+        ? { alert: { title: msg.title, body: msg.body }, sound: "default", "thread-id": msg.tag, "mutable-content": 1, "relevance-score": msg.order ? 1 : 0.5 }
+        : { "content-available": 1 },
+      ...custom,
+    },
+  };
+}
+
+export type ApnsTransport = (req: { authority: string; path: string; headers: Record<string, string>; body: string }) => Promise<{ status: number; body: string; apnsId?: string }>;
+
+/** Default HTTP/2 transport with one reused session per authority. */
+export function http2Transport(): ApnsTransport {
+  const sessions = new Map<string, ClientHttp2Session>();
+  const session = (authority: string) => {
+    let s = sessions.get(authority);
+    if (!s || s.closed || s.destroyed) {
+      s = connect(authority);
+      s.on("error", () => sessions.delete(authority));
+      s.on("close", () => sessions.delete(authority));
+      s.unref();
+      sessions.set(authority, s);
+    }
+    return s;
+  };
+  return (r) =>
+    new Promise((resolve, reject) => {
+      const req = session(r.authority).request({ ":method": "POST", ":path": r.path, "content-type": "application/json", ...r.headers });
+      let status = 0;
+      let apnsId: string | undefined;
+      let body = "";
+      req.setEncoding("utf8");
+      req.on("response", (h) => {
+        status = Number(h[":status"]);
+        apnsId = h["apns-id"] as string | undefined;
+      });
+      req.on("data", (c: string) => (body += c));
+      req.on("end", () => resolve({ status, body, apnsId }));
+      req.on("error", reject);
+      req.setTimeout(10_000, () => req.close());
+      req.end(r.body);
+    });
+}
+
+export class ApnsPushProvider implements PushProvider {
+  readonly name = "apns";
+  private cached: { jwt: string; at: number } | null = null;
+  constructor(
+    private c: ApnsConfig,
+    private transport: ApnsTransport = http2Transport(),
+  ) {}
+
+  static fromEnv(env: NodeJS.ProcessEnv = process.env): ApnsPushProvider | null {
+    if (!env.APNS_KEY_ID || !env.APNS_TEAM_ID || !env.APNS_KEY_P8) return null;
+    const raw = env.APNS_KEY_P8;
+    const key = raw.includes("BEGIN PRIVATE KEY") ? raw.replace(/\\n/g, "\n") : Buffer.from(raw, "base64").toString("utf8");
+    return new ApnsPushProvider({ keyId: env.APNS_KEY_ID, teamId: env.APNS_TEAM_ID, key, topic: env.APNS_TOPIC ?? "rw.nyambika.app", production: env.APNS_ENV !== "sandbox" });
+  }
+
+  token(nowSec = Math.floor(Date.now() / 1000)) {
+    // APNs rejects tokens older than an hour and throttles refreshes more often than every 20 minutes.
+    if (this.cached && nowSec - this.cached.at < 40 * 60) return this.cached.jwt;
+    this.cached = { jwt: apnsJwt(this.c, nowSec), at: nowSec };
+    return this.cached.jwt;
+  }
+
+  async send(t: PushTarget, msg: PushMessage): Promise<PushResult> {
+    const r = apnsRequest(t, msg, this.c.topic);
+    const res = await this.transport({
+      authority: this.c.production ? "https://api.push.apple.com" : "https://api.sandbox.push.apple.com",
+      path: r.path,
+      headers: { authorization: `bearer ${this.token()}`, ...r.headers },
+      body: JSON.stringify(r.payload),
+    });
+    if (res.status === 200) return { ok: true, providerId: res.apnsId };
+    // https://developer.apple.com/documentation/usernotifications/handling-notification-responses-from-apns
+    let reason = "";
+    try {
+      reason = (JSON.parse(res.body) as { reason?: string }).reason ?? "";
+    } catch {}
+    const gone = res.status === 410 || ["BadDeviceToken", "Unregistered", "DeviceTokenNotForTopic", "ExpiredToken"].includes(reason);
+    return { ok: false, gone, error: `${res.status} ${reason}`.trim() };
+  }
+}
+
 // ── Web Push ─────────────────────────────────────────────────────────────────
 
 export interface VapidKeys {
@@ -194,7 +301,7 @@ export interface VapidKeys {
 
 type WebPushSend = typeof webpush.sendNotification;
 
-/** The JSON the service worker receives (`public/sw.js` push handler). */
+/** The JSON the service worker receives (`apps/web/public/sw.js` push handler). */
 export function webPushPayload(msg: PushMessage) {
   return {
     title: msg.title,

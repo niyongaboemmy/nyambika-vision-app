@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="channel_orders">Aho komande igeze</string>
+    <string name="channel_orders_desc">Amakuru ako kanya kuva wishyuye kugeza bikugezeho.</string>
+    <string name="channel_general">Nyambika</string>
+    <string name="widget_label">Imyambarire y\'uyu munsi · komande</string>
+    <string name="widget_description">Komande yawe iri mu nzira, cyangwa imyambarire y\'uyu munsi.</string>
+</resources>

@@ -59,7 +59,7 @@ export class PushController {
       tag: "test",
       alert: true,
       refId: `test-${user.id}`,
-    }), { throttleMs: 10_000 });
+    }), { throttleMs: 10_000, ignorePrefs: true }); // a test must work even with every category off
     return r;
   }
 }

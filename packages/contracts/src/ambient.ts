@@ -76,8 +76,9 @@ export const PushDeviceRegister = z
       if (!d.keys) ctx.addIssue({ code: "custom", message: "Web Push subscriptions need keys", path: ["keys"] });
       if (!/^https:\/\//.test(d.token)) ctx.addIssue({ code: "custom", message: "Web Push endpoint must be https", path: ["token"] });
     } else if (d.platform === "WEB") ctx.addIssue({ code: "custom", message: "The web uses Web Push", path: ["transport"] });
+    if (d.transport === "APNS" && d.platform !== "IOS") ctx.addIssue({ code: "custom", message: "APNs tokens come from iOS", path: ["transport"] });
     if (d.kind === "LIVE_ACTIVITY" && !d.orderId) ctx.addIssue({ code: "custom", message: "Live activity tokens belong to an order", path: ["orderId"] });
-    if (d.kind !== "DEVICE" && d.platform !== "IOS") ctx.addIssue({ code: "custom", message: "Live activity tokens are iOS only", path: ["kind"] });
+    if (d.kind !== "DEVICE" && (d.platform !== "IOS" || d.transport !== "APNS")) ctx.addIssue({ code: "custom", message: "Live activity tokens are iOS APNs tokens", path: ["kind"] });
   });
 export type PushDeviceRegister = z.input<typeof PushDeviceRegister>;
 

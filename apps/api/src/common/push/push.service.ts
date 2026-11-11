@@ -21,7 +21,7 @@ import webpush from "web-push";
 import { config } from "../../config";
 import { PrismaService } from "../prisma.service";
 import { parse } from "../zod";
-import { DevOutboxPushProvider, FcmPushProvider, WebPushProvider, type PushProvider, type PushResult, type PushTarget, type VapidKeys } from "./providers";
+import { ApnsPushProvider, DevOutboxPushProvider, FcmPushProvider, WebPushProvider, type PushProvider, type PushResult, type PushTarget, type VapidKeys } from "./providers";
 
 type Locale = "rw" | "en" | "fr";
 const asLocale = (l: string | null | undefined): Locale => (l === "rw" || l === "fr" ? l : "en");
@@ -44,21 +44,28 @@ export class PushService {
   private log = new Logger("Push");
   private vapidKeys: VapidKeys | null = null;
   /** Overridable in tests. */
-  providers: { fcm: PushProvider; webpush: PushProvider; mode: "dev" | "live" };
+  providers: { fcm: PushProvider; apns: PushProvider; webpush: PushProvider; mode: "dev" | "live" };
 
   constructor(private prisma: PrismaService) {
     const live = (process.env.PUSH_PROVIDER ?? (process.env.NODE_ENV === "production" ? "live" : "dev")) === "live";
     const dev = new DevOutboxPushProvider();
-    let fcm: PushProvider = dev;
-    if (live) {
+    const load = (name: string, make: () => PushProvider | null): PushProvider => {
+      if (!live) return dev;
       try {
-        fcm = FcmPushProvider.fromEnv() ?? dev;
+        const p = make();
+        if (p) return p;
+        this.log.warn(`PUSH_PROVIDER=live but ${name} is not configured: those pushes go to the outbox only`);
       } catch (e) {
-        this.log.error(`FCM disabled: ${(e as Error).message}`);
+        this.log.error(`${name} disabled: ${(e as Error).message}`);
       }
-      if (fcm === dev) this.log.warn("PUSH_PROVIDER=live but no FCM_SERVICE_ACCOUNT_JSON: native pushes go to the outbox only");
-    }
-    this.providers = { fcm, webpush: live ? new WebPushProvider(this.vapid()) : dev, mode: live ? "live" : "dev" };
+      return dev;
+    };
+    this.providers = {
+      fcm: load("FCM (FCM_SERVICE_ACCOUNT_JSON)", () => FcmPushProvider.fromEnv()),
+      apns: load("APNs (APNS_KEY_ID/APNS_TEAM_ID/APNS_KEY_P8)", () => ApnsPushProvider.fromEnv()),
+      webpush: live ? new WebPushProvider(this.vapid()) : dev,
+      mode: live ? "live" : "dev",
+    };
   }
 
   /** VAPID keys from env; in development a pair is generated once and kept under storage/private. */
@@ -165,7 +172,7 @@ export class PushService {
    * Send `event` to every live device of `userId` that the preferences allow. `build` is called once
    * per locale. `throttleMs` drops the push if the same event/ref already reached this user recently.
    */
-  async notify(userId: string, event: PushEvent, build: (l: Locale) => PushMessage, opts: { throttleMs?: number } = {}): Promise<FanOutResult> {
+  async notify(userId: string, event: PushEvent, build: (l: Locale) => PushMessage, opts: { throttleMs?: number; ignorePrefs?: boolean } = {}): Promise<FanOutResult> {
     const res: FanOutResult = { sent: 0, failed: 0, skipped: 0, revoked: 0, targets: [] };
     try {
       const user = await this.prisma.user.findUnique({ where: { id: userId }, select: { locale: true, deletedAt: true } });
@@ -186,7 +193,7 @@ export class PushService {
       for (const d of all) {
         const kind = d.kind as PushDeviceKind;
         const eligible =
-          pushAllowed(prefs, event, kind) &&
+          (opts.ignorePrefs ? kind === "DEVICE" : pushAllowed(prefs, event, kind)) &&
           (kind === "DEVICE" ||
             (kind === "LIVE_ACTIVITY" && !!orderId && d.orderId === orderId) ||
             // Push-to-start (iOS 17.2+): only once, when payment lands and no activity exists yet.
@@ -195,9 +202,7 @@ export class PushService {
           res.skipped++;
           continue;
         }
-        const fcmToken = kind === "DEVICE" ? null : all.find((x) => x.installationId === d.installationId && x.kind === "DEVICE" && x.transport === "FCM")?.token ?? null;
-        const target: PushTarget = { ...d, fcmToken };
-        const r = await this.deliver(userId, target, event, msg);
+        const r = await this.deliver(userId, d as PushTarget, event, msg);
         res.targets.push({ deviceId: d.id, kind: d.kind, transport: d.transport, ok: r.ok });
         if (r.ok) res.sent++;
         else res.failed++;
@@ -210,7 +215,7 @@ export class PushService {
   }
 
   private async deliver(userId: string, t: PushTarget, event: PushEvent, msg: PushMessage): Promise<PushResult> {
-    const provider = t.transport === "WEBPUSH" ? this.providers.webpush : this.providers.fcm;
+    const provider = t.transport === "WEBPUSH" ? this.providers.webpush : t.transport === "APNS" ? this.providers.apns : this.providers.fcm;
     let r: PushResult;
     try {
       r = await provider.send(t, msg);

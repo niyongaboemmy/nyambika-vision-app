@@ -52,7 +52,7 @@ beforeAll(async () => {
   prisma = app.get(PrismaService);
   push = app.get(PushService);
   payments = app.get(PaymentsService);
-  push.providers = { fcm: rec, webpush: rec, mode: "dev" };
+  push.providers = { fcm: rec, apns: rec, webpush: rec, mode: "dev" };
 });
 afterAll(async () => {
   await app?.close();
@@ -119,7 +119,7 @@ describe("order lifecycle fan-out", () => {
     await s.agent.post("/push/devices").send(webSub("o1")).expect(201);
     await s.agent.post("/push/devices").send(android("o1")).expect(201);
     const ios = { installationId: `ios_${uniq}_o1`, platform: "IOS" };
-    await s.agent.post("/push/devices").send({ ...ios, transport: "FCM", token: `fcm-ios-${uniq}-xxxxxxxxxxxx` }).expect(201);
+    await s.agent.post("/push/devices").send({ ...ios, transport: "APNS", token: `apns-ios-${uniq}-xxxxxxxxxxxx` }).expect(201);
     await s.agent.post("/push/devices").send({ ...ios, transport: "APNS", kind: "LIVE_ACTIVITY_START", token: "cd".repeat(32) }).expect(201);
 
     const order = await s.agent.post("/orders").set("idempotency-key", `push-${uniq}-1`).send({ variantId, size: "M", delivery: "DELIVERY", address: "KG 11 Ave, Kigali", wallet: "MTN_MOMO", payerPhone: e164(`0787${uniq}1`) }).expect(201);
@@ -129,8 +129,7 @@ describe("order lifecycle fan-out", () => {
 
     const paid = rec.sent.filter((x) => x.msg.event === "order.paid");
     expect(paid.map((x) => `${x.target.platform}/${x.target.kind}`).sort()).toEqual(["ANDROID/DEVICE", "IOS/DEVICE", "IOS/LIVE_ACTIVITY_START", "WEB/DEVICE"]);
-    const start = paid.find((x) => x.target.kind === "LIVE_ACTIVITY_START")!;
-    expect(start.target.fcmToken).toBe(`fcm-ios-${uniq}-xxxxxxxxxxxx`);
+    expect(paid.find((x) => x.target.kind === "LIVE_ACTIVITY_START")!.target.transport).toBe("APNS");
     expect(paid[0].msg).toMatchObject({ alert: true, url: `/orders/${order.body.id}`, tag: `order-${order.body.id}` });
     expect(paid[0].msg.order!.state).toMatchObject({ status: "PAID", stepIndex: 0, phase: "ACTIVE" });
     expect(paid[0].msg.title).toBe("Paid directly to Uwase 1");
@@ -166,7 +165,7 @@ describe("order lifecycle fan-out", () => {
     const s = await login(`0787${uniq}2`);
     await s.agent.post("/push/devices").send(webSub("p2")).expect(201);
     const ios = { installationId: `ios_${uniq}_p2`, platform: "IOS" };
-    await s.agent.post("/push/devices").send({ ...ios, transport: "FCM", token: `fcm-ios-${uniq}-p2-xxxxxxxxx` }).expect(201);
+    await s.agent.post("/push/devices").send({ ...ios, transport: "APNS", token: `apns-ios-${uniq}-p2-xxxxxxxx` }).expect(201);
     await s.agent.post("/push/devices").send({ ...ios, transport: "APNS", kind: "LIVE_ACTIVITY_START", token: "aa".repeat(32) }).expect(201);
     expect((await s.agent.put("/push/prefs").send({ liveActivity: false }).expect(200)).body.prefs).toMatchObject({ liveActivity: false, orders: true });
     await s.agent.put("/push/prefs").send({ orders: "yes" }).expect(400);

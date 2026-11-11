@@ -20,7 +20,7 @@ const config: CapacitorConfig = {
   appId: "rw.nyambika.app",
   appName: "Nyambika",
   webDir: "www",
-  loggingBehavior: "debug",
+  loggingBehavior: cleartext ? "debug" : "none",
   server: {
     url: SERVER_URL,
     cleartext,
