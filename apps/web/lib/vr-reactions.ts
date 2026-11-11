@@ -9,7 +9,7 @@ export const VR_REACTION: Record<string, { icon: IconName; label: string; color:
   "\u{1F525}": { icon: "fire", label: "Fire", color: "#ff9f0a" },
   "\u{1F60D}": { icon: "heart", label: "Love it", color: "#ff375f" },
   "\u{1F44F}": { icon: "clap", label: "Applause", color: "#ffb340" },
-  "✨": { icon: "sparkle", label: "Sparkle", color: "#bf5af2" },
+  "\u2728": { icon: "sparkle", label: "Sparkle", color: "#bf5af2" },
   "\u{1F483}": { icon: "music", label: "Dance", color: "#64d2ff" },
 };
 
