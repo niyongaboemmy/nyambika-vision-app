@@ -153,7 +153,7 @@ async function copyMetrics(page) {
     const words = (document.body.innerText.match(/[\p{L}\p{N}][\p{L}\p{N}'’.-]*/gu) ?? []).length;
     const paras = [];
     for (const el of document.querySelectorAll("p,li,span,div,dd,figcaption,small,label,legend")) {
-      if (!vis(el) || el.closest("input,textarea,select,code,pre,[role=log],[data-allow-prose]")) continue;
+      if (!vis(el) || el.closest("input,textarea,select,code,pre,[role=log],[data-allow-prose]") || el.closest("details:not([open]) > :not(summary)")) continue;
       const own = [...el.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join("").trim();
       if (own.length < 40) continue;
       const cs = getComputedStyle(el);
@@ -173,7 +173,18 @@ async function copyMetrics(page) {
       const h = Math.max(r.height, hr.height, exp ? parseFloat(af.height) || 0 : 0);
       if (w < 43.5 || h < 43.5) small.push(`${el.tagName.toLowerCase()} ${Math.round(w)}x${Math.round(h)} "${(el.getAttribute("aria-label") ?? el.innerText ?? "").trim().slice(0, 30)}"`);
     }
-    return { words, longParas: paras.length, paras: paras.sort((a, b) => b.lines - a.lines).slice(0, 8), smallTargets: small.length, small: small.slice(0, 12) };
+    // iOS pass: no emoji in rendered text or in names/placeholders (Extended_Pictographic + U+FE0F; © ® ™ allowed).
+    const EMO = /[\p{Extended_Pictographic}\u{FE0F}]/u;
+    const emo = (s) => [...(s ?? "")].filter((c) => EMO.test(c) && !"©®™".includes(c)).join("");
+    const emoji = [];
+    const bodyEmo = emo(document.body.innerText);
+    if (bodyEmo) emoji.push(`text "${bodyEmo.slice(0, 12)}"`);
+    for (const el of document.querySelectorAll("[aria-label],[title],[placeholder],img[alt]")) {
+      const v = ["aria-label", "title", "placeholder", "alt"].map((a) => el.getAttribute(a)).filter(Boolean).join(" ");
+      const e = emo(v);
+      if (e) emoji.push(`${el.tagName.toLowerCase()} "${v.slice(0, 40)}"`);
+    }
+    return { words, longParas: paras.length, paras: paras.sort((a, b) => b.lines - a.lines).slice(0, 8), smallTargets: small.length, small: small.slice(0, 12), emoji: emoji.slice(0, 6) };
   });
 }
 
@@ -215,6 +226,7 @@ for (const theme of THEMES) {
         if (vp === 390) {
           const m = await copyMetrics(page);
           (metrics[name] ??= {})[theme] = m;
+          if (m.emoji.length) issues.push(`${tag} emoji in UI: ${m.emoji.join(", ")}`);
           if (STRICT && m.smallTargets) issues.push(`${tag} ${m.smallTargets} tap target(s) under 44px e.g. ${m.small.slice(0, 3).join(", ")}`);
         }
         if (shoot) {
