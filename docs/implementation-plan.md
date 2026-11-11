@@ -506,6 +506,7 @@ Physics-based drape and **fit heatmaps** (pattern-based garments) · **tailor pa
 
 * **Spike 1, physics drape + fit heatmaps + tailor pattern-to-3D (Nov 2026):** flag-gated CPU prototype, NLB-style harness on synthetic bodies S..3XL. Outcome **Iterate**; see [`docs/spikes/r4-drape-pattern-3d.md`](spikes/r4-drape-pattern-3d.md).
 * **Spike 2, fine-tuned local model on consented garment data + advanced trend insights (Nov 2026):** consent-ledger opt-in, versioned manifests with tombstones and PII screen, CPU attribute model with per-head release behind `ml.local_attr_spike`, k-anonymous trends card behind `insights.trends_spike`. Outcome **Go** (pilot behind flags) for data governance and trends, **Iterate** for the model; see [`docs/spikes/r4-local-model-trends.md`](spikes/r4-local-model-trends.md).
+* **Spike 3, mixed-reality fitting mirror + multi-user VR events (Nov 2026):** flag-gated WebXR immersive-ar mirror and a WebSocket presence gateway (Redis bus) in the E35 showroom; load test 20/50/100 per room, comfort/safety review. Outcome **Iterate** (MR mirror: lean No-go for 2027); see [`docs/spikes/r4-mr-mirror-multiuser-vr.md`](spikes/r4-mr-mirror-multiuser-vr.md).
 
 ---
 

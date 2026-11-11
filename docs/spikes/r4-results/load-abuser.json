@@ -1,0 +1,60 @@
+{
+  "kind": "R4_SPIKE_LOAD",
+  "label": "abuser",
+  "room": "showroom:uwase-couture",
+  "at": "2026-11-11T11:14:19.453Z",
+  "node": "v25.6.1",
+  "machine": "darwin-arm64",
+  "protocol": {
+    "hz": 10,
+    "encoding": "JSON, cm + mrad integers"
+  },
+  "results": [
+    {
+      "clients": 20,
+      "instances": 1,
+      "durationSec": 15,
+      "connected": 20,
+      "refused": 0,
+      "avatars": 19,
+      "spectators": 0,
+      "downBytesPerSecPerAvatar": 4663,
+      "downBytesPerSecPerSpectator": null,
+      "upBytesPerSecPerAvatar": 559,
+      "avatarsVisiblePerViewer": 18,
+      "latencyMs": {
+        "p50": 48,
+        "p95": 94,
+        "p99": 100,
+        "samples": 32282
+      },
+      "spectatorLatencyMsP95": null,
+      "closes": {
+        "1000": 19,
+        "4008": 1
+      },
+      "abuser": {
+        "closedWith": 4008,
+        "upBytes": 5458
+      },
+      "server": [
+        {
+          "instance": "09f014f74d",
+          "cpuPctOfOneCore": 2.2,
+          "tickMsP50": 0.3,
+          "tickMsP95": 0.47,
+          "tickMsMax": 2.57,
+          "publishMsP95": 0.23,
+          "timerLagMsP95": 1.81,
+          "rssMB": 123,
+          "outKBps": 87,
+          "inKBps": 11,
+          "msgsOutPerSec": 237,
+          "drops": 75,
+          "backpressureSkips": 0,
+          "closedFlood": 1
+        }
+      ]
+    }
+  ]
+}

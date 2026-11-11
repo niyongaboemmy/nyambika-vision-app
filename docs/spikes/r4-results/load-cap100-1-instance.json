@@ -1,0 +1,137 @@
+{
+  "kind": "R4_SPIKE_LOAD",
+  "label": "cap100-1-instance",
+  "room": "showroom:uwase-couture",
+  "at": "2026-11-11T11:12:45.854Z",
+  "node": "v25.6.1",
+  "machine": "darwin-arm64",
+  "protocol": {
+    "hz": 10,
+    "encoding": "JSON, cm + mrad integers"
+  },
+  "results": [
+    {
+      "clients": 20,
+      "instances": 1,
+      "durationSec": 20,
+      "connected": 20,
+      "refused": 0,
+      "avatars": 20,
+      "spectators": 0,
+      "downBytesPerSecPerAvatar": 4753,
+      "downBytesPerSecPerSpectator": null,
+      "upBytesPerSecPerAvatar": 562,
+      "avatarsVisiblePerViewer": 18,
+      "latencyMs": {
+        "p50": 53,
+        "p95": 95,
+        "p99": 101,
+        "samples": 45642
+      },
+      "spectatorLatencyMsP95": null,
+      "closes": {
+        "1000": 20
+      },
+      "server": [
+        {
+          "instance": "e9592f07a3",
+          "cpuPctOfOneCore": 5.6,
+          "tickMsP50": 0.01,
+          "tickMsP95": 1.45,
+          "tickMsMax": 4.33,
+          "publishMsP95": 0.55,
+          "timerLagMsP95": 2.21,
+          "rssMB": 246,
+          "outKBps": 93,
+          "inKBps": 11,
+          "msgsOutPerSec": 256,
+          "drops": 0,
+          "backpressureSkips": 0,
+          "closedFlood": 0
+        }
+      ]
+    },
+    {
+      "clients": 50,
+      "instances": 1,
+      "durationSec": 20,
+      "connected": 50,
+      "refused": 0,
+      "avatars": 50,
+      "spectators": 0,
+      "downBytesPerSecPerAvatar": 5333,
+      "downBytesPerSecPerSpectator": null,
+      "upBytesPerSecPerAvatar": 563,
+      "avatarsVisiblePerViewer": 36,
+      "latencyMs": {
+        "p50": 47,
+        "p95": 94,
+        "p99": 100,
+        "samples": 126455
+      },
+      "spectatorLatencyMsP95": null,
+      "closes": {
+        "1000": 50
+      },
+      "server": [
+        {
+          "instance": "e9592f07a3",
+          "cpuPctOfOneCore": 5.8,
+          "tickMsP50": 0.74,
+          "tickMsP95": 1.83,
+          "tickMsMax": 4.33,
+          "publishMsP95": 0.41,
+          "timerLagMsP95": 1.87,
+          "rssMB": 259,
+          "outKBps": 260,
+          "inKBps": 27,
+          "msgsOutPerSec": 838,
+          "drops": 0,
+          "backpressureSkips": 0,
+          "closedFlood": 0
+        }
+      ]
+    },
+    {
+      "clients": 100,
+      "instances": 1,
+      "durationSec": 20,
+      "connected": 100,
+      "refused": 0,
+      "avatars": 100,
+      "spectators": 0,
+      "downBytesPerSecPerAvatar": 5501,
+      "downBytesPerSecPerSpectator": null,
+      "upBytesPerSecPerAvatar": 564,
+      "avatarsVisiblePerViewer": 53,
+      "latencyMs": {
+        "p50": 50,
+        "p95": 94,
+        "p99": 101,
+        "samples": 253275
+      },
+      "spectatorLatencyMsP95": null,
+      "closes": {
+        "1000": 100
+      },
+      "server": [
+        {
+          "instance": "e9592f07a3",
+          "cpuPctOfOneCore": 8.3,
+          "tickMsP50": 1.04,
+          "tickMsP95": 3.59,
+          "tickMsMax": 7.19,
+          "publishMsP95": 0.37,
+          "timerLagMsP95": 1.51,
+          "rssMB": 267,
+          "outKBps": 535,
+          "inKBps": 55,
+          "msgsOutPerSec": 2070,
+          "drops": 0,
+          "backpressureSkips": 0,
+          "closedFlood": 0
+        }
+      ]
+    }
+  ]
+}

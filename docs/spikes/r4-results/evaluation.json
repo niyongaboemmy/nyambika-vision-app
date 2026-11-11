@@ -1,0 +1,59 @@
+{
+  "kind": "R4_SPIKE_EVAL",
+  "spike": "r4-mr-mirror-multiuser-vr",
+  "status": "R4 spike (not committed)",
+  "at": "2026-11-11",
+  "flags": { "mr.mirror_spike": false, "vr.multiuser_spike": false },
+  "evidence": {
+    "unit": "apps/api/src/modules/presence/presence.spec.ts (17 tests)",
+    "load": ["load-default-cap-1-instance.json", "load-cap100-1-instance.json", "load-default-cap-2-instances.json", "load-abuser.json"],
+    "crawl": "scripts/crawl-mrvr.mjs (Pixel 7, SwiftShader, mocked navigator.xr)"
+  },
+  "gates": [
+    { "id": "LOAD-1", "criterion": "20 avatars in one room, one instance: p95 pose latency <= 150 ms on LAN", "result": "p95 94 ms (p50 45)", "pass": true },
+    { "id": "LOAD-2", "criterion": "Downstream per avatar <= 64 kbit/s at 20 avatars", "result": "4.6 KB/s = 37 kbit/s", "pass": true },
+    { "id": "LOAD-3", "criterion": "100 joiners degrade gracefully (no refusals, avatars unaffected)", "result": "20 avatars + 80 spectators; avatar p95 93 ms; spectators 1.4 KB/s at 2 Hz", "pass": true },
+    { "id": "LOAD-4", "criterion": "Interest management bounds per-client bandwidth when all 100 are avatars", "result": "5.5 KB/s per avatar at 100 avatars (vs 4.8 at 20), server tick p95 3.6 ms", "pass": true },
+    { "id": "LOAD-5", "criterion": "Cross-instance fan-out via Redis adds <= 100 ms p95", "result": "p95 139-145 ms vs 93-95 ms single instance (+~50 ms)", "pass": true },
+    { "id": "LOAD-6", "criterion": "A flooding client is cut off without hurting others", "result": "closed 4008 after ~3 s; others p95 94 ms", "pass": true },
+    { "id": "DEVICE-1", "criterion": "Real-headset comfort + performance run on >= 3 devices (matrix below)", "result": "not run: no hardware in this spike", "pass": false },
+    { "id": "SAFETY-1", "criterion": "Harassment controls, bubble, minors policy reviewed (below)", "result": "built for the spike; production gaps listed", "pass": true },
+    { "id": "PRIVACY-1", "criterion": "No camera frame reaches the page; no twin / identity in presence", "result": "camera-access never requested; protocol carries sid + pseudonym + pose only; unit test asserts no user id on the wire", "pass": true }
+  ],
+  "comfortAccessibility": [
+    { "item": "Teleport-only locomotion in XR (no smooth locomotion)", "status": "pass", "where": "E35 vr-engine (inherited); presence 'Go near' teleports in XR" },
+    { "item": "Snap turn 30 degrees, no forced camera motion", "status": "pass", "where": "E35 vr-engine" },
+    { "item": "Seated mode (eye height 1.2 m, local space); seated flag shared so avatars render seated", "status": "pass", "where": "showroom toggle + ticket.seated + PresenceLayer" },
+    { "item": "Comfort vignette during inline glides / XR teleports", "status": "missing", "where": "teleports are instant in XR (no vignette needed); inline glide has none, reduced-motion makes it instant" },
+    { "item": "Captions for joins, reactions and host actions", "status": "pass", "where": "SharedRoom captions (aria-live, CC toggle); ambient sound captioned (E35)" },
+    { "item": "Captions inside the headset (world-space)", "status": "missing", "where": "captions are DOM; in immersive mode only the spatial emoji is visible; needs an XR caption panel" },
+    { "item": "Reduced motion: avatars snap, emoji do not rise, mirror turntable stops", "status": "pass", "where": "PresenceLayer / MirrorEngine" },
+    { "item": "Personal-space bubble on by default, user can switch it", "status": "pass", "where": "PresenceLayer.bubble (0.9 m)" },
+    { "item": "Keyboard / screen reader: every presence and mirror action is a labelled DOM control", "status": "pass", "where": "people sheet, report fieldset, reaction group, mirror fieldsets" },
+    { "item": "Touch targets >= 44 px at 360-430 px", "status": "pass", "where": "crawl screenshots (Pixel 7)" },
+    { "item": "MR mirror placement without precise pointing (gaze hit-test + tap/pinch/trigger)", "status": "pass (untested on device)", "where": "MirrorEngine viewer-space hit-test" },
+    { "item": "Session length nudges (break reminder after 20 min)", "status": "missing", "where": "production" }
+  ],
+  "deviceMatrixTemplate": {
+    "instructions": "Fill one row per device per build. FPS from the browser's WebXR perf overlay / OVR Metrics; comfort 1-5 from 3 testers (seated + standing); 'MR place' = time from Enter to mirror placed.",
+    "columns": ["device", "os/browser", "session", "enters", "fps p50/p5 (20 avatars)", "MR place (s)", "hit-test ok", "hand/controller ray ok", "colour/size switch ok", "presence visible", "reactions ok", "comfort 1-5", "notes"],
+    "rows": [
+      { "device": "Meta Quest 3 / 3S", "os/browser": "Horizon OS, Meta Quest Browser", "session": "immersive-ar (passthrough) + immersive-vr", "expected": "full: hit-test, hands, controllers" },
+      { "device": "Meta Quest 2", "os/browser": "Meta Quest Browser", "session": "immersive-ar (greyscale passthrough) + immersive-vr", "expected": "perf floor for 20 avatars" },
+      { "device": "Samsung Galaxy XR (Android XR)", "os/browser": "Android XR, Chrome", "session": "immersive-ar + immersive-vr", "expected": "hands + eye/hand transient pointer" },
+      { "device": "Pixel 8 / mid-range Android (ARCore)", "os/browser": "Android 15, Chrome", "session": "immersive-ar with dom-overlay", "expected": "screen tap places, DOM overlay status + exit" },
+      { "device": "Tecno / Infinix low-end Android (Rwanda market)", "os/browser": "Android, Chrome", "session": "likely no ARCore", "expected": "inline fallback = E34 AR mirror" },
+      { "device": "Apple Vision Pro", "os/browser": "visionOS, Safari", "session": "immersive-vr only (no immersive-ar in Safari)", "expected": "virtual fitting room, transient-pointer (gaze + pinch)" },
+      { "device": "iPhone", "os/browser": "iOS Safari", "session": "no WebXR", "expected": "inline fallback; shared room works inline" },
+      { "device": "Desktop Chrome + WebXR emulator", "os/browser": "Chrome", "session": "emulated", "expected": "dev only" }
+    ]
+  },
+  "safetyReview": [
+    { "risk": "Harassment / following / blocking someone's view", "controls": ["personal-space bubble (fade + hide label < 0.9 m)", "hide (local block) per person", "report -> ModerationItem VR_PRESENCE_REPORT with last 15 room events", "host mute (pauses reactions) and remove (10 min ban, audited)", "no free text, no voice: emoji whitelist only"], "gaps": ["no platform-level block that persists across rooms", "no moderator live-join or room freeze", "bubble is client-side only (a modified client can still stand inside it; it only affects what the victim sees, which is the point)"] },
+    { "risk": "Spam / flooding", "controls": ["token buckets per socket (pose 15/s, reactions 1/s burst 4, host 0.5/s, reports 3 then 1/20 s)", "512 B frame cap, zod-validated frames", "close 4008 after 150 drops / 10 s", "10 tickets / user / minute", "one socket per user per room"], "gaps": ["per-IP connection caps belong at the load balancer", "ticket limiter is per instance (memory)"] },
+    { "risk": "Impersonation of the maker", "controls": ["only page managers / host admins get the host role (server-side, signed into the ticket)", "host shown with a gold halo + star; pseudonyms cannot be chosen"], "gaps": [] },
+    { "risk": "Minors", "controls": ["sign-in required", "18+ self-attestation per join (spike policy: adults only)", "'seems to be under 18' report reason", "no voice, no chat, no likeness"], "gaps": ["self-attestation is not age assurance; production needs an age policy decision with counsel (Rwanda DPA Law 058/2021 + child online protection policy) before voice or open rooms"] },
+    { "risk": "Privacy / OP-3", "controls": ["pseudonym + avatar style from HMAC(user, room): stable on reconnect, unlinkable across rooms", "no twin, measurements, name or phone in presence", "user ids only server-side (moderation queue, audit)", "MR mirror never requests camera-access; twin GLB via owner-only 5-min signed link"], "gaps": ["reports store reporter/target user ids in free text; production should use structured columns + retention"] },
+    { "risk": "Kill switch", "controls": ["flag off refuses tickets and closes every socket within ~20 s (4010; 10 s flag cache + 10 s check)"], "gaps": [] }
+  ]
+}

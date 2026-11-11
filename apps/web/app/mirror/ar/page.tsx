@@ -8,6 +8,7 @@ import { ErrorNote, Screen, TopBar } from "@/components/ui";
 import { api } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import type { WardrobeItem } from "@/lib/twin3d";
+import { useFlag } from "@/lib/flags";
 
 export default function ArMirrorPage() {
   return (
@@ -25,6 +26,7 @@ function ArPage() {
   const [enabled, setEnabled] = useState<boolean | null>(null);
   const [items, setItems] = useState<WardrobeItem[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const mrMirror = useFlag("mr.mirror_spike"); // R4 spike entry
 
   useEffect(() => {
     if (!loading && !me) router.replace(`/signin?next=${encodeURIComponent(`/mirror/ar${variant ? `?variant=${variant}` : ""}`)}`);
@@ -51,6 +53,11 @@ function ArPage() {
       <TopBar back="/mirror/3d" title={t("twin3d.ar")} />
       <main className="px-4 pb-32">
         <ErrorNote error={error} />
+        {mrMirror && (
+          <Link href={`/mirror/mr${variant ? `?variant=${variant}` : ""}`} className="glass mb-3 flex min-h-12 items-center gap-2 rounded-2xl px-4 text-sm font-bold">
+            🥽 Try the mixed-reality mirror <span className="rounded-full bg-violet/35 px-2 py-0.5 text-[10px] uppercase tracking-wide">experimental</span>
+          </Link>
+        )}
         {enabled === null || items === null ? (
           <div className="skeleton h-[60dvh] rounded-[32px]" />
         ) : !enabled ? (
