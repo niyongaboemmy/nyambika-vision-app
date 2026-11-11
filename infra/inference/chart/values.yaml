@@ -1,5 +1,5 @@
 # Nyambika self-hosted inference pool (E42). Untested on real GPUs: no cluster was available while writing it.
-# Every model listed here must have a permissive licence recorded in docs/adr/0006-self-hosted-inference.md and
+# Every model listed here must have a permissive licence recorded in docs/adr/0007-self-hosted-inference.md and
 # a passing NLB record in the model registry before the gateway routes shopper traffic to it.
 
 # Data-residency region of this pool; the gateway's INFERENCE_POOL_REGION must match (e.g. "rw" for Kigali).
@@ -67,7 +67,7 @@ kserve:
       enabled: true
       # The image runs Nyambika's own model server code (apps/ai providers behind a v2 HTTP front).
       # No permissively licensed photo-VTON weights with commercially usable training data were found
-      # (ADR-0006); until one passes the NLB, this serves the in-house compositor, which needs no GPU.
+      # (ADR-0007); until one passes the NLB, this serves the in-house compositor, which needs no GPU.
       image: ghcr.io/nyambika/vton-server:0.1.0
       weights: ""                  # e.g. s3://nyambika-models/vton/<model>@<sha> once licensed + NLB-passed
       gpus: 0
@@ -81,7 +81,7 @@ kserve:
       replicas: 0
       maxReplicas: 2
     avatar:
-      enabled: false               # slot: SMPL-X is NOT commercially licensed by default (ADR-0006)
+      enabled: false               # slot: SMPL-X is NOT commercially licensed by default (ADR-0007)
       image: ghcr.io/nyambika/avatar-server:0.1.0
       weights: ""
       gpus: 1

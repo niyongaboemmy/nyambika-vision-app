@@ -1,7 +1,7 @@
 # Self-hosted inference pool (E42, AI-GW-07)
 
 Helm chart for a GPU node pool serving permissively licensed models to the AI gateway. Licences and the
-model choices are in [ADR-0006](../../docs/adr/0006-self-hosted-inference.md). **Not deployed or tested on real
+model choices are in [ADR-0007](../../docs/adr/0007-self-hosted-inference.md). **Not deployed or tested on real
 GPUs**: there was no cluster or GPU while this was written. Locally the same wire protocols are served by the fake
 pool (`apps/ai/app/fake_pool.py`).
 

@@ -8,7 +8,7 @@ Two wire protocols, both what the deployment in infra/inference/ serves:
     open LLM and the Whisper-family speech model.
 
 Personal images are sent only to the pool in the approved region, never logged, and the pool
-keeps nothing (stateless model servers, no request logging; ADR-0006).
+keeps nothing (stateless model servers, no request logging; ADR-0007).
 """
 from __future__ import annotations
 

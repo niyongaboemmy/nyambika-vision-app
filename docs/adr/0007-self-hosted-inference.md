@@ -1,4 +1,4 @@
-# ADR-0006: Self-hosted inference and video try-on gating
+# ADR-0007: Self-hosted inference and video try-on gating
 
 - Status: Accepted (R3, E39/E42). Production seams only: no GPU was available, nothing here ran on a GPU.
 

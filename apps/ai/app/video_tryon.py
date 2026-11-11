@@ -271,7 +271,7 @@ class PoolVideoProvider(VideoTryOnProvider):
 
     name = "pool"
     model_version = "pool-video-vton@1.0"
-    licence = "model weights per ADR-0006 (permissive only; slot ships without weights)"
+    licence = "model weights per ADR-0007 (permissive only; slot ships without weights)"
 
     def configured(self) -> bool:
         from .inference import get_router

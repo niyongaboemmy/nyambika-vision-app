@@ -44,7 +44,7 @@ class Policy(BaseModel):
     routes: dict[str, RoutePolicy]
 
 
-# Cost per call in RWF. Pool = GPU-hour price / measured throughput at target utilisation (ADR-0006);
+# Cost per call in RWF. Pool = GPU-hour price / measured throughput at target utilisation (ADR-0007);
 # hosted = list price of the contracted provider. Both are estimates until real invoices exist.
 _DEFAULTS = {
     "tryon": dict(latency_slo_ms=15_000, pool=14, hosted=40),
