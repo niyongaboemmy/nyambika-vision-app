@@ -3,16 +3,19 @@
 import type { Intent } from "@nyambika/contracts";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { MenuSheet } from "@/components/menu";
 import { TwinNudge } from "@/components/twin-nudge";
+import { RecordingTimer, TranscriptReview, VoiceConsentSheet, VoiceOrb, VoiceSettingsSheet } from "@/components/voice-muse";
 import { WardrobeAmbient } from "@/components/wardrobe-ambient";
 import { Button, Chip, ErrorNote, Screen, Sheet, Spinner } from "@/components/ui";
-import { api, rwf } from "@/lib/api";
+import { api, ApiError, rwf } from "@/lib/api";
+import { museReply } from "@/lib/muse-reply";
 import { useSession } from "@/lib/session";
 import { track } from "@/lib/track";
+import { canRecord, loadPrefs, savePrefs, speak, SPEECH_LANG, stopSpeaking, useRecorder, type SttResult, type VoicePrefs } from "@/lib/voice";
 
-type Phase = "idle" | "listening" | "typing" | "thinking" | "understood" | "snapping";
+type Phase = "idle" | "listening" | "transcribing" | "review" | "typing" | "thinking" | "understood" | "snapping";
 
 interface SpeechRec {
   lang: string;
@@ -25,7 +28,6 @@ interface SpeechRec {
   stop: () => void;
 }
 
-const SPEECH_LANG = { rw: "rw-RW", en: "en-US", fr: "fr-FR" } as const;
 const OCCASIONS = ["wedding", "office", "church", "party", "graduation", "casual", "traditional-ceremony"];
 
 function dayLabel(iso: string | null) {
@@ -33,7 +35,11 @@ function dayLabel(iso: string | null) {
   return new Date(iso + "T12:00:00").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
 }
 
-/** The Muse (prototype v2 · 03/04): no feed, no search box. Voice, text or camera → intent → looks on you. */
+/**
+ * The Muse (prototype v2 · 03/04): no feed, no search box. Voice, text or camera → intent → looks on you.
+ * Voice GA (E22): hold-to-speak → server STT → editable transcript → intent → short spoken reply.
+ * Fallbacks: browser Web Speech (no MediaRecorder / signed out) → typing. Keyboard: hold Space/Enter on the mic.
+ */
 export default function Muse() {
   const { me, loading, t, locale } = useSession();
   const router = useRouter();
@@ -49,10 +55,45 @@ export default function Muse() {
   const [touched, setTouched] = useState(false);
   const rec = useRef<SpeechRec | null>(null);
   const heard = useRef("");
+  const [stt, setStt] = useState<SttResult | null>(null);
+  const [voiceConsent, setVoiceConsent] = useState<boolean | null>(null);
+  const [askConsent, setAskConsent] = useState(false);
+  const [prefs, setPrefsState] = useState<VoicePrefs>({ muted: false, voice: {} });
+  const [voiceSheet, setVoiceSheet] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
+  const [reply, setReply] = useState("");
+  const holding = useRef(false);
+
+  useEffect(() => setPrefsState(loadPrefs()), []);
+  const setPrefs = (p: VoicePrefs) => {
+    setPrefsState(p);
+    savePrefs(p);
+    if (p.muted) {
+      stopSpeaking();
+      setSpeaking(false);
+    }
+  };
 
   useEffect(() => {
-    api<Record<string, boolean>>("/flags").then((f) => setVoiceOn(Boolean(f["muse.voice_beta"]))).catch(() => {});
-  }, []);
+    // GA flag `muse.voice` (default on); the pilot experiment can still hold a user out.
+    api<Record<string, boolean>>("/flags").then((f) => setVoiceOn(Boolean(f["muse.voice"] ?? f["muse.voice_beta"]))).catch(() => {});
+  }, [me?.id]);
+
+  useEffect(() => {
+    if (!me || !voiceOn) return;
+    api<{ consents: { purpose: string; granted: boolean }[] }>("/privacy")
+      .then((p) => setVoiceConsent(p.consents.some((c) => c.purpose === "VOICE_PROCESSING" && c.granted)))
+      .catch(() => setVoiceConsent(null));
+  }, [me, voiceOn]);
+
+  useEffect(() => () => void stopSpeaking(), []);
+
+  const onRecordError = useCallbackRef((msg: string) => {
+    holding.current = false;
+    setError(msg);
+    setPhase("idle");
+  });
+  const recorder = useRecorder((audio, durationMs) => void transcribe(audio, durationMs), onRecordError);
 
   // Auto-continue to the looks unless the shopper is editing chips.
   useEffect(() => {
@@ -68,12 +109,21 @@ export default function Muse() {
     setPhase("thinking");
     setTouched(false);
     setSession(null);
+    setReply("");
     track("muse_ask", { source, locale });
     try {
       const parsed = await api<Intent>("/intent/parse", { method: "POST", json: { text: input, source, locale } });
       track("intent_parsed", { source, parser: parsed.parser, hasOccasion: Boolean(parsed.occasion) });
       setIntent(parsed);
       setPhase("understood");
+      const answer = museReply(parsed, locale, Boolean(me));
+      setReply(answer);
+      // Spoken reply for voice turns; muted or no voice for this language → the caption carries it.
+      if (source === "voice" && speak(answer, locale, prefs, () => setSpeaking(false))) {
+        setSpeaking(true);
+        setTouched(true); // let the reply finish before auto-continuing
+        setTimeout(() => setTouched(false), Math.min(6000, 900 + answer.length * 55));
+      }
       if (!me) return;
       setSession(await api("/intent", { method: "POST", json: { text: input, source, locale } }));
     } catch (e) {
@@ -108,10 +158,82 @@ export default function Muse() {
     }
   }
 
+  async function transcribe(audio: Blob, durationMs: number) {
+    setPhase("transcribing");
+    setError(null);
+    const fd = new FormData();
+    fd.append("audio", audio, "muse.webm");
+    fd.append("language", locale);
+    fd.append("durationMs", String(Math.round(durationMs)));
+    try {
+      const r = await api<SttResult>("/voice/stt", { method: "POST", body: fd });
+      if (r.no_speech || !r.text.trim()) {
+        setError(t("voice.noSpeech"));
+        setPhase("idle");
+        return;
+      }
+      setStt(r);
+      setTranscript(r.text);
+      setText(r.text);
+      setPhase("review");
+    } catch (e) {
+      if (e instanceof ApiError && e.status === 403) {
+        setVoiceConsent(false);
+        setAskConsent(true);
+        setPhase("idle");
+        return;
+      }
+      setError(`${(e as Error).message} ${t("voice.typeFallback")}`);
+      setText("");
+      setPhase("typing");
+    }
+  }
+
+  /** Hold starts here (pointer or keyboard). */
+  function beginHold() {
+    if (holding.current) return;
+    if (!voiceOn) return setPhase("typing");
+    stopSpeaking();
+    setSpeaking(false);
+    setError(null);
+    if (me && canRecord()) {
+      if (voiceConsent === false) return setAskConsent(true);
+      holding.current = true;
+      setTranscript("");
+      setStt(null);
+      setPhase("listening");
+      void recorder.start();
+      return;
+    }
+    holding.current = true;
+    startVoice();
+  }
+
+  function endHold() {
+    if (!holding.current) return;
+    holding.current = false;
+    if (me && canRecord()) recorder.stop();
+    else stopVoice();
+  }
+
+  async function allowVoice() {
+    setAskConsent(false);
+    try {
+      await api("/privacy/consents", { method: "POST", json: { purpose: "VOICE_PROCESSING", granted: true } });
+      setVoiceConsent(true);
+      setError(null);
+      setPhase("idle");
+      setReply(t("voice.ready"));
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
+
   function startVoice() {
     const Ctor = (window as unknown as { SpeechRecognition?: new () => SpeechRec; webkitSpeechRecognition?: new () => SpeechRec }).SpeechRecognition
       ?? (window as unknown as { webkitSpeechRecognition?: new () => SpeechRec }).webkitSpeechRecognition;
     if (!Ctor) {
+      holding.current = false;
       setError("Voice isn't available in this browser yet. Type what you need instead.");
       setPhase("typing");
       return;
@@ -129,8 +251,11 @@ export default function Muse() {
       if (e.error !== "aborted") setError(`Voice error: ${e.error}. You can type instead.`);
     };
     r.onend = () => {
-      if (heard.current.trim()) void ask(heard.current, "voice");
-      else setPhase("idle");
+      if (heard.current.trim()) {
+        setStt(null);
+        setText(heard.current);
+        setPhase("review");
+      } else setPhase("idle");
     };
     rec.current = r;
     setTranscript("");
@@ -151,7 +276,20 @@ export default function Muse() {
           <span className="font-display text-lg font-black">Nyambika</span>
         </span>
         {loading ? null : me ? (
-          <button onClick={() => setMenu(true)} aria-label="Menu" className="glass grid size-10 place-items-center rounded-full text-lg">☰</button>
+          <span className="flex items-center gap-2">
+            {voiceOn && (
+              <button
+                onClick={() => setPrefs({ ...prefs, muted: !prefs.muted })}
+                aria-pressed={!prefs.muted}
+                aria-label={t("voice.speakReplies")}
+                title={prefs.muted ? t("voice.unmute") : t("voice.mute")}
+                className="glass grid size-10 place-items-center rounded-full text-lg"
+              >
+                <span aria-hidden>{prefs.muted ? "🔇" : "🔊"}</span>
+              </button>
+            )}
+            <button onClick={() => setMenu(true)} aria-label="Menu" className="glass grid size-10 place-items-center rounded-full text-lg">☰</button>
+          </span>
         ) : (
           <Link href="/signin" className="glass rounded-full px-4 py-2 text-sm font-semibold">Sign in</Link>
         )}
@@ -164,27 +302,30 @@ export default function Muse() {
         <TwinNudge place="home" />
         {me && phase === "idle" && <WardrobeAmbient />}
 
-        <div className="relative my-6 grid size-56 place-items-center">
-          {phase === "listening" && (
-            <>
-              <span className="absolute inset-0 animate-pulse-ring rounded-full border-2 border-gold/60" />
-              <span className="absolute inset-0 animate-pulse-ring rounded-full border-2 border-violet/60 [animation-delay:.6s]" />
-            </>
-          )}
-          <span className={`orb absolute inset-4 rounded-full shadow-[0_0_80px_rgba(139,92,246,.5)] ${phase === "thinking" || phase === "listening" || phase === "snapping" ? "animate-orb" : "animate-[orb-spin_24s_linear_infinite]"}`} />
-          <span className="absolute inset-[72px] rounded-full bg-[conic-gradient(from_90deg,#fff8,#8b5cf6aa,#38bdf8aa,#f2b84baa,#fff8)] blur-[2px]" />
-          {phase === "snapping" && <Spinner className="relative" />}
+        <div className="relative">
+          <VoiceOrb phase={phase} levels={recorder.levels} speaking={speaking} />
+          {(phase === "snapping" || phase === "transcribing") && <Spinner className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />}
         </div>
 
-        {phase === "listening" && <Wave />}
+        <p className="sr-only" role="status" aria-live="polite">
+          {phase === "listening" ? t("voice.listening") : phase === "transcribing" ? t("voice.transcribing") : phase === "review" ? t("voice.heard") : ""}
+        </p>
+        {phase === "listening" && (recorder.recording ? <RecordingTimer elapsed={recorder.elapsed} /> : !(me && canRecord()) && <Wave />)}
+        {phase === "listening" && <p className="mt-1 text-sm font-semibold text-gold">{t("voice.listening")}</p>}
+        {phase === "transcribing" && <p className="mt-1 text-sm text-mut">{t("voice.transcribing")}</p>}
 
-        {transcript && <p className="mt-2 max-w-sm text-lg font-semibold leading-snug">“{transcript}”</p>}
+        {phase === "review" ? (
+          <TranscriptReview stt={stt} value={text} onChange={setText} onSend={() => void ask(text, "voice")} onRetry={() => { setPhase("idle"); setTranscript(""); }} />
+        ) : (
+          transcript && phase !== "transcribing" && <p className="mt-2 max-w-sm text-lg font-semibold leading-snug">“{transcript}”</p>
+        )}
 
         {phase === "thinking" && <p className="mt-3 flex items-center gap-2 text-sm text-mut"><Spinner className="size-4" /> …</p>}
 
         {phase === "understood" && intent && (
           <div className="mt-4 w-full animate-rise">
             <p className="mb-2 text-xs font-semibold uppercase tracking-[.2em] text-gold">{t("muse.understood")}</p>
+            {reply && <p className="mx-auto mb-3 max-w-sm text-sm text-txt/90" aria-live="polite">{speaking ? "🔊 " : ""}{reply}</p>}
             <div className="flex flex-wrap justify-center gap-2">
               {chips.map((c) => (
                 <Chip key={c.key} onClick={c.edit ? () => { setTouched(true); setEdit(c.edit!); } : undefined}>{c.label}</Chip>
@@ -235,24 +376,45 @@ export default function Muse() {
             <input type="file" accept="image/*" capture="environment" className="sr-only" onChange={(e) => e.target.files?.[0] && snap(e.target.files[0])} />
           </label>
           <button
-            aria-label={voiceOn ? `${t("muse.hold")} (${t("muse.voiceBeta")})` : t("muse.type")}
+            aria-label={voiceOn ? t("voice.holdLabel") : t("muse.type")}
+            aria-pressed={voiceOn ? phase === "listening" : undefined}
             onPointerDown={(e) => {
               if (!voiceOn) return;
+              e.preventDefault();
               e.currentTarget.setPointerCapture(e.pointerId);
-              startVoice();
+              beginHold();
             }}
-            onPointerUp={voiceOn ? stopVoice : undefined}
+            onPointerUp={voiceOn ? endHold : undefined}
+            onPointerCancel={voiceOn ? endHold : undefined}
+            onKeyDown={(e) => {
+              if ((e.key === " " || e.key === "Enter") && voiceOn) {
+                e.preventDefault();
+                if (!e.repeat) beginHold();
+              }
+            }}
+            onKeyUp={(e) => {
+              if ((e.key === " " || e.key === "Enter") && voiceOn) {
+                e.preventDefault();
+                endHold();
+              }
+            }}
             onClick={voiceOn ? undefined : () => setPhase("typing")}
-            className={`grad-cta grid size-24 place-items-center rounded-full text-4xl shadow-[0_0_40px_rgba(224,112,63,.45)] transition ${phase === "listening" ? "scale-110" : ""}`}
+            onContextMenu={(e) => e.preventDefault()}
+            className={`grad-cta grid size-24 touch-none select-none place-items-center rounded-full text-4xl shadow-[0_0_40px_rgba(224,112,63,.45)] transition ${phase === "listening" ? "scale-110" : ""}`}
           >
-            🎙️
+            <span aria-hidden>🎙️</span>
           </button>
           <button aria-label={t("muse.type")} title={t("muse.type")} onClick={() => setPhase("typing")} className="glass grid size-16 place-items-center rounded-full text-2xl"><span aria-hidden>⌨️</span></button>
         </div>
-        <p className="mt-2 text-center text-xs text-mut">{voiceOn ? `${t("muse.hold")} · beta` : t("muse.type")}</p>
+        <p className="mt-2 text-center text-xs text-mut">
+          {voiceOn ? t("muse.hold") : t("muse.type")}
+          {voiceOn && me && <> · <button type="button" onClick={() => setVoiceSheet(true)} className="underline underline-offset-2">{t("voice.options")}</button></>}
+        </p>
       </footer>
 
       <MenuSheet open={menu} onClose={() => setMenu(false)} />
+      <VoiceConsentSheet open={askConsent} onClose={() => setAskConsent(false)} onAllow={() => void allowVoice()} onType={() => { setAskConsent(false); setPhase("typing"); }} />
+      <VoiceSettingsSheet open={voiceSheet} onClose={() => setVoiceSheet(false)} prefs={prefs} setPrefs={setPrefs} />
 
       <Sheet open={edit !== null} onClose={() => setEdit(null)}>
         {edit === "occasion" && intent && (
@@ -294,6 +456,13 @@ function buildChips(i: Intent, twinSize: string | null) {
 }
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+/** Stable callback identity that always calls the latest closure. */
+function useCallbackRef<A extends unknown[]>(fn: (...a: A) => void) {
+  const ref = useRef(fn);
+  ref.current = fn;
+  return useCallback((...a: A) => ref.current(...a), []);
+}
 
 function Wave() {
   return (

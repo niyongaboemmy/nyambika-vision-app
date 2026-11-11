@@ -3,8 +3,10 @@
 import { LOCALES, type Locale } from "@nyambika/i18n";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
+import { PasskeyOffer, PasskeySignInButton } from "@/components/passkeys";
 import { Button, Chip, ErrorNote, Screen, TopBar } from "@/components/ui";
 import { api } from "@/lib/api";
+import { offerDismissed, passkeysSupported } from "@/lib/passkeys";
 import { useSession } from "@/lib/session";
 
 const LABELS: Record<Locale, string> = { rw: "Kinyarwanda", en: "English", fr: "Français" };
@@ -18,7 +20,7 @@ function SignIn() {
   const [showInvite, setShowInvite] = useState(Boolean(search.get("invite")));
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
-  const [step, setStep] = useState<"phone" | "code">("phone");
+  const [step, setStep] = useState<"phone" | "code" | "passkey">("phone");
   const [devCode, setDevCode] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -46,14 +48,36 @@ function SignIn() {
       await api("/auth/otp/verify", { method: "POST", json: { phone, code } });
       await api("/auth/me", { method: "PATCH", json: { locale } }).catch(() => {});
       await reload();
-      // Pilot invite entered at sign-in: redeem it on the join screen (which explains any problem).
-      const pilotCode = invite.trim().toUpperCase();
-      router.replace(pilotCode && !next.startsWith("/join") ? `/join/${encodeURIComponent(pilotCode)}` : next);
+      // E29: offer a passkey once OTP has proven the phone ("Sign in faster next time").
+      if (passkeysSupported() && !offerDismissed()) {
+        const keys = await api<unknown[]>("/auth/passkeys").catch(() => [1]);
+        if (keys.length === 0) {
+          setStep("passkey");
+          return;
+        }
+      }
+      proceed();
     } catch (err) {
       setError((err as Error).message);
     } finally {
       setBusy(false);
     }
+  }
+
+  function proceed() {
+    // Pilot invite entered at sign-in: redeem it on the join screen (which explains any problem).
+    const pilotCode = invite.trim().toUpperCase();
+    router.replace(pilotCode && !next.startsWith("/join") ? `/join/${encodeURIComponent(pilotCode)}` : next);
+  }
+
+  if (step === "passkey") {
+    return (
+      <Screen>
+        <main className="flex min-h-dvh flex-col justify-center px-6">
+          <PasskeyOffer onDone={proceed} />
+        </main>
+      </Screen>
+    );
   }
 
   return (
@@ -104,6 +128,7 @@ function SignIn() {
             )}
             <ErrorNote error={error} />
             <Button disabled={busy || phone.replace(/\D/g, "").length < 9}>{t("auth.sendCode")}</Button>
+            <PasskeySignInButton onSignedIn={async () => { await reload(); proceed(); }} />
           </form>
         ) : (
           <form onSubmit={verify} className="flex flex-col gap-3">

@@ -54,8 +54,14 @@ function Order() {
         <section className="glass flex gap-3 rounded-3xl p-3">
           {o.image && <img src={o.image} alt="" className="h-24 w-20 rounded-2xl object-cover" />}
           <div className="min-w-0 flex-1">
-            <p className="font-semibold">{o.item.title}</p>
-            <p className="text-sm text-mut">{o.item.colourName} · size {o.item.size}{o.item.makerName ? ` · made by ${o.item.makerName}` : ""}</p>
+            {(o.items?.length ?? 0) > 1 ? (
+              <ul className="space-y-0.5">{o.items!.map((i, n) => <li key={n}><span className="font-semibold">{i.qty} × {i.title}</span> <span className="text-sm text-mut">· {i.colourName} · {i.size}</span></li>)}</ul>
+            ) : (
+              <>
+                <p className="font-semibold">{o.item.title}</p>
+                <p className="text-sm text-mut">{o.item.colourName} · size {o.item.size}{o.item.makerName ? ` · made by ${o.item.makerName}` : ""}</p>
+              </>
+            )}
             <p className="text-sm">{rwf(o.totalRwf)} · {o.deliveryMode === "DELIVERY" ? `delivery to ${o.address}` : "pickup"}</p>
             <Link href={`/m/${o.page.handle}`} className="text-sm text-gold">{o.page.name} →</Link>
           </div>

@@ -29,6 +29,9 @@ import { WardrobeModule } from "./modules/wardrobe/wardrobe.module";
 import { TailorModule } from "./modules/tailor/tailor.module";
 import { PilotModule } from "./modules/pilot/pilot.module";
 import { XrModule } from "./modules/xr/xr.module";
+import { VoiceModule } from "./modules/voice/voice.module";
+import { PasskeysModule } from "./modules/passkeys/passkeys.module";
+import { CheckoutModule } from "./modules/checkout/checkout.module";
 
 @Controller()
 class HealthController {
@@ -71,6 +74,9 @@ class HealthController {
     TailorModule,
     PilotModule,
     XrModule,
+    VoiceModule,
+    PasskeysModule,
+    CheckoutModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: AuthGuard }],

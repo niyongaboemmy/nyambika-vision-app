@@ -217,6 +217,7 @@ export class OrdersController {
       readyBy: o.readyBy,
       createdAt: o.createdAt,
       item: o.items[0],
+      items: o.items, // E29 bag checkouts: several lines per maker
       image: variantImg?.imagePath ? `/api/files/${variantImg.imagePath}` : null,
       page: { id: o.page.id, name: o.page.name, handle: o.page.handle, whatsapp: o.page.whatsapp },
       events: o.events.map((e) => ({ status: e.status, note: e.note, at: e.createdAt })),

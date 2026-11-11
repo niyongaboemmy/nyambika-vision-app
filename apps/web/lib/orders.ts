@@ -11,6 +11,7 @@ export interface OrderView {
   readyBy: string | null;
   createdAt: string;
   item: { title: string; colourName: string; size: string; unitPriceRwf: number; makerName: string };
+  items?: { title: string; colourName: string; size: string; qty: number; unitPriceRwf: number; makerName: string }[];
   image: string | null;
   page: { id: string; name: string; handle: string; whatsapp: string };
   events: { status: string; note: string; at: string }[];

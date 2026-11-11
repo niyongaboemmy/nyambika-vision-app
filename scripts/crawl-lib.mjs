@@ -6,10 +6,10 @@ const { chromium, devices } = require("@playwright/test");
 
 export const BASE = process.env.BASE_URL ?? "http://localhost:3000";
 
-export async function start(name) {
+export async function start(name, launch = {}) {
   const out = new URL(`./crawl-output/${name}/`, import.meta.url).pathname;
   mkdirSync(out, { recursive: true });
-  const browser = await chromium.launch();
+  const browser = await chromium.launch(launch); // e.g. { args: [fake media flags] } (crawl-voice)
   const context = await browser.newContext({ ...devices["Pixel 7"], locale: "en-US" });
   const page = await context.newPage();
   const issues = [];

@@ -993,3 +993,73 @@ model MotionClip {
   @@index([userId, createdAt])
   @@index([lookId])
 }
+
+// ==== E22/E29 Voice Muse GA · Passkeys · Optional checkout ====
+// Voice (E22) stores nothing: audio lives only in memory for the length of the STT request.
+
+/// WebAuthn credential (FR-ACC-02). Public key only; the private key never leaves the shopper's device.
+model Passkey {
+  id           String    @id @default(cuid())
+  userId       String
+  credentialId String    @unique
+  publicKey    Bytes
+  counter      Int       @default(0)
+  transports   String[]
+  deviceType   String    @default("singleDevice")
+  backedUp     Boolean   @default(false)
+  name         String
+  createdAt    DateTime  @default(now())
+  lastUsedAt   DateTime?
+
+  @@index([userId])
+}
+
+/// Single-use WebAuthn challenge (5 minutes). userId is null for discoverable sign-in.
+model WebAuthnChallenge {
+  id         String    @id @default(cuid())
+  userId     String?
+  kind       String
+  challenge  String    @unique
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+}
+
+/// Optional classic bag (FR-ORD-07 as a direct-to-maker split, CON-08): one line per variant + size.
+model BagItem {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  variantId String
+  size      String
+  qty       Int      @default(1)
+  lookId    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, variantId, size])
+  @@index([userId])
+}
+
+/// Saved delivery address, sealed with AES-256-GCM (same scheme as measurements). In privacy export/deletion.
+model SavedAddress {
+  id         String    @id @default(cuid())
+  userId     String
+  label      String
+  sealed     String
+  isDefault  Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  lastUsedAt DateTime?
+
+  @@index([userId])
+}
+
+/// One bag checkout = one order + one Mobile Money request per maker payout account. Idempotent on retry.
+model Checkout {
+  id             String   @id @default(cuid())
+  userId         String
+  idempotencyKey String   @unique
+  status         String   @default("PROCESSING")
+  orderIds       String[]
+  createdAt      DateTime @default(now())
+}
