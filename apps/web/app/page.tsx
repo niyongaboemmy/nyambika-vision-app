@@ -10,6 +10,7 @@ import { RecordingTimer, TranscriptReview, VoiceConsentSheet, VoiceOrb, VoiceSet
 import { WardrobeAmbient } from "@/components/wardrobe-ambient";
 import { Button, Chip, ErrorNote, Screen, Sheet, Spinner } from "@/components/ui";
 import { api, ApiError, rwf } from "@/lib/api";
+import { describeError } from "@/lib/api-errors";
 import { museReply } from "@/lib/muse-reply";
 import { useSession } from "@/lib/session";
 import { track } from "@/lib/track";
@@ -48,7 +49,7 @@ export default function Muse() {
   const [transcript, setTranscript] = useState("");
   const [intent, setIntent] = useState<Intent | null>(null);
   const [session, setSession] = useState<{ sessionId: string; total: number } | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null); // string, or the caught error (expected limits render as LimitState)
   const [voiceOn, setVoiceOn] = useState(false);
   const [menu, setMenu] = useState(false);
   const [edit, setEdit] = useState<null | "occasion" | "budget">(null);
@@ -127,7 +128,7 @@ export default function Muse() {
       if (!me) return;
       setSession(await api("/intent", { method: "POST", json: { text: input, source, locale } }));
     } catch (e) {
-      setError((e as Error).message);
+      setError(e);
       setPhase("idle");
     }
   }
@@ -139,7 +140,7 @@ export default function Muse() {
     try {
       setSession(await api("/intent/refine", { method: "POST", json: { intent: next } }));
     } catch (e) {
-      setError((e as Error).message);
+      setError(e);
     }
   }
 
@@ -153,7 +154,7 @@ export default function Muse() {
       const r = await api<{ sessionId: string; makers: number }>("/intent/snap", { method: "POST", body: fd });
       router.push(`/looks/${r.sessionId}?snap=${r.makers}`);
     } catch (e) {
-      setError((e as Error).message);
+      setError(e);
       setPhase("idle");
     }
   }
@@ -183,7 +184,7 @@ export default function Muse() {
         setPhase("idle");
         return;
       }
-      setError(`${(e as Error).message} ${t("voice.typeFallback")}`);
+      setError(describeError(e, locale).expected ? e : `${(e as Error).message} ${t("voice.typeFallback")}`);
       setText("");
       setPhase("typing");
     }
@@ -225,7 +226,7 @@ export default function Muse() {
       setPhase("idle");
       setReply(t("voice.ready"));
     } catch (e) {
-      setError((e as Error).message);
+      setError(e);
     }
   }
 
@@ -365,8 +366,7 @@ export default function Muse() {
           </form>
         )}
 
-        <div className="mt-3 w-full"><ErrorNote error={error} /></div>
-        {error?.includes("closed pilot") && <Link href="/join" className="glass mt-3 rounded-2xl px-4 py-2 text-sm font-semibold">🎟️ {t("pilot.haveCode")} →</Link>}
+        <div className="mt-3 w-full"><ErrorNote error={error} onRetry={transcript ? () => void ask(transcript, "text") : undefined} /></div>
       </main>
 
       <footer className="sticky bottom-0 z-20 px-6 pb-[max(env(safe-area-inset-bottom),18px)] pt-3">
