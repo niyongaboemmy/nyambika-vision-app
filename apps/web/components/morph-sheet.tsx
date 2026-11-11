@@ -1,7 +1,7 @@
 "use client";
 
 import { isExpectedText, LimitState } from "@/components/limit-state";
-import { morphPrice, quantizeHue, type MorphLength, type MorphSleeve, type MorphSpec } from "@nyambika/contracts";
+import { morphPrice, quantizeHue, type MorphLength, type MorphSleeve, type MorphSpec } from "@nyambika/contracts/tailor-data";
 import { useCallback, useEffect, useRef, useState, type PointerEvent as RPointerEvent } from "react";
 import { AskTailorSheet } from "@/components/ask-tailor";
 import { Sheet } from "@/components/ui";

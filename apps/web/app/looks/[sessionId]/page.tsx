@@ -2,15 +2,21 @@
 
 import type { Intent } from "@nyambika/contracts";
 import { useParams, useSearchParams } from "next/navigation";
+import dynamic from "next/dynamic";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
-import { HoldToBuy } from "@/components/hold-to-buy";
-import { LookView } from "@/components/look-view";
-import { TwinNudge } from "@/components/twin-nudge";
 import { LimitState } from "@/components/limit-state";
 import { Screen, ShopperSkeleton } from "@/components/ui";
 import { api } from "@/lib/api";
 import { isRendering, type Look } from "@/lib/looks";
 import { track, trackOnce } from "@/lib/track";
+
+// JS budget pass: the look card (gestures, rails, sheets, region pricing) and hold-to-buy are only drawn once the
+// session data is in, so their code loads in parallel with that fetch instead of on the critical path.
+const loadLookView = () => import("@/components/look-view");
+const loadHoldToBuy = () => import("@/components/hold-to-buy");
+const LookView = dynamic(() => loadLookView().then((m) => m.LookView), { ssr: false, loading: () => <div className="theme-media"><ShopperSkeleton variant="media" title={false} /></div> });
+const HoldToBuy = dynamic(() => loadHoldToBuy().then((m) => m.HoldToBuy), { ssr: false });
+const TwinNudge = dynamic(() => import("@/components/twin-nudge").then((m) => m.TwinNudge), { ssr: false });
 
 interface SessionData {
   id: string;
@@ -39,6 +45,8 @@ function Stream() {
 
   const load = useCallback(async () => setData(await api<SessionData>(`/intent/${sessionId}`)), [sessionId]);
   useEffect(() => {
+    void loadLookView();
+    void loadHoldToBuy();
     load().catch(setError);
   }, [load]);
 

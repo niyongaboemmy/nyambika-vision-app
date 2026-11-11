@@ -7,7 +7,15 @@ const nextConfig: NextConfig = {
   turbopack: {
     // Browser bundles compile the contracts from their ESM source so zod tree-shakes (the CommonJS dist pulled
     // the whole of zod + every locale, ~80 KB gz, into every route). The server keeps using dist.
-    resolveAlias: { "@nyambika/contracts": { browser: "../../packages/contracts/src/index.ts" } },
+    // The zod-free subpaths (JS budget pass) keep schema code out of client routes entirely: a module that is
+    // imported at all keeps its top-level `z.object(...)` calls, so client components import these instead.
+    resolveAlias: {
+      "@nyambika/contracts/money": { browser: "../../packages/contracts/src/money.ts" },
+      "@nyambika/contracts/region-data": { browser: "../../packages/contracts/src/region-data.ts" },
+      "@nyambika/contracts/tailor-data": { browser: "../../packages/contracts/src/tailor-data.ts" },
+      "@nyambika/contracts/ambient-model": { browser: "../../packages/contracts/src/ambient-model.ts" },
+      "@nyambika/contracts": { browser: "../../packages/contracts/src/index.ts" },
+    },
   },
   poweredByHeader: false,
   // `NEXT_DIST_DIR=.next-build next build` measures a production bundle while `next dev` keeps using .next.

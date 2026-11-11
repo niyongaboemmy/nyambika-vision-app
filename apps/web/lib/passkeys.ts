@@ -1,6 +1,6 @@
 "use client";
 
-import { browserSupportsWebAuthn, startAuthentication, startRegistration, WebAuthnError } from "@simplewebauthn/browser";
+import type { startAuthentication, startRegistration, WebAuthnError } from "@simplewebauthn/browser";
 import { api } from "./api";
 
 /** Passkeys (E29, FR-ACC-02). OTP stays the fallback for every flow. */
@@ -14,7 +14,10 @@ export interface PasskeyView {
   deviceType: string;
 }
 
-export const passkeysSupported = () => typeof window !== "undefined" && browserSupportsWebAuthn();
+// Same test as @simplewebauthn's browserSupportsWebAuthn(); the library itself (~10 KB gz) loads on first use, so it
+// stays out of the sign-in route's first-load JS (JS budget pass).
+export const passkeysSupported = () => typeof window !== "undefined" && typeof globalThis.PublicKeyCredential === "function";
+const webauthn = () => import("@simplewebauthn/browser");
 
 /** A friendly default name: "Chrome on Android", "Safari on iPhone"… */
 export function deviceName() {
@@ -25,18 +28,21 @@ export function deviceName() {
 }
 
 function friendly(e: unknown) {
-  if (e instanceof WebAuthnError || (e as Error)?.name === "NotAllowedError") {
-    const name = (e as Error).name;
-    if (name === "NotAllowedError" || (e as WebAuthnError).code === "ERROR_CEREMONY_ABORTED") return "Passkey cancelled. You can use a phone code instead.";
-    if ((e as WebAuthnError).code === "ERROR_AUTHENTICATOR_PREVIOUSLY_REGISTERED") return "This device already has a Nyambika passkey.";
+  // WebAuthnError is matched by its `code` (ERROR_*) so the library class need not be loaded up front.
+  const name = (e as Error)?.name;
+  const code = (e as Partial<WebAuthnError>)?.code;
+  if ((typeof code === "string" && code.startsWith("ERROR_")) || name === "NotAllowedError") {
+    if (name === "NotAllowedError" || code === "ERROR_CEREMONY_ABORTED") return "Passkey cancelled. You can use a phone code instead.";
+    if (code === "ERROR_AUTHENTICATOR_PREVIOUSLY_REGISTERED") return "This device already has a Nyambika passkey.";
   }
   return (e as Error).message || "Passkey didn't work. Use a phone code instead.";
 }
 
 export async function registerPasskey(name = deviceName()) {
   try {
-    const optionsJSON = await api<Parameters<typeof startRegistration>[0]["optionsJSON"]>("/auth/passkeys/register/options", { method: "POST" });
-    const response = await startRegistration({ optionsJSON });
+    // The library loads in parallel with the options request, so it adds no round trip.
+    const [optionsJSON, wa] = await Promise.all([api<Parameters<typeof startRegistration>[0]["optionsJSON"]>("/auth/passkeys/register/options", { method: "POST" }), webauthn()]);
+    const response = await wa.startRegistration({ optionsJSON });
     return await api<PasskeyView[]>("/auth/passkeys/register", { method: "POST", json: { response, name } });
   } catch (e) {
     throw new Error(friendly(e));
@@ -45,8 +51,8 @@ export async function registerPasskey(name = deviceName()) {
 
 export async function signInWithPasskey() {
   try {
-    const optionsJSON = await api<Parameters<typeof startAuthentication>[0]["optionsJSON"]>("/auth/passkeys/login/options", { method: "POST" });
-    const response = await startAuthentication({ optionsJSON });
+    const [optionsJSON, wa] = await Promise.all([api<Parameters<typeof startAuthentication>[0]["optionsJSON"]>("/auth/passkeys/login/options", { method: "POST" }), webauthn()]);
+    const response = await wa.startAuthentication({ optionsJSON });
     await api("/auth/passkeys/login", { method: "POST", json: { response } });
   } catch (e) {
     throw new Error(friendly(e));

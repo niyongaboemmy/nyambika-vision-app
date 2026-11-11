@@ -2,15 +2,20 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import dynamic from "next/dynamic";
 import { Suspense, useEffect, useRef, useState } from "react";
-import { HoldToBuy } from "@/components/hold-to-buy";
-import { LookView } from "@/components/look-view";
 import { LimitState } from "@/components/limit-state";
 import { Screen, ShopperSkeleton } from "@/components/ui";
 import { api } from "@/lib/api";
 import type { Look } from "@/lib/looks";
 import { useSession } from "@/lib/session";
 import { useLook } from "@/lib/use-look";
+
+// JS budget pass: the look card and hold-to-buy load in parallel with the try-on request (see /looks/[sessionId]).
+const loadLookView = () => import("@/components/look-view");
+const loadHoldToBuy = () => import("@/components/hold-to-buy");
+const LookView = dynamic(() => loadLookView().then((m) => m.LookView), { ssr: false, loading: () => <div className="theme-media"><ShopperSkeleton variant="media" title={false} /></div> });
+const HoldToBuy = dynamic(() => loadHoldToBuy().then((m) => m.HoldToBuy), { ssr: false });
 
 function TryOn() {
   const variantId = useSearchParams().get("variant");
@@ -28,6 +33,8 @@ function TryOn() {
     if (!me) return router.replace(`/signin?next=${encodeURIComponent(`/looks/try?variant=${variantId}`)}`);
     if (!variantId || started.current) return;
     started.current = true;
+    void loadLookView();
+    void loadHoldToBuy();
     api<Look>("/looks/try", { method: "POST", json: { variantId } }).then(setInitial).catch(setError);
   }, [loading, me, variantId, router, attempt]);
 

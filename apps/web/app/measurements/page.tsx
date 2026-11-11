@@ -1,6 +1,6 @@
 "use client";
 
-import { MEASUREMENT_FIELDS, type Measurements } from "@nyambika/contracts";
+import { MEASUREMENT_FIELDS, type Measurements } from "@nyambika/contracts/tailor-data";
 import { useEffect, useState } from "react";
 import { Button, ErrorNote, Screen, TopBar } from "@/components/ui";
 import { Fact, InfoTip } from "@/components/kit";

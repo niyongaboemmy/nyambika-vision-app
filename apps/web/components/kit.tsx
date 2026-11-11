@@ -7,7 +7,7 @@
  */
 import { useEffect, useId, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { Icon, type IconName } from "@/components/studio";
+import { Icon, type IconName } from "@/components/icons";
 import { haptic } from "@/lib/native";
 import { useTheme, type ThemePref } from "@/lib/theme";
 

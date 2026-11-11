@@ -164,6 +164,114 @@ Reading it
   the data card that follows. Sign in moved with the merged country selector.
 - INP is a synthetic proxy (one tap) and is within noise (all < 60 ms on a 4× slowed CPU).
 
+### 4.1 JS budget pass (sign in, Maker Space, Looks)
+
+Branch `worktree-agent-a4245d923d09830a0`, slot 2. Before = `main` at `ec09f8d`, after = this branch, both built with
+`NEXT_DIST_DIR=… next build` on the same machine and measured the same way.
+
+How it was measured
+
+- **First-load JS (the budget):** the gzip size of every script a route's HTML loads (`rootMainFiles` plus each
+  segment's `entryJSFiles` in `page_client-reference-manifest.js`). Those are exactly the scripts Chrome fetches before
+  `load` (checked per file against the network log). Async chunks (`next/dynamic`, `import()`) are not counted.
+- **Module graph:** `next analyze --output` + `next analyze export --route <route>` (Turbopack's offline analyzer, JSON
+  lines of modules, chunk parts and compressed sizes) to see which module pulled what into which chunk.
+- **Wire:** `scripts/perf-uiux.mjs` (unchanged; Pixel 7, 4× CPU, slow 4G, cold). Its "at load" is
+  `encodedDataLength`, i.e. gzip body **plus ~0.5 KB of response headers per script** (9–12 scripts per route), so it
+  reads ~5 KB above the first-load JS on every route.
+
+What pulled zod in (before)
+
+- `@nyambika/contracts` is compiled from source for the browser with `sideEffects: false`, so unused *modules* drop
+  out, but a module that is imported at all keeps its top-level `z.enum(...)` / `z.object(...)` calls. `region.ts`
+  (imported for `REGIONS`, `signInPhone`, `normalizePhone`, `formatMoney`, `displayPrice`, `WALLET_LABEL`) and
+  `tailor.ts` (`morphPrice`, `quantizeHue`, `MEASUREMENT_FIELDS`) therefore brought zod core + classic (25.5 KB gz) to
+  sign in (`app/signin/page.tsx`), Maker Space (`lib/region.ts`, `components/region.tsx`), Looks / try-on (those plus
+  `hold-to-buy.tsx`, `morph-sheet.tsx`) and ~15 other routes. `ambient.ts` did the same for order pages.
+- Other weight on these routes: `@simplewebauthn/browser` on sign in (~8 KB, only needed after a tap), the whole
+  look card (gesture library, rails, circle-ask, morph, 3D, video, region pricing) and hold-to-buy on Looks before the
+  data had even arrived, the entire `studio.tsx` kit in every route's shared chunk (shopper screens only needed
+  `<Icon>`), `@use-gesture/react` (~7 KB) for three horizontal swipes, and `"use client"` modules that are client
+  references keep **all** their exports (so `region.tsx` shipped checkout + Stripe card step + order money on every
+  page that only showed a price).
+
+What changed (no visual change)
+
+- **Contracts split (zod-free subpaths):** `src/money.ts` (currencies, integer money, FX, `displayPrice`),
+  `src/region-data.ts` (EAC defaults, wallets, `normalizePhone` / `signInPhone`, ranking, zones),
+  `src/tailor-data.ts` (morph pricing, measurements, size recommendation, custom-order steps) and
+  `src/ambient-model.ts` (ambient order model + copy), exposed as `@nyambika/contracts/money`, `/region-data`,
+  `/tailor-data`, `/ambient-model` (`package.json` `exports`; `next.config.ts` browser aliases to the sources). The zod
+  schemas stay in `region.ts` / `tailor.ts` / `ambient.ts`, which `export *` the new modules, so the root export (API,
+  native validator, existing imports) is unchanged; a spec (`apps/api/src/common/contracts-subpaths.spec.ts`) keeps
+  the subpaths zod-free and identical to the root. Client components import the subpaths.
+- **Deferred until needed:** look card + hold-to-buy + twin nudge on Looks / try-on (`next/dynamic`, `ssr: false`,
+  same skeleton as the loading state; their chunks are requested in parallel with the session / try-on fetch), the
+  WebAuthn library (loaded in parallel with the passkey options request), the Maker Space product sheet, checkout
+  (`components/region-buy.tsx`), 3D section / viewer, region sheet (`components/region-sheet.tsx`), WhatsApp opt-in
+  and tailor services (`components/maker-lazy.tsx`, both render nothing until their request answers), ask-a-tailor
+  sheet, and push code (sign-out only).
+- **Smaller shared modules:** `components/icons.tsx` (icon set), `components/skeletons.tsx` (studio skeletons,
+  server-rendered from `loading.tsx` with no client JS), `components/button.tsx`, `components/region-pay.tsx` (wallet
+  entry, order money); `studio.tsx`, `ui.tsx` and `region.tsx` re-export them so every existing import still works.
+- **`lib/drag.ts`:** a 0.5 KB `useDrag` with the slice of the use-gesture API the app uses (x-axis lock, tap filter,
+  movement on release, pointer-cancel = page scroll) replaces `@use-gesture/react` on the coverflow, 3D shelf and look
+  card. (`@use-gesture/react` is still in `package.json`, now unused; drop it in a lockfile-owning change.)
+- Checked and not worth it: date libraries (none; `Intl` / `toLocaleDateString`), icon fonts (none; inline SVG),
+  duplicated code (none found by the analyzer beyond the `studio.tsx` copy in admin loading, now fixed).
+
+First-load JS per route (KB gz, `next build`)
+
+| Route | Before | After | Δ |
+|---|---:|---:|---:|
+| **Sign in** `/signin` | 202.6 | **168.3** | −34.3 |
+| **Maker Space** `/m/[handle]` | 222.3 | **169.5** | −52.8 |
+| **Looks** `/looks/[sessionId]` | 236.1 | **164.4** | −71.7 |
+| **Try one look** `/looks/try` | 234.7 | **163.3** | −71.4 |
+| Muse (home) `/` | 176.5 | 171.1 | −5.4 |
+| Bag / Orders / Wardrobe / Circle | 171.7 / 168.6 / 171.6 / 168.8 | 166.3 / 163.2 / 166.2 / 163.4 | −5.4 each |
+| Makers `/makers` | 202.3 | 163.8 | −38.5 |
+| Order `/orders/[id]` · Circle poll `/circle/[id]` | 209.0 · 211.0 | 172.3 · 175.1 | −36.7 · −35.9 |
+| Measurements · Trust · Mirror | 196.8 · 176.0 · 171.1 | 165.3 · 169.1 · 165.7 | −31.5 · −6.9 · −5.4 |
+| Showroom · Fashion show (`/m/[handle]/…`) | 222.0 · 214.2 | 211.9 · 204.5 | −10.1 · −9.7 |
+| Studio routes (20) · Admin routes (5) | 172.9–206.9 · 173.4–200.8 | 172.6–180.5 · 172.4–175.2 | −0.1 to −27.4 |
+
+Every one of the 57 routes is smaller or equal except Next's own `/_global-error` (+0.3, a framework chunk). The
+framework floor (React DOM + Next runtime + Turbopack runtime) is 128.5 KB; the app's shared layout is now 31.7 KB
+(was 37.2), so a route has ~10 KB of its own before it reaches 170.
+
+Wire, `scripts/perf-uiux.mjs` (KB incl. response headers; before → after)
+
+| Route | JS at load | JS until idle | LCP (ms) | CLS | INP proxy (ms) |
+|---|---:|---:|---:|---:|---:|
+| Sign in | 208 → 173.2 | 225.2 → 191.5 | 2260 → 1996 | 0.017 → 0.017 | 32 → 40 |
+| Maker page | 234.7 → 174.5 | 234.7 → 193 | 1120 → 1116 | 0 → 0 | 16 → 0 |
+| Looks | 243.7 → 169.4 | 260.9 → 222.3 | 3264 → 2976 | 0.006 → 0.005 | 32 → 40 |
+| Try one look | 242.3 → 168.2 | 259.5 → 220.4 | 3312 → 2796 | 0.006 → 0.006 | 0 → 0 |
+| Muse (home) | 181.4 → 176 | 190.4 → 186 | 880 → 872 | 0.056 → 0.041 | 32 → 40 |
+| Bag | 176.6 → 171.2 | 193.8 → 189.4 | 2324 → 2280 | 0 → 0 | 0 → 0 |
+| Orders | 173.5 → 168.1 | 190.7 → 186.3 | 2100 → 2088 | 0 → 0 | 0 → 16 |
+| Wardrobe | 176.5 → 171.1 | 197.4 → 193 | 3144 → 2128 | 0 → 0 | 16 → 0 |
+| Circle | 173.7 → 168.3 | 197.4 → 193 | 2088 → 2072 | 0 → 0 | 0 → 0 |
+| Trust centre | 180.9 → 174 | 204.1 → 201.9 | 2208 → 2180 | 0 → 0 | 32 → 32 |
+| Mirror | 176 → 170.6 | 203.5 → 199.2 | 876 → 884 | 0.021 → 0.021 | 24 → 40 |
+
+Reading it: the budget (≤ 170 KB gz first-load JS) is now met on sign in, Maker Space and Looks / try-on, and on
+every other shopper route except Muse (171.1). On the wire meter, which adds headers, Looks / try-on are under 170
+and sign in / Maker Space are 3–5 KB above it. LCP improved on Looks (−0.3 s) and try-on (−0.5 s) because the look
+card's code now downloads alongside the session fetch instead of ahead of it; it is flat elsewhere (INP and CLS are
+within noise). The earlier §4 table came from a different build (before the hardening merge), so compare these two
+tables with each other, not with that one.
+
+Next levers (not done here)
+
+- **i18n catalogues: 13 KB gz of the shared chunk.** All four locales ship on every route. Loading only `en` (the
+  fallback) plus the active locale would save ~8 KB everywhere, but it means splitting `packages/i18n/src/index.ts`
+  into per-locale files, which every feature branch appends keys to, so it should be its own change once the parallel
+  copy pass has merged.
+- VR showroom / fashion show (205–212 KB) still pull zod through `vr.ts` / `presence.ts` (same split would apply);
+  they also need three.js for the scene anyway.
+
 ## 5. Accessibility
 
 `@axe-core/playwright` 4.14.0, tags `wcag2a wcag2aa wcag21a wcag21aa wcag22aa`, all 49 screens at 390 px,
@@ -189,8 +297,8 @@ move focus in and back and lock page scroll, `prefers-reduced-motion` disables m
 
 ## 6. Known gaps
 
-- **JS budget not met on commerce routes** (sign in 202, Maker page 223, Looks 236–238 KB gz at load vs 170). Next
-  step: move the contracts' pure money/phone/region helpers (`REGIONS`, `displayPrice`, `normalizePhone`,
+- ~~JS budget not met on commerce routes~~ **Resolved by the JS budget pass (§4.1):** sign in 168.3, Maker Space
+  169.5, Looks 164.4 KB gz first-load JS. Original note: move the contracts' pure money/phone/region helpers (`REGIONS`, `displayPrice`, `normalizePhone`,
   `formatMoney`, `signInPhone`, `morphPrice`) into a zod-free module that `index.ts` re-exports, so the browser
   never evaluates zod schemas; and split hold-to-buy so the sheet body loads on first press. I did not restructure
   `packages/contracts` while the commerce/platform hardening branches were editing it.

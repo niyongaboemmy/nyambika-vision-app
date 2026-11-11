@@ -5,6 +5,14 @@
   "sideEffects": false,
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
+    "./money": { "types": "./dist/money.d.ts", "default": "./dist/money.js" },
+    "./region-data": { "types": "./dist/region-data.d.ts", "default": "./dist/region-data.js" },
+    "./tailor-data": { "types": "./dist/tailor-data.d.ts", "default": "./dist/tailor-data.js" },
+    "./ambient-model": { "types": "./dist/ambient-model.d.ts", "default": "./dist/ambient-model.js" },
+    "./package.json": "./package.json"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "tsc -p tsconfig.json --watch --preserveWatchOutput",

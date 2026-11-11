@@ -1,6 +1,6 @@
 "use client";
 
-import { REGION_CODES, REGIONS, signInPhone, type RegionCode } from "@nyambika/contracts";
+import { REGION_CODES, REGIONS, signInPhone, type RegionCode } from "@nyambika/contracts/region-data";
 import { LOCALES, type Locale } from "@nyambika/i18n";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
