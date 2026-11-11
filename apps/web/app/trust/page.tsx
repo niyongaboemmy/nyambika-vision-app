@@ -28,6 +28,8 @@ const PURPOSE: Record<string, { title: string; body: string; icon: IconName; ton
   MARKETING: { title: "News from makers I follow", body: "WhatsApp · new collections", icon: "chat", tone: "mint" },
   AVATAR_3D: { title: "Keep my private 3D twin", body: "Encrypted · off deletes it", icon: "cube", tone: "violet" },
 };
+/** iOS system red, AA on both themes (GroupRow destructive text-red-600 is 3.9:1 on dark). */
+const DANGER = "text-[#d70015] [[data-theme=dark]_&]:text-[#ff6961]";
 type Tone = "terra" | "violet" | "mint" | "sky" | "gold" | "red" | "stone";
 
 /** The five promises as scannable tiles; the full wording sits behind "Learn more". */
@@ -72,7 +74,7 @@ export default function Trust() {
   return (
     <Screen>
       <TopBar back="/" title={t("trust.title")} large />
-      <main className="space-y-6 px-4 pb-12">
+      <main className="space-y-6 px-4 pb-12 pt-3">
         <ErrorNote error={error} />
         <div>
           <Group header="Your promise">
@@ -134,9 +136,9 @@ export default function Trust() {
 
             <Group header="Export & delete">
               <GroupRow icon="download" tone="sky" title="Download my data" value="JSON" onClick={() => window.location.assign("/api/privacy/export")} />
-              {data.twin && <GroupRow icon="trash" tone="red" title="Delete twin" destructive onClick={() => setConfirm("TWIN")} />}
-              <GroupRow icon="trash" tone="red" title="Delete looks" destructive onClick={() => setConfirm("LOOKS")} />
-              <GroupRow icon="logout" tone="red" title="Delete my account" destructive onClick={() => setConfirm("ACCOUNT")} />
+              {data.twin && <GroupRow icon="trash" tone="red" title={<span className={DANGER}>Delete twin</span>} destructive onClick={() => setConfirm("TWIN")} />}
+              <GroupRow icon="trash" tone="red" title={<span className={DANGER}>Delete looks</span>} destructive onClick={() => setConfirm("LOOKS")} />
+              <GroupRow icon="logout" tone="red" title={<span className={DANGER}>Delete my account</span>} destructive onClick={() => setConfirm("ACCOUNT")} />
             </Group>
           </>
         )}

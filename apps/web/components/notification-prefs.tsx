@@ -105,7 +105,8 @@ export function NotificationPrefsCard() {
             ))}
           </Group>
 
-          <Group header={t("push.devices")} footer={blocked ?? (data.devices.length === 0 ? t("push.none") : undefined)}>
+          <Group header={t("push.devices")} footer={data.devices.length > 0 ? blocked ?? undefined : undefined}>
+            {data.devices.length === 0 && <GroupRow icon={blocked ? "eyeOff" : "phone"} tone="stone" title={blocked ?? t("push.none")} />}
             {data.devices.map((d) => (
               <GroupRow
                 key={d.id}
