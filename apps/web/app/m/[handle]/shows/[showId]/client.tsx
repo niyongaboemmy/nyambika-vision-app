@@ -254,7 +254,7 @@ export function ShowClient({ initial }: { initial: ShowView }) {
                   🔔 {me ? t("vr.rsvp") : `Sign in · ${t("vr.rsvp")}`}
                 </button>
               )}
-              <div className="mt-2 flex flex-wrap justify-center gap-1.5"><Fact icon="mail">WhatsApp · 1 h before</Fact><Fact icon="lock">Never shared with makers</Fact></div>
+              <div className="mt-2 flex flex-wrap justify-center gap-1.5"><Fact icon="clock">1 h before</Fact><Fact icon="lock">Never shared with makers</Fact></div>
             </div>
           )}
           {err && (isExpectedText(err) ? <LimitState error={err} /> : <p role="alert" className="text-sm text-terra">{err}</p>)}
