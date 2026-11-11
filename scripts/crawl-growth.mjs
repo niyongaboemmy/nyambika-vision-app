@@ -32,7 +32,13 @@ async function ctx(label) {
   };
   return { c, p, snap };
 }
-const nav = (p, name) => p.getByRole("navigation", { name: "Studio" }).last().getByRole("link", { name, exact: true }).click();
+// Secondary sections (Settings, Grow) sit in the More sheet on phones.
+const nav = async (p, name) => {
+  const link = p.getByRole("navigation", { name: "Studio" }).last().getByRole("link", { name, exact: true });
+  if (await link.count()) return link.click();
+  await p.getByRole("button", { name: "More" }).click();
+  await p.getByRole("dialog").getByRole("link", { name: new RegExp(`^${name}`) }).click();
+};
 
 // ── E30: tailor share kit + offer ─────────────────────────────────────────────
 const T = await ctx("tailor");
@@ -216,7 +222,7 @@ const approvable = await U.p.getByText(/^1\. NY-/m).count().catch(() => 0);
 if (await U.p.getByText(/NY-/).first().isVisible().catch(() => false)) {
   await U.p.getByRole("textbox", { name: "Reply" }).fill("1");
   await U.p.getByRole("button", { name: "Send reply" }).click();
-  await U.p.getByText(/yemeze/i).waitFor();
+  await U.p.getByText(/yemeze/i).first().waitFor();
   await U.snap("order-detail");
   await U.p.getByRole("textbox", { name: "Reply" }).fill("1");
   await U.p.getByRole("button", { name: "Send reply" }).click();

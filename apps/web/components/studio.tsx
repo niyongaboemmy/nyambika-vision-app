@@ -154,6 +154,8 @@ export interface StudioNavItem {
   icon: IconName;
   /** Shown only in the sidebar / More sheet on phones (the dock keeps 4–5 slots). */
   secondary?: boolean;
+  /** One-line description under the label in the More sheet. */
+  hint?: string;
 }
 
 /** One list drives the phone dock, the desktop sidebar and PageTabs. Add a studio section with one line here. */
@@ -165,9 +167,9 @@ export function studioNav(pageId: string, isCoop: boolean, member?: boolean, tai
     ...(member ? [] : [{ href: `${base}/orders`, label: "Orders", icon: "inbox" } as StudioNavItem]),
     ...(tailor && !member ? [{ href: `${base}/tailor`, label: "Custom orders", icon: "scissors" } as StudioNavItem] : []),
     ...(isCoop && !member ? [{ href: `${base}/makers`, label: "Makers", icon: "users" } as StudioNavItem] : []),
-    ...(member ? [] : [{ href: `${base}/grow`, label: "Grow", icon: "trend" } as StudioNavItem]),
+    ...(member ? [] : [{ href: `${base}/grow`, label: "Grow", icon: "trend", secondary: true, hint: "Promo cards, offers, followers, insights" } as StudioNavItem]),
     ...(member && isCoop ? [{ href: `${base}/easy`, label: "Easy mode", icon: "sparkle" } as StudioNavItem] : []),
-    ...(member ? [] : [{ href: `${base}/settings`, label: "Settings", icon: "settings", secondary: true } as StudioNavItem]),
+    ...(member ? [] : [{ href: `${base}/settings`, label: "Settings", icon: "settings", secondary: true, hint: "Profile, theme, payouts, plan, staff" } as StudioNavItem]),
   ];
 }
 
