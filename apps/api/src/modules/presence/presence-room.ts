@@ -24,7 +24,10 @@ export interface RoomEvent {
 export class PresenceRoom {
   members = new Map<string, MemberRecord>();
   poses = new Map<string, Pose>();
-  /** Per local recipient: pose version (`at`) last sent for each sid, and when the last snapshot went out. */
+  /** Monotonic pose version per sid (two poses can land in the same millisecond). */
+  private ver = new Map<string, number>();
+  private seq = 0;
+  /** Per local recipient: pose version last sent for each sid, and when the last snapshot went out. */
   private sent = new Map<string, Map<string, number>>();
   private lastSend = new Map<string, number>();
   /** Recent events (joins, reactions, host actions) attached to moderation reports as context. */
@@ -49,6 +52,7 @@ export class PresenceRoom {
   remove(sid: string) {
     this.members.delete(sid);
     this.poses.delete(sid);
+    this.ver.delete(sid);
     this.outbox.delete(sid);
     this.sent.delete(sid);
     this.lastSend.delete(sid);
@@ -68,6 +72,7 @@ export class PresenceRoom {
     const c = clampPose(p);
     const pose: Pose = { ...c, ts: (p.ts ?? now) % 1_000_000, at: now };
     this.poses.set(sid, pose);
+    this.ver.set(sid, ++this.seq);
     this.outbox.set(sid, pose);
     return true;
   }
@@ -77,6 +82,7 @@ export class PresenceRoom {
     for (const [sid, x, y, z, yw, ts] of entries) {
       if (this.members.get(sid)?.seat !== "avatar") continue;
       this.poses.set(sid, { x, y, z, yw, ts, at: now });
+      this.ver.set(sid, ++this.seq);
     }
   }
 
@@ -110,8 +116,9 @@ export class PresenceRoom {
     const p: PoseEntry[] = [];
     for (const osid of want) {
       const pose = this.poses.get(osid)!;
-      if (sent.get(osid) === pose.at) continue;
-      sent.set(osid, pose.at);
+      const v = this.ver.get(osid) ?? 0;
+      if (sent.get(osid) === v) continue;
+      sent.set(osid, v);
       p.push([osid, pose.x, pose.y, pose.z, pose.yw, pose.ts]);
     }
     // Forget avatars that left interest so they are re-sent in full when they come back.

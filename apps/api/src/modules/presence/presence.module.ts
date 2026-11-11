@@ -1,4 +1,6 @@
 import { Body, Controller, ForbiddenException, Get, HttpException, Module, NotFoundException, Param, Post } from "@nestjs/common";
+import { ApplicationConfig, HttpAdapterHost } from "@nestjs/core";
+import { WsAdapter } from "@nestjs/platform-ws";
 import { parseRoom, PRESENCE, PRESENCE_LABEL, TicketInput } from "@nyambika/contracts";
 import { Access, AuthUser, CurrentUser, MANAGE, Public } from "../../common/auth";
 import { PrismaService } from "../../common/prisma.service";
@@ -68,4 +70,21 @@ export class PresenceController {
   controllers: [PresenceController],
   providers: [PresenceService, PresenceGateway],
 })
-export class PresenceModule {}
+export class PresenceModule {
+  /** Plain `ws` driver for the gateway, set here so main.ts and every test app need no extra wiring. */
+  constructor(appConfig: ApplicationConfig, host: HttpAdapterHost) {
+    if (!appConfig.getIoAdapter()) appConfig.setIoAdapter(new LazyWsAdapter(host));
+  }
+}
+
+/** The HTTP server may not exist yet when modules are constructed (testing apps): resolve it when gateways bind. */
+class LazyWsAdapter extends WsAdapter {
+  constructor(private host: HttpAdapterHost) {
+    super();
+  }
+  create(port: number, options?: Record<string, unknown>) {
+    const self = this as unknown as { httpServer?: unknown };
+    self.httpServer ??= this.host.httpAdapter?.getHttpServer();
+    return super.create(port, options);
+  }
+}
