@@ -1,5 +1,5 @@
-import { Body, Controller, Get, HttpCode, Module, Patch, Post, Req, Res, HttpException, UnauthorizedException } from "@nestjs/common";
-import { OtpRequest, OtpVerify, Locale } from "@nyambika/contracts";
+import { BadRequestException, Body, Controller, Get, HttpCode, Module, Patch, Post, Req, Res, HttpException, UnauthorizedException } from "@nestjs/common";
+import { OtpRequest, OtpVerify, Locale, signInPhone, type RegionCode } from "@nyambika/contracts";
 import type { Request, Response } from "express";
 import { createHash, randomBytes, randomInt } from "node:crypto";
 import { z } from "zod";
@@ -10,11 +10,11 @@ import { parse } from "../../common/zod";
 import { config } from "../../config";
 
 const sha = (s: string) => createHash("sha256").update(s).digest("hex");
-const normalisePhone = (p: string) => {
-  const digits = p.replace(/[^0-9]/g, "");
-  if (digits.startsWith("250")) return `+${digits}`;
-  if (digits.startsWith("07")) return `+250${digits.slice(1)}`;
-  return `+${digits}`;
+/** Per-country rules from the sign-in selector (hardening pass 1); Rwanda keeps the original 07… → +250 reading. */
+const normalisePhone = (p: string, country?: RegionCode) => {
+  const r = signInPhone(p, country);
+  if (!r.ok) throw new BadRequestException({ message: r.message, code: "PHONE_INVALID" });
+  return r.e164;
 };
 
 const cookieBase = { httpOnly: true, sameSite: "lax" as const, secure: process.env.NODE_ENV === "production", path: "/" };
@@ -42,7 +42,8 @@ export class AuthController {
   @Post("otp/request")
   @HttpCode(200)
   async requestOtp(@Body() body: unknown) {
-    const phone = normalisePhone(parse(OtpRequest, body).phone);
+    const req = parse(OtpRequest, body);
+    const phone = normalisePhone(req.phone, req.country);
     const recent = await this.prisma.otpChallenge.count({
       where: { phone, createdAt: { gte: new Date(Date.now() - 15 * 60_000) } },
     });
@@ -60,7 +61,7 @@ export class AuthController {
   @HttpCode(200)
   async verifyOtp(@Body() body: unknown, @Res({ passthrough: true }) res: Response) {
     const input = parse(OtpVerify, body);
-    const phone = normalisePhone(input.phone);
+    const phone = normalisePhone(input.phone, input.country);
     const ch = await this.prisma.otpChallenge.findFirst({
       where: { phone, consumedAt: null, expiresAt: { gt: new Date() } },
       orderBy: { createdAt: "desc" },

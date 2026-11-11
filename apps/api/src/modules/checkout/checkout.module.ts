@@ -92,6 +92,9 @@ export class CheckoutService {
     if (!v || v.product.status !== "PUBLISHED" || v.product.page.status !== "PUBLISHED") throw new NotFoundException("This item isn't available");
     if (!v.sizes.includes(input.size)) throw new BadRequestException(`Size ${input.size} isn't offered`);
     if (!v.product.madeToOrder && v.stock < 1) throw new ConflictException("Sold out in this colour");
+    // The bag charges RWF over MoMo/Airtel only: pieces priced in another currency are bought from their buy sheet (no silent conversion).
+    const pr = await this.prisma.pageRegion.findUnique({ where: { pageId: v.product.pageId } });
+    if (pr && pr.currency !== "RWF") throw new ConflictException({ message: `This maker sells in ${pr.currency}. Buy it from its own sheet; the bag is for Rwandan makers for now.`, code: "BAG_CURRENCY" });
     const lookId = input.lookId ? (await this.prisma.look.findFirst({ where: { id: input.lookId, userId }, select: { id: true } }))?.id ?? null : null;
     const existing = await this.prisma.bagItem.findUnique({ where: { userId_variantId_size: { userId, variantId: v.id, size: input.size } } });
     const qty = Math.min(MAX_QTY, (existing?.qty ?? 0) + input.qty);
