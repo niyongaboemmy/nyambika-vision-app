@@ -2,6 +2,7 @@
 
 import { MEASUREMENT_FIELDS } from "@nyambika/contracts/tailor-data";
 import { useState } from "react";
+import { Stepper } from "@/components/ios";
 import { Card, Empty, Field, Icon, Input, Note, SButton, Textarea } from "@/components/studio";
 import { DeskNav } from "@/components/tailor-studio";
 import { api, rwf } from "@/lib/api";
@@ -30,7 +31,7 @@ export default function Services() {
       {editing && <ServiceForm pageId={page.id} initial={editing} onDone={async () => { setEditing(null); await reload(); }} onCancel={() => setEditing(null)} />}
       {data?.length === 0 && !editing && (
         <Empty icon="scissors" title="No services yet">
-          <p className="mb-3">✨ Start from an idea</p>
+          <p className="mb-3 inline-flex items-center gap-1"><Icon name="sparkle" className="size-4 text-violet-ink" /> Start from an idea</p>
           <div className="flex flex-wrap justify-center gap-2">
             {IDEAS.map((i) => <SButton key={i.title} variant="outline" onClick={() => setEditing({ ...i, requiredMeasurements: ["bustCm", "waistCm", "hipsCm"], active: true })}>{i.title}</SButton>)}
           </div>
@@ -86,9 +87,10 @@ function ServiceForm({ pageId, initial, onDone, onCancel }: { pageId: string; in
     <Card className="space-y-3 ring-2 ring-stone-900">
       <Field label="Service name"><Input value={s.title ?? ""} onChange={(e) => setS({ ...s, title: e.target.value })} maxLength={80} placeholder="Custom dress from your fabric" /></Field>
       <Field label="What's included"><Textarea value={s.description ?? ""} onChange={(e) => setS({ ...s, description: e.target.value })} maxLength={600} /></Field>
-      <div className="grid grid-cols-2 gap-3">
-        <Field label="Starting price (RWF)"><Input inputMode="numeric" value={s.startingPriceRwf ?? ""} onChange={(e) => setS({ ...s, startingPriceRwf: Number(e.target.value.replace(/\D/g, "")) })} /></Field>
-        <Field label="Lead time (days)"><Input inputMode="numeric" value={s.leadTimeDays ?? ""} onChange={(e) => setS({ ...s, leadTimeDays: Number(e.target.value.replace(/\D/g, "")) })} /></Field>
+      <Field label="Starting price (RWF)"><Input inputMode="numeric" value={s.startingPriceRwf ?? ""} onChange={(e) => setS({ ...s, startingPriceRwf: Number(e.target.value.replace(/\D/g, "")) })} /></Field>
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-[13px] font-bold text-cocoa">Lead time</span>
+        <Stepper label="lead days" unit="days" value={s.leadTimeDays ?? 7} onChange={(v) => setS({ ...s, leadTimeDays: v })} min={1} max={120} />
       </div>
       <Field label="Measurements you need" group>
         <div className="flex flex-wrap gap-2">

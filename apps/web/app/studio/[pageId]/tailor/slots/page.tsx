@@ -1,10 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import { Card, Chip, Field, Icon, Input, Note, SButton, Select } from "@/components/studio";
+import { useMemo, useState, type ReactNode } from "react";
+import { Stepper } from "@/components/ios";
+import { Card, Chip, Field, Icon, Input, Note, SButton } from "@/components/studio";
 import { DeskNav } from "@/components/tailor-studio";
 import { api } from "@/lib/api";
+import { useDrag } from "@/lib/drag";
+import { haptic } from "@/lib/native";
 import { useApi } from "@/lib/use-api";
 import { kigaliTime } from "@/lib/tailor";
 import { useManagedPage } from "../../layout";
@@ -114,24 +117,33 @@ export default function Slots() {
         {!data && <div className="h-16 animate-pulse rounded-2xl bg-stone-100" />}
         {data && todays.length === 0 && <p className="text-sm text-stone-600">No times yet</p>}
         <ul className="space-y-2">
-          {(showAll ? todays : todays.slice(0, SLOT_PREVIEW)).map((s) => (
-            <li key={s.id} className={`flex items-center gap-3 rounded-2xl p-3 ${s.booked ? "bg-fuchsia-50 ring-1 ring-fuchsia-200" : "bg-stone-50 ring-1 ring-stone-200"}`}>
-              <span className="w-14 text-lg font-black">{kigaliTime(s.startsAt, { hour: "2-digit", minute: "2-digit", hour12: false })}</span>
-              <div className="min-w-0 flex-1 text-sm">
-                {s.booked ? (
-                  <>
-                    <p className="font-semibold">{s.customer?.name ?? s.customer?.phone} · fitting</p>
-                    {s.customOrder && <Link href={`/studio/${page.id}/tailor/${s.customOrder.id}`} className="text-stone-600 underline">{s.customOrder.code} · {s.customOrder.title}</Link>}
-                  </>
-                ) : (
-                  <p className="text-stone-600">Open · {s.durationMin} min · {s.location}</p>
+          {(showAll ? todays : todays.slice(0, SLOT_PREVIEW)).map((s) => {
+            const time = kigaliTime(s.startsAt, { hour: "2-digit", minute: "2-digit", hour12: false });
+            const remove = async () => {
+              haptic("medium");
+              await api(`/pages/${page.id}/slots/${s.id}`, { method: "DELETE" });
+              await reload();
+            };
+            const row = (
+              <div className={`flex items-center gap-3 rounded-2xl p-3 ${s.booked ? "bg-fuchsia-50 ring-1 ring-inset ring-fuchsia-200" : "bg-stone-50 ring-1 ring-inset ring-stone-200"}`}>
+                <span className="w-14 text-lg font-black tabular-nums">{time}</span>
+                <div className="min-w-0 flex-1 text-sm">
+                  {s.booked ? (
+                    <>
+                      <p className="font-semibold">{s.customer?.name ?? s.customer?.phone} · fitting</p>
+                      {s.customOrder && <Link href={`/studio/${page.id}/tailor/${s.customOrder.id}`} className="text-stone-600 underline">{s.customOrder.code} · {s.customOrder.title}</Link>}
+                    </>
+                  ) : (
+                    <p className="truncate text-stone-600">Open · {s.durationMin} min · {s.location}</p>
+                  )}
+                </div>
+                {!s.booked && (
+                  <SButton variant="ghost" className="w-11 px-0" aria-label={`Remove ${time} slot`} onClick={remove}><Icon name="trash" className="size-4" /></SButton>
                 )}
               </div>
-              {!s.booked && (
-                <SButton variant="ghost" aria-label="Remove slot" onClick={async () => { await api(`/pages/${page.id}/slots/${s.id}`, { method: "DELETE" }); await reload(); }}>✕</SButton>
-              )}
-            </li>
-          ))}
+            );
+            return <li key={s.id}>{s.booked ? row : <SwipeToDelete label={`Remove ${time}`} onDelete={remove}>{row}</SwipeToDelete>}</li>;
+          })}
         </ul>
         {todays.length > SLOT_PREVIEW && (
           <button type="button" aria-expanded={showAll} onClick={() => setShowAll(!showAll)} className="st-press inline-flex min-h-11 w-full items-center justify-center gap-1 rounded-2xl text-sm font-semibold text-stone-600 hover:text-stone-900">
@@ -157,11 +169,10 @@ export default function Slots() {
           </div>
         </Field>
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Length">
-            <Select value={duration} onChange={(e) => setDuration(Number(e.target.value))}>
-              {[30, 45, 60, 90].map((d) => <option key={d} value={d}>{d} min</option>)}
-            </Select>
-          </Field>
+          <div className="space-y-1.5">
+            <span className="block text-[13px] font-bold text-cocoa">Length</span>
+            <Stepper label="minutes" unit="min" value={duration} onChange={setDuration} min={15} max={120} step={15} />
+          </div>
           <Field label="Where">
             <Input value={location} onChange={(e) => setLocation(e.target.value)} maxLength={120} />
           </Field>
@@ -172,6 +183,48 @@ export default function Slots() {
           <SButton variant="outline" className="min-h-12" disabled={busy || !picked.length} onClick={() => publish(true)}>Same times rest of week</SButton>
         </div>
       </Card>
+    </div>
+  );
+}
+
+const REVEAL = 96;
+
+/**
+ * iOS-style swipe: drag a row left to reveal a red Remove button (the row's own trash button stays for mouse and
+ * keyboard). Springs back on a short drag; reduced motion just snaps.
+ */
+function SwipeToDelete({ label, onDelete, children }: { label: string; onDelete: () => void; children: ReactNode }) {
+  const [x, setX] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const [open, setOpen] = useState(false);
+  const bind = useDrag(
+    ({ movement: [dx], last, tap }) => {
+      if (tap) return;
+      const base = open ? -REVEAL : 0;
+      const next = Math.max(-REVEAL - 24, Math.min(0, base + dx));
+      if (!last) {
+        setDragging(true);
+        setX(next);
+        return;
+      }
+      setDragging(false);
+      const isOpen = next < -REVEAL / 2;
+      if (isOpen && !open) haptic("light");
+      setOpen(isOpen);
+      setX(isOpen ? -REVEAL : 0);
+    },
+    { axis: "x" },
+  );
+  return (
+    <div className="relative overflow-hidden rounded-2xl">
+      {open && (
+        <button type="button" aria-label={label} onClick={onDelete} className="absolute inset-y-0 right-0 flex w-24 items-center justify-center gap-1 bg-red-700 text-sm font-bold text-[#fff]">
+          <Icon name="trash" className="size-4" /> Remove
+        </button>
+      )}
+      <div {...bind()} style={{ transform: `translateX(${x}px)`, touchAction: "pan-y" }} className={`relative rounded-2xl bg-surface ${dragging ? "" : "transition-transform duration-300 ease-[var(--ease-spring)] motion-reduce:transition-none"}`}>
+        {children}
+      </div>
     </div>
   );
 }

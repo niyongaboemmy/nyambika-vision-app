@@ -80,7 +80,7 @@ export default function RegionStudio() {
             <div className="grid grid-cols-2 gap-2">
               {s.regions.map((r) => (
                 <button key={r.code} type="button" aria-pressed={s.region === r.code} onClick={() => r.code !== s.region && save({ region: r.code }, `Your page is now in ${r.name}. Prices are charged in ${r.currency}.`)} className={`st-press flex min-h-16 items-center gap-3 rounded-2xl px-3 text-left ring-1 ring-inset ${s.region === r.code ? "bg-cocoa text-white ring-cocoa" : "bg-white text-cocoa ring-hairline"}`}>
-                  <span className="text-2xl" aria-hidden>{r.flag}</span>
+                  <span aria-hidden className={`grid size-9 shrink-0 place-items-center rounded-xl text-xs font-black tracking-wide ${s.region === r.code ? "bg-white/15" : "bg-paper-2 text-cocoa-2"}`}>{r.code}</span>
                   <span className="min-w-0"><span className="block text-sm font-bold">{r.name}</span><span className={`block text-xs ${s.region === r.code ? "text-white/80" : "text-cocoa-2"}`}>{r.currency}{r.launched ? "" : " · pilot"}</span></span>
                 </button>
               ))}
@@ -95,7 +95,7 @@ export default function RegionStudio() {
           <div className="flex flex-wrap gap-2">
             {allowed.map((w) => {
               const on = w === "MPESA" ? Boolean(s.mpesaTill) : w === "MTN_MOMO" ? Boolean(s.momoMerchant) : Boolean(s.airtelMerchant || (s.region === "RW" && s.momoMerchant));
-              return <Chip key={w} tone={on ? "mint" : "stone"}>{on ? "✓ " : ""}{WALLET_LABEL[w]}</Chip>;
+              return <Chip key={w} tone={on ? "mint" : "stone"}>{on && <Icon name="check" className="size-3.5" />}{WALLET_LABEL[w]}</Chip>;
             })}
           </div>
           {allowed.includes("MPESA") && (
@@ -162,7 +162,7 @@ export default function RegionStudio() {
       </div>
 
       <ZoneSheet open={zoneOpen} currency={s.currency} pageId={page.id} onClose={() => setZoneOpen(false)} onSaved={(x) => { setData(x); setZoneOpen(false); }} />
-      <p className="text-xs text-cocoa-2">{REGIONS[s.region].flag} Phone format: {REGIONS[s.region].phoneExample}</p>
+      <p className="flex items-center gap-1 text-xs text-cocoa-2"><Icon name="phone" className="size-3.5" /> {REGIONS[s.region].name} phone format: {REGIONS[s.region].phoneExample}</p>
     </div>
   );
 }
