@@ -41,6 +41,7 @@ import { RegionModule } from "./modules/region/region.module";
 import { Twin3dModule } from "./modules/twin3d/twin3d.module";
 import { InferenceModule } from "./modules/inference/inference.module";
 import { VideoModule } from "./modules/video/video.module";
+import { VrModule } from "./modules/vr/vr.module";
 
 @Controller()
 class HealthController {
@@ -95,6 +96,7 @@ class HealthController {
     Twin3dModule,
     InferenceModule,
     VideoModule,
+    VrModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: AuthGuard }],

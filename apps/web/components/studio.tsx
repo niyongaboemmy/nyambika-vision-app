@@ -168,6 +168,7 @@ export function studioNav(pageId: string, isCoop: boolean, member?: boolean, tai
     ...(tailor && !member ? [{ href: `${base}/tailor`, label: "Custom orders", icon: "scissors" } as StudioNavItem] : []),
     ...(isCoop && !member ? [{ href: `${base}/makers`, label: "Makers", icon: "users" } as StudioNavItem] : []),
     ...(member ? [] : [{ href: `${base}/grow`, label: "Grow", icon: "trend", secondary: true, hint: "Promo cards, offers, followers, insights" } as StudioNavItem]),
+    ...(member ? [] : [{ href: `${base}/showroom`, label: "Showroom", icon: "layers", secondary: true, hint: "3D showroom, VR and virtual fashion shows" } as StudioNavItem]),
     ...(member && isCoop ? [{ href: `${base}/easy`, label: "Easy mode", icon: "sparkle" } as StudioNavItem] : []),
     ...(member ? [] : [{ href: `${base}/settings`, label: "Settings", icon: "settings", secondary: true, hint: "Profile, theme, payouts, plan, staff" } as StudioNavItem]),
   ];

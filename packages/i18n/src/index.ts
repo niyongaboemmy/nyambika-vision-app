@@ -226,6 +226,20 @@ const en = {
   "video.title": "See it on video",
   "video.label": "AI video try-on",
   "video.consent": "Use my clip only to make this video, then delete it. Never shared with makers.",
+  "vr.shelfEyebrow": "Turn it around",
+  "vr.shelfTitle": "The 3D shelf",
+  "vr.tapToTurn": "tap to open in 3D",
+  "vr.enterShowroom": "Enter the 3D showroom",
+  "vr.showroomHint": "Walk the room on your phone, or step in with a VR headset",
+  "vr.live": "LIVE",
+  "vr.fashionShow": "Fashion show",
+  "vr.watchNow": "On the runway now. Watch live",
+  "vr.enterVr": "Enter VR",
+  "vr.holdToBuy": "Hold to buy",
+  "vr.rsvp": "Remind me on WhatsApp",
+  "vr.rsvpDone": "You're on the list",
+  "vr.replay": "Watch the replay",
+  "vr.watching": "watching",
 };
 
 type Messages = typeof en;
@@ -452,6 +466,20 @@ const rw: Messages = {
   "video.title": "Birebe kuri videwo",
   "video.label": "Igerageza rya videwo rya AI",
   "video.consent": "Koresha videwo yanjye gusa mu gukora iyi videwo, hanyuma uyisibe. Ntisangizwa abadozi.",
+  "vr.shelfEyebrow": "Bihindukize urebe",
+  "vr.shelfTitle": "Akabati ka 3D",
+  "vr.tapToTurn": "kanda urebe muri 3D",
+  "vr.enterShowroom": "Injira mu imurikagurisha rya 3D",
+  "vr.showroomHint": "Zenguruka icyumba kuri telefoni, cyangwa winjire ukoresheje VR",
+  "vr.live": "IMBONANKUBONE",
+  "vr.fashionShow": "Imurika ry'imideli",
+  "vr.watchNow": "Riri kuba ubu. Rirebe imbonankubone",
+  "vr.enterVr": "Injira muri VR",
+  "vr.holdToBuy": "Kanda ukomeze ugure",
+  "vr.rsvp": "Nyibutsa kuri WhatsApp",
+  "vr.rsvpDone": "Wanditswe ku rutonde",
+  "vr.replay": "Reba isubiramo",
+  "vr.watching": "barareba",
 };
 
 const fr: Messages = {
@@ -675,6 +703,20 @@ const fr: Messages = {
   "video.title": "Voir en vidéo",
   "video.label": "Essayage vidéo IA",
   "video.consent": "Utiliser mon clip uniquement pour cette vidéo, puis le supprimer. Jamais partagé avec les créateurs.",
+  "vr.shelfEyebrow": "Faites-le tourner",
+  "vr.shelfTitle": "L'étagère 3D",
+  "vr.tapToTurn": "touchez pour ouvrir en 3D",
+  "vr.enterShowroom": "Entrer dans le showroom 3D",
+  "vr.showroomHint": "Parcourez la salle sur votre téléphone ou entrez avec un casque VR",
+  "vr.live": "EN DIRECT",
+  "vr.fashionShow": "Défilé",
+  "vr.watchNow": "Sur le podium maintenant. Regardez en direct",
+  "vr.enterVr": "Entrer en VR",
+  "vr.holdToBuy": "Maintenir pour acheter",
+  "vr.rsvp": "Me le rappeler sur WhatsApp",
+  "vr.rsvpDone": "Vous êtes sur la liste",
+  "vr.replay": "Voir la rediffusion",
+  "vr.watching": "spectateurs",
 };
 
 /**

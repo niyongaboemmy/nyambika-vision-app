@@ -16,10 +16,10 @@ const HOLD_MS = 1200;
 const DELIVERY_FEE = 2000;
 
 /** Hold to buy (prototype v2 · 14/15/16): auto-filled size, delivery and wallet; one press-and-hold. */
-export function HoldToBuy({ look }: { look: Look }) {
+export function HoldToBuy({ look, autoOpen = false }: { look: Look; /** E35: open the sheet straight away (hand-off from the VR showroom / runway). */ autoOpen?: boolean }) {
   const { me, t } = useSession();
   const router = useRouter();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(autoOpen);
   const twinSize = me?.twinSize && look.variant.sizes.includes(me.twinSize) ? me.twinSize : null;
   const [size, setSize] = useState(twinSize ?? look.variant.sizes[Math.min(1, look.variant.sizes.length - 1)]);
   const [delivery, setDelivery] = useState<"DELIVERY" | "PICKUP">("DELIVERY");
@@ -70,7 +70,7 @@ export function HoldToBuy({ look }: { look: Look }) {
       const o = await api<OrderView>("/orders", {
         method: "POST",
         headers: { "idempotency-key": key.current },
-        json: { lookId: look.id, variantId: look.variant.id, size, delivery, wallet, payerPhone: me!.phone, address, discountCode: discount?.code ?? undefined },
+        json: { lookId: look.id || undefined, variantId: look.variant.id, size, delivery, wallet, payerPhone: me!.phone, address, discountCode: discount?.code ?? undefined },
       });
       track("hold_started", { lookId: look.id, orderId: o.id, pageId: look.maker.pageId });
       router.push(`/orders/${o.id}?fresh=1`);

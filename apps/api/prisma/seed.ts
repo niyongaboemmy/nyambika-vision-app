@@ -10,6 +10,7 @@ import { join, resolve } from "node:path";
 import "dotenv/config";
 import { seedTailor } from "./seed-tailor";
 import { seed3d } from "./seed-3d";
+import { seedVr } from "./seed-vr";
 import { seedRegion } from "./seed-region";
 
 const prisma = new PrismaClient();
@@ -311,6 +312,7 @@ async function main() {
   }
   await seedTailor(prisma);
   await seed3d(prisma);
+  await seedVr(prisma);
   await seedRegion(prisma);
   console.log("Seed complete. Demo shopper 0788000001 · tailor 0788100001 · coop admin 0788100002 · seller 0788100003 · coop maker 0788100004 · host 0788900001");
 }

@@ -244,3 +244,11 @@ body {
 @media (max-height: 700px) {
   .look-rail button { font-size: 0; gap: 0; }
 }
+
+/* E35 fashion show: reactions float up from the bar (not rendered with reduced motion). */
+@keyframes vr-float {
+  0% { transform: translateY(0) scale(.6); opacity: 0; }
+  12% { opacity: 1; transform: translateY(-20px) scale(1.1); }
+  100% { transform: translateY(-46dvh) translateX(-18px) scale(.9); opacity: 0; }
+}
+.vr-float { animation: vr-float 2.5s cubic-bezier(.2,.7,.3,1) forwards; }
