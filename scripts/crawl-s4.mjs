@@ -48,14 +48,14 @@ const maker = await c2.newPage();
 await signIn(maker, OWNERS[makerName]);
 await maker.goto(`${BASE}/studio`);
 await maker.getByText(makerName).first().click();
-await maker.getByRole("link", { name: "Orders" }).click();
+await maker.getByRole("navigation", { name: "Studio" }).getByRole("link", { name: "Orders" }).click();
 await maker.getByRole("button", { name: "Accept" }).first().waitFor();
 await maker.screenshot({ path: new URL("./crawl-output/s4/91-maker-inbox.png", import.meta.url).pathname });
 for (const step of ["Accept", "Start making", "Send out", "Mark delivered"]) {
   await maker.getByRole("button", { name: step }).first().click();
   await maker.waitForTimeout(500);
 }
-await maker.getByRole("link", { name: "Overview" }).click();
+await maker.getByRole("navigation", { name: "Studio" }).getByRole("link", { name: "Home" }).click();
 await maker.getByText(/paid orders/i).waitFor();
 await maker.screenshot({ path: new URL("./crawl-output/s4/92-maker-analytics.png", import.meta.url).pathname, fullPage: true });
 await c2.close();

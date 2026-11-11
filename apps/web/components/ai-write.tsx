@@ -22,17 +22,17 @@ export function AiWrite<T>({ pageId, kind, fields, onResult }: { pageId: string;
     }
   }
   return (
-    <div className="flex flex-wrap items-center gap-2 rounded-xl bg-violet-50 p-2">
-      <button type="button" onClick={run} disabled={busy} className="rounded-lg bg-violet-600 px-3 py-1.5 text-sm font-semibold text-white disabled:opacity-50">
+    <div className="flex flex-wrap items-center gap-2 rounded-2xl bg-gradient-to-br from-violet-50 to-orange-50 p-2.5 ring-1 ring-inset ring-violet-200">
+      <button type="button" onClick={run} disabled={busy} className="inline-flex min-h-10 items-center rounded-xl bg-violet-ink px-3.5 text-sm font-bold text-white shadow-[0_8px_18px_-10px_rgba(98,57,201,.8)] transition active:scale-[.97] disabled:opacity-50">
         {busy ? "Writing…" : "✨ Write it for me"}
       </button>
-      <span className="text-xs text-violet-900">in</span>
+      <span className="text-xs font-semibold text-violet-ink">in</span>
       {(["rw", "en", "fr"] as Locale[]).map((l) => (
-        <button key={l} type="button" aria-pressed={l === locale} onClick={() => setLocale(l)} className={`rounded-md px-2 py-1 text-xs font-semibold ${l === locale ? "bg-violet-200 text-violet-900" : "text-violet-700"}`}>
+        <button key={l} type="button" aria-pressed={l === locale} onClick={() => setLocale(l)} className={`min-h-9 min-w-9 rounded-lg px-2 text-xs font-bold transition ${l === locale ? "bg-white text-violet-ink shadow-sm ring-1 ring-violet-200" : "text-violet-ink/80 hover:bg-white/60"}`}>
           {l.toUpperCase()}
         </button>
       ))}
-      <span className="w-full text-[11px] text-violet-800">A draft from your details. Check it before saving.</span>
+      <span className="w-full px-0.5 text-[11px] text-violet-ink">A draft from your details. Check it before saving.</span>
       {err && <span className="text-xs text-red-700">{err}</span>}
     </div>
   );

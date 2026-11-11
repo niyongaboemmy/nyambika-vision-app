@@ -17,7 +17,8 @@ await shot("admin-wave-imported");
 let r = await page.request.get(`${BASE}/m/${tailor.handle}`, { maxRedirects: 0 });
 console.log(`new page before go-live: HTTP ${r.status()}`);
 
-const card = (name) => page.locator("div.rounded-2xl", { hasText: name }).filter({ has: page.getByRole("button") }).last();
+// Waves are listed newest first; earlier dry runs may reuse the same sample names.
+const card = (name) => page.getByRole("article", { name, exact: true }).first();
 await card(tailor.name).getByRole("button", { name: /send review link/i }).click();
 await card(seller.name).getByRole("button", { name: /send review link/i }).click();
 await page.waitForTimeout(600);
