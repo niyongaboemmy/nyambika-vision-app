@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { HoldToBuy } from "@/components/hold-to-buy";
 import type { ShowroomEngine } from "@/components/vr-engine";
+import { SharedRoom } from "@/components/vr-presence";
 import { XrStage } from "@/components/xr-viewer";
 import { api, rwf } from "@/lib/api";
 import { useRegion, type Commerce } from "@/lib/region";
@@ -303,6 +304,10 @@ function Room({ room, commerce }: { room: Showroom; commerce: Commerce | null })
         <p className="mt-2 text-center text-[10px] text-txt/60">✨ {room.label} · shapes and drape are approximate</p>
       </div>
 
+      {/* R4 spike: shared presence (flag vr.multiuser_spike; renders nothing while off) */}
+      {mode === "3d" && firstView && (
+        <SharedRoom engine={engine.current} room={`showroom:${room.page.handle}`} signedIn={Boolean(me)} signInHref={`/signin?next=${encodeURIComponent(`/m/${room.page.handle}/showroom`)}`} seated={seated} show={room.shows[0] ? { id: room.shows[0].id, title: room.shows[0].title, href: `/m/${room.page.handle}/shows/${room.shows[0].id}` } : null} />
+      )}
       {stage && <XrStage open onClose={() => setStage(null)} title={stage.item.title} subtitle={`${room.page.name} · ${price(stage.item)}`} assets={stage.assets} initialVariantId={stage.item.variantId} />}
     </main>
   );

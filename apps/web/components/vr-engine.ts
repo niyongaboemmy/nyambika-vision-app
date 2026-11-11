@@ -615,7 +615,29 @@ export class ShowroomEngine {
     void this.renderer.xr.getSession()?.end();
   }
 
+  // ── R4 spike hooks (multi-user presence layer, flag vr.multiuser_spike) ──
+  private frameHooks = new Set<(dt: number) => void>();
+  /** Add an object to the room (returns a remover). */
+  attach(obj: THREE.Object3D) {
+    this.scene.add(obj);
+    return () => void this.scene.remove(obj);
+  }
+  /** Run every rendered frame, inline and in XR (window rAF pauses in XR). */
+  onFrame(fn: (dt: number) => void) {
+    this.frameHooks.add(fn);
+    return () => void this.frameHooks.delete(fn);
+  }
+  /** Viewer eye position (metres, room space) and facing yaw (radians), inline or in XR. */
+  viewerPose() {
+    const xr = this.renderer.xr.isPresenting;
+    const cam = xr ? this.renderer.xr.getCamera() : this.camera;
+    const p = xr ? this.head() : this.camera.getWorldPosition(new THREE.Vector3());
+    const d = new THREE.Vector3(0, 0, -1).applyQuaternion(cam.getWorldQuaternion(new THREE.Quaternion()));
+    return { x: p.x, y: p.y, z: p.z, yaw: Math.atan2(-d.x, -d.z), xr, seated: this.seated };
+  }
+
   dispose() {
+    this.frameHooks.clear();
     this.disposed = true;
     this.exitXR();
     this.renderer.setAnimationLoop(null);
@@ -918,6 +940,7 @@ export class ShowroomEngine {
       n.mixer?.update(dt);
     }
     if (this.dust) this.dust.rotation.y += dt * 0.02;
+    for (const f of this.frameHooks) f(dt);
     if (!this.o.reducedMotion) {
       const pulse = 0.45 + Math.sin(performance.now() / 700) * 0.15;
       for (const t of this.teleports) (t.material as THREE.MeshBasicMaterial).opacity = pulse;
