@@ -23,10 +23,10 @@ import numpy as np
 from .pattern import Pattern, finished_for_body
 from .solver import DrapeResult
 
-TIGHT_STRETCH = 0.02
+TIGHT_STRETCH = 0.025
 CONTACT = 0.012
 LOOSE_GAP = 0.035
-LOOSE_EASE = 0.12  # measured girth ease (m) of a horizontal slab above which off-body cloth reads loose
+LOOSE_EASE = 0.09  # measured girth ease (m) of a horizontal slab above which off-body cloth reads loose
 SLAB = 0.02
 BANDS = ("tight", "ok", "loose", "drape")
 # sRGB colours for the overlay (colour-blind safe-ish: magenta / teal / amber-light) and the legend.

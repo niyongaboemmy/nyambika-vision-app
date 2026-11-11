@@ -127,11 +127,14 @@ def _arrange_cone(pm: meshmod.PanelMesh, body: Body, pattern: Pattern, w_eff: fl
     ties = []
     tt = pattern.panels[0].placement["theta_tot"] / 2
     for sign in (1, -1):
-        for dr in (0.0, 0.03):
-            pa = np.array([(r1 + dr) * np.sin(sign * tt), r1 - (r1 + dr) * np.cos(sign * tt)])
-            f = sign * (w_tot / 2 - w_eff) / r1
-            pb = np.array([(r1 + dr) * np.sin(f), r1 - (r1 + dr) * np.cos(f)])
-            ties.append((pa, pb))
+        # The last 5 cm of each flap's waistband lies flat on the layer under it (spreads the tie load).
+        for dl in (0.0, 0.025, 0.05):
+            for dr in (0.0, 0.03):
+                fa = sign * (tt - dl / r1)
+                pa = np.array([(r1 + dr) * np.sin(fa), r1 - (r1 + dr) * np.cos(fa)])
+                f = sign * ((w_tot / 2 - w_eff) - dl) / r1
+                pb = np.array([(r1 + dr) * np.sin(f), r1 - (r1 + dr) * np.cos(f)])
+                ties.append((pa, pb))
     return pos, layer, ties
 
 
@@ -231,7 +234,8 @@ def drape(pattern: Pattern, body: Body, cfg: SolverConfig | None = None) -> Drap
     rest_e = np.linalg.norm(g.uv[edges[:, 1]] - g.uv[edges[:, 0]], axis=1)
     grain = np.array([pm.panel.grain_deg for pm in g.panels])[g.panel_of[edges[:, 0]]]
     st_e = _grain_stretch(g.uv, edges, grain, fabric)
-    kt_e = np.clip(1 - 7 * st_e, 0.12, 0.97)
+    # `stretch` is elongation under a hand pull; self-weight loads are far lower, so map it gently.
+    kt_e = np.clip(1 - 1.6 * st_e, 0.5, 0.98)
     # Stay-taped edges (waistband, neckline, shoulder seams) do not stretch.
     taped = np.zeros(n, dtype=bool)
     for pm, off in zip(g.panels, g.offsets):

@@ -20,6 +20,8 @@ from . import video_tryon  # noqa: E402
 from .inference import api as inference_api  # noqa: E402
 app.include_router(video_tryon.router)  # E39 video try-on + NLB video eval: /v1/video/*
 inference_api.install(app)  # E42 self-hosted inference routing: /v1/inference/*
+from .drape import api as drape_api  # noqa: E402
+app.include_router(drape_api.router)  # R4 spike: physics drape + fit heatmap + pattern-to-3D: /v1/drape/*
 
 
 class ImageIn(BaseModel):
