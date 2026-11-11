@@ -398,7 +398,7 @@ function MigrationTab() {
         {report && (
           <ul className="space-y-1 text-sm">
             {report.map((r) => (
-              <li key={r.handle} className={r.ok ? "text-mint-ink" : "text-red-800"}><Icon name={r.ok ? "check" : "x"} className="mr-1 inline size-4 align-[-3px]" />{r.handle} {r.ok ? `· ${r.defects.length} item(s) to check` : `· ${r.error}`}</li>
+              <li key={r.handle} className={r.ok ? "text-mint-ink" : "text-red-800"}><Icon name={r.ok ? "check" : "x"} className="mr-1 inline size-4 align-[-3px]" /><span className="sr-only">{r.ok ? "Imported: " : "Failed: "}</span>{r.handle} {r.ok ? `· ${r.defects.length} to fix` : `· ${r.error}`}</li>
             ))}
           </ul>
         )}

@@ -22,7 +22,7 @@ await signIn(page, "0788900001");
 await page.goto(`${BASE}/admin`);
 await page.getByRole("button", { name: "Migration" }).click();
 await page.locator('input[type=file][accept*="json"]').setInputFiles(bundlePath);
-await page.getByText(`✓ ${tailor.handle}`).waitFor({ timeout: 60000 });
+await page.getByText(`Imported: ${tailor.handle}`).waitFor({ timeout: 60000 });
 await shot("admin-wave-imported");
 
 // Hidden until go-live; legacy URL not redirected yet
