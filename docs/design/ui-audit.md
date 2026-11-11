@@ -125,7 +125,44 @@ Members
 
 ## 4. Performance budget (before → after)
 
-PERF_TABLE
+Production build, Pixel 7, 4× CPU, slow 4G, cold cache, signed-in shopper (`scripts/perf-uiux.mjs`). "Until idle"
+counts every script fetched until the network is idle, including chunks deferred past hydration and the route
+prefetches Next starts for visible links (the metric the before run used). "At load" is the critical JS fetched
+before the `load` event, which is what the plan's budget describes.
+
+| Route | JS until idle, before (KB gz) | JS until idle, after | JS at load, after | LCP before → after (ms) | CLS before → after | INP proxy before → after (ms) |
+|---|---:|---:|---:|---:|---:|---:|
+| Muse (home) | 249.8 | 184.6 | 175.5 | 1068 → 828 | 0.059 → 0.056 | 16 → 48 |
+| Looks | 277.9 | 254.8 | 237.6 | 3908 → 3180 | 0.006 → 0.014 | 32 → 16 |
+| Try one look | 276.8 | 253.3 | 236.1 | 3512 → 3048 | 0.006 → 0.015 | 24 → 0 |
+| Maker page | 260.8 | 228.8 | 222.9 | 1260 → 1080 | 0 → 0 | 32 → 0 |
+| Bag | 250.0 | 187.9 | 170.7 | 2188 → 2276 | 0 → 0 | 40 → 0 |
+| Orders | 246.8 | 184.8 | 167.6 | 2004 → 2036 | 0 → 0 | 24 → 0 |
+| Wardrobe | 256.0 | 191.5 | 170.6 | 2016 → 2096 | 0 → 0 | 0 → 0 |
+| Circle | 256.0 | 191.5 | 167.8 | 2012 → 2044 | 0 → 0 | 16 → 0 |
+| Trust centre | 258.8 | 198.1 | 175.0 | 1048 → 2132 | 0 → 0 | 48 → 24 |
+| Mirror | 264.8 | 197.6 | 170.1 | 1300 → 868 | 0.024 → 0.021 | 48 → 24 |
+| Sign in | 252.0 | 219.3 | 202.1 | 1924 → 2180 | 0.015 → 0.017 | 64 → 56 |
+
+Reading it
+
+- **−8 % to −27 % JS until idle on every shopper route; −34 % at load on core routes.** The biggest cut is zod:
+  `@nyambika/contracts` is now compiled from its ESM source for the browser (`turbopack.resolveAlias`,
+  `transpilePackages`, `"sideEffects": false`), so zod tree-shakes and its locale bundles are gone (80 KB → 0 on
+  routes that need only types/constants, ~27 KB of zod core where runtime helpers such as `displayPrice` or
+  `normalizePhone` are used). Pilot survey, native bridge, menu, twin nudge, wardrobe ambient and checkout on the
+  wardrobe load after first paint.
+- **Budget (≤ 170 KB gz at load):** Orders and Circle are under it; Mirror, Wardrobe and Bag are within 1 KB; Muse and
+  Trust are 5 KB over. Over budget: Sign in (202 KB: the hardening merge's country selector imports `REGIONS` and
+  `signInPhone` from the contracts, which pulls zod), Maker page (223 KB: region pricing + 3D shelf), Looks/try-on
+  (236–238 KB: hold-to-buy, morph, region pricing). The framework floor (React DOM 72 KB + Next runtime 47 KB +
+  Turbopack runtime 4 KB) is ~125 KB, so the remaining lever is zod on commerce routes (see Known gaps).
+- **CLS < 0.1 everywhere** (max 0.056: the Muse orb settling as the display font swaps in). Skeletons reserve each
+  final box.
+- **LCP** improved on Muse, Looks, try-on, Maker page and Mirror. Trust centre got slower (1.0 → 2.1 s) by design:
+  its LCP element used to be the static promise text; now the route streams a skeleton and the largest element is
+  the data card that follows. Sign in moved with the merged country selector.
+- INP is a synthetic proxy (one tap) and is within noise (all < 60 ms on a 4× slowed CPU).
 
 ## 5. Accessibility
 

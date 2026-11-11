@@ -2,8 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Nunito, Plus_Jakarta_Sans } from "next/font/google";
 import { Toaster } from "@/components/kit";
 import { DeferredGlobals } from "@/components/deferred-globals";
+import { ThemeScript } from "@/components/theme-script";
 import { SessionProvider } from "@/lib/session";
-import { THEME_SCRIPT } from "@/lib/theme-script";
 import "./globals.css";
 
 const body = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-body", display: "swap" });
@@ -29,12 +29,12 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    // data-theme is corrected before first paint by THEME_SCRIPT (cookie `nv-theme`, else the OS preference).
-    <html lang="en" data-theme="dark" className={`${body.variable} ${display.variable}`} suppressHydrationWarning>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
-      </head>
+    // <html data-theme> is set before first paint by ThemeScript (cookie `nv-theme`, else the OS preference). It is
+    // deliberately not a JSX prop, so a client re-render of the shell (e.g. a not-found boundary) never resets it.
+    <html lang="en" className={`${body.variable} ${display.variable}`} suppressHydrationWarning>
       <body className="antialiased">
+        {/* Next "preventing flash" pattern via useServerInsertedHTML: in the first HTML only, never in a client render. */}
+        <ThemeScript />
         <SessionProvider>
           {children}
           <Toaster />

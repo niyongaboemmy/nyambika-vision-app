@@ -53,7 +53,10 @@ const j = (role, path, init) => roles[role].page.evaluate(async ([p, i]) => { co
 // ── discover ids for dynamic routes ────────────────────────────────────────────────────────────────────────────
 const maker = await j("anon", "/pages/by-handle/uwase-couture");
 const variant = maker?.products?.[0]?.variants?.[0]?.id;
-const productId = maker?.products?.[0]?.id;
+// A product that has a published Digital Product Passport (seeded on the Abahizi coop).
+const coopPublic = await j("anon", "/pages/by-handle/abahizi-coop");
+let productId = null;
+for (const pr of coopPublic?.products ?? []) if (!productId && (await j("anon", `/passports/${pr.id}`))) productId = pr.id;
 const look = await j("fresh", "/intent", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text: "a kitenge dress for a wedding under 60000", source: "text", locale: "en" }) });
 const orders = (await j("shopper", "/orders/mine")) ?? [];
 const polls = (await j("shopper", "/circle/polls")) ?? [];
