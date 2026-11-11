@@ -341,7 +341,8 @@ def _label(img: Image.Image) -> tuple[Image.Image, tuple[int, int, int, int]]:
     img = img.convert("RGBA")
     s = img.height / 512
     w, h = int(104 * s), int(18 * s)
-    x0, y0 = int(8 * s), img.height - h - int(8 * s)
+    # Top-right corner, clear of the head (frames keep the identity region pixel-identical) and the maker card.
+    x0, y0 = img.width - w - int(8 * s), int(8 * s)
     overlay = Image.new("RGBA", img.size, (0, 0, 0, 0))
     d = ImageDraw.Draw(overlay)
     d.rounded_rectangle((x0, y0, x0 + w, y0 + h), radius=int(6 * s), fill=(0, 0, 0, 140))
