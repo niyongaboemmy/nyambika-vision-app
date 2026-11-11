@@ -52,7 +52,7 @@ export default function TailorDesk() {
         {rows.map((o) => (
           <Link key={o.id} href={`/studio/${page.id}/tailor/${o.id}`} className="group flex gap-3 rounded-3xl bg-white p-3 ring-1 ring-stone-200 transition hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-stone-900">
             <div className="relative h-32 w-24 shrink-0 overflow-hidden rounded-2xl bg-stone-100">
-              {o.image || o.productImage ? <img src={o.image ?? o.productImage!} alt="" className="h-full w-full object-cover" /> : <span className="grid h-full place-items-center text-3xl" aria-hidden>✂️</span>}
+              {o.image || o.productImage ? <img loading="lazy" decoding="async" src={o.image ?? o.productImage!} alt="" className="h-full w-full object-cover" /> : <span className="grid h-full place-items-center text-3xl" aria-hidden>✂️</span>}
               {o.spec.hue !== null && <span className="absolute bottom-1.5 left-1.5 size-5 rounded-full ring-2 ring-white" style={{ background: `hsl(${o.spec.hue} 72% 50%)` }} aria-label={`Custom colour ${o.spec.hue}°`} />}
               {o.image && <span className="absolute right-1 top-1 rounded bg-black/60 px-1 text-[9px] font-semibold text-white">AI preview</span>}
             </div>

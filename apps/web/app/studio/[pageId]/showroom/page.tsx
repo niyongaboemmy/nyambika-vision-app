@@ -144,7 +144,7 @@ function Tile({ c, on, order, onClick, note }: { c: Candidate; on: boolean; orde
       onClick={onClick}
       className={`st-press relative w-[104px] shrink-0 overflow-hidden rounded-2xl bg-white text-left ring-2 ring-inset transition ${on ? "ring-violet-ink shadow-[0_8px_20px_-10px_rgba(98,57,201,.6)]" : "ring-hairline"}`}
     >
-      <span className="block aspect-[4/5] bg-paper-2">{c.photo ? <img src={c.photo} alt="" className="size-full object-cover" /> : <Icon name="hanger" className="m-auto mt-8 size-6 text-cocoa-3" />}</span>
+      <span className="block aspect-[4/5] bg-paper-2">{c.photo ? <img loading="lazy" decoding="async" src={c.photo} alt="" className="size-full object-cover" /> : <Icon name="hanger" className="m-auto mt-8 size-6 text-cocoa-3" />}</span>
       <span className="block truncate px-2 pt-1.5 text-xs font-bold text-cocoa">{c.title}</span>
       <span className="block px-2 pb-2 text-[11px] font-semibold text-cocoa-2">{note ?? rwf(c.priceRwf)}</span>
       {on && <span className="absolute right-1.5 top-1.5 grid size-6 place-items-center rounded-full bg-violet-ink text-xs font-black text-white">{order}</span>}
@@ -181,7 +181,7 @@ function ShowsCard({ data, onNew, onChanged }: { data: VrStudio; onNew: () => vo
             const upcoming = s.phase === "UPCOMING" || s.phase === "DOORS_OPEN";
             return (
               <li key={s.id} className="flex gap-3 rounded-2xl bg-white p-2.5 ring-1 ring-inset ring-hairline">
-                {s.cover ? <img src={s.cover} alt="" className="h-24 w-20 shrink-0 rounded-xl object-cover" /> : <span className="h-24 w-20 shrink-0 rounded-xl bg-paper-2" />}
+                {s.cover ? <img loading="lazy" decoding="async" src={s.cover} alt="" className="h-24 w-20 shrink-0 rounded-xl object-cover" /> : <span className="h-24 w-20 shrink-0 rounded-xl bg-paper-2" />}
                 <div className="min-w-0 flex-1 space-y-1">
                   <div className="flex flex-wrap items-center gap-1.5">
                     <Badge value={tone} label={label} />

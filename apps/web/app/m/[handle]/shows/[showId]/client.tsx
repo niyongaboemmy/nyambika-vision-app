@@ -216,7 +216,7 @@ export function ShowClient({ initial }: { initial: ShowView }) {
     return (
       <main className="theme-media relative mx-auto min-h-dvh w-full max-w-[480px] overflow-hidden bg-ink pb-10 text-txt">
         <header className="relative h-[58dvh] min-h-[360px]">
-          {show.cover && <img src={show.cover} alt="" className="absolute inset-0 size-full object-cover" />}
+          {show.cover && <img loading="lazy" decoding="async" src={show.cover} alt="" className="absolute inset-0 size-full object-cover" />}
           <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-ink" />
           <Link href={`/m/${show.maker.handle}`} aria-label={`Back to ${show.maker.name}`} className="glass absolute left-4 top-[max(env(safe-area-inset-top),14px)] grid size-11 place-items-center rounded-full">←</Link>
           <div className="absolute inset-x-5 bottom-4">
@@ -262,7 +262,7 @@ export function ShowClient({ initial }: { initial: ShowView }) {
             <ul tabIndex={0} aria-label="Looks in this show" className="no-scrollbar -mx-5 flex gap-3 overflow-x-auto px-5">
               {show.items.map((i) => (
                 <li key={i.position} className="w-32 shrink-0">
-                  <div className="glass overflow-hidden rounded-3xl">{(i.runway?.poster ?? i.photo) && <img src={(i.runway?.poster ?? i.photo)!} alt="" className="h-40 w-full object-cover" />}</div>
+                  <div className="glass overflow-hidden rounded-3xl">{(i.runway?.poster ?? i.photo) && <img loading="lazy" decoding="async" src={(i.runway?.poster ?? i.photo)!} alt="" className="h-40 w-full object-cover" />}</div>
                   <p className="mt-1 truncate text-sm font-semibold">{i.product.title}</p>
                   <p className="text-xs text-gold">{money(i.product)}</p>
                 </li>
@@ -284,7 +284,7 @@ export function ShowClient({ initial }: { initial: ShowView }) {
       {gl ? (
         <canvas ref={canvas} tabIndex={0} aria-label={`${show.title} runway. Drag or use the arrow keys to change your seat angle.`} className="absolute inset-0 size-full touch-pan-y outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gold" />
       ) : (
-        <div className="absolute inset-0 grid place-items-center">{item?.runway?.poster || item?.photo ? <img src={(item.runway?.poster ?? item.photo)!} alt={item.product.title} className="max-h-[70dvh] object-contain" /> : null}</div>
+        <div className="absolute inset-0 grid place-items-center">{item?.runway?.poster || item?.photo ? <img loading="lazy" decoding="async" src={(item.runway?.poster ?? item.photo)!} alt={item.product.title} className="max-h-[70dvh] object-contain" /> : null}</div>
       )}
 
       <header className="absolute inset-x-0 top-0 z-10 flex items-center gap-2 bg-gradient-to-b from-black/75 to-transparent px-3 pb-10 pt-[max(env(safe-area-inset-top),12px)]">

@@ -148,7 +148,7 @@ export function Shelf3d({ shelf, brand, commerce }: { shelf: Shelf; brand: strin
                   style={{ width: 190, height: 240, background: "transparent", pointerEvents: "none", "--poster-color": "transparent", "--progress-bar-color": "transparent" } as CSSProperties}
                 />
               ) : it.poster ? (
-                <img src={it.poster} alt="" draggable={false} className="max-h-full max-w-full object-contain drop-shadow-[0_18px_24px_rgba(0,0,0,.55)]" />
+                <img loading="lazy" decoding="async" src={it.poster} alt="" draggable={false} className="max-h-full max-w-full object-contain drop-shadow-[0_18px_24px_rgba(0,0,0,.55)]" />
               ) : (
                 <div className="skeleton h-full w-full rounded-[40px]" />
               )}
@@ -186,7 +186,7 @@ export function Shelf3d({ shelf, brand, commerce }: { shelf: Shelf; brand: strin
         )}
         {shelf.shows.map((s) => (
           <Link key={s.id} href={`/m/${shelf.handle}/shows/${s.id}`} className="glass flex items-center gap-3 rounded-[22px] p-2.5 pr-4">
-            {s.cover ? <img src={s.cover} alt="" className="size-14 shrink-0 rounded-2xl object-cover" /> : <span className="size-14 shrink-0 rounded-2xl bg-white/10" />}
+            {s.cover ? <img loading="lazy" decoding="async" src={s.cover} alt="" className="size-14 shrink-0 rounded-2xl object-cover" /> : <span className="size-14 shrink-0 rounded-2xl bg-white/10" />}
             <span className="min-w-0 flex-1">
               <span className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest">
                 {s.phase === "LIVE" ? <span className="rounded-full bg-terra px-2 py-0.5 text-white">● {t("vr.live")}</span> : <span className="text-gold">{t("vr.fashionShow")}</span>}

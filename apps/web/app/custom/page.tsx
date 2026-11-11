@@ -25,7 +25,7 @@ export default function CustomOrders() {
           const step = journeyIndex(o.status);
           return (
             <Link key={o.id} href={`/custom/${o.id}`} className="glass flex gap-3 rounded-3xl p-3 transition active:scale-[.99]">
-              {o.image || o.productImage ? <img src={o.image ?? o.productImage!} alt="" className="h-24 w-20 shrink-0 rounded-2xl object-cover" /> : <span className="grid h-24 w-20 place-items-center rounded-2xl bg-white/10 text-3xl">✂️</span>}
+              {o.image || o.productImage ? <img loading="lazy" decoding="async" src={o.image ?? o.productImage!} alt="" className="h-24 w-20 shrink-0 rounded-2xl object-cover" /> : <span className="grid h-24 w-20 place-items-center rounded-2xl bg-white/10 text-3xl">✂️</span>}
               <div className="min-w-0 flex-1">
                 <p className="truncate font-semibold">{o.title}</p>
                 <p className="text-sm text-mut">{o.page.name} · {o.code}</p>

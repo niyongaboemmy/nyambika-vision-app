@@ -130,7 +130,7 @@ export default function Orders() {
                   <article key={o.id} data-order-card className="st-card animate-pop space-y-2 rounded-[20px] p-3">
                     <button type="button" data-order-open onClick={() => setOpen(o.id)} className="flex w-full items-start gap-2.5 text-left">
                       <span className="sr-only">Open order {o.code}: </span>
-                      {o.image ? <img src={o.image} alt="" className="h-16 w-13 shrink-0 rounded-xl object-cover" /> : <span className="grid h-16 w-13 shrink-0 place-items-center rounded-xl bg-paper-2"><Icon name="hanger" className="size-5 text-cocoa-3" /></span>}
+                      {o.image ? <img loading="lazy" decoding="async" src={o.image} alt="" className="h-16 w-13 shrink-0 rounded-xl object-cover" /> : <span className="grid h-16 w-13 shrink-0 place-items-center rounded-xl bg-paper-2"><Icon name="hanger" className="size-5 text-cocoa-3" /></span>}
                       <span className="min-w-0 flex-1">
                         <span className="block truncate text-sm font-extrabold text-cocoa">{o.item.title}</span>
                         <span className="block truncate text-xs text-cocoa-2">{o.item.colourName} · {o.item.size} · {o.code}</span>
@@ -160,7 +160,7 @@ export default function Orders() {
         {current && (
           <div className="space-y-4">
             <div className="flex gap-3">
-              {current.image && <img src={current.image} alt="" className="h-28 w-22 rounded-2xl object-cover" />}
+              {current.image && <img loading="lazy" decoding="async" src={current.image} alt="" className="h-28 w-22 rounded-2xl object-cover" />}
               <div className="min-w-0 space-y-1">
                 <p className="font-display text-lg font-black leading-tight text-cocoa">{current.item.title}</p>
                 <p className="text-sm text-cocoa-2">{current.item.colourName} · size {current.item.size}</p>

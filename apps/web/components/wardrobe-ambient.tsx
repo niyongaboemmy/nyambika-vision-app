@@ -17,7 +17,7 @@ export function WardrobeAmbient() {
       <p className="font-display text-[17px] font-black">👗 {e.title} {whenLabel(e.daysUntil)}: your outfit is ready</p>
       <p className="text-sm text-txt/75">The Muse styled your wardrobe {e.ready} way{e.ready === 1 ? "" : "s"}</p>
       <div className="mt-3 grid grid-cols-3 gap-2">
-        {e.thumbs.map((t) => <img key={t} src={t} alt="" className="aspect-[3/4] w-full rounded-xl bg-white/5 object-cover" />)}
+        {e.thumbs.map((t) => <img loading="lazy" decoding="async" key={t} src={t} alt="" className="aspect-[3/4] w-full rounded-xl bg-white/5 object-cover" />)}
       </div>
     </Link>
   );

@@ -52,7 +52,7 @@ export default function WardrobePage() {
               <p className="font-display text-lg font-black">👗 {e.title} {whenLabel(e.daysUntil)}</p>
               <p className="text-sm text-txt/80">{e.rendering ? "The Muse is styling…" : `${e.ready} outfit${e.ready === 1 ? "" : "s"} ready`}</p>
               <div className="mt-3 grid grid-cols-3 gap-2">
-                {Array.from({ length: 3 }).map((_, i) => (e.thumbs[i] ? <img key={i} src={e.thumbs[i]} alt="" className="aspect-[3/4] w-full rounded-xl bg-white/5 object-cover" /> : <div key={i} className="skeleton aspect-[3/4] rounded-xl" />))}
+                {Array.from({ length: 3 }).map((_, i) => (e.thumbs[i] ? <img loading="lazy" decoding="async" key={i} src={e.thumbs[i]} alt="" className="aspect-[3/4] w-full rounded-xl bg-white/5 object-cover" /> : <div key={i} className="skeleton aspect-[3/4] rounded-xl" />))}
               </div>
             </Link>
           ))}
@@ -78,7 +78,7 @@ export default function WardrobePage() {
         {shown.map((t, i) => {
           const inner = (
             <>
-              {t.image ? <img src={t.image} alt="" className={`w-full object-cover ${t.kind === "saved" ? "object-top" : "object-contain p-3"} ${i % 3 === 0 ? "h-72" : "h-40"}`} /> : <div className={`skeleton ${i % 3 === 0 ? "h-72" : "h-40"}`} />}
+              {t.image ? <img loading="lazy" decoding="async" src={t.image} alt="" className={`w-full object-cover ${t.kind === "saved" ? "object-top" : "object-contain p-3"} ${i % 3 === 0 ? "h-72" : "h-40"}`} /> : <div className={`skeleton ${i % 3 === 0 ? "h-72" : "h-40"}`} />}
               <span className={`absolute left-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-bold ${t.kind === "owned" ? "bg-mint/90 text-ink" : "bg-black/60"}`}>{t.kind === "owned" ? "Owned" : "♥ Saved · AI"}</span>
               <span className="block px-3 pb-3 pt-2 text-left">
                 <span className="block truncate text-sm font-bold">{t.title}</span>
@@ -114,7 +114,7 @@ export default function WardrobePage() {
         {peek && (
           <div>
             <div className="relative mx-auto h-[46vh] overflow-hidden rounded-3xl bg-ink-3">
-              {peek.image && <img src={peek.image} alt={`${peek.product.title}, AI preview`} className="h-full w-full object-contain" />}
+              {peek.image && <img loading="lazy" decoding="async" src={peek.image} alt={`${peek.product.title}, AI preview`} className="h-full w-full object-contain" />}
               <span className="absolute bottom-2 left-2 rounded-md bg-black/60 px-2 py-0.5 text-[10px] font-bold">✦ AI preview</span>
             </div>
             <div className="mt-3 flex items-center justify-between gap-3">

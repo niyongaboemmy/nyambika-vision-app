@@ -15,7 +15,7 @@ export default function Saved() {
       <main className="grid grid-cols-2 gap-3 p-4">
         {data?.map((l) => (
           <Link key={l.id} href={`/looks/${l.intentSessionId}`} className="glass overflow-hidden rounded-3xl">
-            {l.image ? <img src={l.image} alt={l.product.title} className="aspect-[9/16] w-full object-cover" /> : <div className="skeleton aspect-[9/16]" />}
+            {l.image ? <img loading="lazy" decoding="async" src={l.image} alt={l.product.title} className="aspect-[9/16] w-full object-cover" /> : <div className="skeleton aspect-[9/16]" />}
             <div className="p-2">
               <p className="truncate text-sm font-semibold">{l.product.title}</p>
               <p className="truncate text-xs text-mut">{l.maker.name} · {rwf(l.product.priceRwf)}</p>
