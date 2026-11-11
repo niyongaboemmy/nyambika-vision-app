@@ -1107,12 +1107,18 @@ export class RunwayEngine {
       g.fillRect(0, 0, 1600, 1070);
       g.textAlign = "center";
       g.textBaseline = "middle";
+      // Portrait phones only see the middle of the backdrop, so titles shrink to fit ~55% of its width.
+      const fit = (text: string, weight: number, max: number) => {
+        let size = max;
+        g.font = `${weight} ${size}px ${o.font}`;
+        while (size > 40 && g.measureText(text).width > 880) g.font = `${weight} ${(size -= 6)}px ${o.font}`;
+      };
       g.fillStyle = "#ffffff";
-      g.font = `900 150px ${o.font}`;
-      g.fillText(o.brand, 800, 250, 1500);
+      fit(o.brand, 900, 150);
+      g.fillText(o.brand, 800, 250);
       g.fillStyle = "#FFE7B0";
-      g.font = `800 64px ${o.font}`;
-      g.fillText(o.title, 800, 380, 1500);
+      fit(o.title, 800, 64);
+      g.fillText(o.title, 800, 380);
     });
     const backdrop = new THREE.Mesh(new THREE.PlaneGeometry(9, 6), new THREE.MeshBasicMaterial({ map: back, fog: false }));
     backdrop.position.set(0, 3.0, -HALF - 1.1);
