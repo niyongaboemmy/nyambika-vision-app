@@ -116,7 +116,7 @@ function SignIn() {
                 className="glass h-14 shrink-0 rounded-2xl bg-transparent pl-3 pr-2 text-base text-white outline-none focus-visible:ring-2 focus-visible:ring-gold"
               >
                 {REGION_CODES.map((c) => (
-                  <option key={c} value={c} className="bg-ink-2">{REGIONS[c].flag} +{REGIONS[c].dialCode}</option>
+                  <option key={c} value={c} className="bg-ink-2">{c} +{REGIONS[c].dialCode}</option>
                 ))}
               </select>
               <input

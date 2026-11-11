@@ -58,7 +58,7 @@ export default async function MakerSpacePage({ params }: Props) {
               {m.name}{m.verified && <span className="whitespace-nowrap text-mint" title="Verified member">&nbsp;✓</span>}
             </h1>
             <p className="text-sm text-txt/80">
-              {commerce && commerce.region !== "RW" ? `${commerce.flag} ` : ""}{TYPE_LABEL[m.memberType]} · {m.sector} · ★ {m.rating.toFixed(1)} ({m.reviewCount}<span className="sr-only"> reviews</span>)
+              {commerce && commerce.region !== "RW" ? `${commerce.region} · ` : ""}{TYPE_LABEL[m.memberType]} · {m.sector} · ★ {m.rating.toFixed(1)} ({m.reviewCount}<span className="sr-only"> reviews</span>)
             </p>
           </div>
         </div>

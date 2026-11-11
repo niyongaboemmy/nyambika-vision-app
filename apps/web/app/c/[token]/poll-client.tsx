@@ -4,10 +4,11 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button, ErrorNote, Sheet } from "@/components/ui";
 import { api } from "@/lib/api";
-import { REACTIONS, timeLeft, type PollMeta, type PublicPoll, type Snapshot } from "@/lib/social";
+import { timeLeft, type PollMeta, type PublicPoll, type Snapshot } from "@/lib/social";
 import { useLive } from "@/lib/use-live";
 import { useSession } from "@/lib/session";
-import { Bubble } from "@/components/circle-bits";
+import { Bubble, ReactionPicker } from "@/components/circle-bits";
+import { Icon } from "@/components/icons";
 
 /** Public poll page opened from WhatsApp: big swipeable looks, tap to vote, live results. No account. */
 export function PollClient({ token, meta }: { token: string; meta: PollMeta }) {
@@ -81,7 +82,7 @@ export function PollClient({ token, meta }: { token: string; meta: PollMeta }) {
   return (
     <main className="aurora relative mx-auto min-h-dvh w-full max-w-[480px] overflow-x-hidden pb-28">
       <header className="px-5 pt-[max(env(safe-area-inset-top),18px)] text-center">
-        <h1 className="font-display text-[28px] font-black leading-tight">{t("circle.title")} 👥</h1>
+        <h1 className="font-display text-[28px] font-black leading-tight">{t("circle.title")}</h1>
         <p className="mt-1 text-[17px] text-txt/90">“{meta.question}”</p>
         <p className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-black/30 px-3 py-1 text-xs text-txt/80">
           <span className="size-2 animate-pulse rounded-full bg-mint" aria-hidden /> Live · {poll ? `${poll.total} vote${poll.total === 1 ? "" : "s"}` : "…"} · {timeLeft(poll?.expiresAt ?? meta.expiresAt)}
@@ -103,7 +104,7 @@ export function PollClient({ token, meta }: { token: string; meta: PollMeta }) {
               {/* Exact look ratio, so the AI-preview stamp at the bottom is never cropped or covered. */}
               <span className="relative block aspect-[9/16] h-[min(50vh,470px)] max-w-[72vw]">
                 <img src={o.image} alt={`${o.label} look, AI preview`} className="h-full w-full object-cover" loading={i < 2 ? "eager" : "lazy"} fetchPriority={i === 0 ? "high" : "auto"} decoding="async" />
-                {burst === o.id && <span className="pointer-events-none absolute inset-0 grid place-items-center text-8xl animate-rise drop-shadow-[0_0_30px_rgba(242,184,75,.9)]" aria-hidden>💛</span>}
+                {burst === o.id && <span className="pointer-events-none absolute inset-0 grid place-items-center text-8xl animate-rise drop-shadow-[0_0_30px_rgba(242,184,75,.9)]" aria-hidden><Icon name="heart" className="size-24 text-gold" filled /></span>}
                 {chosen && <span className="absolute right-3 top-3 rounded-full bg-gold px-3 py-1 text-xs font-black text-ink">{t("circle.yourVote")} ✓</span>}
               </span>
               <span className="block px-4 pb-3.5 pt-2.5">
@@ -135,7 +136,7 @@ export function PollClient({ token, meta }: { token: string; meta: PollMeta }) {
           </>
         ) : (
           <div className="flex gap-2">
-            <Button className="flex-1" variant="glass" onClick={() => setNote(true)}>💬 {poll.myVote?.comment ? "Edit your comment" : t("circle.addComment")}</Button>
+            <Button className="flex-1" variant="glass" onClick={() => setNote(true)}><Icon name="chat" className="size-5" /> {poll.myVote?.comment ? "Edit your comment" : t("circle.addComment")}</Button>
             {current.id !== mine && <Button variant="glass" disabled={busy} onClick={() => vote(current.id)}>Switch to {current.label}</Button>}
           </div>
         )}
@@ -149,7 +150,7 @@ export function PollClient({ token, meta }: { token: string; meta: PollMeta }) {
 
       <footer className="fixed inset-x-0 bottom-0 z-10 mx-auto max-w-[480px] px-4 pb-[max(env(safe-area-inset-bottom),12px)]">
         <div className="glass flex items-center justify-between gap-2 rounded-full px-4 py-2.5 text-xs text-txt/85">
-          <span>🔗 Private live poll · AI-preview watermark</span>
+          <span className="inline-flex items-center gap-1"><Icon name="link" className="size-3.5" /> Private live poll · AI-preview watermark</span>
           <Link href="/" className="shrink-0 font-semibold text-gold">Nyambika →</Link>
         </div>
       </footer>
@@ -189,11 +190,7 @@ function CommentSheet({ open, onClose, initial, onSend, busy }: { open: boolean;
         <h2 className="font-display text-xl font-black">Say something nice</h2>
         <fieldset>
           <legend className="mb-2 text-xs font-semibold uppercase tracking-widest text-mut">Reaction</legend>
-          <div className="flex flex-wrap gap-2">
-            {REACTIONS.map((r) => (
-              <button key={r} type="button" aria-pressed={emoji === r} aria-label={`React ${r}`} onClick={() => setEmoji(emoji === r ? undefined : r)} className={`grid size-11 place-items-center rounded-full text-xl transition ${emoji === r ? "scale-110 bg-gold/30 ring-2 ring-gold" : "bg-white/10"}`}>{r}</button>
-            ))}
-          </div>
+          <ReactionPicker value={emoji} onChange={setEmoji} />
         </fieldset>
         <label className="block">
           <span className="text-xs font-semibold uppercase tracking-widest text-mut">Your name (optional)</span>

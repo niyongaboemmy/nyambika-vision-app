@@ -58,7 +58,7 @@ export default async function Makers({ searchParams }: { searchParams: Promise<{
               {p.name.split(/\s+/).map((w) => w[0]).join("").slice(0, 2)}
             </span>
             <div className="min-w-0">
-              <p className="truncate font-semibold">{p.name} {p.verified && <span className="text-mint">✓</span>} {p.crossBorderListing && <span className="ml-1 rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-bold text-gold">{p.flag} ships to you</span>}</p>
+              <p className="truncate font-semibold">{p.name} {p.verified && <span className="text-mint">✓</span>} {p.crossBorderListing && <span className="ml-1 rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-bold text-gold">Ships to you</span>}</p>
               <p className="text-xs text-mut">{[TYPE_LABEL[p.memberType], p.sector, p.rating > 0 ? `★ ${p.rating.toFixed(1)}` : null, `${p.productCount} ${p.productCount === 1 ? "item" : "items"}`].filter(Boolean).join(" · ")}</p>
               <p className="mt-0.5 truncate text-xs text-txt/70">{p.tagline}</p>
             </div>

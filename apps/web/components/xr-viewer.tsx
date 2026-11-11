@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { TryIn3d } from "@/components/twin3d-card";
 import { useSession } from "@/lib/session";
 import { fmtM, hasWebGL2, loadModelViewer, prefersReducedMotion, type Garment3d } from "@/lib/xr";
+import { Icon } from "@/components/icons";
 
 type ModelViewerProps = DetailedHTMLProps<HTMLAttributes<HTMLElement>, HTMLElement> & Record<string, unknown>;
 declare module "react" {
@@ -161,9 +162,9 @@ export function GarmentViewer({ assets, title, initialVariantId, variantId, clas
           </div>
         )}
 
-        <span className="pointer-events-none absolute left-3 top-3 rounded-full border border-white/15 bg-black/55 px-2.5 py-1 text-[11px] font-semibold backdrop-blur">✨ {t("xr.aiLabel")}</span>
+        <span className="pointer-events-none absolute left-3 top-3 rounded-full border border-white/15 bg-black/55 px-2.5 py-1 text-[11px] font-semibold backdrop-blur"><Icon name="sparkle" className="mr-1 inline size-3 align-[-2px]" />{t("xr.aiLabel")}</span>
         <span className="pointer-events-none absolute right-3 top-3 rounded-full border border-white/15 bg-black/55 px-2.5 py-1 text-[11px] font-semibold backdrop-blur" title="Real-world size used in AR">
-          📏 {fmtM(a.dimensions.height)} · size {a.size}
+          <Icon name="ruler" className="mr-1 inline size-3 align-[-2px]" />{fmtM(a.dimensions.height)} · size {a.size}
         </span>
 
         {!fallback && (

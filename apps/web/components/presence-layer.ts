@@ -91,7 +91,7 @@ export class PresenceLayer {
       halo.position.y = bodyH + 0.42;
       root.add(halo);
     }
-    const label = textSprite(`${m.role === "host" ? "★ " : ""}${m.nick}${m.muted ? " 🔇" : ""}`, { font: this.opts.font, bg: "rgba(10,9,15,.72)", size: 46 });
+    const label = textSprite(`${m.role === "host" ? "★ " : ""}${m.nick}${m.muted ? " (muted)" : ""}`, { font: this.opts.font, bg: "rgba(10,9,15,.72)", size: 46 });
     label.position.y = bodyH + 0.62;
     root.add(label);
     root.visible = false;

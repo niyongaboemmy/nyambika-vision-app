@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button, ErrorNote, Fact, Screen, Spinner, TopBar } from "@/components/ui";
 import { api } from "@/lib/api";
 import { useSession } from "@/lib/session";
+import { Icon } from "@/components/icons";
 
 interface Joined {
   joined: boolean;
@@ -64,7 +65,7 @@ export default function Join() {
         </div>
 
         {done ? (
-          <Button onClick={() => router.push(done.kind === "PAGE" ? "/studio" : "/")}>{done.kind === "PAGE" ? "Open my Page Manager" : "✨ Ask the Muse"}</Button>
+          <Button onClick={() => router.push(done.kind === "PAGE" ? "/studio" : "/")}>{done.kind === "PAGE" ? "Open my Page Manager" : <><Icon name="sparkle" className="size-5" /> Ask the Muse</>}</Button>
         ) : loading || (busy && !error) ? (
           <div className="flex items-center gap-3 text-mut"><Spinner /> Checking your invite…</div>
         ) : (

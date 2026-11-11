@@ -15,6 +15,7 @@ import { useSession } from "@/lib/session";
 import { useLive } from "@/lib/use-live";
 import { countdown, fmtWhen, lookFor, lowEnd, type ShowSnapshot, type ShowView } from "@/lib/vr";
 import { hasWebGL2, prefersReducedMotion } from "@/lib/xr";
+import { Icon } from "@/components/icons";
 
 interface Floater {
   key: string;
@@ -240,7 +241,7 @@ export function ShowClient({ initial }: { initial: ShowView }) {
             <div className="glass rounded-3xl p-4">
               <p className="font-display text-2xl font-black">That&apos;s a wrap</p>
               <p className="text-sm text-mut">Replay with live reactions</p>
-              <button onClick={() => void startReplay()} className="grad-cta mt-3 flex min-h-12 w-full items-center justify-center rounded-2xl font-bold">▶ {t("vr.replay")}</button>
+              <button onClick={() => void startReplay()} className="grad-cta mt-3 flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl font-bold"><Icon name="play" className="size-5" filled /> {t("vr.replay")}</button>
             </div>
           )}
           {phase === "UPCOMING" && (
@@ -251,7 +252,7 @@ export function ShowClient({ initial }: { initial: ShowView }) {
                 </button>
               ) : (
                 <button onClick={() => void rsvp(true)} disabled={rsvpBusy} className="grad-cta flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl text-lg font-black shadow-[0_14px_36px_rgba(224,112,63,.4)]">
-                  🔔 {me ? t("vr.rsvp") : `Sign in · ${t("vr.rsvp")}`}
+                  <Icon name="bell" className="size-5" /> {me ? t("vr.rsvp") : `Sign in · ${t("vr.rsvp")}`}
                 </button>
               )}
               <div className="mt-2 flex flex-wrap justify-center gap-1.5"><Fact icon="clock">1 h before</Fact><Fact icon="lock">Never shared with makers</Fact></div>
@@ -271,7 +272,7 @@ export function ShowClient({ initial }: { initial: ShowView }) {
               ))}
             </ul>
           </div>
-          <Link href={`/m/${show.maker.handle}/showroom`} className="glass flex min-h-12 items-center justify-center rounded-2xl text-sm font-semibold">🥽 {t("vr.enterShowroom")}</Link>
+          <Link href={`/m/${show.maker.handle}/showroom`} className="glass flex min-h-12 items-center justify-center rounded-2xl gap-2 text-sm font-semibold"><Icon name="headset" className="size-5" /> {t("vr.enterShowroom")}</Link>
           <p className="text-center text-[11px] text-mut">{show.model.label}</p>
         </section>
       </main>
@@ -304,7 +305,7 @@ export function ShowClient({ initial }: { initial: ShowView }) {
         )}
         {!replay && (
           <span className="glass rounded-full px-2.5 py-1 text-xs font-bold tabular-nums" aria-live="polite" aria-label={`${snap?.viewers ?? 0} ${t("vr.watching")}`}>
-            👁 {snap?.viewers ?? "…"} <span className="sr-only">{t("vr.watching")}</span>
+            <Icon name="eye" className="mr-1 inline size-4 align-[-3px]" />{snap?.viewers ?? "…"} <span className="sr-only">{t("vr.watching")}</span>
           </span>
         )}
       </header>
@@ -339,11 +340,11 @@ export function ShowClient({ initial }: { initial: ShowView }) {
               </div>
             ) : (
               <div className="flex flex-1 gap-2">
-                <button onClick={togglePause} className="glass min-h-12 flex-1 rounded-2xl font-bold">{replay.pausedAt ? "▶ Play" : "❚❚ Pause"}</button>
+                <button onClick={togglePause} className="glass inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-2xl font-bold">{replay.pausedAt ? <><Icon name="play" className="size-5" filled /> Play</> : <><Icon name="pause" className="size-5" filled /> Pause</>}</button>
                 <button onClick={() => void startReplay()} className="glass min-h-12 rounded-2xl px-4 font-bold" aria-label="Restart the replay">↺</button>
               </div>
             )}
-            {look && (me ? <HoldToBuy key={look.variant.id} look={look} /> : <Link href={`/signin?next=${encodeURIComponent(`/m/${show.maker.handle}/shows/${show.id}`)}`} className="grad-cta shrink-0 rounded-2xl px-4 py-2 text-sm font-bold">✋ Buy</Link>)}
+            {look && (me ? <HoldToBuy key={look.variant.id} look={look} /> : <Link href={`/signin?next=${encodeURIComponent(`/m/${show.maker.handle}/shows/${show.id}`)}`} className="grad-cta inline-flex shrink-0 items-center gap-1.5 rounded-2xl px-4 py-2 text-sm font-bold"><Icon name="hand" className="size-4" /> Buy</Link>)}
           </div>
           {snap && !replay && (
             <p className="mt-2 text-center text-[11px] text-txt/70">

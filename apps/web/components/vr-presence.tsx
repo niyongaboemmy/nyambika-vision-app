@@ -9,6 +9,7 @@ import type { ShowroomEngine } from "@/components/vr-engine";
 import { api } from "@/lib/api";
 import { CLOSE_TEXT, PresenceClient, type PresenceEvent } from "@/lib/presence";
 import { prefersReducedMotion } from "@/lib/xr";
+import { Icon } from "@/components/icons";
 
 type Phase = "idle" | "joining" | "in" | "closed";
 const WHY = [
@@ -199,11 +200,11 @@ export function SharedRoom({ engine, room, signedIn, signInHref, seated, show }:
       <div className="absolute right-3 top-[84px] z-20 flex flex-col items-end gap-2">
         {phase === "in" ? (
           <button onClick={() => setPeople(true)} className="glass flex min-h-11 items-center gap-2 rounded-full px-4 text-sm font-bold" aria-label={`${count} people in this shared room. Open the people list`}>
-            <span className="size-2 rounded-full bg-mint shadow-[0_0_8px_#2dd4bf]" aria-hidden /> 👥 {count} here
+            <span className="size-2 rounded-full bg-mint shadow-[0_0_8px_#2dd4bf]" aria-hidden /> <Icon name="users" className="size-4" /> {count} here
           </button>
         ) : (
           <button onClick={() => setIntro(true)} disabled={phase === "joining"} className="glass flex min-h-11 items-center gap-2 rounded-full px-4 text-sm font-bold disabled:opacity-60">
-            👥 {phase === "joining" ? "Joining…" : "Shared room"} <span className="rounded-full bg-violet/30 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-txt/90">test</span>
+            <Icon name="users" className="size-4" /> {phase === "joining" ? "Joining…" : "Shared room"} <span className="rounded-full bg-violet/30 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-txt/90">test</span>
           </button>
         )}
         {phase === "in" && you?.seat === "avatar" && (
@@ -231,7 +232,7 @@ export function SharedRoom({ engine, room, signedIn, signInHref, seated, show }:
         <div className="absolute inset-x-3 top-[140px] z-20 mx-auto max-w-[420px] animate-rise" role="status">
           <div className="glass flex items-center gap-3 rounded-3xl p-3">
             <span className="text-2xl" aria-hidden>
-              💃
+              <Icon name="dress" className="size-6 text-gold" />
             </span>
             <p className="min-w-0 flex-1 text-sm font-bold">The runway is starting</p>
             {show && (
@@ -259,9 +260,9 @@ export function SharedRoom({ engine, room, signedIn, signInHref, seated, show }:
         <h2 className="font-display text-2xl font-black">Shared room</h2>
         <p className="mt-1 inline-block rounded-full bg-violet/25 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide">Experimental test</p>
         <ul className="mt-3 space-y-2 text-sm text-txt/90">
-          <li>🎭 Synthetic avatar, made-up name · nothing personal shown</li>
-          <li>👏 No voice and no chat: only emoji reactions.</li>
-          <li>🫧 Personal-space bubble · hide or report anyone</li>
+          <li>Synthetic avatar, made-up name · nothing personal shown</li>
+          <li>No voice, no chat · reactions only</li>
+          <li>Personal-space bubble · hide or report anyone</li>
           <li>★ Hosted by the maker</li>
         </ul>
         {signedIn ? (
@@ -318,7 +319,7 @@ export function SharedRoom({ engine, room, signedIn, signInHref, seated, show }:
             {note && <p className="mt-2 rounded-2xl bg-white/5 p-2 text-xs" role="status">{note}</p>}
             {host && show && (
               <button onClick={() => client.current?.send({ t: "h", a: "runway", show: show.id })} className="grad-cta mt-3 flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl font-bold">
-                ▶ Start the runway · {show.title}
+                <Icon name="play" className="mr-1 inline size-4 align-[-3px]" filled />Start the runway · {show.title}
               </button>
             )}
             <ul className="mt-3 max-h-[42dvh] space-y-2 overflow-y-auto" aria-label="People">
@@ -382,7 +383,7 @@ export function SharedRoom({ engine, room, signedIn, signInHref, seated, show }:
             <fieldset className="mt-3 flex flex-wrap gap-2">
               <legend className="sr-only">Comfort</legend>
               <button aria-pressed={bubble} onClick={() => setBubble(!bubble)} className={`min-h-10 rounded-full px-3 text-xs font-bold ${bubble ? "bg-gold text-ink" : "bg-white/10"}`}>
-                🫧 Personal space
+                Personal space
               </button>
               <button aria-pressed={cc} onClick={() => setCc(!cc)} className={`min-h-10 rounded-full px-3 text-xs font-bold ${cc ? "bg-gold text-ink" : "bg-white/10"}`}>
                 CC Captions

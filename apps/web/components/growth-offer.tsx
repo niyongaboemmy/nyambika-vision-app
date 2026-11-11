@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { api, rwf } from "@/lib/api";
 import type { MakerSpace } from "@/lib/maker";
 import { useSession } from "@/lib/session";
+import { Icon } from "@/components/icons";
 
 export interface AppliedDiscount {
   code: string | null;
@@ -58,7 +59,7 @@ export function DiscountField({ variantId, open, onChange }: { variantId: string
     <div className="space-y-2">
       {offer && !applied?.code && (
         <p className="flex items-center gap-2 rounded-2xl bg-gold/15 px-3 py-2 text-sm text-gold ring-1 ring-inset ring-gold/30">
-          <span aria-hidden>🏷️</span>
+          <span aria-hidden><Icon name="tag" className="size-4" /></span>
           <span className="flex-1"><b>{offer.label || "Offer"}</b> {offer.display} · −{rwf(offer.amountRwf)}{ends ? ` · until ${ends}` : ""}</span>
         </p>
       )}
@@ -99,7 +100,7 @@ export function CollectionAlerts({ maker }: { maker: MakerSpace }) {
   }
   return (
     <section className="mx-5 mt-5 flex items-center gap-3 rounded-3xl glass p-4">
-      <span className="text-2xl" aria-hidden>💬</span>
+      <span aria-hidden><Icon name="chat" className="size-6 text-gold" /></span>
       <span className="min-w-0 flex-1">
         <span className="block text-sm font-bold">New pieces on WhatsApp</span>
         <span className="block text-xs text-mut">{on ? "New collections only · reply STOP anytime" : `Get ${maker.name}'s new collections. At most a few a week.`}</span>

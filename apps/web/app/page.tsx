@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { RecordingTimer, TranscriptReview, VoiceConsentSheet, VoiceOrb, VoiceSettingsSheet } from "@/components/voice-muse";
-import { Icon } from "@/components/icons";
+import { Icon, type IconName } from "@/components/icons";
 import { Button, Chip, ErrorNote, Screen, Sheet, Spinner } from "@/components/ui";
 import { api, ApiError, rwf } from "@/lib/api";
 import { describeError } from "@/lib/api-errors";
@@ -278,7 +278,7 @@ export default function Muse() {
       <header className="relative z-20 flex items-center justify-between px-4 pt-[max(env(safe-area-inset-top),14px)]">
         <span className="flex items-center gap-2">
           <span className="orb size-7 rounded-full shadow-[0_0_18px_rgba(242,184,75,.5)]" />
-          <span className="font-display text-lg font-black">Nyambika</span>
+          <span className="font-brand text-lg font-black">Nyambika</span>
         </span>
         {loading ? null : me ? (
           <span className="flex items-center gap-2">
@@ -301,8 +301,8 @@ export default function Muse() {
       </header>
 
       <main className="flex flex-1 flex-col items-center px-5 text-center">
-        <p className="mt-6 text-txt/80">{t("home.greeting")}{name ? ` ${name}` : ""} 👋</p>
-        <h1 className="font-display text-[34px] font-black leading-tight text-grad">{t("muse.question")}</h1>
+        <p className="mt-6 text-txt/80">{t("home.greeting")}{name ? ` ${name}` : ""}</p>
+        <h1 className="font-brand text-[34px] font-black leading-tight text-grad">{t("muse.question")}</h1>
 
         <TwinNudge place="home" />
         {me && phase === "idle" && <WardrobeAmbient />}
@@ -330,18 +330,18 @@ export default function Muse() {
         {phase === "understood" && intent && (
           <div className="mt-4 w-full animate-rise">
             <p className="mb-2 text-xs font-semibold uppercase tracking-[.2em] text-gold">{t("muse.understood")}</p>
-            {reply && <p className="mx-auto mb-3 max-w-sm text-sm text-txt/90" aria-live="polite">{speaking ? "🔊 " : ""}{reply}</p>}
+            {reply && <p className="mx-auto mb-3 max-w-sm text-sm text-txt/90" aria-live="polite">{speaking ? <Icon name="volume" className="mr-1 inline size-4 align-[-3px]" /> : null}{reply}</p>}
             <div className="flex flex-wrap justify-center gap-2">
               {chips.map((c) => (
-                <Chip key={c.key} onClick={c.edit ? () => { setTouched(true); setEdit(c.edit!); } : undefined}>{c.label}</Chip>
+                <Chip key={c.key} onClick={c.edit ? () => { setTouched(true); setEdit(c.edit!); } : undefined}><Icon name={c.icon} className="size-4 text-gold" />{c.label}</Chip>
               ))}
             </div>
             {me ? (
               <div className="mt-4">
                 {session ? (
-                  <Button className="w-full" onClick={() => router.push(`/looks/${session.sessionId}`)}>✨ {t("muse.showLooks")} ({session.total})</Button>
+                  <Button className="w-full" onClick={() => router.push(`/looks/${session.sessionId}`)}><Icon name="sparkle" className="size-5" /> {t("muse.showLooks")} ({session.total})</Button>
                 ) : (
-                  <p className="text-sm font-semibold text-gold">✨ {me.hasTwin ? t("muse.rendering") : t("muse.renderingModel")}</p>
+                  <p className="text-sm font-semibold text-gold"><Icon name="sparkle" className="mr-1 inline size-4 align-[-3px]" />{me.hasTwin ? t("muse.rendering") : t("muse.renderingModel")}</p>
                 )}
               </div>
             ) : (
@@ -448,14 +448,14 @@ function BudgetEdit({ value, onDone }: { value: number | null; onDone: (b: numbe
 }
 
 function buildChips(i: Intent, twinSize: string | null) {
-  const chips: { key: string; label: string; edit?: "occasion" | "budget" }[] = [];
-  chips.push({ key: "o", label: i.occasion ? `💍 ${cap(i.occasion.replace("-", " "))}${i.date ? ` · ${dayLabel(i.date)}` : ""}` : "💍 Any occasion", edit: "occasion" });
-  chips.push({ key: "b", label: i.budgetMax ? `💰 Under ${rwf(i.budgetMax)}` : "💰 Any budget", edit: "budget" });
+  const chips: { key: string; label: string; icon: IconName; edit?: "occasion" | "budget" }[] = [];
+  chips.push({ key: "o", icon: "ring", label: i.occasion ? `${cap(i.occasion.replace("-", " "))}${i.date ? ` · ${dayLabel(i.date)}` : ""}` : "Any occasion", edit: "occasion" });
+  chips.push({ key: "b", icon: "cash", label: i.budgetMax ? `Under ${rwf(i.budgetMax)}` : "Any budget", edit: "budget" });
   const style = [...i.categories, ...i.colours, ...i.styles];
-  if (style.length) chips.push({ key: "s", label: `🎨 ${style.map(cap).join(" · ")}` });
+  if (style.length) chips.push({ key: "s", icon: "palette", label: style.map(cap).join(" · ") });
   const size = i.size ?? twinSize;
-  chips.push({ key: "z", label: size ? `📏 Your twin · size ${size}` : "📏 Size from your twin" });
-  chips.push({ key: "l", label: `📍 ${i.location ?? "Kigali"} makers` });
+  chips.push({ key: "z", icon: "ruler", label: size ? `Your twin · size ${size}` : "Size from your twin" });
+  chips.push({ key: "l", icon: "pin", label: `${i.location ?? "Kigali"} makers` });
   return chips;
 }
 

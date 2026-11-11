@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Button, Chip, Sheet } from "@/components/ui";
 import { useSession } from "@/lib/session";
 import { canSpeak, defaultVoice, speak, useVoices, voiceLabel, type SttResult, type VoicePrefs } from "@/lib/voice";
+import { Icon } from "@/components/icons";
 
 /** Voice Muse GA (E22) pieces: living orb, consent, transcript review and spoken-reply settings. */
 
@@ -92,14 +93,14 @@ export function VoiceConsentSheet({ open, onAllow, onType, onClose }: { open: bo
   const { t } = useSession();
   return (
     <Sheet open={open} onClose={onClose}>
-      <p className="font-display text-xl font-black">🎙️ {t("voice.consentTitle")}</p>
+      <p className="font-display text-xl font-black"><Icon name="mic" className="mr-1.5 inline size-5 align-[-3px]" />{t("voice.consentTitle")}</p>
       <p className="mt-2 text-sm text-txt/90">{t("voice.consentBody")}</p>
       <ul className="mt-3 space-y-1 text-sm text-mut">
         <li>• {t("voice.notStored")}</li>
         <li>• {t("voice.editFirst")}</li>
       </ul>
       <div className="mt-5 grid grid-cols-2 gap-2">
-        <Button variant="glass" onClick={onType}>⌨️ {t("voice.typeInstead")}</Button>
+        <Button variant="glass" onClick={onType}><Icon name="keyboard" className="size-5" /> {t("voice.typeInstead")}</Button>
         <Button onClick={onAllow}>{t("voice.allow")}</Button>
       </div>
       <Link href="/trust" className="mt-3 block text-center text-xs text-mut underline">{t("trust.title")}</Link>
@@ -129,8 +130,8 @@ export function TranscriptReview({ stt, value, onChange, onSend, onRetry }: { st
       />
       <p className="mt-1 text-xs text-mut">{t("voice.editHint")}</p>
       <div className="mt-3 grid grid-cols-2 gap-2">
-        <Button type="button" variant="glass" onClick={onRetry}>🎙️ {t("voice.again")}</Button>
-        <Button disabled={!value.trim()}>✨ {t("voice.send")}</Button>
+        <Button type="button" variant="glass" onClick={onRetry}><Icon name="mic" className="size-5" /> {t("voice.again")}</Button>
+        <Button disabled={!value.trim()}><Icon name="send" className="size-5" /> {t("voice.send")}</Button>
       </div>
     </form>
   );
@@ -144,7 +145,7 @@ export function VoiceSettingsSheet({ open, onClose, prefs, setPrefs }: { open: b
   const current = prefs.voice[locale];
   return (
     <Sheet open={open} onClose={onClose}>
-      <p className="font-display text-xl font-black">🔊 {t("voice.replies")}</p>
+      <p className="font-display text-xl font-black"><Icon name="volume" className="mr-1.5 inline size-5 align-[-3px]" />{t("voice.replies")}</p>
       <label className="mt-3 flex items-center gap-3">
         <span className="flex-1">
           <span className="block text-sm font-semibold">{t("voice.speakReplies")}</span>
@@ -169,7 +170,7 @@ export function VoiceSettingsSheet({ open, onClose, prefs, setPrefs }: { open: b
           </div>
         )}
       </fieldset>
-      <Button variant="glass" className="mt-4 w-full" disabled={prefs.muted || voices.length === 0} onClick={() => speak(t("voice.sample"), locale, prefs)}>▶ {t("voice.play")}</Button>
+      <Button variant="glass" className="mt-4 w-full" disabled={prefs.muted || voices.length === 0} onClick={() => speak(t("voice.sample"), locale, prefs)}><Icon name="play" className="size-5" filled /> {t("voice.play")}</Button>
     </Sheet>
   );
 }
