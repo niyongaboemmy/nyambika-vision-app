@@ -4,7 +4,7 @@ import { extname } from "node:path";
 import { Public } from "../../common/auth";
 import { StorageService } from "../../common/storage.service";
 
-const TYPES: Record<string, string> = { ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp" };
+const TYPES: Record<string, string> = { ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp", ".glb": "model/gltf-binary" };
 
 @Controller()
 export class FilesController {

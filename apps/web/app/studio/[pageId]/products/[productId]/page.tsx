@@ -7,6 +7,7 @@ import { AiWrite } from "@/components/ai-write";
 import { Badge, Card, Field, Icon, Input, Note, ScreenSkeleton, SButton, Steps, Textarea } from "@/components/studio";
 import { EDITOR_STEPS, EditorSection, ProductPreview } from "@/components/studio-product";
 import { MorphOptions } from "@/components/morph-options";
+import { Garment3dCard } from "@/components/studio-3d";
 import { api, rwf } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import type { StudioProduct, StudioVariant } from "@/lib/types";
@@ -100,6 +101,7 @@ function ProductDetail() {
           </EditorSection>
 
           <StudioCard p={p} onChange={reload} />
+          <Garment3dCard productId={p.id} title={p.title} canManage={Boolean(canManage)} />
           {page.memberType === "TAILOR" && canManage && <MorphOptions productId={p.id} />}
 
           <DetailsEditor p={p} pageId={page.id} pageName={page.name} onSaved={reload} />

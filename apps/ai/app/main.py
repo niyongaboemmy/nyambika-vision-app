@@ -8,7 +8,7 @@ from fastapi import FastAPI, HTTPException
 from PIL import Image, ImageDraw
 from pydantic import BaseModel, Field
 
-from . import c2pa, config, garment, guard, intent, listing, morph, twin
+from . import c2pa, config, garment, garment3d, guard, intent, listing, morph, motion, twin
 from .embed import embed_image
 from .imaging import decode_b64, encode_png_b64
 from .providers import get_provider, registry
@@ -150,3 +150,48 @@ def garment_morph(body: MorphIn):
                     body.base_length, body.base_sleeve)
     return {"cutout_b64": encode_png_b64(r["cutout"]), "frame": r["frame"], "applied": r["applied"],
             "base_hue": r["base_hue"]}
+
+
+# ==== E27 3D garment + E28 motion preview ====
+class Garment3dIn(BaseModel):
+    cutout_b64: str
+    category: str = "dress"
+    size: str = "M"
+    request_id: str = Field(default_factory=lambda: uuid.uuid4().hex)
+
+
+@app.post("/v1/garment/3d")
+def garment_3d(body: Garment3dIn):
+    """Image-to-3D (E27): cut-out -> GLB (PBR, metre scale, <= 2 MB) + poster."""
+    try:
+        r = garment3d.generate(_image(body.cutout_b64), body.category, body.size, body.request_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    out = {k: v for k, v in r.items() if k not in ("glb", "poster")}
+    return {**out, "glb_b64": base64.b64encode(r["glb"]).decode(), "poster_b64": base64.b64encode(r["poster"]).decode()}
+
+
+class MotionIn(BaseModel):
+    twin_b64: str
+    garment_b64: str
+    garment_category: str = "dress"
+    request_id: str = Field(default_factory=lambda: uuid.uuid4().hex)
+    garment_frame: list[int] | None = Field(default=None, min_length=4, max_length=4)
+
+
+@app.post("/v1/motion")
+def motion_preview(body: MotionIn):
+    """Motion preview (E28): 4 s sway loop of a look, guarded on sampled frames, labelled + C2PA."""
+    started = time.perf_counter()
+    try:
+        r = motion.generate(_image(body.twin_b64), _image(body.garment_b64), body.garment_category, "PREVIEW",
+                            tuple(body.garment_frame) if body.garment_frame else None, body.request_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    out = {k: v for k, v in r.items() if not k.startswith("_") and k not in ("webp", "mp4", "poster")}
+    out["latency_ms"] = int((time.perf_counter() - started) * 1000)
+    if r["status"] == "DELIVERED":
+        out["webp_b64"] = base64.b64encode(r["webp"]).decode()
+        out["mp4_b64"] = base64.b64encode(r["mp4"]).decode() if r.get("mp4") else None
+        out["poster_b64"] = base64.b64encode(r["poster"]).decode()
+    return out
