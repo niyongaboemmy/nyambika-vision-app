@@ -17,6 +17,7 @@ export interface MakerProduct {
   readiness: string;
   featured: boolean;
   makers: string[];
+  studio: (string | null)[];
   variants: MakerProductVariant[];
 }
 

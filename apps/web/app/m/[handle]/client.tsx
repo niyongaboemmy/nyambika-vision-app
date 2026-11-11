@@ -94,6 +94,16 @@ function ProductSheet({ maker, product, onClose }: { maker: MakerSpace; product:
         </a>
       </div>
       {product.readiness !== "READY" && <p className="mt-2 text-center text-xs text-mut">Try-on isn't available for this item yet.</p>}
+      {product.studio.length > 0 && (
+        <div className="no-scrollbar mt-4 flex gap-2 overflow-x-auto">
+          {product.studio.filter(Boolean).map((src) => (
+            <figure key={src} className="relative shrink-0">
+              <img src={src!} alt={`${product.title} on an AI model`} className="h-40 w-24 rounded-xl object-cover" />
+              <figcaption className="absolute left-1 top-1 rounded bg-black/60 px-1 text-[9px]">AI model</figcaption>
+            </figure>
+          ))}
+        </div>
+      )}
     </Sheet>
   );
 }

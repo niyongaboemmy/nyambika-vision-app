@@ -8,7 +8,7 @@ from fastapi import FastAPI, HTTPException
 from PIL import Image, ImageDraw
 from pydantic import BaseModel, Field
 
-from . import c2pa, config, garment, guard, intent, twin
+from . import c2pa, config, garment, guard, intent, listing, twin
 from .embed import embed_image
 from .imaging import decode_b64, encode_png_b64
 from .providers import get_provider, registry
@@ -117,3 +117,15 @@ def embed(body: ImageIn):
 @app.post("/v1/intent/parse")
 def parse_intent(body: IntentIn):
     return intent.parse(body.text, body.locale, body.source)
+
+
+class ListingIn(BaseModel):
+    kind: Literal["product", "story"] = "product"
+    locale: Literal["rw", "en", "fr"] = "en"
+    fields: dict = Field(default_factory=dict)
+
+
+@app.post("/v1/listing/write")
+def listing_write(body: ListingIn):
+    """AI listing writer: product title/description or page story in RW/EN/FR."""
+    return listing.write(body.kind, body.fields, body.locale)

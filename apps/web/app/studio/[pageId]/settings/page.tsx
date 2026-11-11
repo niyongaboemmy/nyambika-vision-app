@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { AiWrite } from "@/components/ai-write";
 import { Card, Field, Input, Note, SButton, Select, Textarea } from "@/components/studio";
 import { api } from "@/lib/api";
 import { useManagedPage } from "../layout";
@@ -51,6 +52,12 @@ export default function Settings() {
           <h2 className="font-bold">Page profile</h2>
           <Field label="Name"><Input value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} /></Field>
           <Field label="Story"><Textarea value={f.story} onChange={(e) => setF({ ...f, story: e.target.value })} /></Field>
+          <AiWrite<{ story: string }>
+            pageId={page.id}
+            kind="story"
+            fields={() => ({ name: f.name, memberType: page.memberType, sector: f.sector, district: f.district })}
+            onResult={(r) => setF((x) => ({ ...x, story: r.story }))}
+          />
           <div className="grid grid-cols-2 gap-3">
             <Field label="District"><Input value={f.district} onChange={(e) => setF({ ...f, district: e.target.value })} /></Field>
             <Field label="Sector"><Input value={f.sector} onChange={(e) => setF({ ...f, sector: e.target.value })} /></Field>

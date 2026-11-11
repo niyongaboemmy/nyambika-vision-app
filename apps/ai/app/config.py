@@ -5,7 +5,7 @@ C2PA_SIGNING_KEY = os.environ.get("C2PA_SIGNING_KEY", "dev-only-c2pa-signing-key
 VTON_PROVIDER = os.environ.get("VTON_PROVIDER", "local-compositor")
 MUSE_LLM = os.environ.get("MUSE_LLM") == "1"
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
-MUSE_LLM_MODEL = os.environ.get("MUSE_LLM_MODEL", "claude-haiku-5-5")
+MUSE_LLM_MODEL = os.environ.get("MUSE_LLM_MODEL", "claude-opus-5-5")
 
 # Guard thresholds (AI-GD). Looks failing any of these are withheld and never billed.
 GUARD_MIN_IDENTITY = float(os.environ.get("GUARD_MIN_IDENTITY", "0.97"))

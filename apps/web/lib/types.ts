@@ -28,6 +28,7 @@ export interface StudioProduct {
   featured: boolean;
   variants: StudioVariant[];
   makers: { id: string; name: string }[];
+  studio: { id: string; image: string | null }[];
 }
 
 export interface Maker {

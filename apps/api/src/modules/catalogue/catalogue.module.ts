@@ -19,6 +19,7 @@ import { ProductInput, VariantInput } from "@nyambika/contracts";
 import type { Role } from "@prisma/client";
 import { z } from "zod";
 import { AiClient } from "../../common/ai.client";
+import { MeteringService } from "../../common/metering.service";
 import { Access, AuthUser, CurrentUser, MANAGE } from "../../common/auth";
 import { PrismaService } from "../../common/prisma.service";
 import { StorageService } from "../../common/storage.service";
@@ -42,6 +43,7 @@ export class CatalogueService {
     private prisma: PrismaService,
     private storage: StorageService,
     private ai: AiClient,
+    private metering: MeteringService,
   ) {}
 
   async attachVariantImage(variantId: string, image: Buffer) {
@@ -65,6 +67,37 @@ export class CatalogueService {
     await this.prisma.mediaAsset.create({ data: { productId: variant.productId, path: imagePath, kind: "ORIGINAL" } });
     await this.refreshReadiness(variant.productId, a);
     return { readiness: a.readiness, notes: a.notes, qualityScore: a.quality_score, image: this.storage.publicUrl(imagePath) };
+  }
+
+  /**
+   * AI product studio (FR-PHO-01..06): render a variant on synthetic AI models (never a real person)
+   * as labelled, C2PA-signed catalogue photos owned by the member. Metered against the page allowance.
+   */
+  async studio(variantId: string, personas: number[]) {
+    const v = await this.prisma.variant.findUnique({ where: { id: variantId }, include: { product: true } });
+    if (!v?.cutoutPath) throw new BadRequestException("Upload a photo for this colour first");
+    const garment = await this.storage.read(v.cutoutPath);
+    const out: { persona: number; image: string | null; status: string }[] = [];
+    for (const n of personas) {
+      const model = await this.storage.read(`personas/persona-${n}.png`);
+      const r = await this.ai.post<{ status: string; image_b64: string | null; c2pa: { sha256: string } | null }>("/v1/tryon", {
+        twin_b64: model.toString("base64"),
+        garment_b64: garment.toString("base64"),
+        garment_category: v.product.category,
+        tier: "HD",
+        request_id: `studio-${variantId}-${n}`,
+      });
+      if (r.status !== "DELIVERED" || !r.image_b64) {
+        out.push({ persona: n, image: null, status: r.status });
+        continue;
+      }
+      const path = await this.storage.put(`public/media/${v.product.pageId}/${v.id}-studio-p${n}.png`, Buffer.from(r.image_b64, "base64"));
+      await this.prisma.mediaAsset.deleteMany({ where: { productId: v.productId, path } });
+      await this.prisma.mediaAsset.create({ data: { productId: v.productId, path, kind: "STUDIO" } });
+      await this.metering.record("PHOTO", "PAGE_ALLOWANCE", 110, null, v.product.pageId, v.id);
+      out.push({ persona: n, image: this.storage.publicUrl(path), status: "DELIVERED" });
+    }
+    return out;
   }
 
   /** Product is try-on READY only when every variant has a passing cut-out. */
@@ -91,6 +124,7 @@ export class CatalogueController {
     private access: Access,
     private storage: StorageService,
     private catalogue: CatalogueService,
+    private ai: AiClient,
   ) {}
 
   @Get("pages/:pageId/products")
@@ -102,14 +136,17 @@ export class CatalogueController {
     const products = await this.prisma.product.findMany({
       where: { pageId, ...(isMemberOnly ? { submittedById: user.id } : {}), status: { not: "ARCHIVED" } },
       orderBy: { createdAt: "desc" },
-      include: { variants: true, makers: { include: { coopMember: true } } },
+      include: { variants: true, makers: { include: { coopMember: true } }, media: { where: { kind: "STUDIO" } } },
     });
     return products.map((p) => this.view(p));
   }
 
   @Get("products/:id")
   async get(@Param("id") id: string, @CurrentUser() user: AuthUser) {
-    const p = await this.prisma.product.findUnique({ where: { id }, include: { variants: true, makers: { include: { coopMember: true } } } });
+    const p = await this.prisma.product.findUnique({
+      where: { id },
+      include: { variants: true, makers: { include: { coopMember: true } }, media: { where: { kind: "STUDIO" } } },
+    });
     if (!p) throw new NotFoundException();
     await this.access.requirePage(user.id, p.pageId, CONTRIBUTORS);
     return this.view(p);
@@ -182,6 +219,32 @@ export class CatalogueController {
     return this.catalogue.attachVariantImage(id, file.buffer);
   }
 
+  @Post("variants/:id/studio")
+  async studio(@Param("id") id: string, @CurrentUser() user: AuthUser, @Body() body: unknown) {
+    const { personas } = parse(z.object({ personas: z.array(z.number().int().min(1).max(5)).min(1).max(5) }), body);
+    const v = await this.prisma.variant.findUniqueOrThrow({ where: { id }, include: { product: true } });
+    await this.access.requirePage(user.id, v.product.pageId, CONTRIBUTORS);
+    return this.catalogue.studio(id, personas);
+  }
+
+  @Delete("products/:id/media/:mediaId")
+  async removeMedia(@Param("id") id: string, @Param("mediaId") mediaId: string, @CurrentUser() user: AuthUser) {
+    const p = await this.prisma.product.findUniqueOrThrow({ where: { id } });
+    await this.access.requirePage(user.id, p.pageId, CONTRIBUTORS);
+    const m = await this.prisma.mediaAsset.findFirstOrThrow({ where: { id: mediaId, productId: id, kind: "STUDIO" } });
+    await this.storage.remove(m.path);
+    await this.prisma.mediaAsset.delete({ where: { id: m.id } });
+    return { ok: true };
+  }
+
+  /** AI listing writer for products and page stories (FR-PAGE-07, FR-AST-10). */
+  @Post("pages/:pageId/assist")
+  async assist(@Param("pageId") pageId: string, @CurrentUser() user: AuthUser, @Body() body: unknown) {
+    await this.access.requirePage(user.id, pageId, CONTRIBUTORS);
+    const req = parse(z.object({ kind: z.enum(["product", "story"]), locale: z.enum(["rw", "en", "fr"]), fields: z.record(z.string(), z.unknown()) }), body);
+    return this.ai.post("/v1/listing/write", req);
+  }
+
   /**
    * Publish / archive (SRS B4). Cooperative members' submissions go to admin approval
    * (FR-COOP-03); admins approve or reject.
@@ -248,9 +311,11 @@ export class CatalogueController {
     featured: boolean;
     variants: { id: string; colourName: string; colourHex: string; sizes: string[]; stock: number; imagePath: string | null; cutoutPath: string | null }[];
     makers: { coopMember: { id: string; name: string } }[];
+    media?: { id: string; path: string }[];
   }) {
     return {
       ...p,
+      studio: (p.media ?? []).map((m) => ({ id: m.id, image: this.storage.publicUrl(m.path) })),
       variants: p.variants.map((v) => ({
         id: v.id,
         colourName: v.colourName,

@@ -18,7 +18,7 @@ pnpm test    # pytest
 | `POST /v1/twin/check` | Capture checks (resolution, light, portrait, one person, full body), size estimate |
 | `POST /v1/tryon` | Render look → guard (identity, skin tone, garment fidelity) → C2PA sign. Guard failures are `WITHHELD` |
 | `POST /v1/embed/image` | 64-d L2-normalised colour + texture embedding for pgvector |
-| `POST /v1/intent/parse` | RW/EN/FR text → Intent (rules; optional Claude tool call with `MUSE_LLM=1`) |
+| `POST /v1/intent/parse` | RW/EN/FR text → Intent (rules; optional Claude structured output with `MUSE_LLM=1`) |
 
 Env: `VTON_PROVIDER` (default `local-compositor`), `C2PA_SIGNING_KEY`, `GUARD_MIN_IDENTITY`,
 `GUARD_MAX_SKIN_DELTA`, `GUARD_MIN_FIDELITY`, `MUSE_LLM`, `ANTHROPIC_API_KEY`, `MUSE_LLM_MODEL`.

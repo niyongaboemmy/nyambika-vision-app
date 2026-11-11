@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { AiWrite } from "@/components/ai-write";
 import { Card, Field, Input, Note, SButton, Select, Textarea } from "@/components/studio";
 import { api } from "@/lib/api";
 import { CATEGORIES, type Maker, OCCASIONS, STYLES } from "@/lib/types";
@@ -77,6 +78,12 @@ export default function NewProduct() {
           <Field label="Price (RWF)"><Input required inputMode="numeric" value={f.priceRwf} onChange={(e) => setF({ ...f, priceRwf: e.target.value.replace(/\D/g, "") })} /></Field>
         </div>
         <Field label="Description"><Textarea value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} /></Field>
+        <AiWrite<{ title: string; description: string }>
+          pageId={page.id}
+          kind="product"
+          fields={() => ({ category: f.category, colours: variants.map((v) => v.colourName).filter(Boolean), occasions, styles, fabric: f.fabric, madeToOrder: f.madeToOrder, leadTimeDays: f.leadTimeDays, makerName: page.name })}
+          onResult={(r) => setF((x) => ({ ...x, title: x.title || r.title, description: r.description }))}
+        />
         <Field label="Fabric"><Input value={f.fabric} onChange={(e) => setF({ ...f, fabric: e.target.value })} placeholder="Cotton kitenge (wax print)" /></Field>
         <div className="flex items-center gap-3">
           <label className="flex items-center gap-2 text-sm font-semibold">

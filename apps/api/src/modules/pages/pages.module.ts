@@ -45,7 +45,7 @@ export class PagesController {
         products: {
           where: { status: "PUBLISHED" },
           orderBy: [{ featured: "desc" }, { createdAt: "desc" }],
-          include: { variants: true, makers: { include: { coopMember: true } } },
+          include: { variants: true, makers: { include: { coopMember: true } }, media: { where: { kind: "STUDIO" } } },
         },
         _count: { select: { follows: true } },
       },
@@ -77,6 +77,7 @@ export class PagesController {
         readiness: p.readiness,
         featured: p.featured,
         makers: p.makers.filter((m) => m.coopMember.attributionConsent).map((m) => m.coopMember.name),
+        studio: p.media.map((m) => this.storage.publicUrl(m.path)),
         variants: p.variants.map((v) => ({
           id: v.id,
           colourName: v.colourName,

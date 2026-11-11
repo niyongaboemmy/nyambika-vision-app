@@ -9,7 +9,7 @@ import re
 import unicodedata
 from datetime import date, timedelta
 
-from . import config
+from . import config, llm
 
 OCCASIONS = {
     "wedding": ["wedding", "bukwe", "ubukwe", "mariage", "noces"],
@@ -188,30 +188,25 @@ INTENT_TOOL = {
 
 
 def _parse_llm(text: str, locale: str | None, source: str, today: date) -> dict:
-    import anthropic  # optional dependency
-
-    client = anthropic.Anthropic(api_key=config.ANTHROPIC_API_KEY)
-    response = client.messages.create(
-        model=config.MUSE_LLM_MODEL,
-        max_tokens=512,
-        tools=[INTENT_TOOL],
-        tool_choice={"type": "tool", "name": "record_intent"},
+    schema = {**INTENT_TOOL["input_schema"], "additionalProperties": False}
+    data = llm.generate_json(
         system=(f"Today is {today.isoformat()} ({today.strftime('%A')}). The shopper writes in Kinyarwanda, "
-                "English or French. Extract their intent. Budgets are in Rwandan francs."),
-        messages=[{"role": "user", "content": text}],
+                "English or French. Extract their fashion intent using the canonical English vocabulary in the "
+                "schema. Budgets are in Rwandan francs. Use null when something isn't said."),
+        user=text,
+        schema=schema,
+        max_tokens=1024,
     )
-    block = next(b for b in response.content if b.type == "tool_use")
-    data = dict(block.input)
     data.setdefault("language", locale or "en")
     for key in ("styles", "colours", "categories"):
         data[key] = list(data.get(key) or [])
     data.update(source=source, parser="llm")
-    return json.loads(json.dumps(data))
+    return data
 
 
 def parse(text: str, locale: str | None = None, source: str = "text", today: date | None = None) -> dict:
     today = today or date.today()
-    if config.MUSE_LLM and config.ANTHROPIC_API_KEY:
+    if llm.enabled():
         try:
             return _parse_llm(text, locale, source, today)
         except Exception:  # noqa: BLE001 - any LLM failure falls back to rules

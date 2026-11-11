@@ -22,12 +22,12 @@ All R1 "Must" epics in a working form: E01–E04, E06–E08, E10–E16, E18, E20
 | Payments | Mock MoMo with simulated handset; MTN adapter written but untested | MTN/Airtel credentials or aggregator (OD-05) |
 | WhatsApp / SMS | Outbox table + log | WhatsApp Cloud API templates, SMS gateway |
 | Kinyarwanda voice | Browser Web Speech API (beta flag) | Kinyarwanda ASR vendor (OD-03) |
-| Muse intent | RW/EN/FR rules parser; optional Claude tool call (`MUSE_LLM=1`) | LLM with the 300-utterance eval set |
+| Muse intent, listing writer | RW/EN/FR rules and templates; optional Claude (`claude-opus-5-5`, structured outputs) with `MUSE_LLM=1`, untested here without credentials | LLM path evaluated against the 300-utterance set (plan §15.2) |
 | Visual search | 64-d colour + texture embedding | Image embedding model |
 | Object storage | Local filesystem, AES-256-GCM twins | S3-compatible store with SSE-KMS in the approved region |
 
 ### Not done yet (R1)
-- E05 AI product studio and AI listing writer (Should).
+- (E05 delivered after S5, see above.)
 - E17 is built against a documented bundle format; the transform from the real legacy export still needs the export itself (OI-04).
 - On-device pose checks with MediaPipe (currently: on-device light check + server-side silhouette checks).
 - Postgres row-level security (API guards + tests today, ADR-0003); BullMQ/Redis job queue (in-process today, ADR-0004).
@@ -37,3 +37,4 @@ All R1 "Must" epics in a working form: E01–E04, E06–E08, E10–E16, E18, E20
 ### Later phases (not started)
 R2 "Grow" (live morph, tailor custom orders, Ask-your-circle poll, wardrobe, 3D garment + AR, voice GA, passkeys), R3 "Expand" (3D twin, AR mirror, VR showroom, agentic commerce, native shell) and R4. These depend on the Gate 3 pilot decision in the plan.
 | E17: migration of existing pages | Wave import (JSON bundle, checksums, photos through the readiness pipeline, hidden pages + products, per-page defect log), WhatsApp owner review link with sign-in check, owner sign-off / change requests (to moderation), go-live with verified publish and legacy redirect (catch-all route, permanent redirect), per-page rollback, redirect hit counts and unmatched-URL 404 monitoring. Format and runbook mapping in docs/migration.md; synthetic sample generator in scripts/migration. | `scripts/crawl-mig.mjs`: import → review → sign-off/changes → go live → legacy URL 308 → rollback → 404 recorded; strangers can't open review links. |
+| E05: AI product studio + listing writer | On-model photos: a variant rendered in HD on chosen synthetic AI models (5 skin tones), guarded, C2PA-signed, labelled "AI model", stored as member-owned catalogue media, metered against the page allowance, removable; shown in the Maker Space product sheet. Listing writer for product title/description and page story in RW/EN/FR (templates always; Claude via structured outputs when `MUSE_LLM=1`, with refusal fallbacks and template fallback). The Muse's optional LLM path moved to the same helper (structured outputs instead of forced tool use, which current models reject). | `scripts/crawl-e05.mjs`; AI tests 19/19. Crawl found and fixed: studio colour selection frozen before first upload. |
