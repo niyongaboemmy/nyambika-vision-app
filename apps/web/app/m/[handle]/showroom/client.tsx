@@ -7,6 +7,7 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "rea
 import { HoldToBuy } from "@/components/hold-to-buy";
 import type { ShowroomEngine } from "@/components/vr-engine";
 import { SharedRoom } from "@/components/vr-presence";
+import { useFlag } from "@/lib/flags";
 import { XrStage } from "@/components/xr-viewer";
 import { api, rwf } from "@/lib/api";
 import { useRegion, type Commerce } from "@/lib/region";
@@ -56,6 +57,7 @@ function Room({ room, commerce }: { room: Showroom; commerce: Commerce | null })
   const [stage, setStage] = useState<{ item: RoomItem; assets: Garment3d[] } | null>(null);
   const [twin, setTwin] = useState<{ id: string; state: "working" | "on" | "none" | "error"; note?: string } | null>(null);
   const [announce, setAnnounce] = useState("");
+  const mrMirror = useFlag("mr.mirror_spike"); // R4 spike entry
   const item = room.items.find((i) => i.productId === selected) ?? null;
   const pieces = useMemo(() => {
     const places = roomLayout(room.items.length);
@@ -259,6 +261,7 @@ function Room({ room, commerce }: { room: Showroom; commerce: Commerce | null })
               <Pill onClick={() => void view3d(item)}>🧊 View in 3D</Pill>
               {me && mode === "3d" && (twin?.id === item.productId && twin.state === "on" ? <Pill onClick={offTwin}>↺ Back to mannequin</Pill> : <Pill onClick={() => void onMyTwin(item)} busy={twin?.id === item.productId && twin.state === "working"}>🪞 See it on my 3D twin</Pill>)}
               <Pill href={`/looks/try?variant=${item.variantId}`}>✨ Try on me</Pill>
+              {me && mrMirror && <Pill href={`/mirror/mr?product=${item.productId}&variant=${item.variantId}`}>🥽 Mixed-reality mirror</Pill>}
               <Pill href={`/m/${room.page.handle}`}>🏠 Maker Space</Pill>
             </div>
             {twin?.id === item.productId && twin.state === "on" && <p className="mt-2 text-[11px] text-mut">🔒 Only you see your 3D twin here. {twin.note}</p>}
