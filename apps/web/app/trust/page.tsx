@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { AddressesCard } from "@/components/bag";
+import { PasskeysCard } from "@/components/passkeys";
 import { Button, ErrorNote, Screen, Sheet, TopBar } from "@/components/ui";
 import { api } from "@/lib/api";
 import { useSession } from "@/lib/session";
@@ -19,7 +21,7 @@ interface Privacy {
 const PURPOSE: Record<string, { title: string; body: string }> = {
   TWIN_PROCESSING: { title: "Keep my private twin", body: "Store my encrypted twin so looks appear on me." },
   TRYON_GENERATION: { title: "Render looks on my twin", body: "Use my twin to create AI previews. Off = looks pause." },
-  VOICE_PROCESSING: { title: "Voice Muse", body: "Turn my voice into text. Audio isn't stored, only the transcript." },
+  VOICE_PROCESSING: { title: "Voice Muse", body: "Turn my voice into text. The recording is deleted as soon as the text comes back; it is never stored." },
   MARKETING: { title: "News from makers I follow", body: "WhatsApp updates about new collections." },
 };
 
@@ -65,6 +67,7 @@ export default function Trust() {
             <li>• Makers never receive your twin or your looks, only what you order.</li>
             <li>• Every AI look is labelled and carries Content Credentials (C2PA).</li>
             <li>• You pay makers directly. Nyambika never holds your money.</li>
+            <li>• When you speak to the Muse, your recording is turned into text and deleted straight away. Audio is never stored.</li>
           </ul>
         </section>
 
@@ -99,6 +102,9 @@ export default function Trust() {
                 </label>
               ))}
             </section>
+
+            <PasskeysCard />
+            <AddressesCard />
 
             <section className="glass space-y-2 rounded-3xl p-4">
               <p className="font-semibold">My data</p>

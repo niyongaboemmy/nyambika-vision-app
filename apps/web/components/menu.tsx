@@ -15,6 +15,7 @@ export function MenuSheet({ open, onClose }: { open: boolean; onClose: () => voi
     { href: "/mirror", icon: "🪞", label: "My twin" },
     { href: "/saved", icon: "♥", label: "Saved looks" },
     { href: "/wardrobe", icon: "👗", label: "Wardrobe" },
+    { href: "/bag", icon: "🛍️", label: t("bag.title") },
     { href: "/orders", icon: "📦", label: t("orders.title") },
     { href: "/custom", icon: "🪡", label: t("tailor.myOrders") },
     { href: "/measurements", icon: "📏", label: t("tailor.measurements") },

@@ -19,6 +19,16 @@ const normalisePhone = (p: string) => {
 
 const cookieBase = { httpOnly: true, sameSite: "lax" as const, secure: process.env.NODE_ENV === "production", path: "/" };
 
+/** Access + rotating refresh cookies. Shared by OTP and passkey sign-in (E29). */
+export async function issueSession(prisma: PrismaService, res: Response, user: AuthUser) {
+  const refresh = randomBytes(32).toString("base64url");
+  await prisma.session.create({
+    data: { userId: user.id, refreshHash: sha(refresh), expiresAt: new Date(Date.now() + 30 * 86400_000) },
+  });
+  res.cookie(ACCESS_COOKIE, signAccess(user), { ...cookieBase, maxAge: 15 * 60_000 });
+  res.cookie(REFRESH_COOKIE, refresh, { ...cookieBase, maxAge: 30 * 86400_000 });
+}
+
 @Controller("auth")
 export class AuthController {
   constructor(
@@ -117,12 +127,7 @@ export class AuthController {
   }
 
   private async issue(res: Response, user: AuthUser) {
-    const refresh = randomBytes(32).toString("base64url");
-    await this.prisma.session.create({
-      data: { userId: user.id, refreshHash: sha(refresh), expiresAt: new Date(Date.now() + 30 * 86400_000) },
-    });
-    res.cookie(ACCESS_COOKIE, signAccess(user), { ...cookieBase, maxAge: 15 * 60_000 });
-    res.cookie(REFRESH_COOKIE, refresh, { ...cookieBase, maxAge: 30 * 86400_000 });
+    await issueSession(this.prisma, res, user);
   }
 
   private async profile(userId: string) {

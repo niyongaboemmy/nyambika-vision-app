@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { AddToBag } from "@/components/bag";
 import { SizeNotes, useSizeRecommendation } from "@/components/size-hint";
 import { Chip, ErrorNote, Sheet, Spinner } from "@/components/ui";
 import { api, rwf } from "@/lib/api";
@@ -139,6 +140,7 @@ export function HoldToBuy({ look }: { look: Look }) {
           <p className="text-xs text-mut">Press and hold 1 second · then approve with your Mobile Money PIN</p>
           {delivery === "DELIVERY" && address.trim().length < 4 && <p className="text-xs text-gold">Add a delivery address to continue</p>}
         </div>
+        <AddToBag look={look} size={size} />
       </Sheet>
     </>
   );

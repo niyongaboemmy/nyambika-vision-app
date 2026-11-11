@@ -28,6 +28,9 @@ import { CircleModule } from "./modules/circle/circle.module";
 import { WardrobeModule } from "./modules/wardrobe/wardrobe.module";
 import { TailorModule } from "./modules/tailor/tailor.module";
 import { PilotModule } from "./modules/pilot/pilot.module";
+import { VoiceModule } from "./modules/voice/voice.module";
+import { PasskeysModule } from "./modules/passkeys/passkeys.module";
+import { CheckoutModule } from "./modules/checkout/checkout.module";
 
 @Controller()
 class HealthController {
@@ -69,6 +72,9 @@ class HealthController {
     WardrobeModule,
     TailorModule,
     PilotModule,
+    VoiceModule,
+    PasskeysModule,
+    CheckoutModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: AuthGuard }],

@@ -84,12 +84,13 @@ export class PaymentsService implements OnModuleInit, OnModuleDestroy {
       await this.prisma.order.update({ where: { id: order.id }, data: { status: "PAID" } });
       await serverEvent(this.prisma, "order_paid", order.shopperId, { orderId: order.id, pageId: order.pageId });
       await this.prisma.orderEvent.create({ data: { orderId: order.id, status: "PAID", note: `Paid directly to ${order.payoutLabel} via ${order.wallet === "MTN_MOMO" ? "MTN MoMo" : "Airtel Money"}` } });
-      const item = order.items[0];
+      // Bag checkouts (E29) carry several lines; hold-to-buy orders have one.
+      const lines = order.items.map((i) => `${i.qty > 1 ? `${i.qty} × ` : ""}${i.title} (${i.colourName}, size ${i.size})`).join("; ");
       await this.messaging.send(
         "WHATSAPP",
         order.page.whatsapp || order.payoutMsisdn,
         "order_paid_maker",
-        `New paid order ${order.code}: ${item.title} (${item.colourName}, size ${item.size}) · RWF ${order.totalRwf.toLocaleString()} paid to ${order.payoutLabel}. ${order.deliveryMode === "DELIVERY" ? `Deliver to: ${order.address}` : "Pickup"}. Buyer: ${order.shopper.name ?? ""} ${order.shopper.phone}`,
+        `New paid order ${order.code}: ${lines} · RWF ${order.totalRwf.toLocaleString()} paid to ${order.payoutLabel}. ${order.deliveryMode === "DELIVERY" ? `Deliver to: ${order.address}` : "Pickup"}. Buyer: ${order.shopper.name ?? ""} ${order.shopper.phone}`,
         order.id,
       );
       await this.messaging.send("WHATSAPP", order.shopper.phone, "order_paid_shopper", `Murakoze! ${order.code} is paid directly to ${order.payoutLabel}. We will keep you posted here.`, order.id);
