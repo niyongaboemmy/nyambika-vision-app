@@ -1,0 +1,98 @@
+# Nyambika self-hosted inference pool (E42). Untested on real GPUs: no cluster was available while writing it.
+# Every model listed here must have a permissive licence recorded in docs/adr/0006-self-hosted-inference.md and
+# a passing NLB record in the model registry before the gateway routes shopper traffic to it.
+
+# Data-residency region of this pool; the gateway's INFERENCE_POOL_REGION must match (e.g. "rw" for Kigali).
+region: rw
+
+# GPU node pool. Create it with your provider's tooling (see ../README.md), then these select and tolerate it.
+gpuNodePool:
+  nodeSelector:
+    nyambika.rw/pool: gpu-inference
+  tolerations:
+    - key: nvidia.com/gpu
+      operator: Exists
+      effect: NoSchedule
+
+# Only the gateway namespace may call the pool (NetworkPolicy). Bearer key checked at the ingress.
+gatewayNamespace: nyambika
+auth:
+  existingSecret: inference-pool-key   # key "token"; the gateway sends it as INFERENCE_POOL_KEY
+
+ingress:
+  enabled: true
+  className: nginx
+  host: inference.internal.nyambika.rw
+  tlsSecret: inference-tls
+
+# Hugging Face cache on a PVC so pods do not re-download weights; weights are pinned by revision.
+modelCache:
+  storageClass: ""
+  size: 200Gi
+  hfTokenSecret: hf-token          # only needed for gated repos; none of the defaults are gated
+
+# OpenAI-compatible servers (vLLM). Paths: /v1/chat/completions, /v1/audio/transcriptions, /v1/models.
+vllm:
+  image: vllm/vllm-openai:v0.11.0
+  models:
+    llm:
+      enabled: true
+      # Apache-2.0. Phrasing / listing / insights rewrites in RW-EN-FR (quality in Kinyarwanda must be evaluated).
+      repo: mistralai/Mistral-7B-Instruct-v0.3
+      revision: main               # pin to a commit sha before production
+      servedName: llm
+      gpus: 1                      # 1 x L4 (24 GB) with fp8, or 1 x A10G
+      replicas: 1
+      maxReplicas: 3
+      args: ["--max-model-len", "8192", "--gpu-memory-utilization", "0.90", "--quantization", "fp8", "--disable-log-requests"]
+      paths: ["/v1/chat", "/v1/completions", "/v1/models"]
+    whisper:
+      enabled: true
+      # MIT. Speech-to-text for the Muse; Kinyarwanda WER must be measured (target <= 12%, plan 9.3).
+      repo: openai/whisper-large-v3-turbo
+      revision: main
+      servedName: whisper
+      gpus: 1
+      replicas: 1
+      maxReplicas: 2
+      args: ["--task", "transcription", "--disable-log-requests"]
+      paths: ["/v1/audio"]
+
+# Open Inference Protocol v2 servers (KServe InferenceService, or plain Deployments with kserve: false).
+# Paths: /v2/models/{name}/infer, /v2/models/{name}/ready, /v2/health/ready
+kserve:
+  enabled: true
+  models:
+    vton:
+      enabled: true
+      # The image runs Nyambika's own model server code (apps/ai providers behind a v2 HTTP front).
+      # No permissively licensed photo-VTON weights with commercially usable training data were found
+      # (ADR-0006); until one passes the NLB, this serves the in-house compositor, which needs no GPU.
+      image: ghcr.io/nyambika/vton-server:0.1.0
+      weights: ""                  # e.g. s3://nyambika-models/vton/<model>@<sha> once licensed + NLB-passed
+      gpus: 0
+      replicas: 1
+      maxReplicas: 4
+    video-vton:
+      enabled: false               # slot: needs licensed weights + a passing NLB video eval (E39)
+      image: ghcr.io/nyambika/video-vton-server:0.1.0
+      weights: ""
+      gpus: 1                      # 1 x L40S / A100 40 GB class for a video diffusion model
+      replicas: 0
+      maxReplicas: 2
+    avatar:
+      enabled: false               # slot: SMPL-X is NOT commercially licensed by default (ADR-0006)
+      image: ghcr.io/nyambika/avatar-server:0.1.0
+      weights: ""
+      gpus: 1
+      replicas: 0
+      maxReplicas: 1
+
+resources:
+  cpuPerGpu: "6"
+  memoryPerGpu: 28Gi
+
+# Scale-to-baseline window: GPUs are the cost driver (NFR-CST-01). HPA on GPU duty cycle via DCGM exporter.
+autoscaling:
+  enabled: true
+  targetGpuUtilisation: 70

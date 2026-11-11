@@ -1,0 +1,54 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata: {name: inference-model-cache}
+spec:
+  accessModes: [ReadWriteMany]
+  {{- with .Values.modelCache.storageClass }}
+  storageClassName: {{ . }}
+  {{- end }}
+  resources: {requests: {storage: {{ .Values.modelCache.size }}}}
+---
+# Only the AI gateway may reach the pool; no egress except DNS and the model registry/HF for weight pulls.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: inference-ingress-from-gateway}
+spec:
+  podSelector: {matchLabels: {app.kubernetes.io/part-of: nyambika-inference}}
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector: {matchLabels: {kubernetes.io/metadata.name: {{ .Values.gatewayNamespace }}}}
+          podSelector: {matchLabels: {app.kubernetes.io/name: ai-gateway}}
+        - namespaceSelector: {matchLabels: {kubernetes.io/metadata.name: ingress-nginx}}
+{{- if .Values.ingress.enabled }}
+---
+# One host for the gateway's INFERENCE_POOL_URL; paths fan out to the model servers.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: inference
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 32m
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/auth-url: http://inference-auth.{{ .Release.Namespace }}.svc.cluster.local/check
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  tls: [{hosts: [{{ .Values.ingress.host }}], secretName: {{ .Values.ingress.tlsSecret }}}]
+  rules:
+    - host: {{ .Values.ingress.host }}
+      http:
+        paths:
+          {{- range $name, $m := .Values.vllm.models }}
+          {{- if $m.enabled }}
+          {{- range $m.paths }}
+          - {path: {{ . }}, pathType: Prefix, backend: {service: {name: vllm-{{ $name }}, port: {number: 80}}}}
+          {{- end }}
+          {{- end }}
+          {{- end }}
+          {{- range $name, $m := .Values.kserve.models }}
+          {{- if $m.enabled }}
+          - {path: /v2/models/{{ $name }}, pathType: Prefix, backend: {service: {name: {{ $name }}-predictor, port: {number: 80}}}}
+          {{- end }}
+          {{- end }}
+{{- end }}
