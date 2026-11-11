@@ -23,8 +23,9 @@ import { PrismaService } from "../prisma.service";
 import { parse } from "../zod";
 import { ApnsPushProvider, DevOutboxPushProvider, FcmPushProvider, WebPushProvider, type PushProvider, type PushResult, type PushTarget, type VapidKeys } from "./providers";
 
-type Locale = "rw" | "en" | "fr";
-const asLocale = (l: string | null | undefined): Locale => (l === "rw" || l === "fr" ? l : "en");
+// Swahili is passed through so copy that has a Swahili version can use it; the rest falls back to English.
+type Locale = "rw" | "en" | "fr" | "sw";
+const asLocale = (l: string | null | undefined): Locale => (l === "rw" || l === "fr" || l === "sw" ? l : "en");
 
 export interface FanOutResult {
   sent: number;

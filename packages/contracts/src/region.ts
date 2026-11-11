@@ -206,6 +206,24 @@ export function normalizePhone(input: string, country: RegionCode): PhoneResult 
   return { ok: true, e164: `+${r.dialCode}${nsn}`, country };
 }
 
+/**
+ * Sign-in phone (hardening pass 1, E41). A national number is read for the chosen country (the sign-in
+ * country selector, else Rwanda) and validated with that country's rules; a full international number
+ * (+… / 00…) wins over the selector. Rwanda keeps its original lenient reading (07… → +250…), so every
+ * existing account signs in exactly as before.
+ */
+export function signInPhone(input: string, country: RegionCode = "RW"): PhoneResult {
+  const raw = input.trim().replace(/[\s\-().]/g, "");
+  const intl = /^(\+|00)/.test(raw);
+  const digits = raw.replace(/^(\+|00)/, "").replace(/\D/g, "");
+  const target = intl ? (REGION_CODES.find((c) => digits.startsWith(REGIONS[c].dialCode)) ?? null) : country;
+  if (target && target !== "RW") return normalizePhone(intl ? `+${digits}` : raw, target);
+  // Rwanda (and numbers outside the EAC regions): the original normalisation, unchanged.
+  const e164 = digits.startsWith("250") ? `+${digits}` : digits.startsWith("07") ? `+250${digits.slice(1)}` : `+${digits}`;
+  if (!/^\+[0-9]{9,15}$/.test(e164)) return { ok: false, message: `${REGIONS.RW.name} numbers look like ${REGIONS.RW.phoneExample}` };
+  return { ok: true, e164, country: target ?? country };
+}
+
 /** Country of an E.164 number among the supported EAC regions. */
 export function countryOfPhone(e164: string): RegionCode | null {
   for (const c of REGION_CODES) if (e164.startsWith(`+${REGIONS[c].dialCode}`) && normalizePhone(e164, c).ok) return c;

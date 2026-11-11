@@ -385,8 +385,23 @@ const EVENT_COPY: Record<AmbientLocale, Record<"look.ready" | "circle.vote" | "c
   },
 };
 
+/** "today / tomorrow / in N days" for the wardrobe reminder (hardening pass 1: was English in every locale). */
+const WHEN: Record<AmbientLocale | "sw", (days: number) => string> = {
+  en: (d) => (d <= 0 ? "today" : d === 1 ? "tomorrow" : `in ${d} days`),
+  rw: (d) => (d <= 0 ? "uyu munsi" : d === 1 ? "ejo" : `mu minsi ${d}`),
+  fr: (d) => (d <= 0 ? "aujourd'hui" : d === 1 ? "demain" : `dans ${d} jours`),
+  sw: (d) => (d <= 0 ? "leo" : d === 1 ? "kesho" : `baada ya siku ${d}`),
+};
+/** Swahili push copy (machine-drafted, needs native review); events without it fall back to English. */
+const SW_EVENT_COPY: Partial<Record<keyof (typeof EVENT_COPY)["en"], (p: Record<string, string>) => { title: string; body: string }>> = {
+  "wardrobe.reminder": (p) => ({ title: `${p.event} ${p.when}`, body: "Mavazi yako yako tayari ✨" }),
+};
+
 export function eventCopy(event: keyof (typeof EVENT_COPY)["en"], locale: AnyLocale, p: Record<string, string>) {
-  return EVENT_COPY[loc(locale)][event](p);
+  const sw = locale === "sw" ? SW_EVENT_COPY[event] : undefined;
+  // `days` (wardrobe reminder) is localised here; a pre-rendered `when` is kept for older callers.
+  const vars = p.days != null && p.days !== "" ? { ...p, when: WHEN[sw ? "sw" : loc(locale)](Number(p.days)) } : p;
+  return sw ? sw(vars) : EVENT_COPY[loc(locale)][event](vars);
 }
 
 /** Order event → push event (alerts only on the moments the shopper waits for). */
