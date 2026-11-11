@@ -7,4 +7,4 @@
 - Cache key = `sha256(twin id + version, variant, model version, tier)`. Re-views are free (plan §4.4).
 - **Progressive generation:** 3 looks on intent, then +2 when the shopper reaches look n−1. There are no speculative batches.
 - Guardrails: daily per-user cap (default 15, `looks.daily_cap` flag), and a global kill-switch (`ai.kill_switch` flag).
-- R1 runs jobs on an in-process queue with bounded concurrency. Moving to BullMQ/Redis streams (plan §4.1) is mechanical once multiple API instances run.
+- Jobs run on a **BullMQ queue in Redis** (`look-generation`), job id = generation id (idempotent enqueue), worker concurrency `GENERATION_CONCURRENCY` (default 2). `GENERATION_WORKER=0` runs an API instance without a worker, so web and worker processes can scale separately.

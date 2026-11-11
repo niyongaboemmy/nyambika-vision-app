@@ -1,0 +1,14 @@
+**/node_modules
+**/.next
+**/.next-build
+**/dist
+**/.turbo
+**/.venv
+**/__pycache__
+**/.pytest_cache
+.cache
+.git
+apps/api/storage
+apps/api/.env
+scripts/crawl-output
+docs/*.mp4

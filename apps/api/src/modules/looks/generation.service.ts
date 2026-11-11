@@ -1,5 +1,8 @@
-import { ForbiddenException, Injectable, Logger } from "@nestjs/common";
+import { ForbiddenException, Injectable, Logger, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
+import { Queue, Worker } from "bullmq";
 import { ConsentService } from "../../common/consent.service";
+import { aiSpend, firstLook, generationDuration, generations, queueDepth } from "../../common/metrics";
+import { config } from "../../config";
 import type { Generation } from "@prisma/client";
 import { AiClient } from "../../common/ai.client";
 import { MeteringService } from "../../common/metering.service";
@@ -16,17 +19,19 @@ interface TryOnResult {
   latency_ms: number;
 }
 
-const CONCURRENCY = 2;
+const CONCURRENCY = Number(process.env.GENERATION_CONCURRENCY ?? 2);
+const QUEUE = "look-generation";
 
 /**
  * Look generation (SRS B1, plan §4.4, ADR-0004).
  * QUEUED → GENERATING → GUARDING → DELIVERED | WITHHELD | FAILED. Billing only on DELIVERED.
+ * Jobs run on a BullMQ queue in Redis so several API instances can share the work and jobs survive restarts.
  */
 @Injectable()
-export class GenerationService {
+export class GenerationService implements OnModuleInit, OnModuleDestroy {
   private log = new Logger("Generation");
-  private queue: string[] = [];
-  private running = 0;
+  private queue!: Queue;
+  private worker?: Worker;
 
   constructor(
     private prisma: PrismaService,
@@ -36,6 +41,25 @@ export class GenerationService {
     private metering: MeteringService,
     private consent: ConsentService,
   ) {}
+
+  onModuleInit() {
+    const connection = { url: config.redisUrl, maxRetriesPerRequest: null };
+    this.queue = new Queue(QUEUE, { connection });
+    if (process.env.GENERATION_WORKER !== "0") {
+      this.worker = new Worker(QUEUE, (job) => this.run(job.data.id as string, job.data.persona as number), { connection, concurrency: CONCURRENCY });
+      this.worker.on("failed", (job, err) => this.log.error(`generation ${job?.data?.id} failed: ${err.message}`));
+    }
+  }
+
+  async onModuleDestroy() {
+    await this.worker?.close();
+    await this.queue?.close();
+  }
+
+  async refreshQueueGauge() {
+    const counts = await this.queue.getJobCounts("waiting", "active", "delayed", "failed");
+    for (const [state, n] of Object.entries(counts)) queueDepth.set({ state }, n);
+  }
 
   async model(tier: "PREVIEW" | "HD") {
     const m = await this.prisma.modelVersion.findFirst({ where: { tier, status: "ACTIVE" }, orderBy: { createdAt: "desc" } });
@@ -60,22 +84,9 @@ export class GenerationService {
     const gen = await this.prisma.generation.create({
       data: { userId, variantId, twinVersion: twin?.version ?? 0, modelVersion: model.id, tier, cacheKey, status: "QUEUED" },
     });
-    this.queue.push(gen.id);
-    this.pump(persona);
+    // jobId = generation id: enqueueing the same generation twice is a no-op.
+    await this.queue.add("render", { id: gen.id, persona }, { jobId: gen.id, attempts: 1, removeOnComplete: 1000, removeOnFail: 5000 });
     return gen;
-  }
-
-  private pump(persona: number) {
-    while (this.running < CONCURRENCY && this.queue.length) {
-      const id = this.queue.shift()!;
-      this.running++;
-      this.run(id, persona)
-        .catch((e) => this.log.error(`generation ${id} failed: ${(e as Error).message}`))
-        .finally(() => {
-          this.running--;
-          this.pump(persona);
-        });
-    }
   }
 
   private async run(id: string, persona: number) {
@@ -101,6 +112,8 @@ export class GenerationService {
       if (r.status !== "DELIVERED" || !r.image_b64) {
         // Guard failed: never shown, never charged; logged for the AI quality review (plan §15.2).
         await this.prisma.generation.update({ where: { id }, data: { status: "WITHHELD", guard: r.guard, latencyMs: Date.now() - started } });
+        generations.inc({ status: "WITHHELD", model: gen.modelVersion });
+        generationDuration.observe({ tier: gen.tier, status: "WITHHELD" }, (Date.now() - gen.createdAt.getTime()) / 1000);
         await this.prisma.moderationItem.create({
           data: { kind: "GUARD_WITHHELD", refId: id, pageId: gen.variant.product.pageId, reason: r.guard.reasons.join("; ") || "Guard failed" },
         });
@@ -123,8 +136,14 @@ export class GenerationService {
           modelVersion: r.model_version || gen.modelVersion,
         },
       });
+      generations.inc({ status: "DELIVERED", model: gen.modelVersion });
+      aiSpend.inc({ kind: "TRYON" }, model.costRwf);
+      generationDuration.observe({ tier: gen.tier, status: "DELIVERED" }, (Date.now() - gen.createdAt.getTime()) / 1000);
+      const first = await this.prisma.look.findFirst({ where: { generationId: id, rank: 0 }, include: { intentSession: true } });
+      if (first) firstLook.observe((Date.now() - first.intentSession.createdAt.getTime()) / 1000);
     } catch (e) {
       await this.prisma.generation.update({ where: { id }, data: { status: "FAILED", guard: { error: (e as Error).message } } });
+      generations.inc({ status: "FAILED", model: gen.modelVersion });
       throw e;
     }
   }

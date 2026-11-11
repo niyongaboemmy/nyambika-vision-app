@@ -1,0 +1,35 @@
+# SLO alerts (implementation plan §14.4). Metrics come from the API's GET /metrics.
+groups:
+  - name: nyambika-slo
+    rules:
+      - alert: FirstLookSlow
+        expr: histogram_quantile(0.5, sum(rate(nyambika_first_look_seconds_bucket[15m])) by (le)) > 18
+        for: 15m
+        labels: { severity: page }
+        annotations: { summary: "First look p50 above 18 s for 15 min (SLO p50 ≤ 15 s)" }
+      - alert: GuardFailureHigh
+        expr: |
+          sum(rate(nyambika_generations_total{status="WITHHELD"}[1h]))
+            / clamp_min(sum(rate(nyambika_generations_total{status=~"DELIVERED|WITHHELD"}[1h])), 1e-9) > 0.02
+        for: 30m
+        labels: { severity: ticket }
+        annotations: { summary: "Guard failure rate above 2% (AI-GD); check model registry and bias register" }
+      - alert: AISpendHigh
+        expr: increase(nyambika_ai_spend_rwf_total[1d]) > 0.8 * 150000
+        labels: { severity: ticket }
+        annotations: { summary: "AI spend at 80% of the daily budget; kill-switch at 120% (NFR-CST-02)" }
+      - alert: GenerationBacklog
+        expr: nyambika_generation_queue_jobs{state="waiting"} > 50
+        for: 10m
+        labels: { severity: page }
+        annotations: { summary: "Look generation queue backing up; scale workers or check the VTON provider" }
+      - alert: PaymentFailuresSpike
+        expr: sum(rate(nyambika_payments_total{status="FAILED"}[30m])) / clamp_min(sum(rate(nyambika_payments_total[30m])), 1e-9) > 0.2
+        for: 30m
+        labels: { severity: page }
+        annotations: { summary: "More than 20% of Mobile Money payments failing" }
+      - alert: APIErrors
+        expr: sum(rate(nyambika_http_request_duration_seconds_count{status=~"5.."}[5m])) / clamp_min(sum(rate(nyambika_http_request_duration_seconds_count[5m])), 1e-9) > 0.01
+        for: 10m
+        labels: { severity: page }
+        annotations: { summary: "API 5xx rate above 1% (availability SLO 99.5%)" }

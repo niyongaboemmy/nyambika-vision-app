@@ -1,0 +1,40 @@
+# Full stack for staging-like environments. Synthetic data only outside production (plan §4.6).
+# docker compose -f infra/docker-compose.yml up --build
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment: { POSTGRES_USER: nyambika, POSTGRES_PASSWORD: nyambika, POSTGRES_DB: nyambika }
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck: { test: ["CMD", "pg_isready", "-U", "nyambika"], interval: 5s, retries: 10 }
+  redis:
+    image: redis:7-alpine
+  ai:
+    build: { context: .., dockerfile: apps/ai/Dockerfile }
+    environment:
+      C2PA_SIGNING_KEY: ${C2PA_SIGNING_KEY:-change-me}
+  api:
+    build: { context: .., dockerfile: apps/api/Dockerfile }
+    depends_on: { postgres: { condition: service_healthy }, redis: { condition: service_started }, ai: { condition: service_started } }
+    environment:
+      DATABASE_URL: postgresql://nyambika:nyambika@postgres:5432/nyambika?schema=public
+      REDIS_URL: redis://redis:6379
+      AI_GATEWAY_URL: http://ai:8100
+      PUBLIC_WEB_URL: ${PUBLIC_WEB_URL:-http://localhost:3000}
+      SELF_URL: http://api:4000
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET}
+      TWIN_KEY: ${TWIN_KEY:?set a 64-hex-char TWIN_KEY}
+      MOMO_WEBHOOK_SECRET: ${MOMO_WEBHOOK_SECRET:?set MOMO_WEBHOOK_SECRET}
+      PAYMENTS_PROVIDER: ${PAYMENTS_PROVIDER:-mock}
+      METRICS_TOKEN: ${METRICS_TOKEN:-}
+      STORAGE_DIR: /data
+    volumes: [apidata:/data]
+  web:
+    build: { context: .., dockerfile: apps/web/Dockerfile }
+    depends_on: [api]
+    environment:
+      API_INTERNAL_URL: http://api:4000
+      PUBLIC_WEB_URL: ${PUBLIC_WEB_URL:-http://localhost:3000}
+    ports: ["3000:3000"]
+volumes:
+  pgdata:
+  apidata:

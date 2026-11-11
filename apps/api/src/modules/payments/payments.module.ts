@@ -25,6 +25,7 @@ import { MessagingService } from "../../common/messaging.service";
 import { PrismaService } from "../../common/prisma.service";
 import { parse } from "../../common/zod";
 import { config } from "../../config";
+import { payments as paymentsMetric } from "../../common/metrics";
 import { MockMomoProvider, MtnMomoProvider, sign, type PaymentProvider, type PayRequest } from "./providers";
 
 @Injectable()
@@ -69,6 +70,7 @@ export class PaymentsService implements OnModuleInit, OnModuleDestroy {
       data: { status, webhook: raw, settledAt: new Date() },
     });
     if (updated.count === 0) return payment;
+    paymentsMetric.inc({ provider: payment.provider, status });
     const order = payment.order;
     if (status === "SUCCESSFUL") {
       await this.prisma.order.update({ where: { id: order.id }, data: { status: "PAID" } });

@@ -22,9 +22,13 @@ jobs:
         ports: ["5432:5432"]
         options: >-
           --health-cmd "pg_isready -U nyambika" --health-interval 5s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
     env:
       DATABASE_URL: postgresql://nyambika:nyambika@localhost:5432/nyambika_test?schema=public
       JWT_SECRET: ci-secret
+      REDIS_URL: redis://localhost:6379
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -57,3 +61,13 @@ jobs:
           cache-dependency-path: apps/ai/requirements.txt
       - run: pip install -r requirements.txt
       - run: pytest -q
+
+  docker:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: [api, web, ai]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build ${{ matrix.app }} image
+        run: docker build -f apps/${{ matrix.app }}/Dockerfile -t nyambika-${{ matrix.app }}:ci .

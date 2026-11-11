@@ -10,6 +10,7 @@ export const config = {
   port: Number(process.env.PORT ?? 4000),
   jwtSecret: req("JWT_SECRET", "dev-only-change-me"),
   twinKey: Buffer.from(req("TWIN_KEY", "0".repeat(63) + "1"), "hex"),
+  redisUrl: process.env.REDIS_URL ?? "redis://localhost:6379",
   aiUrl: req("AI_GATEWAY_URL", "http://localhost:8100"),
   webUrl: req("PUBLIC_WEB_URL", "http://localhost:3000"),
   selfUrl: process.env.SELF_URL ?? `http://localhost:${process.env.PORT ?? 4000}`,
