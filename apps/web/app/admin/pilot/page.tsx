@@ -9,6 +9,7 @@ import { api, rwf } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { useApi } from "@/lib/use-api";
 import { InfoTip } from "@/components/kit";
+import type { IconName } from "@/components/icons";
 
 type Rag = "green" | "amber" | "red" | "none";
 interface KpiRow {
@@ -69,11 +70,11 @@ interface Summary {
   recommendation: { decision: "Scale" | "Iterate" | "Pivot"; reasons: string[] };
 }
 
-const RAG: Record<Rag, { tone: "mint" | "gold" | "red" | "stone"; label: string; icon: string }> = {
-  green: { tone: "mint", label: "On target", icon: "●" },
-  amber: { tone: "gold", label: "Near target", icon: "▲" },
-  red: { tone: "red", label: "Off target", icon: "■" },
-  none: { tone: "stone", label: "No data", icon: "○" },
+const RAG: Record<Rag, { tone: "mint" | "gold" | "red" | "stone"; label: string; icon: IconName }> = {
+  green: { tone: "mint", label: "On target", icon: "checkCircle" },
+  amber: { tone: "gold", label: "Near target", icon: "alert" },
+  red: { tone: "red", label: "Off target", icon: "x" },
+  none: { tone: "stone", label: "No data", icon: "minus" },
 };
 const STEP_LABEL: Record<string, string> = {
   muse_ask: "Asked the Muse",
@@ -173,8 +174,8 @@ function KpiCard({ k }: { k: KpiRow }) {
   return (
     <li className={`st-card space-y-2 rounded-[22px] p-4 ${k.rag === "red" ? "!border-red-200" : k.rag === "amber" ? "!border-amber-300 !bg-amber-50/60" : ""}`}>
       <div className="flex items-start justify-between gap-2">
-        <p className="text-xs font-bold text-cocoa-2">{k.label}{k.critical && <span className="ml-1 text-violet-ink" title="Critical for unit economics or trust">★</span>}</p>
-        <Chip tone={r.tone}><span aria-hidden>{r.icon}</span> {r.label}</Chip>
+        <p className="text-xs font-bold text-cocoa-2">{k.label}{k.critical && <span className="ml-1 text-violet-ink" title="Critical for unit economics or trust"><Icon name="star" filled className="inline size-3.5 align-[-2px]" /><span className="sr-only">critical</span></span>}</p>
+        <Chip tone={r.tone}><Icon name={r.icon} className="size-3.5" />{r.label}</Chip>
       </div>
       <p className="font-display text-2xl font-black tabular-nums text-cocoa">{k.display}</p>
       {k.actual !== null &&
@@ -284,7 +285,7 @@ function Economics({ e }: { e: Summary["economics"] }) {
           <h2 className="font-display text-xl font-black tracking-tight text-cocoa">Unit economics</h2>
           <p className="text-sm text-cocoa-2">Study vs pilot</p>
         </div>
-        <Chip tone={e.withinBreakEvenPath ? "mint" : "red"}>{e.withinBreakEvenPath ? "● On break-even path" : "■ Off break-even path"}</Chip>
+        <Chip tone={e.withinBreakEvenPath ? "mint" : "red"}><Icon name={e.withinBreakEvenPath ? "checkCircle" : "alert"} className="size-3.5" />{e.withinBreakEvenPath ? "On break-even path" : "Off break-even path"}</Chip>
       </div>
       <table className="w-full text-sm">
         <thead><tr className="text-left text-xs text-cocoa-2"><th className="py-1 font-bold">Contribution</th><th className="text-right font-bold">Study</th><th className="text-right font-bold">Pilot</th></tr></thead>

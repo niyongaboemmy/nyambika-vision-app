@@ -64,8 +64,8 @@ export default function AgentsAdmin() {
             <LearnMore>AI shopping agents read the public catalogue and start checkouts that shoppers confirm in Nyambika; partners buy guarded try-ons on synthetic models. Keys are stored as hashes only.</LearnMore>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Chip tone={data.killSwitch["agents.kill_switch"] ? "red" : "mint"}>{data.killSwitch["agents.kill_switch"] ? "■ Agent channel paused" : "● Agent channel open"}</Chip>
-            <Chip tone={data.killSwitch["partners.kill_switch"] ? "red" : "mint"}>{data.killSwitch["partners.kill_switch"] ? "■ Partner API paused" : "● Partner API open"}</Chip>
+            <Chip tone={data.killSwitch["agents.kill_switch"] ? "red" : "mint"}><Icon name={data.killSwitch["agents.kill_switch"] ? "pause" : "checkCircle"} className="size-3.5" />{data.killSwitch["agents.kill_switch"] ? "Agent channel paused" : "Agent channel open"}</Chip>
+            <Chip tone={data.killSwitch["partners.kill_switch"] ? "red" : "mint"}><Icon name={data.killSwitch["partners.kill_switch"] ? "pause" : "checkCircle"} className="size-3.5" />{data.killSwitch["partners.kill_switch"] ? "Partner API paused" : "Partner API open"}</Chip>
             <a href="/admin?tab=Flags%20%26%20models" className="st-press inline-flex min-h-11 items-center gap-1 rounded-2xl px-2 text-xs font-bold text-violet-ink hover:bg-paper-2">Kill switches <Icon name="chevron" className="size-3.5" /></a>
             <SButton className="ml-auto" onClick={() => setNewClient(true)}><Icon name="plus" className="size-4" /> New client</SButton>
           </div>
@@ -105,7 +105,7 @@ export default function AgentsAdmin() {
                     <div className="space-y-1.5 p-3">
                       <div className="flex flex-wrap gap-1.5">
                         <Badge value={j.status.toUpperCase()} />
-                        {j.result?.c2pa.signed && <Chip tone="violet">C2PA ✓</Chip>}
+                        {j.result?.c2pa.signed && <Chip tone="violet"><Icon name="check" className="size-3.5" />C2PA</Chip>}
                       </div>
                       <p className="truncate text-xs font-bold text-cocoa">{j.clientName}</p>
                       <p className="truncate text-[11px] text-cocoa-2">{j.model_id} · {j.billing.band === "none" ? "not billed" : `${j.billing.band}${j.billing.price.amount ? ` · ${rwf(j.billing.price.amount)}` : ""}`}</p>
