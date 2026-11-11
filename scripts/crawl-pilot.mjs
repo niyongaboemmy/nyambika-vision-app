@@ -146,7 +146,12 @@ await page.waitForTimeout(500);
 await page.screenshot({ path: `${out}survey-order-paid.png` });
 await page.getByRole("dialog").getByRole("button", { name: /not now/i }).click();
 await page.getByRole("dialog").waitFor({ state: "detached" });
-const pending = await (await page.request.get(`${BASE}/api/survey/pending`)).json();
+// The sheet closes before the dismissal POST lands: poll briefly instead of racing it.
+let pending = { trigger: "?" };
+for (let i = 0; i < 10 && pending.trigger !== null; i++) {
+  pending = await (await page.request.get(`${BASE}/api/survey/pending`)).json();
+  if (pending.trigger !== null) await page.waitForTimeout(400);
+}
 assert(pending.trigger === null, "both surveys answered or dismissed: nothing pending");
 
 // Events were recorded for this shopper (server sees the funnel)
