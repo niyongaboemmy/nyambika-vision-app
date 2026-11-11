@@ -4,8 +4,9 @@ import { dirname, join } from "node:path";
 import { BASE, signIn, start } from "./crawl-lib.mjs";
 
 const bundlePath = new URL("./crawl-output/wave0.json", import.meta.url).pathname;
-// Fresh checkouts / worktrees have no bundle yet: build the synthetic Wave 0 bundle on demand.
-if (!existsSync(bundlePath)) {
+// Build a fresh synthetic Wave 0 bundle every run (new handle suffix): re-importing an old bundle finds its
+// pages already migrated, so the "✓ handle" row never appears. MIG_BUNDLE_KEEP=1 reuses the existing file.
+if (!(process.env.MIG_BUNDLE_KEEP && existsSync(bundlePath))) {
   const root = new URL("..", import.meta.url).pathname;
   const mainRoot = dirname(execSync("git rev-parse --path-format=absolute --git-common-dir", { cwd: root }).toString().trim());
   const py = [process.env.AI_PYTHON, join(root, "apps/ai/.venv/bin/python"), join(mainRoot, "apps/ai/.venv/bin/python")].find((p) => p && existsSync(p));

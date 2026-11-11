@@ -39,7 +39,10 @@ const only = arg("only");
 const KNOWN = [
   [/^\/dev\//, /HTTP 4\d\d .*\/api\/dev\//, "dev-only simulator pages probe endpoints that refuse non-dev roles"],
   [/./, /HTTP 400 .*\/api\/auth\/refresh/, "silent refresh without a refresh cookie answers 400/401 by design (anonymous)"],
+  [/^\/confirm\//, /HTTP 400 GET \/api\/agent-mandates\/sweep-unknown-mandate/, "probe with a malformed mandate token: API answers 400, page shows its designed invalid-link state"],
+  [/^\/\[\.\.\.legacy\]/, /Failed to execute 'measure' on 'Performance'.*negative time stamp/, "next dev only: React's Server Components performance track mis-times an async page that ends in notFound(); not present in production builds"],
 ];
+const limitShots = new Set();
 
 // ── 1. enumerate routes ──────────────────────────────────────────────────────────────────────────────────────────
 function walk(dir) {
@@ -185,7 +188,8 @@ async function visit(ctx, role, width, route, url) {
                 .slice(0, 3)
                 .map((el) => `${el.tagName.toLowerCase()}.${String(el.className).slice(0, 60)}`)
             : [];
-        return { text, broken, overflow, wide, path: location.pathname };
+        const limits = [...document.querySelectorAll("[data-limit]")].map((el) => el.getAttribute("data-limit"));
+        return { text, broken, overflow, wide, limits, path: location.pathname };
       });
       for (const re of RAW) {
         const m = probe.text.match(re);
@@ -197,6 +201,15 @@ async function visit(ctx, role, width, route, url) {
       for (const b of probe.broken) push("broken-image", b);
       if (probe.overflow > 1) push("overflow", `${probe.overflow}px wider than the screen: ${probe.wide.join(", ")}`);
       tag.landed = probe.path;
+      // Expected limits (429 DAILY_CAP, rate limits…) are fine when the page shows the designed LimitState card.
+      if (probe.limits.length) {
+        for (const f of local) if (f.kind === "http-4xx" && /^HTTP 429 /.test(f.detail)) f.intended = `rendered as LimitState (${[...new Set(probe.limits)].join(", ")})`;
+        const key = `${route.path}|${probe.limits.join(",")}|${width}`;
+        if (!limitShots.has(key)) {
+          limitShots.add(key);
+          await page.screenshot({ path: `${OUT}limit-${route.path.replace(/[^a-z0-9]+/gi, "_")}-${probe.limits[0]}-${width}.png` });
+        }
+      }
     }
   } catch (e) {
     push("navigation", e.message.split("\n")[0]);
@@ -242,12 +255,13 @@ await Promise.all(
 await browser.close();
 
 // ── 4. report ───────────────────────────────────────────────────────────────────────────────────────────────────
-const known = (f) => KNOWN.find(([r, d]) => r.test(f.route) && d.test(f.detail));
+const known = (f) => (f.intended ? [null, null, f.intended] : KNOWN.find(([r, d]) => r.test(f.route) && d.test(f.detail)));
 const norm = (s) => s.replace(/c[a-z0-9]{24}/g, ":id").replace(/\d{6,}/g, ":n").replace(/\?.*$/, "");
 const groups = new Map();
 for (const f of findings) {
-  const k = `${f.route}|${f.kind}|${norm(f.detail)}`;
-  const g = groups.get(k) ?? { route: f.route, kind: f.kind, detail: norm(f.detail), where: new Set(), known: known(f)?.[2] ?? null };
+  const k = `${f.route}|${f.kind}|${norm(f.detail)}|${Boolean(known(f))}`;
+  const g = groups.get(k) ?? { route: f.route, kind: f.kind, detail: norm(f.detail), where: new Set(), known: null };
+  g.known ??= known(f)?.[2] ?? null;
   g.where.add(`${f.role}@${f.width}`);
   groups.set(k, g);
 }

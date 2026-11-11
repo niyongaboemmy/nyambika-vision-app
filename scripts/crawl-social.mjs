@@ -170,6 +170,12 @@ await page.getByRole("link", { name: /owned/i }).first().click();
 await page.waitForURL(/\/wardrobe\/item\//);
 await page.getByRole("heading", { name: /styled by the muse/i }).waitFor();
 await shot("wardrobe-item");
+// The pilot micro-survey (E26) may pop up after the paid order: answer "Not now" so it doesn't cover the sheet.
+const survey = page.getByRole("dialog").filter({ hasText: /help you decide|recommend nyambika/i });
+if (await survey.isVisible().catch(() => false)) {
+  await survey.getByRole("button", { name: /not now/i }).click();
+  await survey.waitFor({ state: "detached" });
+}
 await page.getByRole("button", { name: /restyle for an event/i }).click();
 await page.getByRole("dialog").getByRole("button", { name: "Office", exact: true }).click();
 await page.getByRole("dialog").getByPlaceholder(/e\.g\./).fill("Board presentation");

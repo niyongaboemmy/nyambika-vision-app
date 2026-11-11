@@ -49,7 +49,7 @@ await signIn(maker, "0788100004");
 await maker.goto(`${BASE}/studio`);
 await maker.getByText("Abahizi Sewing Cooperative").click();
 await maker.getByRole("navigation", { name: "Studio" }).getByRole("link", { name: "My products" }).click();
-await maker.getByRole("button", { name: "Add product" }).click();
+await maker.getByRole("button", { name: "Add product" }).click({ timeout: 30000 }).catch(async (e) => { await maker.screenshot({ path: new URL("./crawl-output/s1/89-maker-products-failed.png", import.meta.url).pathname, fullPage: true }); throw e; });
 // Unique per run: a busy dev DB keeps earlier runs' submissions in the approval queue.
 const skirt = `Jeanne's gold skirt ${String(Date.now()).slice(-4)}`;
 await maker.getByPlaceholder("Indigo wrap dress").fill(skirt);
@@ -70,8 +70,10 @@ await admin.getByRole("navigation", { name: "Studio" }).getByRole("link", { name
 await admin.getByText(/waiting for approval/i).waitFor();
 await admin.screenshot({ path: new URL("./crawl-output/s1/91-admin-approval-queue.png", import.meta.url).pathname });
 const approve = admin.getByRole("link", { name: skirt }).locator("xpath=ancestor::*[.//button[normalize-space()='Approve']][1]").getByRole("button", { name: "Approve" });
+const approved = admin.waitForResponse((r) => /\/api\/products\/[^/]+\/status$/.test(r.url()) && r.request().method() === "POST");
 await approve.click();
-await approve.waitFor({ state: "detached" });
+if (!(await approved).ok()) throw new Error("approval failed");
+await admin.waitForLoadState("networkidle");
 await admin.getByRole("navigation", { name: "Studio" }).getByRole("link", { name: "Makers" }).click();
 await admin.getByRole("heading", { name: /Makers \(/ }).waitFor();
 await admin.screenshot({ path: new URL("./crawl-output/s1/92-coop-makers.png", import.meta.url).pathname });
