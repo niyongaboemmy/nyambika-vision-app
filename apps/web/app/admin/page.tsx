@@ -1,13 +1,16 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AdminShell } from "@/components/admin-shell";
-import { InferencePanel } from "@/components/inference-panel";
-import { Badge, Card, Chip, Empty, Icon, Kpi, Meter, Monogram, Note, ScreenSkeleton, SButton, Switch } from "@/components/studio";
+import { Badge, Card, Chip, Empty, Icon, Kpi, Meter, Monogram, Note, ScreenSkeleton, SButton, Skeleton, Switch } from "@/components/studio";
 import { api, rwf } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { useApi } from "@/lib/use-api";
+
+// Lazy (below the fold / on demand): keeps this route's first-load JS small.
+const InferencePanel = dynamic(() => import("@/components/inference-panel").then((m) => m.InferencePanel), { ssr: false, loading: () => <Skeleton className="h-72" /> });
 
 interface Overview {
   pages: Record<string, number>;

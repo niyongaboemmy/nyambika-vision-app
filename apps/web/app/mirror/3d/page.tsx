@@ -1,14 +1,18 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
-import { TwinDrapePanel } from "@/components/drape-spike";
-import { TurnCapture } from "@/components/twin3d-capture";
-import { Twin3dViewer } from "@/components/twin3d-viewer";
+import { Fact, LearnMore, Skel } from "@/components/kit";
 import { Button, ErrorNote, Screen, Sheet, TopBar } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { useSession } from "@/lib/session";
+
+// Heavy canvases (camera capture, WebGL viewer, drape panel) load only when the step needs them.
+const TurnCapture = dynamic(() => import("@/components/twin3d-capture").then((m) => m.TurnCapture), { ssr: false, loading: () => <Skel className="h-[60dvh] w-full rounded-[32px]" /> });
+const Twin3dViewer = dynamic(() => import("@/components/twin3d-viewer").then((m) => m.Twin3dViewer), { ssr: false, loading: () => <Skel className="aspect-[3/4] w-full rounded-[32px]" /> });
+const TwinDrapePanel = dynamic(() => import("@/components/drape-spike").then((m) => m.TwinDrapePanel), { ssr: false, loading: () => <Skel className="h-40 w-full rounded-3xl" /> });
 import {
   hexToRgb01,
   POSES,
@@ -212,15 +216,22 @@ function ConsentIntro({ onConsent, error }: { onConsent: () => void; error: stri
       <div className="pt-4 text-center">
         <Hero />
         <h1 className="mt-4 font-display text-3xl font-black text-grad">{t("twin3d.title")}</h1>
-        <p className="mt-2 text-mut">Turn slowly once and get a twin you can spin, pose and dress in 3D.</p>
+        <p className="mt-2 text-mut">Turn once. Spin, pose and dress it.</p>
       </div>
       <div className="space-y-3">
-        <ul className="glass space-y-1.5 rounded-3xl p-4 text-sm">
-          <li>🔒 Separate from your photo twin: this needs its own yes.</li>
-          <li>🧊 Stylised body from your measurements and skin tone. It is not a photo-real likeness.</li>
-          <li>🗝️ Encrypted. Only you see it. Never shared with makers.</li>
-          <li>🧹 Capture frames are deleted as soon as your twin is built. Delete everything any time.</li>
-        </ul>
+        <div className="glass rounded-3xl p-4">
+          <ul aria-label="How your 3D twin is handled" className="flex flex-wrap gap-2">
+            <li><Fact icon="lock">Encrypted · only you</Fact></li>
+            <li><Fact icon="shield">Never shared with makers</Fact></li>
+            <li><Fact icon="cube">Stylised, not photo-real</Fact></li>
+            <li><Fact icon="refresh">Frames deleted after build</Fact></li>
+          </ul>
+          <LearnMore className="mt-2">
+            Separate from your photo twin, so it needs its own yes. The body is stylised from your measurements and skin tone; it is not a
+            photo-real likeness. It is encrypted, only you see it, and it is never shared with makers. Capture frames are deleted as soon as
+            your twin is built, and you can delete everything any time.
+          </LearnMore>
+        </div>
         <label className="glass flex cursor-pointer items-center gap-3 rounded-3xl p-4">
           <span className="flex-1 text-sm">
             <b>{t("twin3d.consentTitle")}</b> · {t("twin3d.consentBody")}

@@ -1,12 +1,15 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
 import { ThemeToggle } from "@/components/kit";
-import { QrCode } from "@/components/qr";
-import { Badge, Icon, isNavActive, Monogram, SButton, StudioSheet, studioNav, type IconName } from "@/components/studio";
+import { Badge, Icon, isNavActive, Monogram, SButton, StudioSheet, studioNav, type IconName, Skeleton } from "@/components/studio";
 import { useSession } from "@/lib/session";
+
+// Lazy (below the fold / on demand): keeps this route's first-load JS small.
+const QrCode = dynamic(() => import("@/components/qr").then((m) => m.QrCode), { ssr: false, loading: () => <Skeleton className="aspect-square w-full" /> });
 
 export interface ShellPage {
   id: string;

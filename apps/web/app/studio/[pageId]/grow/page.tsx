@@ -1,14 +1,17 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
-import { GrowthInsights } from "@/components/growth-insights";
 import { Badge, Chip, Empty, Field, Icon, Input, Meter, Note, ScreenSkeleton, SButton, SectionTitle, Segmented, Select, Skeleton, StudioSheet, Switch, Textarea } from "@/components/studio";
 import { api, rwf } from "@/lib/api";
 import type { BroadcastState, Discount, PromoCard } from "@/lib/growth";
 import type { StudioProduct } from "@/lib/types";
 import { useApi } from "@/lib/use-api";
 import { useManagedPage } from "../layout";
+
+// Lazy (below the fold / on demand): keeps this route's first-load JS small.
+const GrowthInsights = dynamic(() => import("@/components/growth-insights").then((m) => m.GrowthInsights), { ssr: false, loading: () => <Skeleton className="h-72" /> });
 
 type Tab = "share" | "offers" | "broadcast" | "insights";
 const TABS: { value: Tab; label: string }[] = [

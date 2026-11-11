@@ -1,14 +1,17 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState } from "react";
 import { AiWrite } from "@/components/ai-write";
 import { AgentChannels } from "@/components/agent-channels";
-import { TrainingDataLink } from "@/components/mlspike-training";
-import { Card, Field, Icon, Input, Monogram, Note, SButton, SectionTitle, Switch, Textarea } from "@/components/studio";
+import { Card, Field, Icon, Input, Monogram, Note, SButton, SectionTitle, Switch, Textarea, Skeleton } from "@/components/studio";
 import { api, rwf } from "@/lib/api";
 import { THEMES } from "@/lib/maker";
 import { useApi } from "@/lib/use-api";
 import { useManagedPage } from "../layout";
+
+// Lazy (below the fold / on demand): keeps this route's first-load JS small.
+const TrainingDataLink = dynamic(() => import("@/components/mlspike-training").then((m) => m.TrainingDataLink), { ssr: false, loading: () => <Skeleton className="h-24" /> });
 
 interface Plan {
   code: string;

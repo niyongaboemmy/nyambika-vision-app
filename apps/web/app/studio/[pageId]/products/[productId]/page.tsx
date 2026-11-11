@@ -1,20 +1,23 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { AiWrite } from "@/components/ai-write";
-import { Badge, Card, Field, Icon, Input, Note, ScreenSkeleton, SButton, Steps, Textarea } from "@/components/studio";
+import { Badge, Card, Field, Icon, Input, Note, ScreenSkeleton, SButton, Skeleton, Steps, Textarea } from "@/components/studio";
 import { EDITOR_STEPS, EditorSection, ProductPreview } from "@/components/studio-product";
 import { MorphOptions } from "@/components/morph-options";
-import { Garment3dCard } from "@/components/studio-3d";
-import { PassportCard } from "@/components/passport-editor";
 import { AttrSuggest } from "@/components/mlspike-suggest";
 import { api, rwf } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import type { StudioProduct, StudioVariant } from "@/lib/types";
 import { useApi } from "@/lib/use-api";
 import { useManagedPage } from "../../layout";
+const PassportCard = dynamic(() => import("@/components/passport-editor").then((m) => m.PassportCard), { ssr: false, loading: () => <Skeleton className="h-48" /> });
+
+// Lazy (below the fold / on demand): keeps this route's first-load JS small.
+const Garment3dCard = dynamic(() => import("@/components/studio-3d").then((m) => m.Garment3dCard), { ssr: false, loading: () => <Skeleton className="h-64" /> });
 
 function ProductDetail() {
   const { productId } = useParams<{ productId: string }>();
