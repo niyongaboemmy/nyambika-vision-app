@@ -6,6 +6,7 @@ import { z } from "zod";
 import { Access, AuthUser, CurrentUser, Public } from "../../common/auth";
 import { ConsentService } from "../../common/consent.service";
 import { MessagingService } from "../../common/messaging.service";
+import { PushService } from "../../common/push/push.service";
 import { PrismaService } from "../../common/prisma.service";
 import { parse } from "../../common/zod";
 import { ASSIST_DAYS, ASSIST_SCOPES, assistAllowed, checkCode, CONSENT_TEXT, hashCode, newCode, type AssistScope } from "./assist";
@@ -61,6 +62,7 @@ export class CoopVoiceService implements OnModuleInit, OnModuleDestroy {
     private access: Access,
     private messaging: MessagingService,
     private consent: ConsentService,
+    private push: PushService,
   ) {}
 
   onModuleInit() {
@@ -124,6 +126,7 @@ export class CoopVoiceService implements OnModuleInit, OnModuleDestroy {
     await this.prisma.order.update({ where: { id: o.id }, data: { status: "ACCEPTED" } });
     await this.prisma.orderEvent.create({ data: { orderId: o.id, status: "ACCEPTED", note: `Accepted by ${maker.name} (${via})`, actorId } });
     await this.messaging.send("WHATSAPP", o.shopper.phone, "order_accepted", `${o.page.name} accepted your order (${o.code}).`, o.id);
+    await this.push.orderUpdate(o.id); // E38: same push as a studio accept (silent progress / live activity step)
     return o;
   }
 

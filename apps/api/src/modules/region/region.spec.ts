@@ -12,6 +12,7 @@ import {
   pickZone,
   rankByRegion,
   shareBp,
+  signInPhone,
   toMajorString,
   validatePassport,
   vatIncluded,
@@ -124,6 +125,39 @@ describe("regions: phone validation per country", () => {
     expect(pageWallets("KE", { momo: "", airtel: "", mpesaTill: "5123456" })).toEqual(["MPESA"]);
     expect(pageWallets("RW", { momo: "0788100001", airtel: "", mpesaTill: "5123456" })).toEqual(["MTN_MOMO", "AIRTEL_MONEY"]); // no M-Pesa in RW
     expect(pageWallets("UG", { momo: "", airtel: "", mpesaTill: "" })).toEqual([]);
+  });
+});
+
+describe("sign-in phone per country (hardening pass 1)", () => {
+  it.each([
+    [undefined, "0788 123 456", "+250788123456"],
+    ["RW", "0788123456", "+250788123456"],
+    ["RW", "250788123456", "+250788123456"],
+    ["KE", "0712 345 678", "+254712345678"],
+    ["KE", "712345678", "+254712345678"],
+    ["KE", "+250788123456", "+250788123456"], // a full international number wins over the selector
+    ["RW", "+254 712 345 678", "+254712345678"],
+    ["UG", "0772 123 456", "+256772123456"],
+    ["TZ", "0754-123-456", "+255754123456"],
+  ] as const)("%s reads %s as %s", (c, input, e164) => {
+    const r = signInPhone(input, c);
+    expect(r.ok && r.e164).toBe(e164);
+  });
+
+  it("keeps the lenient Rwandan reading of existing accounts", () => {
+    const r = signInPhone("07841234561", "RW"); // historic 10-digit test numbers still map to +250…
+    expect(r.ok && r.e164).toBe("+2507841234561");
+  });
+
+  it.each([
+    ["KE", "0812345678"],
+    ["UG", "077212345"],
+    ["TZ", "0854123456"],
+    ["KE", "+254812345678"],
+  ] as const)("%s rejects %s with the country hint", (c, input) => {
+    const r = signInPhone(input, c);
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.message).toMatch(/look like/);
   });
 });
 

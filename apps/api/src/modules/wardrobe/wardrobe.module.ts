@@ -298,7 +298,7 @@ export class WardrobeService implements OnModuleInit, OnModuleDestroy {
       `${e.title} ${when}: your outfit is ready ✨ ${ready} look${ready > 1 ? "s" : ""} styled from your wardrobe. ${config.webUrl}/wardrobe/events/${e.id}`,
       e.id,
     );
-    await this.push.event(e.userId, "wardrobe.reminder", { url: `/wardrobe/events/${e.id}`, refId: e.id, vars: { event: e.title, when } });
+    await this.push.event(e.userId, "wardrobe.reminder", { url: `/wardrobe/events/${e.id}`, refId: e.id, vars: { event: e.title, days: String(days) } }); // "when" localised per device locale
     return true;
   }
 
