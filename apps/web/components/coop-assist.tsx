@@ -43,8 +43,8 @@ export function MakerAccessPanel({ pageId, maker }: { pageId: string; maker: Mak
   return (
     <div className="space-y-2.5 border-t border-hairline pt-3">
       <p className="text-[11px] font-black uppercase tracking-wider text-cocoa-2">Easy access</p>
-      <Switch checked={row.voiceMode} onChange={(v) => patch({ voiceMode: v })} label="🔊 Voice & icon mode" description="Big pictures, spoken prompts in Kinyarwanda, number pad for prices." />
-      <Switch checked={row.smsMode} onChange={(v) => patch({ smsMode: v })} disabled={!maker.phone} label="📟 SMS & USSD (*775#)" description={maker.phone ? "Order alerts by SMS; sales, payout and approvals from any phone." : "Add a phone number first."} />
+      <Switch checked={row.voiceMode} onChange={(v) => patch({ voiceMode: v })} label="🔊 Voice & icon mode" description="Big pictures · spoken RW · number pad" />
+      <Switch checked={row.smsMode} onChange={(v) => patch({ smsMode: v })} disabled={!maker.phone} label="📟 SMS & USSD (*775#)" description={maker.phone ? "Alerts, sales, payouts on any phone" : "Add a phone number first"} />
       <Note error={err} />
       <div className="flex flex-wrap items-center gap-2">
         {active ? <Chip tone="violet"><Icon name="shield" className="size-3.5" /> Helping allowed until {new Date(row.assist!.expiresAt!).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</Chip> : row.assist?.status === "PENDING" ? <Chip tone="gold">Waiting for {maker.name.split(" ")[0]}&apos;s OK</Chip> : null}
@@ -134,11 +134,11 @@ function ConsentSheet({ open, onClose, pageId, maker, pending, onDone }: { open:
               <Input inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))} className="text-center font-mono text-2xl tracking-[.4em]" />
             </label>
             <SButton className="min-h-12 w-full" onClick={confirm} disabled={code.length !== 6}>Record consent</SButton>
-            <button type="button" onClick={ask} className="w-full text-center text-xs font-bold text-violet-ink underline">Send a new code</button>
+            <button type="button" onClick={ask} className="min-h-11 w-full text-center text-xs font-bold text-violet-ink underline">Send a new code</button>
           </>
         )}
         <Note error={err} ok={ok} />
-        <p className="text-xs leading-relaxed text-cocoa-2">Everything you do for {first} is logged under your name and theirs. {first} can stop it any time from their phone.</p>
+        <p className="flex items-center gap-1.5 text-xs font-semibold text-cocoa-2"><Icon name="shield" className="size-3.5 shrink-0" />Logged under both names · {first} can stop any time</p>
       </div>
     </StudioSheet>
   );
