@@ -29,7 +29,7 @@ async function ctx(label) {
   });
   const snap = async (name, full = false) => {
     n += 1;
-    await p.screenshot({ path: `${OUT}${String(n).padStart(2, "0")}-${label}-${name}.png`, fullPage: full });
+    await p.screenshot({ path: `${OUT}${String(n).padStart(2, "0")}-${label}-${name}.png`, fullPage: full, caret: "initial" }); // caret:"hide" restyles inputs and can race hydration
     console.log(`📸 ${label}/${name}`);
   };
   return { c, p, snap };

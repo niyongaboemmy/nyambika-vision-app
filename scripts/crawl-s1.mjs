@@ -68,7 +68,11 @@ await admin.getByText("Abahizi Sewing Cooperative").click();
 await admin.getByRole("navigation", { name: "Studio" }).getByRole("link", { name: "Products" }).click();
 await admin.getByText(/waiting for approval/i).waitFor();
 await admin.screenshot({ path: new URL("./crawl-output/s1/91-admin-approval-queue.png", import.meta.url).pathname });
-await admin.getByRole("button", { name: "Approve" }).first().click();
+// Approve the queue (earlier runs on a reused slot DB may have left items waiting too).
+for (let i = 0; i < 12 && (await admin.getByRole("button", { name: "Approve" }).count()); i++) {
+  await admin.getByRole("button", { name: "Approve" }).first().click();
+  await admin.waitForTimeout(600);
+}
 await admin.getByText(/waiting for approval/i).waitFor({ state: "detached" });
 await admin.getByRole("navigation", { name: "Studio" }).getByRole("link", { name: "Makers" }).click();
 await admin.getByRole("heading", { name: /Makers \(/ }).waitFor();

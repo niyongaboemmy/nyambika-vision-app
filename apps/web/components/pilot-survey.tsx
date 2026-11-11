@@ -26,6 +26,8 @@ export function PilotSurvey() {
 
   const check = useCallback(async () => {
     if (!me || busy.current || trigger || HIDDEN.test(path)) return;
+    // Never stack sheets: if the shopper is in another dialog, ask again on the next navigation.
+    if (document.querySelector('[role="dialog"][aria-modal="true"]')) return;
     busy.current = true;
     try {
       const r = await api<{ trigger: SurveyTrigger | null }>("/survey/pending");
