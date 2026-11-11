@@ -26,7 +26,7 @@ export function animate(el: Element | null | undefined, frames: Keyframe[], opts
 
 /**
  * One rail button: 48 px glass circle (hit area ≥ 44 px), accessible name = `label` (or `ariaLabel`).
- * The visible caption is tiny and only shown on tall phones; elsewhere a long-press shows it in a bubble.
+ * Glyph-only (iOS); a long-press shows the name (or `caption`, e.g. a progress percentage) in a bubble.
  */
 export function RailButton({
   children,
@@ -88,7 +88,7 @@ export function RailButton({
       className="group relative flex select-none flex-col items-center gap-1 outline-none [-webkit-touch-callout:none]"
     >
       <span
-        className={`relative grid size-12 place-items-center rounded-full text-white transition-[transform,background-color] duration-300 group-active:scale-[.86] group-focus-visible:outline group-focus-visible:outline-[2.5px] group-focus-visible:outline-offset-2 group-focus-visible:outline-gold ${MAT_BASE} ${active ? activeClass : "bg-black/35"}`}
+        className={`relative grid size-11 place-items-center rounded-full text-white transition-[transform,background-color] duration-300 group-active:scale-[.86] group-focus-visible:outline group-focus-visible:outline-[2.5px] group-focus-visible:outline-offset-2 group-focus-visible:outline-gold ${MAT_BASE} ${active ? activeClass : "bg-black/35"}`}
         style={{ transitionTimingFunction: SPRING }}
       >
         {busy && (
@@ -99,12 +99,8 @@ export function RailButton({
         )}
         <span aria-hidden className="grid place-items-center">{children}</span>
       </span>
-      {/* Tiny caption on tall phones only (iOS rails stay glyph-first); the name is always on the button. */}
-      <span aria-hidden className="hidden text-[10px] font-semibold leading-none text-white/90 [text-shadow:0_1px_3px_rgba(0,0,0,.7)] [@media(min-height:860px)]:block">
-        {caption ?? label}
-      </span>
       {bubble && (
-        <span aria-hidden className={`pointer-events-none absolute right-[calc(100%+8px)] top-3 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold text-white ${MATERIAL}`}>
+        <span aria-hidden className={`pointer-events-none absolute right-[calc(100%+8px)] top-2.5 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold text-white ${MATERIAL}`}>
           {caption ?? label}
         </span>
       )}

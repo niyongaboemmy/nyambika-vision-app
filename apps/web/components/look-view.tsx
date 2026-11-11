@@ -166,8 +166,8 @@ export function LookView({ look, index, total, intentLabel, onSave, onVariant, p
           <img
             src={look.image}
             alt={`${look.product.title} in ${look.variant.colourName}, AI preview on ${look.onTwin ? "your twin" : "an AI model"}`}
-            className="absolute inset-0 size-full object-cover object-center will-change-transform"
-            style={{ transform: "translate3d(0, calc(var(--p, 0) * -22%), 0) scale(1.04)" }}
+            className="absolute inset-0 size-full object-cover object-[50%_35%] will-change-transform"
+            style={{ transform: "translate3d(0, calc(var(--p, 0) * -22% + max(env(safe-area-inset-top), 12px) + 4dvh), 0) scale(1.04)", transformOrigin: "50% 0" }}
             draggable={false}
           />
         ) : isRendering(look.status) && paused ? (
@@ -198,51 +198,30 @@ export function LookView({ look, index, total, intentLabel, onSave, onVariant, p
       <div aria-hidden className={`pointer-events-none absolute inset-x-0 top-0 h-44 bg-gradient-to-b from-black/60 via-black/25 to-transparent ${chromeCls}`} />
       <div aria-hidden className={`pointer-events-none absolute inset-x-0 bottom-0 h-[46%] bg-gradient-to-t from-black/80 via-black/35 to-transparent ${chromeCls}`} />
 
-      {/* Top: back · page dots · chips (one line) */}
-      <div className="absolute inset-x-0 top-0 z-10 px-3 pt-[max(env(safe-area-inset-top),12px)]">
-        <div inert={!chrome} className={`grid grid-cols-[44px_1fr_44px] items-center ${chromeCls}`}>
-          <Link href="/" aria-label="Back to Muse" className={`hit grid size-10 place-items-center rounded-full text-white transition-transform active:scale-90 ${MATERIAL}`}>
-            <Icon name="back" className="size-5" />
-          </Link>
-          {total && total > 1 ? <PageDots index={index ?? 0} total={total} /> : <span />}
-          <span />
+      {/* Top bar: ONE compact line — back · intent + page position · AI chip (the AI chip never hides). */}
+      <div className="absolute inset-x-0 top-0 z-10 flex items-center gap-2 px-4 pt-[max(env(safe-area-inset-top),12px)]">
+        <Link inert={!chrome} href="/" aria-label="Back to Muse" className={`hit grid size-10 shrink-0 place-items-center rounded-full text-white transition-transform active:scale-90 ${MATERIAL} ${chromeCls}`}>
+          <Icon name="back" className="size-5" />
+        </Link>
+        <div inert={!chrome} className={`flex min-w-0 flex-1 justify-center ${chromeCls}`}>
+          {intentLabel || (total && total > 1) ? <PageCapsule label={intentLabel?.replace(/^For:\s*/, "") ?? null} icon={intentLabel ? intentIcon(intentLabel) : null} index={index ?? 0} total={total ?? 0} /> : null}
         </div>
-        <div className="mt-2 flex min-w-0 items-center gap-1.5">
-          {intentLabel && (
-            <span className={`inline-flex min-w-0 max-w-[55%] items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-semibold text-white ${MATERIAL} ${chromeCls}`}>
-              <Icon name={intentIcon(intentLabel)} className="size-3.5 shrink-0 text-gold" />
-              <span className="truncate">{intentLabel.replace(/^For:\s*/, "")}</span>
-            </span>
-          )}
-          {/* In-app AI label: stays visible even when the chrome is hidden; opens content credentials. */}
-          <button
-            type="button"
-            onClick={() => setAbout(true)}
-            aria-label={`AI preview · C2PA — ${look.onTwin ? t("looks.onTwin") : t("looks.onModel")}`}
-            className={`hit inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-semibold text-white transition-transform active:scale-95 ${MATERIAL}`}
-          >
-            <Icon name="sparkle" className="size-3.5 text-gold" />
-            AI preview{" "}
-            <span className="text-white/70">· C2PA</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Right edge hint: the Maker Space is one swipe left (grows into a peek while dragging). */}
-      <div aria-hidden className={`pointer-events-none absolute right-0 top-[calc(max(env(safe-area-inset-top),12px)+118px)] z-10 flex items-center ${chromeCls}`}>
-        <span
-          className={`flex items-center gap-1.5 rounded-l-full py-2 pl-2.5 text-xs font-semibold text-white ${MAT_BASE} bg-black/45`}
-          style={{ paddingRight: 6 + pull * 10, opacity: coach || pull > 0 ? 1 : 0.85, transition: dx ? "none" : `padding 300ms ${SPRING}` }}
+        <button
+          type="button"
+          onClick={() => setAbout(true)}
+          aria-label={`AI · C2PA — ${look.onTwin ? t("looks.onTwin") : t("looks.onModel")}`}
+          className={`hit inline-flex h-8 shrink-0 items-center gap-1 rounded-full px-2.5 text-[12px] font-semibold text-white transition-transform active:scale-95 ${MATERIAL}`}
         >
-          <Icon name="back" className="size-3.5" />
-          {(coach || pull > 0.15) && <span className="whitespace-nowrap pr-1">Maker Space</span>}
-        </span>
+          <Icon name="sparkle" className="size-3.5 text-gold" />
+          AI{" "}
+          <span className="text-white/70">· C2PA</span>
+        </button>
       </div>
 
       {/* Right rail: glass circles, SF-like glyphs; names on the buttons, captions tiny or on long-press. */}
       <div
         inert={!chrome}
-        className={`absolute right-3 z-10 flex flex-col items-center gap-3 bottom-[calc(max(env(safe-area-inset-bottom),12px)+150px)] [@media(min-height:860px)]:gap-3.5 ${chromeCls}`}
+        className={`absolute right-4 z-10 flex flex-col items-center justify-center gap-3 top-[calc(max(env(safe-area-inset-top),12px)+56px)] bottom-[calc(max(13dvh,128px)+max(env(safe-area-inset-bottom),14px)-6px)] ${chromeCls}`}
         style={enter}
       >
         <RailButton label={look.saved ? t("looks.saved") : t("looks.save")} onClick={onSave} active={look.saved}>
@@ -264,10 +243,8 @@ export function LookView({ look, index, total, intentLabel, onSave, onVariant, p
         </RailButton>
       </div>
 
-      {/* Coach mark (first view only): next look is a scroll away. */}
-      {coach && total && total > 1 ? (
-        <CoachChevron />
-      ) : null}
+      {/* One-time coach mark (fades), and the live peek while dragging left: bottom-left, clear of the rail. */}
+      {(coach || pull > 0.1) && <CoachHint next={coach && Boolean(total && total > 1)} pull={pull} dragging={dx !== 0} />}
 
       {/* Maker card + Buy: a glass sheet along the bottom. It always covers the bottom 12 %+ of the render
           (the gateway's baked AI tag sits there) — the in-app AI chip above stays the visible label. */}
@@ -278,7 +255,7 @@ export function LookView({ look, index, total, intentLabel, onSave, onVariant, p
       >
         <div className={`rounded-t-[28px] px-4 pb-[max(env(safe-area-inset-bottom),14px)] pt-3.5 ${MAT_BASE} border-x-0 border-b-0 bg-black/55`} style={{ minHeight: "max(13dvh, 128px)" }}>
           <Link href={makerHref} className="flex min-h-11 min-w-0 items-center gap-3 rounded-2xl outline-offset-4">
-            <Avatar name={look.maker.name} size={40} ring />
+            <Avatar name={look.maker.name} size={40} />
             <span className="min-w-0 flex-1">
               <span className="flex min-w-0 items-center gap-1.5 font-display text-[17px] font-black leading-tight text-white">
                 <span className="truncate">{look.maker.name}</span>
@@ -350,43 +327,51 @@ export function LookView({ look, index, total, intentLabel, onSave, onVariant, p
   );
 }
 
-/** iOS page control: dots (≤ 9 looks) or a progress capsule; the active dot stretches with a spring. */
-function PageDots({ index, total }: { index: number; total: number }) {
-  const label = `Look ${index + 1} of ${total}`;
-  if (total > 9) {
-    return (
-      <span role="img" aria-label={label} className={`mx-auto flex h-7 w-28 items-center rounded-full px-2.5 ${MATERIAL}`}>
-        <span className="h-1 w-full overflow-hidden rounded-full bg-white/25">
-          <span className="block h-full rounded-full bg-white transition-[width] duration-500" style={{ width: `${((index + 1) / total) * 100}%`, transitionTimingFunction: SPRING }} />
-        </span>
-      </span>
-    );
-  }
+/** Intent + position in one capsule ("Wedding · Sat · 1/9"): the page indicator folded into the top bar. */
+function PageCapsule({ label, icon, index, total }: { label: string | null; icon: IconName | null; index: number; total: number }) {
+  const pos = total > 1 ? `${index + 1}/${total}` : null;
   return (
-    <span role="img" aria-label={label} className={`mx-auto flex h-7 items-center gap-1.5 rounded-full px-2.5 ${MATERIAL}`}>
-      {Array.from({ length: total }, (_, i) => (
-        <span
-          key={i}
-          className={`h-1.5 rounded-full transition-[width,background-color] duration-500 ${i === index ? "w-4 bg-white" : "w-1.5 bg-white/40"}`}
-          style={{ transitionTimingFunction: SPRING }}
-        />
-      ))}
+    <span className={`inline-flex h-8 min-w-0 max-w-full items-center gap-1.5 rounded-full px-3 text-[13px] font-semibold text-white ${MATERIAL}`}>
+      {icon && <Icon name={icon} className="size-3.5 shrink-0 text-gold" />}
+      {label && <span className="truncate">{label}</span>}
+      {label && pos && <span aria-hidden className="text-white/50">·</span>}
+      {pos && (
+        <span role="img" aria-label={`Look ${index + 1} of ${total}`} className="shrink-0 tabular-nums text-white/85">
+          <span aria-hidden>{pos}</span>
+        </span>
+      )}
     </span>
   );
 }
 
-/** First-view hint: a softly bouncing chevron above the card (static with reduced motion). */
-function CoachChevron() {
-  const ref = useRef<HTMLSpanElement>(null);
+/** Coach capsule: "Next · Maker Space" once (softly animated chevrons), and "Maker Space" as the drag peek. */
+function CoachHint({ next, pull, dragging }: { next: boolean; pull: number; dragging: boolean }) {
+  const left = useRef<HTMLSpanElement>(null);
+  const up = useRef<HTMLSpanElement>(null);
   useEffect(() => {
-    const a = animate(ref.current, [{ transform: "translateY(4px)", opacity: 0.55 }, { transform: "translateY(-6px)", opacity: 1 }, { transform: "translateY(4px)", opacity: 0.55 }], { duration: 1400, iterations: Infinity, easing: "ease-in-out" });
-    return () => a?.cancel();
-  }, []);
+    if (dragging) return;
+    const a = animate(left.current, [{ transform: "translateX(3px)" }, { transform: "translateX(-4px)" }, { transform: "translateX(3px)" }], { duration: 1300, iterations: Infinity, easing: "ease-in-out" });
+    const b = animate(up.current, [{ transform: "translateY(2px)" }, { transform: "translateY(-3px)" }, { transform: "translateY(2px)" }], { duration: 1300, iterations: Infinity, easing: "ease-in-out" });
+    return () => {
+      a?.cancel();
+      b?.cancel();
+    };
+  }, [dragging]);
   return (
-    <span aria-hidden className="pointer-events-none absolute bottom-[calc(max(13dvh,128px)+18px)] left-1/2 z-10 -translate-x-1/2">
-      <span ref={ref} className={`grid size-9 place-items-center rounded-full text-white ${MATERIAL}`}>
-        <Icon name="chevron" className="size-4 -rotate-90" />
-      </span>
+    <span
+      aria-hidden
+      className={`pointer-events-none absolute left-4 z-10 inline-flex animate-fade items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold text-white bottom-[calc(max(13dvh,128px)+max(env(safe-area-inset-bottom),14px)+4px)] ${MATERIAL}`}
+      style={{ opacity: dragging ? 0.4 + pull * 0.6 : 1 }}
+    >
+      {next && !dragging && (
+        <>
+          <span ref={up} className="inline-flex"><Icon name="chevron" className="size-3.5 -rotate-90" /></span>
+          Next
+          <span className="text-white/50">·</span>
+        </>
+      )}
+      <span ref={left} className="inline-flex"><Icon name="back" className="size-3.5" /></span>
+      Maker Space
     </span>
   );
 }
