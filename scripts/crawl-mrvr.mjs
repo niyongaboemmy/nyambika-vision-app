@@ -121,9 +121,18 @@ try {
   await signIn(g1.p, phone(5));
   await signIn(g2.p, phone(4));
   const enter = async (x) => {
-    await x.p.goto(`${BASE}/m/uwase-couture/showroom`);
-    await x.p.locator("canvas").waitFor({ timeout: 60000 });
-    await x.p.waitForFunction(() => !document.body.innerText.includes("Bringing in pieces") && Boolean(window.__vrShowroom), null, { timeout: 90000 });
+    // SwiftShader WebGL on a busy machine can stall the first scene load: one reload before giving up.
+    for (let attempt = 0; ; attempt++) {
+      await x.p.goto(`${BASE}/m/uwase-couture/showroom`);
+      try {
+        await x.p.locator("canvas").waitFor({ timeout: 60000 });
+        await x.p.waitForFunction(() => !document.body.innerText.includes("Bringing in pieces") && Boolean(window.__vrShowroom), null, { timeout: 90000 });
+        break;
+      } catch (e) {
+        if (attempt >= 1) throw e;
+        console.log("ℹ showroom scene slow to load, reloading once");
+      }
+    }
     await x.p.getByRole("button", { name: /Shared room/ }).click();
     await x.p.getByRole("checkbox", { name: /18 or older/ }).check();
     await x.p.getByRole("button", { name: "Join the shared room" }).click();

@@ -140,3 +140,21 @@ export function rank(cands: Candidate[], intent: Intent, seed: string, limit = 9
   const rest = scored.filter((r) => r.score < top - 3);
   return [...diversify(strong, limit), ...diversify(rest, limit)].slice(0, limit);
 }
+
+/**
+ * E41 region rule for looks (same as the maker directory's rankByRegion): home-country pages, plus pages listed
+ * cross-border when the shopper opted in. Pages without a region row are Rwandan.
+ */
+export function visibleForShopper(
+  pageIds: string[],
+  regions: { pageId: string; region: string; crossBorder: boolean }[],
+  shopper: { country: string; crossBorder: boolean },
+): Set<string> {
+  const byPage = new Map(regions.map((r) => [r.pageId, r]));
+  return new Set(
+    pageIds.filter((id) => {
+      const r = byPage.get(id) ?? { region: "RW", crossBorder: false };
+      return r.region === shopper.country || (shopper.crossBorder && r.crossBorder);
+    }),
+  );
+}

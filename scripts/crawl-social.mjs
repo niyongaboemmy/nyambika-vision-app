@@ -132,7 +132,11 @@ await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
 await page.mouse.down();
 await page.waitForTimeout(1500);
 await page.mouse.up();
-await page.waitForURL(/\/orders\/.+fresh=1/, { timeout: 15000 });
+await page.waitForURL(/\/orders\/.+fresh=1/, { timeout: 15000 }).catch(async (e) => {
+  const why = await page.locator('[role="alert"], [role="status"][data-limit]').allInnerTexts().catch(() => []);
+  await shot("winner-hold-failed");
+  throw new Error(`hold to buy did not reach the order page: ${why.join(" | ") || e.message}`);
+});
 const orderId = new URL(page.url()).pathname.split("/").pop();
 await shot("winner-order");
 

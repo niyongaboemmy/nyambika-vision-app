@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Intent } from "@nyambika/contracts";
-import { colourWords, diversify, rank, type Candidate } from "./ranking";
+import { colourWords, diversify, rank, visibleForShopper, type Candidate } from "./ranking";
 
 const base: Intent = { occasion: null, date: null, budgetMax: null, styles: [], colours: [], categories: [], size: null, location: null, language: "en", source: "text", parser: "rules" };
 
@@ -69,5 +69,21 @@ describe("ranking", () => {
   it("skips products with nothing in stock", () => {
     const r = rank([cand("x", "p", { variants: [{ id: "v", colourHex: "#000000", colourName: "Black", inStock: false }] })], base, "s");
     expect(r).toHaveLength(0);
+  });
+});
+
+describe("visibleForShopper (E41 region rule for looks, error sweep)", () => {
+  const regions = [
+    { pageId: "ke", region: "KE", crossBorder: false },
+    { pageId: "ke-x", region: "KE", crossBorder: true },
+  ];
+  it("a Rwandan shopper sees Rwandan pages (no region row = RW) but not Kenyan ones", () => {
+    expect([...visibleForShopper(["rw", "ke", "ke-x"], regions, { country: "RW", crossBorder: false })]).toEqual(["rw"]);
+  });
+  it("cross-border opt-in adds only pages listed cross-border", () => {
+    expect([...visibleForShopper(["rw", "ke", "ke-x"], regions, { country: "RW", crossBorder: true })]).toEqual(["rw", "ke-x"]);
+  });
+  it("a Kenyan shopper sees Kenyan pages", () => {
+    expect([...visibleForShopper(["rw", "ke", "ke-x"], regions, { country: "KE", crossBorder: false })]).toEqual(["ke", "ke-x"]);
   });
 });
