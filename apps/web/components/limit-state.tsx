@@ -40,7 +40,7 @@ function useCountdown(until: number | null) {
 }
 
 const ICON: Partial<Record<Described["kind"], string>> = {
-  "daily-cap": "✨",
+  "daily-cap": "🌅",
   resting: "🌙",
   consent: "🔐",
   rate: "⏳",

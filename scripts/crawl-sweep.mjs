@@ -177,7 +177,8 @@ async function visit(ctx, role, width, route, url) {
     await page.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => {});
     await page.waitForTimeout(700);
     if (route.kind === "page") {
-      const probe = await page.evaluate(() => {
+      // A client-side redirect / revalidation can replace the document mid-probe: settle and probe again once.
+      const probeFn = () => {
         const text = document.body?.innerText ?? "";
         const broken = [...document.images].filter((i) => i.complete && i.naturalWidth === 0 && i.getAttribute("src") && !i.src.startsWith("data:")).map((i) => i.getAttribute("src"));
         const overflow = document.documentElement.scrollWidth - window.innerWidth;
@@ -190,6 +191,11 @@ async function visit(ctx, role, width, route, url) {
             : [];
         const limits = [...document.querySelectorAll("[data-limit]")].map((el) => el.getAttribute("data-limit"));
         return { text, broken, overflow, wide, limits, path: location.pathname };
+      };
+      const probe = await page.evaluate(probeFn).catch(async (e) => {
+        if (!/Execution context was destroyed|navigation/i.test(e.message)) throw e;
+        await page.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => {});
+        return page.evaluate(probeFn);
       });
       for (const re of RAW) {
         const m = probe.text.match(re);
