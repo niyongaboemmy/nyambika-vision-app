@@ -20,6 +20,8 @@ from . import video_tryon  # noqa: E402
 from .inference import api as inference_api  # noqa: E402
 app.include_router(video_tryon.router)  # E39 video try-on + NLB video eval: /v1/video/*
 inference_api.install(app)  # E42 self-hosted inference routing: /v1/inference/*
+from .mlspike import api as mlspike_api  # noqa: E402
+app.include_router(mlspike_api.router)  # R4 spike: consented dataset, local attribute model, eval: /v1/ml/*
 
 
 class ImageIn(BaseModel):

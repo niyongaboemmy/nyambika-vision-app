@@ -56,6 +56,11 @@ def register_defaults(router: Router, pool: PoolClient | None) -> Router:
     if os.environ.get("VIDEO_TRYON_HOSTED_URL"):
         router.register("video", "hosted", hosted_video)
 
+    # ── attr (R4 spike): the local attribute model runs in-process as the self-hosted `pool` backend ──
+    from ..mlspike.api import pool_backend as attr_pool
+
+    router.register("attr", "pool", attr_pool)
+
     if pool is None:
         return router
 

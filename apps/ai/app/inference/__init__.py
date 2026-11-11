@@ -14,6 +14,8 @@ _router: Router | None = None
 _pool: PoolClient | None = None
 _monitor: threading.Thread | None = None
 _lock = threading.Lock()
+# Routes whose `pool` backend runs inside the gateway process (R4 spike local model), not on the GPU pool.
+IN_PROCESS_ROUTES = ("attr",)
 
 
 def routing_enabled() -> bool:
@@ -30,6 +32,9 @@ def check_health(router: Router | None = None, client: PoolClient | None = None)
     router = router or get_router()
     client = client or _pool
     for route in ROUTES:
+        if route in IN_PROCESS_ROUTES:
+            router.set_health(route, "UP", latency_ms=0, error=None, checked_at=time.time())
+            continue
         if client is None or "pool" not in router.backends.get(route, {}):
             router.set_health(route, "UNCONFIGURED")
             continue

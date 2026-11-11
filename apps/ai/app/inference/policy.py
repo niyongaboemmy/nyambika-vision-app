@@ -10,7 +10,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-ROUTES = ("tryon", "stt", "llm", "avatar", "video")
+ROUTES = ("tryon", "stt", "llm", "avatar", "video", "attr")
 BACKENDS = ("pool", "hosted")
 Strategy = Literal["cost", "latency", "pool-first", "hosted-only", "pool-only"]
 
@@ -53,6 +53,8 @@ _DEFAULTS = {
     "avatar": dict(latency_slo_ms=120_000, pool=12, hosted=25),
     # Video: no silent fallback. Every backend that serves shoppers must have passed its own NLB eval.
     "video": dict(latency_slo_ms=90_000, pool=120, hosted=300, fallback=False),
+    # R4 spike: garment-attribute suggestions from the self-hosted local model only; maker photos stay in-region.
+    "attr": dict(latency_slo_ms=2_000, pool=0.2, hosted=0, strategy="pool-only", residency="in-region"),
 }
 
 
@@ -61,6 +63,7 @@ def default_policy() -> Policy:
     for route, d in _DEFAULTS.items():
         routes[route] = RoutePolicy(
             latency_slo_ms=d["latency_slo_ms"], fallback=d.get("fallback", True),
+            strategy=d.get("strategy", "cost"), residency=d.get("residency", "any"),
             pool=BackendPolicy(cost_rwf=d["pool"]), hosted=BackendPolicy(cost_rwf=d["hosted"]),
         )
     return Policy(routes=routes)
