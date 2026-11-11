@@ -196,7 +196,7 @@ function KpiCard({ k }: { k: KpiRow }) {
 function AllowlistCard({ on, reload }: { on: boolean; reload: () => Promise<void> }) {
   const [busy, setBusy] = useState(false);
   return (
-    <div className="st-card flex min-w-0 flex-col gap-1.5 rounded-[22px] p-4">
+    <div className="st-card flex min-w-0 flex-col gap-1.5 rounded-[22px] p-4 [&>label]:min-h-11 [&>label]:items-center">
       <p className="text-xs font-bold text-cocoa-2">Closed pilot allowlist</p>
       <p className="text-sm font-bold text-cocoa">{on ? "On · cohort shoppers only" : "Off · everyone can ask"}</p>
       <Switch

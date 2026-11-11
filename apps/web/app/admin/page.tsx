@@ -375,7 +375,7 @@ function MigrationTab() {
               Import a wave
               <InfoTip label="About importing">JSON bundle from the legacy export (format in docs/migration.md). Pages are imported hidden; photos go through the readiness pipeline.</InfoTip>
             </p>
-            <p className="text-sm text-cocoa-2">Legacy JSON · imported hidden</p>
+            <p className="text-sm text-cocoa-2">Legacy JSON · hidden</p>
           </div>
           <a href="/admin/network" className="st-press inline-flex min-h-11 shrink-0 items-center gap-1 rounded-2xl px-2 text-sm font-bold text-violet-ink hover:bg-paper-2">
             Network <Icon name="chevron" className="size-4" />
@@ -421,13 +421,13 @@ function MigrationTab() {
                   </ol>
                   {i.defects.length > 0 && (
                     <div className="flex flex-wrap items-center gap-1.5">
-                      {i.defects.length > 0 && <Chip tone="gold"><Icon name="alert" className="size-3.5" /> {i.defects.length} to fix</Chip>}
-                      {defectTags(i.defects).map((t) => <Chip key={t}>{t}</Chip>)}
-                      {i.defects.length > 0 && (
+                      <span className="inline-flex items-center gap-0.5">
+                        <Chip tone="gold"><Icon name="alert" className="size-3.5" /> {i.defects.length} to fix</Chip>
                         <InfoTip label={`Defects for ${i.page?.name ?? "this page"}`}>
                           <ul className="list-disc space-y-1 pl-4">{i.defects.map((d, k) => <li key={k}>{d.message}</li>)}</ul>
                         </InfoTip>
-                      )}
+                      </span>
+                      {defectTags(i.defects).map((t) => <Chip key={t}>{t}</Chip>)}
                     </div>
                   )}
                   {i.ownerNote && <p className="truncate rounded-xl bg-red-50 px-3 py-2 text-xs text-red-800 ring-1 ring-inset ring-red-200" title={i.ownerNote}>Owner: “{i.ownerNote}”</p>}
