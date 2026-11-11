@@ -1,6 +1,7 @@
 import "reflect-metadata";
 import { Logger } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
+import { WsAdapter } from "@nestjs/platform-ws";
 import cookieParser from "cookie-parser";
 import { json, type NextFunction, type Request, type Response } from "express";
 import { AppModule } from "./app.module";
@@ -24,6 +25,7 @@ async function bootstrap() {
     res.on("finish", () => end({ method: req.method, route: (req.route?.path as string) ?? "unmatched", status: String(res.statusCode) }));
     next();
   });
+  app.useWebSocketAdapter(new WsAdapter(app)); // R4 spike: /vr/presence gateway
   app.enableShutdownHooks();
   await app.listen(config.port);
   Logger.log(`Nyambika API on http://localhost:${config.port}`, "Bootstrap");
