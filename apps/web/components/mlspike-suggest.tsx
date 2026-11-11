@@ -22,7 +22,7 @@ type Suggest =
 const FIELD: Record<Suggestion["field"], string> = { category: "Type", pattern: "Pattern family", colour: "Main colour" };
 
 /**
- * R4 spike (flag ml.local_attr_spike): ✨ auto-fill suggestions from the photo, made by the self-hosted local
+ * R4 spike (flag ml.local_attr_spike): auto-fill suggestions from the photo, made by the self-hosted local
  * model. The maker always decides; nothing is changed until they tap "Use".
  */
 export function AttrSuggest({ productId, canEdit, onApplied }: { productId: string; canEdit: boolean; onApplied: () => Promise<void> }) {
@@ -55,7 +55,7 @@ export function AttrSuggest({ productId, canEdit, onApplied }: { productId: stri
       <div className="flex items-start gap-3">
         <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-violet-ink text-white shadow-[0_8px_18px_-8px_rgba(98,57,201,.8)]"><Icon name="sparkle" className="size-5" /></span>
         <div className="min-w-0">
-          <h3 id="attr-suggest-t" className="font-display text-lg font-black tracking-tight text-cocoa">✨ Suggested from your photo</h3>
+          <h3 id="attr-suggest-t" className="font-display text-lg font-black tracking-tight text-cocoa">Suggested from your photo</h3>
           <p className="text-sm text-cocoa-2">Tap Use · change any time</p>
         </div>
       </div>

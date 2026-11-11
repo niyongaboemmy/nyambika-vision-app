@@ -159,7 +159,7 @@ function Check({ ok, label }: { ok: boolean; label: string }) {
   );
 }
 
-/** Edit title, price and description after creation, with the ✨ AI writer (FR-PAGE-07). */
+/** Edit title, price and description after creation, with the AI writer (FR-PAGE-07). */
 function DetailsEditor({ p, pageId, pageName, onSaved }: { p: StudioProduct; pageId: string; pageName: string; onSaved: () => Promise<void> }) {
   const [f, setF] = useState({ title: p.title, description: p.description ?? "", priceRwf: String(p.priceRwf) });
   const [msg, setMsg] = useState<string | null>(null);
@@ -179,7 +179,7 @@ function DetailsEditor({ p, pageId, pageName, onSaved }: { p: StudioProduct; pag
   }
   return (
     <form onSubmit={save}>
-      <EditorSection n={1} id="details" title="Details" hint="Polish the words any time. ✨ drafts them from your details in RW, EN or FR.">
+      <EditorSection n={1} id="details" title="Details" hint="Polish the words any time. AI drafts them from your details in RW, EN or FR.">
         <Field label="Product title"><Input required value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} /></Field>
         <Field label="Price in RWF"><Input required type="number" min={0} value={f.priceRwf} onChange={(e) => setF({ ...f, priceRwf: e.target.value })} /></Field>
         <Field label="Product description"><Textarea value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} /></Field>
@@ -227,7 +227,7 @@ function StudioCard({ p, onChange }: { p: StudioProduct; onChange: () => Promise
         <div className="flex items-start gap-3">
           <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-violet-ink text-white shadow-[0_8px_18px_-8px_rgba(98,57,201,.8)]"><Icon name="sparkle" className="size-5" /></span>
           <div>
-            <h3 id="ai-studio-t" className="font-display text-lg font-black tracking-tight text-cocoa">✨ AI product studio</h3>
+            <h3 id="ai-studio-t" className="font-display text-lg font-black tracking-tight text-cocoa">AI product studio</h3>
             <p className="mt-1 flex flex-wrap gap-1.5"><Chip tone="violet">AI label · C2PA</Chip><Chip>Uses allowance</Chip><InfoTip label="About AI product studio">Show this piece on AI models with different skin tones. Photos are labelled as AI and use your page allowance.</InfoTip></p>
           </div>
         </div>

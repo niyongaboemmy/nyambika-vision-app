@@ -2,6 +2,7 @@
 
 import { isExpectedText, LimitState } from "@/components/limit-state";
 import { useState } from "react";
+import { Icon } from "@/components/icons";
 import { api } from "@/lib/api";
 
 type Locale = "rw" | "en" | "fr";
@@ -25,7 +26,7 @@ export function AiWrite<T>({ pageId, kind, fields, onResult }: { pageId: string;
   return (
     <div className="flex flex-wrap items-center gap-2 rounded-2xl bg-gradient-to-br from-violet-50 to-orange-50 p-2.5 ring-1 ring-inset ring-violet-200">
       <button type="button" onClick={run} disabled={busy} title="A draft from your details. Check it before saving." className="inline-flex min-h-11 items-center rounded-xl bg-violet-ink px-3.5 text-sm font-bold text-white shadow-[0_8px_18px_-10px_rgba(98,57,201,.8)] transition active:scale-[.97] disabled:opacity-50">
-        {busy ? "Writing…" : "✨ Write it for me"}
+        <Icon name="sparkle" className="mr-1.5 size-4" />{busy ? "Writing…" : "Write it for me"}
       </button>
       <div role="group" aria-label="Draft language" className="flex items-center gap-0.5">
         {(["rw", "en", "fr"] as Locale[]).map((l) => (

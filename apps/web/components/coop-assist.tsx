@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Chip, Icon, Input, Note, SButton, StudioSheet, Switch } from "@/components/studio";
+import { Chip, Icon, Input, Note, SButton, StudioSheet, Switch, type IconName } from "@/components/studio";
 import { api, rwf } from "@/lib/api";
 import { speak, type CoopMe, type MakerAccessRow, type Statement } from "@/lib/growth";
 import type { Maker } from "@/lib/types";
@@ -43,8 +43,8 @@ export function MakerAccessPanel({ pageId, maker }: { pageId: string; maker: Mak
   return (
     <div className="space-y-2.5 border-t border-hairline pt-3">
       <p className="text-[11px] font-black uppercase tracking-wider text-cocoa-2">Easy access</p>
-      <Switch checked={row.voiceMode} onChange={(v) => patch({ voiceMode: v })} label="🔊 Voice & icon mode" description="Big pictures · spoken RW · number pad" />
-      <Switch checked={row.smsMode} onChange={(v) => patch({ smsMode: v })} disabled={!maker.phone} label="📟 SMS & USSD (*775#)" description={maker.phone ? "Alerts, sales, payouts on any phone" : "Add a phone number first"} />
+      <Switch checked={row.voiceMode} onChange={(v) => patch({ voiceMode: v })} label={<span className="inline-flex items-center gap-1.5"><Icon name="volume" className="size-4" />Voice &amp; icon mode</span>} description="Big pictures · spoken RW · number pad" />
+      <Switch checked={row.smsMode} onChange={(v) => patch({ smsMode: v })} disabled={!maker.phone} label={<span className="inline-flex items-center gap-1.5"><Icon name="signal" className="size-4" />SMS &amp; USSD (*775#)</span>} description={maker.phone ? "Alerts, sales, payouts on any phone" : "Add a phone number first"} />
       <Note error={err} />
       <div className="flex flex-wrap items-center gap-2">
         {active ? <Chip tone="violet"><Icon name="shield" className="size-3.5" /> Helping allowed until {new Date(row.assist!.expiresAt!).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</Chip> : row.assist?.status === "PENDING" ? <Chip tone="gold">Waiting for {maker.name.split(" ")[0]}&apos;s OK</Chip> : null}
@@ -59,7 +59,7 @@ export function MakerAccessPanel({ pageId, maker }: { pageId: string; maker: Mak
             <Icon name="shield" className="size-4" /> Assisted mode
           </SButton>
         )}
-        <SButton variant="soft" onClick={() => setStatement(true)}>🔊 Statement</SButton>
+        <SButton variant="soft" onClick={() => setStatement(true)}><Icon name="volume" className="size-4" /> Statement</SButton>
       </div>
       {active && (
         <button type="button" className="text-xs font-bold text-red-800 underline" onClick={async () => { await api(`/pages/${pageId}/makers/${maker.id}/assist/revoke`, { method: "POST" }); await load(true); }}>
@@ -117,11 +117,11 @@ function ConsentSheet({ open, onClose, pageId, maker, pending, onDone }: { open:
       <div className="space-y-4">
         <ol className="space-y-2 text-sm text-cocoa">
           {[
-            ["🗣️", `Ask ${first} if they want your help adding pieces and accepting orders.`],
-            ["📩", `We text ${first} a 6-digit code (or they dial *775# → 4).`],
-            ["🔢", `${first} reads the code to you. That is their recorded consent, for 30 days.`],
+            ["chat", `Ask ${first} if they want your help`],
+            ["send", `We text ${first} a 6-digit code (or *775# → 4)`],
+            ["key", `${first} reads it to you · consent for 30 days`],
           ].map(([e, t]) => (
-            <li key={t} className="flex items-start gap-3 rounded-2xl bg-paper p-3 ring-1 ring-inset ring-hairline"><span className="text-xl" aria-hidden>{e}</span><span>{t}</span></li>
+            <li key={t} className="flex items-start gap-3 rounded-2xl bg-paper p-3 ring-1 ring-inset ring-hairline"><span aria-hidden className="grid size-8 shrink-0 place-items-center rounded-xl bg-violet-100 text-violet-ink"><Icon name={e as IconName} className="size-4" /></span><span className="self-center">{t}</span></li>
           ))}
         </ol>
         {grant && <p className="rounded-2xl bg-violet-50 p-3 text-sm italic leading-relaxed text-violet-ink ring-1 ring-inset ring-violet-200">“{grant.consentText}”</p>}
@@ -170,7 +170,7 @@ export function StatementSheet({ open, onClose, pageId, makerId, locale = "rw" }
               <div className="rounded-2xl bg-emerald-50 p-2.5 ring-1 ring-inset ring-emerald-200"><p className="text-[11px] font-bold text-mint-ink">Direct to MoMo</p><p className="truncate font-display text-base font-black text-cocoa">{rwf(s.totals.directRwf)}</p></div>
               <div className="rounded-2xl bg-violet-50 p-2.5 ring-1 ring-inset ring-violet-200"><p className="text-[11px] font-bold text-violet-ink">Coop pays</p><p className="truncate font-display text-base font-black text-cocoa">{rwf(s.totals.cooperativeRwf)}</p></div>
             </div>
-            <SButton className="min-h-12 w-full" onClick={() => speak(s.spoken, s.locale)}>🔊 Read it aloud</SButton>
+            <SButton className="min-h-12 w-full" onClick={() => speak(s.spoken, s.locale)}><Icon name="volume" className="size-4" /> Read it aloud</SButton>
             <p className="rounded-2xl bg-paper p-3 text-sm leading-relaxed text-cocoa-2">{s.spoken}</p>
             <ul className="divide-y divide-hairline text-sm">
               {s.lines.map((l) => (
@@ -210,7 +210,7 @@ export function VoiceModeGate({ pageId }: { pageId: string }) {
   if (!me) return null;
   return (
     <Link href={`/studio/${pageId}/easy`} className="st-press st-hero flex items-center gap-4 rounded-[26px] p-4">
-      <span className="grid size-16 shrink-0 place-items-center rounded-[22px] bg-white text-3xl shadow-sm" aria-hidden>🔊</span>
+      <span className="grid size-16 shrink-0 place-items-center rounded-[22px] bg-white text-violet-ink shadow-sm" aria-hidden><Icon name="volume" className="size-8" /></span>
       <span className="min-w-0">
         <span className="block font-display text-xl font-black text-cocoa">Uburyo bworoshye</span>
         <span className="block text-sm text-cocoa-2">Easy mode: pictures and voice</span>

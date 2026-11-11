@@ -27,8 +27,8 @@ const EMPTY: Record<Filter, string> = {
   all: "Clear photo · plain background",
   live: "Nothing live yet",
   draft: "No drafts",
-  photo: "All photos passed ✓",
-  improve: "All descriptions complete ✨",
+  photo: "All photos passed",
+  improve: "All descriptions complete",
 };
 
 const readinessLabel = (r: string) => `try-on: ${r.replace(/_/g, " ").toLowerCase()}`;
@@ -111,14 +111,14 @@ function Products() {
             { value: "live", label: "Live", count: rest.filter(MATCH.live).length },
             { value: "draft", label: "Drafts", count: rest.filter(MATCH.draft).length },
             { value: "photo", label: "Needs photo", count: rest.filter(MATCH.photo).length },
-            { value: "improve", label: "✨ Improve", count: rest.filter(MATCH.improve).length },
+            { value: "improve", label: "Improve", count: rest.filter(MATCH.improve).length },
           ]}
         />
       )}
       {filter === "improve" && shown.length > 0 && (
         <p className="flex items-center gap-2 rounded-2xl bg-violet-50 px-3 py-2.5 text-sm font-semibold text-violet-ink ring-1 ring-inset ring-violet-200">
           <Icon name="sparkle" className="size-4 shrink-0" />
-          Short descriptions · open one → “✨ Write it for me”
+          Short descriptions · open one → “Write it for me”
         </p>
       )}
 

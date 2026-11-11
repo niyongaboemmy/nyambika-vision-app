@@ -110,7 +110,7 @@ export default function NewProduct() {
             />
           </div>
 
-          <EditorSection n={1} id="details" title="Details" hint="What it is and what it costs. Let ✨ AI draft the words.">
+          <EditorSection n={1} id="details" title="Details" hint="What it is and what it costs. Let AI draft the words.">
             <Field label="Title"><Input required value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} placeholder="Indigo wrap dress" /></Field>
             <div className="grid grid-cols-2 gap-3">
               <Field label="Category">

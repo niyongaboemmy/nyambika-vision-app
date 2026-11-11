@@ -91,7 +91,7 @@ export default function MigrationReview() {
                 <ul className="space-y-1.5">
                   {r.defects.map((d, i) => (
                     <li key={i} className="flex gap-2 rounded-2xl bg-white/70 p-2.5 text-sm text-gold-ink">
-                      <span aria-hidden>{d.severity === "info" ? "💡" : "🛠️"}</span> {d.message}
+                      <Icon name={d.severity === "info" ? "bulb" : "wrench"} className="mr-1 inline size-4 align-[-3px]" /> {d.message}
                     </li>
                   ))}
                 </ul>
@@ -118,7 +118,7 @@ export default function MigrationReview() {
             <Note error={err} ok={msg} />
             {["IMPORTED", "IN_REVIEW", "CHANGES_REQUESTED"].includes(r.status) ? (
               <Card className="space-y-3">
-                <SButton className="min-h-12 w-full text-base" onClick={() => act("sign-off", undefined, "Thank you! The Nyambika team will switch your page on.")}>✓ Looks right, sign off</SButton>
+                <SButton className="min-h-12 w-full text-base" onClick={() => act("sign-off", undefined, "Thank you! The Nyambika team will switch your page on.")}><Icon name="check" className="size-5" /> Looks right, sign off</SButton>
                 <div className="flex items-center gap-3 text-xs font-bold text-cocoa-2"><span className="h-px flex-1 bg-hairline" />or<span className="h-px flex-1 bg-hairline" /></div>
                 <Textarea aria-label="What should we fix?" placeholder="Or tell us what to fix…" value={note} onChange={(e) => setNote(e.target.value)} />
                 <SButton variant="outline" className="w-full" disabled={note.trim().length < 3} onClick={() => act("request-changes", { note }, "Sent. We'll fix it within 48 hours and ask you again.")}>Request changes</SButton>

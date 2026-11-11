@@ -121,7 +121,7 @@ export default function Home() {
         {/* Today */}
         <section aria-labelledby="today" className="st-hero relative overflow-hidden rounded-[28px] p-5 lg:col-span-2 lg:row-span-2 lg:p-6">
           <div aria-hidden className="orb absolute -right-10 -top-10 size-40 animate-orb rounded-full opacity-20 blur-2xl" />
-          <p className="relative text-sm font-bold text-terra-ink">Muraho{firstName ? `, ${firstName}` : ""} 👋</p>
+          <p className="relative text-sm font-bold text-terra-ink">Muraho{firstName ? `, ${firstName}` : ""}</p>
           <h2 id="today" className="relative font-display text-2xl font-black tracking-tight text-cocoa lg:text-3xl">Today at {page.name}</h2>
           <ul className="relative mt-4 space-y-2">
             {loadingTodos && [0, 1].map((i) => <li key={i}><Skeleton className="h-[68px] bg-white/60" /></li>)}

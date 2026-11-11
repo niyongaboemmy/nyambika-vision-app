@@ -43,7 +43,7 @@ export default function StudioHome() {
         {loading && <ScreenSkeleton variant="list" />}
         {!loading && !creating && (
           <div className="animate-rise">
-            <p className="text-sm font-bold text-terra-ink">Muraho{me?.name ? `, ${me.name.split(" ")[0]}` : ""} 👋</p>
+            <p className="text-sm font-bold text-terra-ink">Muraho{me?.name ? `, ${me.name.split(" ")[0]}` : ""}</p>
             <h1 className="font-display text-3xl font-black tracking-tight text-cocoa">Your pages</h1>
           </div>
         )}
@@ -77,7 +77,7 @@ export default function StudioHome() {
             <h2 className="mt-5 font-display text-2xl font-black tracking-tight text-cocoa">Your own page on Nyambika</h2>
             <p className="mx-auto mt-2 max-w-md text-[15px] text-cocoa-2">Tailors · cooperatives · sellers</p>
             <ul className="mx-auto mt-5 grid max-w-md gap-2 text-left text-sm font-semibold text-cocoa">
-              {["Free · 3 steps", "Paid directly to your MoMo", "✨ AI writes in RW · EN · FR"].map((x) => (
+              {["Free · 3 steps", "Paid directly to your MoMo", "AI writes in RW · EN · FR"].map((x) => (
                 <li key={x} className="flex items-center gap-2 rounded-2xl bg-white/70 px-3 py-2.5">
                   <Icon name="check" className="size-4 shrink-0 text-mint-ink" /> {x}
                 </li>
@@ -181,7 +181,7 @@ function CreatePage({ onDone, onCancel }: { onDone: () => void; onCancel: () => 
 
       {step === 1 && (
         <Card key="s1" className="animate-slide-in space-y-4">
-          <Field label="Your story" hint="What you make, since when, what makes it special. You can let ✨ AI rewrite it later in Settings.">
+          <Field label="Your story" hint="What you make, since when, what makes it special. You can let AI rewrite it later in Settings.">
             <Textarea value={f.story} onChange={set("story")} placeholder="Since 2014 I design wedding and office wear from Rwandan kitenge…" />
           </Field>
           <div className="grid grid-cols-2 gap-3">

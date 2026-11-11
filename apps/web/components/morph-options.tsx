@@ -3,7 +3,7 @@
 import { MORPH_LENGTHS, MORPH_SLEEVES, morphPrice, type MorphTemplateInput } from "@nyambika/contracts/tailor-data";
 import { useEffect, useState } from "react";
 import { InfoTip } from "@/components/kit";
-import { Card, Chip, Field, Input, Note, SButton, Select } from "@/components/studio";
+import { Card, Chip, Field, Icon, Input, Note, SButton, Select } from "@/components/studio";
 import { api, rwf } from "@/lib/api";
 
 const DEFAULTS: MorphTemplateInput = {
@@ -58,7 +58,7 @@ export function MorphOptions({ productId }: { productId: string }) {
     return (
       <Card className="flex flex-wrap items-center justify-between gap-3 bg-gradient-to-br from-amber-50 to-violet-50">
         <div>
-          <h3 className="font-bold">🎨 Live morph</h3>
+          <h3 className="flex items-center gap-1.5 font-bold"><Icon name="palette" className="size-4 text-terra-ink" />Live morph</h3>
           <p className="mt-1 flex flex-wrap items-center gap-1.5"><Chip>Colour</Chip><Chip>Length</Chip><Chip>Sleeves</Chip><InfoTip label="About live morph">Let shoppers recolour this piece and change length or sleeves on their twin, then ask you to sew it.</InfoTip></p>
         </div>
         <SButton onClick={() => setO(DEFAULTS)}>Make customizable</SButton>
@@ -100,7 +100,7 @@ export function MorphOptions({ productId }: { productId: string }) {
     <Card className="space-y-4">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <h3 className="font-bold">🎨 Live morph options</h3>
+          <h3 className="flex items-center gap-1.5 font-bold"><Icon name="palette" className="size-4 text-terra-ink" />Live morph options</h3>
           <p className="text-sm text-stone-600">{rwf(base.basePriceRwf)} → up to {rwf(max)} · paid to you</p>
         </div>
         <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${saved ? "bg-emerald-100 text-emerald-900" : "bg-amber-100 text-amber-900"}`}>{saved ? "live" : "not saved"}</span>

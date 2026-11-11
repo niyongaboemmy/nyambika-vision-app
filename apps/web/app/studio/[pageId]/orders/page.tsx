@@ -209,7 +209,7 @@ export default function Orders() {
             )}
             {current.review && (
               <p className="rounded-2xl bg-amber-50 p-3 text-sm text-gold-ink ring-1 ring-inset ring-amber-200">
-                {"★".repeat(current.review.rating)}{"☆".repeat(5 - current.review.rating)} “{current.review.text}”
+                <span className="mr-1 inline-flex align-[-2px]" role="img" aria-label={`${current.review.rating} of 5 stars`}>{[1, 2, 3, 4, 5].map((n) => <Icon key={n} name="star" filled={n <= current.review!.rating} className="size-4" />)}</span> “{current.review.text}”
               </p>
             )}
           </div>
