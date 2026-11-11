@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { Icon, Kpi, Meter, ScreenSkeleton, Skeleton, type IconName } from "@/components/studio";
 import { ShareSheet } from "@/components/studio-shell";
 import { GrowthHomeCard } from "@/components/growth-insights";
+import { TrendsCard } from "@/components/mlspike-trends";
 import { VoiceModeGate } from "@/components/coop-assist";
 import { rwf } from "@/lib/api";
 import type { OrderView } from "@/lib/orders";
@@ -213,6 +214,7 @@ export default function Home() {
       )}
 
       {manager && <GrowthHomeCard pageId={page.id} />}
+      {manager && <TrendsCard pageId={page.id} />}
 
       {manager && a && a.topProducts.length > 0 && (
         <section aria-labelledby="top-title" className="st-card rounded-[24px] p-4 sm:p-5">
