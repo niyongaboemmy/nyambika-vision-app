@@ -10,6 +10,7 @@ import { PrismaService } from "../../common/prisma.service";
 import { PushService } from "../../common/push/push.service";
 import { StorageService } from "../../common/storage.service";
 import { TwinService } from "../twin/twin.module";
+import { inferenceRegion } from "./inference-region";
 
 interface TryOnResult {
   status: "DELIVERED" | "WITHHELD";
@@ -134,6 +135,7 @@ export class GenerationService implements OnModuleInit, OnModuleDestroy {
         garment_category: gen.variant.product.category,
         tier: gen.tier,
         request_id: gen.id,
+        region: await inferenceRegion(this.prisma, gen.userId, gen.variant.product.pageId), // E42 in-region policy
         ...(morph ? { garment_frame: morph.frame } : {}),
       });
       await this.prisma.generation.update({ where: { id }, data: { status: "GUARDING" } });

@@ -49,7 +49,8 @@ class LocalCompositor(VTONProvider):
         return int(cx - gw / 2), int(y0 + top * h), gw, int((bottom - top) * h)
 
     def generate(self, twin: Image.Image, garment: Image.Image, category: str, tier: str,
-                 frame: tuple[int, int, int, int] | None = None) -> VTONResult:
+                 frame: tuple[int, int, int, int] | None = None, region: str | None = None) -> VTONResult:
+        # Runs in this process wherever the gateway runs: `region` does not change anything here.
         target_h = TIER_HEIGHT.get(tier, 512)
         twin = twin.convert("RGB")
         twin = twin.resize((round(twin.width * target_h / twin.height), target_h), Image.LANCZOS)

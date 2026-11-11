@@ -36,8 +36,43 @@ export interface TrainingConsentState {
   products: Record<string, ConsentEntry>;
 }
 export type Eligibility =
-  | { eligible: true; consentRecordId: string; consentedAt: Date; scope: "page" | "product" }
-  | { eligible: false; reason: "NOT_OPTED_IN" | "PAGE_WITHDRAWN" | "PRODUCT_EXCLUDED" };
+  | { eligible: true; consentRecordId: string; consentedAt: Date; scope: "page" | "product"; makerConsentRecordIds?: string[] }
+  | { eligible: false; reason: "NOT_OPTED_IN" | "PAGE_WITHDRAWN" | "PRODUCT_EXCLUDED" | "MAKER_NOT_CONSENTED" | "MAKER_WITHDRAWN" };
+
+/**
+ * Cooperative pages: the piece is the credited maker's work, so the coop admin's yes is not enough.
+ *   TRAINING_DATA_MAKER:<pageId>:<coopMemberId>  recorded by the maker's own account; latest record wins, default OUT.
+ * Separate prefix on purpose: `consentState` must never read it as a product override.
+ */
+export const MAKER_TRAINING_PURPOSE = "TRAINING_DATA_MAKER";
+export const makerPurpose = (pageId: string, coopMemberId: string) => `${MAKER_TRAINING_PURPOSE}:${pageId}:${coopMemberId}`;
+
+/** Latest maker decision per coop member on one page. */
+export function makerConsents(pageId: string, rows: LedgerRow[]): Record<string, ConsentEntry> {
+  const prefix = `${MAKER_TRAINING_PURPOSE}:${pageId}:`;
+  const out: Record<string, ConsentEntry> = {};
+  for (const r of [...rows].sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())) {
+    if (r.purpose.startsWith(prefix)) out[r.purpose.slice(prefix.length)] = { granted: r.granted, recordId: r.id, userId: r.userId, at: r.createdAt };
+  }
+  return out;
+}
+
+/**
+ * Page/product consent (admin) AND, on a cooperative page, every credited maker's own consent. A piece no maker is
+ * credited for is the cooperative's own work: the admin decides alone. A withdrawal by either side takes it out.
+ */
+export function coopEligibility(state: TrainingConsentState, productId: string, credited: string[], makers: Record<string, ConsentEntry>): Eligibility {
+  const base = productEligibility(state, productId);
+  if (!base.eligible || !credited.length) return base;
+  const ids: string[] = [];
+  for (const m of credited) {
+    const c = makers[m];
+    if (!c) return { eligible: false, reason: "MAKER_NOT_CONSENTED" };
+    if (!c.granted) return { eligible: false, reason: "MAKER_WITHDRAWN" };
+    ids.push(c.recordId);
+  }
+  return { ...base, makerConsentRecordIds: ids };
+}
 
 /** Latest ledger record per training purpose of one page (rows may come from several page managers). */
 export function consentState(pageId: string, rows: LedgerRow[]): TrainingConsentState {

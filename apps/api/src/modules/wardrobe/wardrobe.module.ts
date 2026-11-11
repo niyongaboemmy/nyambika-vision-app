@@ -14,6 +14,7 @@ import { parse } from "../../common/zod";
 import { config } from "../../config";
 import { colourWords } from "../intent/ranking";
 import { GenerationService } from "../looks/generation.service";
+import { inferenceRegion } from "../looks/inference-region";
 import { LooksModule, LooksService } from "../looks/looks.module";
 import { TwinModule, TwinService } from "../twin/twin.module";
 import { daysUntil, type Piece, reminderDue, slotOf, suggestOutfits } from "./outfit-rules";
@@ -227,6 +228,7 @@ export class WardrobeService implements OnModuleInit, OnModuleDestroy {
       let image = (await this.twins.renderSource(o.userId, 2)).image;
       let result: TryOnResult | null = null;
       const model = await this.generations.model("PREVIEW");
+      const region = await inferenceRegion(this.prisma, o.userId, variants[0]?.product.pageId); // same order as looks + video
       for (const it of items) {
         const v = variants.find((x) => x.id === it.variantId);
         if (!v?.cutoutPath) throw new Error("A piece has no try-on cut-out");
@@ -236,6 +238,7 @@ export class WardrobeService implements OnModuleInit, OnModuleDestroy {
           garment_category: v.product.category,
           tier: "PREVIEW",
           request_id: `${outfitId}:${it.variantId}`,
+          region,
         });
         if (result.status !== "DELIVERED" || !result.image_b64) {
           await this.prisma.wardrobeOutfit.update({ where: { id: outfitId }, data: { status: "WITHHELD", guard: result.guard } });
