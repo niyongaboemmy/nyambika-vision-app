@@ -159,6 +159,35 @@ describe("voice + passkey endpoints (E22, E29)", () => {
     expect(r.body.duration_s).toBeCloseTo(0.1, 2);
   });
 
+  it("STT rate limit lives in Redis, so it holds across API instances", async () => {
+    const exp = await prisma.experiment.findUnique({ where: { key: "muse.voice" } });
+    if (exp?.status === "RUNNING") await prisma.experiment.update({ where: { key: "muse.voice" }, data: { status: "PAUSED" } });
+    onTestFinished(async () => {
+      if (exp?.status === "RUNNING") await prisma.experiment.update({ where: { key: "muse.voice" }, data: { status: "RUNNING" } });
+    });
+    const { VoiceService, STT_LIMITS } = await import("../src/modules/voice/voice.module");
+    const { RedisCounterStore } = await import("../src/modules/circle/guards");
+    const { config } = await import("../src/config");
+    const voice = app.get(VoiceService);
+    for (let i = 0; i < 40 && !(voice.counters instanceof RedisCounterStore); i++) await new Promise((r) => setTimeout(r, 50));
+    expect(voice.counters).toBeInstanceOf(RedisCounterStore);
+    const s = await login(`0782${String(Date.now()).slice(-6)}`);
+    await s.post("/privacy/consents").send({ purpose: "VOICE_PROCESSING", granted: true }).expect(201);
+    const userId = (await s.get("/auth/me")).body.user.id as string;
+    // Another API instance has already used this user's whole window: it only shares Redis with us.
+    const { Redis } = await import("ioredis");
+    const other = new Redis(config.redisUrl, { keyPrefix: config.redisKeyPrefix });
+    onTestFinished(() => void other.quit());
+    const [limit] = STT_LIMITS(userId);
+    await other.set(`rl:${limit.key}`, String(limit.max), "EX", limit.windowSec);
+    const r = await s.post("/voice/stt").attach("audio", Buffer.from("RIFF0000WAVE"), { filename: "a.wav", contentType: "audio/wav" }).field("language", "rw");
+    expect(r.status).toBe(429);
+    // Once the shared window is clear, the same user may speak again.
+    await other.del(`rl:${limit.key}`);
+    const ok = await s.post("/voice/stt").attach("audio", Buffer.from("RIFF0000WAVE"), { filename: "a.wav", contentType: "audio/wav" }).field("language", "rw");
+    expect(ok.status).not.toBe(429);
+  });
+
   it("passkey options are bound to PUBLIC_WEB_URL and challenges are single-use", async () => {
     const s = await login(`0784${String(Date.now()).slice(-6)}`);
     const opts = (await s.post("/auth/passkeys/register/options").expect(200)).body;

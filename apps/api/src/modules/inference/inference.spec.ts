@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { AdminController } from "../admin/admin.module";
 import { mapGatewayStatus, residencyRegion, servedByActivatedModel, validateClip, VIDEO_TRYON, videoAvailable, videoEligibility, videoQuote } from "../video/video-rules";
 import { VideoTryOnService } from "../video/video.service";
-import { counterDeltas, enforceInvariants, policySchema, poolShare, type Policy } from "./inference-rules";
+import { ADDED_ROUTE_DEFAULTS, counterDeltas, enforceInvariants, policySchema, poolShare, ROUTES, upgradePolicy, type Policy } from "./inference-rules";
 import { activationDecision, assertActivationAllowed, EVAL_MAX_AGE_DAYS } from "./nlb-gate";
 
 const video = { id: "motion-compose@1.0", tier: "VIDEO_TRYON" };
@@ -78,13 +78,37 @@ describe("PATCH /admin/models/:id uses the gate", () => {
 
 describe("inference policy + metrics (E42)", () => {
   const route = { strategy: "cost", latency_slo_ms: 15000, residency: "any", fallback: true, pool: { enabled: true, cost_rwf: 14 }, hosted: { enabled: true, cost_rwf: 40 } } as const;
-  const policy: Policy = { version: 3, breaker: { failure_threshold: 3, cooldown_s: 15 }, routes: { tryon: route, stt: route, llm: route, avatar: route, video: route } };
+  const policy: Policy = { version: 3, breaker: { failure_threshold: 3, cooldown_s: 15 }, routes: { tryon: route, stt: route, llm: route, avatar: route, video: route, attr: route } };
 
   it("validates the policy and forces no-fallback on video", () => {
     expect(policySchema.safeParse(policy).success).toBe(true);
     expect(policySchema.safeParse({ ...policy, routes: { ...policy.routes, tryon: { ...route, strategy: "random" } } }).success).toBe(false);
     expect(enforceInvariants(policy).routes.video.fallback).toBe(false);
     expect(enforceInvariants(policy).routes.tryon.fallback).toBe(true);
+  });
+  it("lists the attr route and keeps policies stored before it valid (compat step)", () => {
+    expect(ROUTES).toContain("attr");
+    const { attr: _drop, ...routes5 } = policy.routes;
+    const stored = { ...policy, routes: routes5 }; // saved by E42, before the R4 spike added `attr`
+    expect(policySchema.safeParse(stored).success).toBe(false); // why adding the route naively broke them
+    const up = upgradePolicy(stored);
+    expect(up.changed).toBe(true);
+    expect(policySchema.safeParse(up.policy).success).toBe(true);
+    expect(up.policy.routes.attr).toEqual(ADDED_ROUTE_DEFAULTS.attr);
+    expect(up.policy.routes.attr).toMatchObject({ strategy: "pool-only", residency: "in-region" });
+    expect(up.policy.routes.tryon).toEqual(route);
+    expect(up.policy.version).toBe(3);
+    // The gateway's live attr policy wins over the built-in defaults.
+    const live = { ...route, latency_slo_ms: 1500 };
+    expect(upgradePolicy(stored, { routes: { attr: live } }).policy.routes.attr).toEqual(live);
+    // Already complete: untouched. Unknown keys (from a newer gateway) are dropped instead of failing the parse.
+    expect(upgradePolicy(policy)).toEqual({ policy, changed: false });
+    const extra = upgradePolicy({ ...policy, routes: { ...policy.routes, teleport: route } });
+    expect(extra.changed).toBe(true);
+    expect(Object.keys(extra.policy.routes)).not.toContain("teleport");
+    // A route we cannot fill is still an error, not a silent default.
+    const { tryon: _t, ...noTryon } = policy.routes;
+    expect(() => upgradePolicy({ ...policy, routes: noTryon })).toThrow(/tryon/);
   });
   it("turns cumulative gateway counters into deltas, surviving a gateway restart", () => {
     const a = { calls: 10, ok: 8, failures: 2, served_as_fallback: 1, cost_rwf: 112 };

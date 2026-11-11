@@ -9,6 +9,8 @@ import {
   Injectable,
   Module,
   NotFoundException,
+  OnModuleDestroy,
+  OnModuleInit,
   Post,
   ServiceUnavailableException,
   UploadedFile,
@@ -24,7 +26,9 @@ import { MeteringService } from "../../common/metering.service";
 import { PrismaService } from "../../common/prisma.service";
 import { parse } from "../../common/zod";
 import { config } from "../../config";
+import { CounterStore, Limit, MemoryCounterStore, overLimit, RedisCounterStore } from "../circle/guards";
 import { ExperimentsService } from "../pilot/pilot.service";
+import { Redis } from "ioredis";
 
 export const STT_MAX_BYTES = 2 * 1024 * 1024;
 const STT_PER_10_MIN = 40;
@@ -39,26 +43,18 @@ export interface SttResult {
   simulated: boolean;
 }
 
-/** Sliding-window limiter per user (in-process; production would back this with Redis). */
-export class RateWindow {
-  private hits = new Map<string, number[]>();
-  constructor(private max: number, private windowMs: number) {}
-  take(key: string, now = Date.now()) {
-    const recent = (this.hits.get(key) ?? []).filter((t) => now - t < this.windowMs);
-    if (recent.length >= this.max) return false;
-    recent.push(now);
-    this.hits.set(key, recent);
-    return true;
-  }
-}
+/** Per-user STT window, counted in Redis so it holds across API instances (same fixed-window store as poll votes). */
+export const STT_LIMITS = (userId: string): Limit[] => [{ key: `voice:stt:${userId}`, max: STT_PER_10_MIN, windowSec: 600 }];
 
 /**
  * Voice Muse GA (E22, FR-AST-04): server-side speech-to-text through the AI gateway. The recording is
  * held in memory for the duration of the request only. It is never written to storage, logged or kept.
  */
 @Injectable()
-export class VoiceService {
-  private limiter = new RateWindow(STT_PER_10_MIN, 10 * 60_000);
+export class VoiceService implements OnModuleInit, OnModuleDestroy {
+  private redis?: Redis;
+  /** Redis once connected; memory only while Redis is down (and in unit tests). */
+  counters: CounterStore = new MemoryCounterStore();
 
   constructor(
     private prisma: PrismaService,
@@ -66,6 +62,17 @@ export class VoiceService {
     private metering: MeteringService,
     private experiments: ExperimentsService,
   ) {}
+
+  onModuleInit() {
+    this.redis = new Redis(config.redisUrl, { maxRetriesPerRequest: 1, enableOfflineQueue: false, keyPrefix: config.redisKeyPrefix });
+    this.redis.on("error", () => undefined);
+    this.redis.on("ready", () => (this.counters = new RedisCounterStore(this.redis!)));
+    this.redis.on("end", () => (this.counters = new MemoryCounterStore()));
+  }
+
+  onModuleDestroy() {
+    this.redis?.disconnect();
+  }
 
   /** GA: on by default (flag `muse.voice`); the running `muse.voice` experiment can still hold a user out. */
   async enabled(userId: string) {
@@ -81,7 +88,7 @@ export class VoiceService {
       throw new ForbiddenException({ message: "Allow voice in the trust centre to speak to the Muse.", code: "VOICE_CONSENT" });
     }
     await this.metering.assertBudgetOpen();
-    if (!this.limiter.take(userId)) throw new HttpException("Lots of voice requests. Take a breath, or type instead.", 429);
+    if (await overLimit(this.counters, STT_LIMITS(userId))) throw new HttpException("Lots of voice requests. Take a breath, or type instead.", 429);
     const form = new FormData();
     form.append("audio", new Blob([new Uint8Array(audio)], { type: mime || "application/octet-stream" }), "muse");
     form.append("language", language);
