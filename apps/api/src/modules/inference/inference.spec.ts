@@ -1,7 +1,7 @@
 import { ConflictException } from "@nestjs/common";
 import { describe, expect, it, vi } from "vitest";
 import { AdminController } from "../admin/admin.module";
-import { mapGatewayStatus, servedByActivatedModel, validateClip, VIDEO_TRYON, videoAvailable, videoEligibility, videoQuote } from "../video/video-rules";
+import { mapGatewayStatus, residencyRegion, servedByActivatedModel, validateClip, VIDEO_TRYON, videoAvailable, videoEligibility, videoQuote } from "../video/video-rules";
 import { VideoTryOnService } from "../video/video.service";
 import { counterDeltas, enforceInvariants, policySchema, poolShare, type Policy } from "./inference-rules";
 import { activationDecision, assertActivationAllowed, EVAL_MAX_AGE_DAYS } from "./nlb-gate";
@@ -119,6 +119,11 @@ describe("video try-on rules (E39)", () => {
     expect(videoEligibility("DELIVERED", VIDEO_TRYON.dailyCap).ok).toBe(false);
     expect(videoEligibility("WITHHELD", 0).ok).toBe(false);
   });
+  it("routes inference in the shopper's E41 region, else the page's, else RW", () => {
+    expect(residencyRegion("KE", "RW")).toBe("KE");
+    expect(residencyRegion(null, "UG")).toBe("UG");
+    expect(residencyRegion("XX", undefined)).toBe("RW");
+  });
   it("only the activated model's output reaches the shopper", () => {
     expect(servedByActivatedModel("motion-compose@1.0", "motion-compose@1.0")).toBe(true);
     expect(servedByActivatedModel("pool-video-vton@1.0", "hosted-video@2026")).toBe(false);
@@ -137,6 +142,8 @@ describe("video worker deletes the shopper clip whatever happens", () => {
       generation: { findUnique: vi.fn(async () => ({ status: "DELIVERED", cacheKey: "persona-2:x", variant: { cutoutPath: "public/c.png", product: { category: "dress" } } })) },
       modelVersion: { findFirst: vi.fn(async () => ({ id: "motion-compose@1.0" })) },
       usageEvent: { create: vi.fn() },
+      shopperPrefs: { findUnique: vi.fn(async () => ({ country: "RW" })) },
+      pageRegion: { findUnique: vi.fn(async () => null) },
     };
     const storage = { read: vi.fn(async () => Buffer.from("png")), readEncrypted: vi.fn(async () => Buffer.from(JSON.stringify(["a"]))), remove: vi.fn(async () => undefined) };
     const ai = { post: vi.fn(async () => { throw new Error("AI gateway unreachable"); }) };

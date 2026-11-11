@@ -13,7 +13,9 @@ CON-02 / AI-BM-05 block non-commercial licences in production.
   existing in-process adapters stand in). Per call: enabled → configured → residency (`in-region` = backend region
   must equal the request region; no compliant backend = 503, never a silent transfer abroad) → strategy (`cost` =
   cheapest whose observed p95 meets the SLO, `latency`, `pool-first`, `hosted-only`, `pool-only`) → skip OPEN
-  circuits and pools whose last health check is DOWN → call, falling back on failure.
+  circuits and pools whose last health check is DOWN → call, falling back on failure. The request region is the
+  E41 region code (ADR-0006): for video the shopper's `ShopperPrefs.country`, else the page's `PageRegion.region`,
+  else RW; backend regions come from `INFERENCE_POOL_REGION` / `INFERENCE_HOSTED_REGION`.
 - **Circuit breaker** per (route, backend): 3 consecutive failures open it, 15 s cool-down, then one half-open trial.
   Pool health is polled separately (`/v2/models/{name}/ready`) so a dead pool is skipped before any call times out.
 - **Video never falls back silently** (`fallback: false`, enforced by the API): each backend that may serve shoppers
