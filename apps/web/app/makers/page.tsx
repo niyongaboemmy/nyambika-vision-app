@@ -4,6 +4,7 @@ import { serverApi } from "@/lib/server-api";
 import { THEMES, TYPE_LABEL } from "@/lib/maker";
 import { cookies } from "next/headers";
 import { RegionPill } from "@/components/region";
+import { TopBar } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Browse makers", description: "Rwandan tailors, sewing cooperatives and sellers on Nyambika." };
 
@@ -39,13 +40,10 @@ export default async function Makers({ searchParams }: { searchParams: Promise<{
     { label: "Sellers", href: "/makers?type=SELLER" },
   ];
   return (
-    <div className="aurora mx-auto min-h-dvh w-full max-w-[480px] px-4 pb-10">
-      <div className="flex items-center justify-between pt-[max(env(safe-area-inset-top),14px)] pb-2">
-        <Link href="/" className="hit glass grid size-10 place-items-center rounded-full" aria-label="Back">←</Link>
-        <h1 className="font-display text-xl font-black">Browse makers</h1>
-        <RegionPill />
-      </div>
-      <form className="mt-2" role="search"><input name="q" type="search" aria-label="Search makers" defaultValue={q} placeholder="Search makers" className="glass h-12 w-full rounded-2xl px-4 outline-none placeholder:text-white/40" /></form>
+    <div className="aurora mx-auto min-h-dvh w-full max-w-[480px] pb-[max(env(safe-area-inset-bottom),40px)]">
+      <TopBar large back="/" title="Browse makers" right={<RegionPill />} />
+      <div className="px-4">
+      <form className="mt-1" role="search"><input name="q" type="search" aria-label="Search makers" defaultValue={q} placeholder="Search makers" className="glass h-12 w-full rounded-2xl px-4 outline-none placeholder:text-white/40" /></form>
       <div className="no-scrollbar mt-3 flex gap-2 overflow-x-auto">
         {filters.map((f) => (
           <Link key={f.href} href={f.href} aria-current={(type ?? "") === (f.href.split("=")[1] ?? "") ? "page" : undefined} className={`press inline-flex min-h-11 items-center whitespace-nowrap rounded-2xl border px-3.5 text-sm font-semibold ${(type ?? "") === (f.href.split("=")[1] ?? "") ? "border-gold/70 bg-gold/20" : "border-white/20 bg-white/10"}`}>{f.label}</Link>
@@ -65,6 +63,7 @@ export default async function Makers({ searchParams }: { searchParams: Promise<{
           </Link>
         ))}
         {pages.length === 0 && <p className="text-center text-mut">No makers match.</p>}
+      </div>
       </div>
     </div>
   );

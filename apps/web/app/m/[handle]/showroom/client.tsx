@@ -16,6 +16,7 @@ import type { FitView, Twin3dState } from "@/lib/twin3d";
 import { fmtWhen, lookFor, lowEnd, xrSupported, type RoomItem, type Showroom } from "@/lib/vr";
 import { fmtMB, hasWebGL2, load3d, prefersReducedMotion, type Garment3d } from "@/lib/xr";
 import { Icon } from "@/components/icons";
+import { MoreActions } from "@/components/ios";
 
 type Mode = "loading" | "3d" | "flat";
 
@@ -260,10 +261,18 @@ function Room({ room, commerce }: { room: Showroom; commerce: Commerce | null })
             </div>
             <div className="no-scrollbar mt-3 flex gap-2 overflow-x-auto">
               <Pill onClick={() => void view3d(item)}><Icon name="cube" className="size-4" /> View in 3D</Pill>
-              {me && mode === "3d" && (twin?.id === item.productId && twin.state === "on" ? <Pill onClick={offTwin}>↺ Back to mannequin</Pill> : <Pill onClick={() => void onMyTwin(item)} busy={twin?.id === item.productId && twin.state === "working"}><Icon name="mirror" className="size-4" /> See it on my 3D twin</Pill>)}
+              {me && mode === "3d" && (twin?.id === item.productId && twin.state === "on" ? <Pill onClick={offTwin}><Icon name="rotate" className="size-4" /> Back to mannequin</Pill> : <Pill onClick={() => void onMyTwin(item)} busy={twin?.id === item.productId && twin.state === "working"}><Icon name="mirror" className="size-4" /> See it on my 3D twin</Pill>)}
               <Pill href={`/looks/try?variant=${item.variantId}`}><Icon name="sparkle" className="size-4" /> Try on me</Pill>
-              {me && mrMirror && <Pill href={`/mirror/mr?product=${item.productId}&variant=${item.variantId}`}><Icon name="headset" className="size-4" /> Mixed-reality mirror</Pill>}
-              <Pill href={`/m/${room.page.handle}`}><Icon name="store" className="size-4" /> Maker Space</Pill>
+              {/* Secondary destinations live in an iOS action sheet instead of more pills. */}
+              <MoreActions
+                label="More for this piece"
+                title={item.title}
+                className="size-10 shrink-0 bg-white/10 ring-1 ring-inset ring-white/15"
+                actions={[
+                  ...(me && mrMirror ? [{ label: "Mixed-reality mirror", icon: "headset" as const, onSelect: () => router.push(`/mirror/mr?product=${item.productId}&variant=${item.variantId}`) }] : []),
+                  { label: "Maker Space", icon: "store" as const, onSelect: () => router.push(`/m/${room.page.handle}`) },
+                ]}
+              />
             </div>
             {twin?.id === item.productId && twin.state === "on" && <p className="mt-2 text-[11px] text-mut"><Icon name="lock" className="mr-1 inline size-3 align-[-2px]" />Only you see your 3D twin · {twin.note}</p>}
             {twin?.id === item.productId && twin.state === "none" && <p className="mt-2 text-xs text-mut"><Link className="text-gold underline" href="/mirror/3d">Make your 3D twin</Link> · 2 min</p>}
