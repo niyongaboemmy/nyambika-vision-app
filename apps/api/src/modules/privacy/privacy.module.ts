@@ -8,6 +8,8 @@ import { PrismaService } from "../../common/prisma.service";
 import { StorageService } from "../../common/storage.service";
 import { parse } from "../../common/zod";
 import { TwinModule, TwinService } from "../twin/twin.module";
+import { CircleModule, CircleService } from "../circle/circle.module";
+import { WardrobeModule, WardrobeService } from "../wardrobe/wardrobe.module";
 
 /** Privacy centre (FR-PRV-01..07, CMP-01..05): consents, export, deletion cascade. */
 @Controller("privacy")
@@ -17,6 +19,8 @@ export class PrivacyController {
     private consent: ConsentService,
     private twins: TwinService,
     private storage: StorageService,
+    private circle: CircleService,
+    private wardrobe: WardrobeService,
   ) {}
 
   @Get()
@@ -63,7 +67,8 @@ export class PrivacyController {
     });
     res.setHeader("content-type", "application/json");
     res.setHeader("content-disposition", 'attachment; filename="nyambika-my-data.json"');
-    res.send(JSON.stringify({ exportedAt: new Date(), note: "Twin and look images are available on request; they are encrypted at rest.", user: u }, null, 2));
+    const [circlePolls, wardrobe] = await Promise.all([this.circle.exportFor(user.id), this.wardrobe.exportFor(user.id)]);
+    res.send(JSON.stringify({ exportedAt: new Date(), note: "Twin and look images are available on request; they are encrypted at rest.", user: u, circlePolls, wardrobe }, null, 2));
   }
 
   /** Deletion cascade with a recorded job and per-step status. */
@@ -82,6 +87,10 @@ export class PrivacyController {
       steps.push({ step: "Twin image deleted from storage", done: true, detail: `${removed} looks rendered from it removed` });
       steps.push({ step: "Provider zero-retention confirmed", done: true, detail: "Local gateway keeps no copies" });
     }
+    // Polls and restyled outfits are rendered from the twin and looks, so every scope removes them.
+    const polls = await this.circle.deleteFor(user.id);
+    const outfits = await this.wardrobe.deleteFor(user.id);
+    steps.push({ step: "Circle polls and wardrobe outfits deleted", done: true, detail: `${polls} polls (shared copies and votes), ${outfits} outfit images` });
     if (scope === "LOOKS" || scope === "ACCOUNT") {
       const gens = await this.prisma.generation.findMany({ where: { userId: user.id } });
       for (const g of gens) if (g.outputPath) await this.storage.remove(g.outputPath);
@@ -102,5 +111,5 @@ export class PrivacyController {
   }
 }
 
-@Module({ imports: [TwinModule], controllers: [PrivacyController] })
+@Module({ imports: [TwinModule, CircleModule, WardrobeModule], controllers: [PrivacyController] })
 export class PrivacyModule {}

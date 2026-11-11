@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { MenuSheet } from "@/components/menu";
+import { WardrobeAmbient } from "@/components/wardrobe-ambient";
 import { Button, Chip, ErrorNote, Screen, Sheet, Spinner } from "@/components/ui";
 import { api, rwf } from "@/lib/api";
 import { useSession } from "@/lib/session";
@@ -159,6 +160,7 @@ export default function Muse() {
         {me && !me.hasTwin && (
           <Link href="/mirror" className="glass mt-3 rounded-2xl px-4 py-2 text-sm">🪞 Create your private twin to see looks on <b>you</b> →</Link>
         )}
+        {me && phase === "idle" && <WardrobeAmbient />}
 
         <div className="relative my-6 grid size-56 place-items-center">
           {phase === "listening" && (

@@ -579,3 +579,99 @@ model NotFoundHit {
   hits     Int      @default(1)
   lastSeen DateTime @default(now())
 }
+
+// ==== E25 Ask your circle (FR-SOC-01..03, CR-09) ====
+
+/// A private live poll the shopper shares with friends. Watermarked copies only; originals stay private.
+model CirclePoll {
+  id        String         @id @default(cuid())
+  ownerId   String
+  token     String         @unique
+  question  String
+  occasion  String?
+  consentId String
+  ogPath    String?
+  expiresAt DateTime
+  revokedAt DateTime?
+  purgedAt  DateTime?
+  createdAt DateTime       @default(now())
+  options   CircleOption[]
+  votes     CircleVote[]
+
+  @@index([ownerId, createdAt])
+  @@index([expiresAt])
+}
+
+model CircleOption {
+  id        String       @id @default(cuid())
+  pollId    String
+  poll      CirclePoll   @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  position  Int
+  lookId    String
+  productId String
+  variantId String
+  label     String
+  /// Watermarked copy (private/polls/...), served only while the poll is open.
+  imagePath String
+  votes     CircleVote[]
+}
+
+/// One vote per device per poll (signed device cookie); name and comment are optional.
+model CircleVote {
+  id         String       @id @default(cuid())
+  pollId     String
+  poll       CirclePoll   @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  optionId   String
+  option     CircleOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  deviceHash String
+  ipHash     String
+  name       String?
+  comment    String?
+  emoji      String?
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  @@unique([pollId, deviceHash])
+  @@index([pollId, createdAt])
+}
+
+// ==== E26 Digital wardrobe (FR-WRD-01..03, CR-09) ====
+
+/// An upcoming event the shopper wants to restyle owned pieces for.
+model WardrobeEvent {
+  id              String           @id @default(cuid())
+  userId          String
+  title           String
+  occasion        String
+  date            DateTime
+  budgetMax       Int?
+  intentSessionId String?
+  reminderSentAt  DateTime?
+  createdAt       DateTime         @default(now())
+  outfits         WardrobeOutfit[]
+
+  @@index([userId, date])
+}
+
+/// One AI outfit suggestion: owned pieces + 0–2 new maker items, rendered on the twin.
+model WardrobeOutfit {
+  id          String           @id @default(cuid())
+  eventId     String
+  event       WardrobeEvent    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId      String
+  rank        Int
+  /// [{ productId, variantId, category, owned }] in render order (bottom → top).
+  items       Json
+  reasons     String[]
+  score       Float            @default(0)
+  newCostRwf  Int              @default(0)
+  status      GenerationStatus @default(QUEUED)
+  outputPath  String?
+  guard       Json?
+  c2pa        Json?
+  costRwf     Int              @default(0)
+  createdAt   DateTime         @default(now())
+  deliveredAt DateTime?
+
+  @@index([userId, createdAt])
+}
