@@ -36,7 +36,7 @@ async function ctx(label) {
 const nav = async (p, name) => {
   const link = p.getByRole("navigation", { name: "Studio" }).last().getByRole("link", { name, exact: true });
   if (await link.count()) return link.click();
-  await p.getByRole("button", { name: "More" }).click();
+  await p.getByRole("button", { name: "More", exact: true }).click();
   await p.getByRole("dialog").getByRole("link", { name: new RegExp(`^${name}`) }).click();
 };
 

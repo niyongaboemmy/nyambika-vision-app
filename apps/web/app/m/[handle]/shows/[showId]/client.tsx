@@ -2,6 +2,8 @@
 
 import { isExpectedText, LimitState } from "@/components/limit-state";
 import { REACTIONS, runwayCursor, showPhase, type RunwayCursor, type ShowPhase } from "@nyambika/contracts";
+import { haptic } from "@/lib/native";
+import { vrReaction } from "@/lib/vr-reactions";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -313,7 +315,7 @@ export function ShowClient({ initial }: { initial: ShowView }) {
       {/* Floating reactions (off with reduced motion: counts only) */}
       <div aria-hidden className="pointer-events-none absolute inset-0 z-10 overflow-hidden">
         {floaters.map((f) => (
-          <span key={f.key} className="vr-float absolute bottom-40 text-3xl" style={{ right: `${f.x}%` }}>{f.emoji}</span>
+          <span key={f.key} aria-hidden className="vr-float absolute bottom-40" style={{ right: `${f.x}%`, color: vrReaction(f.emoji).color }}><Icon name={vrReaction(f.emoji).icon} filled className="size-9 drop-shadow-[0_4px_12px_rgba(0,0,0,.5)]" /></span>
         ))}
       </div>
 
@@ -333,22 +335,22 @@ export function ShowClient({ initial }: { initial: ShowView }) {
             {!replay ? (
               <div role="group" aria-label="Send a reaction" className="glass flex flex-1 justify-between rounded-full px-1.5 py-1">
                 {REACTIONS.map((e) => (
-                  <button key={e} onClick={() => void react(e)} aria-label={`React ${e}${snap ? `, ${snap.reactions[e] ?? 0} so far` : ""}`} className="grid size-11 place-items-center rounded-full text-2xl transition active:scale-125">
-                    <span aria-hidden>{e}</span>
+                  <button key={e} onClick={() => { haptic("light"); void react(e); }} aria-label={`React: ${vrReaction(e).label}${snap ? `, ${snap.reactions[e] ?? 0} so far` : ""}`} className="press grid size-11 place-items-center rounded-full transition active:scale-125" style={{ color: vrReaction(e).color }}>
+                    <Icon name={vrReaction(e).icon} filled className="size-6" />
                   </button>
                 ))}
               </div>
             ) : (
               <div className="flex flex-1 gap-2">
                 <button onClick={togglePause} className="glass inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-2xl font-bold">{replay.pausedAt ? <><Icon name="play" className="size-5" filled /> Play</> : <><Icon name="pause" className="size-5" filled /> Pause</>}</button>
-                <button onClick={() => void startReplay()} className="glass min-h-12 rounded-2xl px-4 font-bold" aria-label="Restart the replay">↺</button>
+                <button onClick={() => void startReplay()} className="glass min-h-12 rounded-2xl px-4 font-bold" aria-label="Restart the replay"><Icon name="refresh" className="size-5" /></button>
               </div>
             )}
             {look && (me ? <HoldToBuy key={look.variant.id} look={look} /> : <Link href={`/signin?next=${encodeURIComponent(`/m/${show.maker.handle}/shows/${show.id}`)}`} className="grad-cta inline-flex shrink-0 items-center gap-1.5 rounded-2xl px-4 py-2 text-sm font-bold"><Icon name="hand" className="size-4" /> Buy</Link>)}
           </div>
           {snap && !replay && (
             <p className="mt-2 text-center text-[11px] text-txt/70">
-              {REACTIONS.map((e) => `${e} ${snap.reactions[e] ?? 0}`).join("  ·  ")}{mode === "polling" ? " · refreshing every few seconds" : ""}
+              {REACTIONS.map((e) => <span key={e} className="mx-1 inline-flex items-center gap-1 tabular-nums"><Icon name={vrReaction(e).icon} className="size-3.5" /><span className="sr-only">{vrReaction(e).label} </span>{snap.reactions[e] ?? 0}</span>)}{mode === "polling" ? " · live" : ""}
             </p>
           )}
           {err && (isExpectedText(err) ? <LimitState error={err} /> : <p role="alert" className="mt-1 text-center text-xs text-terra">{err}</p>)}

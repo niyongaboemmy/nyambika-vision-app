@@ -39,7 +39,7 @@ export function RegionPill({ className = "" }: { className?: string }) {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className={`hit glass press inline-flex min-h-10 items-center gap-1.5 rounded-full px-3 text-sm font-semibold ${className}`} aria-label={`Country ${REGIONS[prefs.country].name}, prices shown in ${prefs.displayCurrency}. Change`}>
+      <button type="button" onClick={() => setOpen(true)} className={`hit glass press inline-flex min-h-10 items-center gap-1.5 rounded-full px-3 text-sm font-semibold ${className}`} aria-label={`Country ${prefs.country} · ${prefs.displayCurrency}: ${REGIONS[prefs.country].name}, prices in ${prefs.displayCurrency}. Change`}>
         <Icon name="globe" className="size-4" /> <span className="tabular-nums">{prefs.country}</span> · {prefs.displayCurrency}
         <Icon name="chevron" className="size-3.5 rotate-90 text-mut" />
       </button>

@@ -6,6 +6,8 @@
  */
 import { AVATAR_HUES, PRESENCE, type PoseEntry, type PresenceMember } from "@nyambika/contracts";
 import * as THREE from "three";
+import { iconPath } from "@/components/icons";
+import { vrReaction } from "@/lib/vr-reactions";
 import type { ShowroomEngine } from "./vr-engine";
 
 interface Body {
@@ -24,6 +26,33 @@ interface Float {
   s: THREE.Sprite;
   t: number;
   y0: number;
+}
+
+/** Reaction as an SF-style glyph on a glass disc (no emoji in the 3D room either). */
+function iconSprite(value: string) {
+  const r = vrReaction(value);
+  const c = document.createElement("canvas");
+  c.width = c.height = 128;
+  const g = c.getContext("2d")!;
+  g.fillStyle = "rgba(20,18,26,.72)";
+  g.beginPath();
+  g.arc(64, 64, 58, 0, Math.PI * 2);
+  g.fill();
+  g.translate(28, 28);
+  g.scale(3, 3);
+  const path = new Path2D(iconPath(r.icon));
+  g.fillStyle = r.color;
+  g.strokeStyle = r.color;
+  g.lineWidth = 1.75;
+  g.lineCap = "round";
+  g.lineJoin = "round";
+  g.fill(path);
+  g.stroke(path);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, transparent: true, depthWrite: false }));
+  s.renderOrder = 5;
+  return s;
 }
 
 function textSprite(text: string, opts: { font: string; size?: number; bg?: string; fg?: string; w?: number }) {
@@ -157,7 +186,7 @@ export class PresenceLayer {
   /** A reaction rises from the sender (or in front of the viewer for their own). */
   react(sid: string, emoji: string) {
     if (this.hiddenByUser.has(sid)) return;
-    const s = textSprite(emoji, { font: "system-ui, 'Apple Color Emoji', 'Noto Color Emoji'", size: 92, w: 128 });
+    const s = iconSprite(emoji);
     s.scale.set(0.26, 0.26, 1);
     const b = this.bodies.get(sid);
     if (b?.root.visible) s.position.set(b.root.position.x, b.root.position.y + (b.m.seated ? 1.5 : 1.9), b.root.position.z);

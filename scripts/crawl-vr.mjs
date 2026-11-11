@@ -167,12 +167,12 @@ const viewers = (p) => p.locator('[aria-label$="watching"]').getAttribute("aria-
 for (const p of [page, viewerB]) await p.waitForFunction(() => /^2 /.test(document.querySelector('[aria-label$="watching"]')?.getAttribute("aria-label") ?? ""), null, { timeout: 15000 });
 assert((await viewers(page)).startsWith("2 ") && (await viewers(viewerB)).startsWith("2 "), "both viewers see 2 watching");
 await page.waitForTimeout(7000); // past the intro: first look on the runway
-await page.getByRole("button", { name: /^React 🔥/ }).click();
-await page.getByRole("button", { name: /^React 😍/ }).click();
-await viewerB.waitForFunction(() => /🔥 1/.test(document.body.innerText) && /😍 1/.test(document.body.innerText), null, { timeout: 8000 });
+await page.getByRole("button", { name: /^React: Fire/ }).click();
+await page.getByRole("button", { name: /^React: Love it/ }).click();
+await viewerB.waitForFunction(() => /Fire 1/.test(document.body.innerText) && /Love it 1/.test(document.body.innerText), null, { timeout: 8000 });
 assert(true, "viewer B sees viewer A's reactions live");
-await viewerB.getByRole("button", { name: /^React 👏/ }).click();
-await page.waitForFunction(() => /👏 1/.test(document.body.innerText), null, { timeout: 8000 });
+await viewerB.getByRole("button", { name: /^React: Applause/ }).click();
+await page.waitForFunction(() => /Applause 1/.test(document.body.innerText), null, { timeout: 8000 });
 await page.waitForTimeout(600);
 await shot("live-show-viewer-a");
 await viewerB.screenshot({ path: new URL("./crawl-output/vr/30-live-show-viewer-b.png", import.meta.url).pathname });

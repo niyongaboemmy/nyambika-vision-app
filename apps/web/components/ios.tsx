@@ -77,7 +77,7 @@ export function GroupRow({
         </span>
       )}
       <span className="min-w-0 flex-1">
-        <span className={`block truncate text-[15px] font-medium ${destructive ? "text-red-600" : "text-fg"}`}>{title}</span>
+        <span className={`block truncate text-[15px] font-medium ${destructive ? "text-[#d70015] [[data-theme=dark]_&]:text-[#ff6961]" : "text-fg"}`}>{title}</span>
         {subtitle && <span className="block truncate text-[13px] text-fg-muted">{subtitle}</span>}
       </span>
       {value != null && <span className="max-w-[45%] shrink-0 truncate text-[15px] text-fg-muted">{value}</span>}
@@ -164,7 +164,7 @@ export function ActionSheet({ open, onClose, title, actions, cancelLabel = "Canc
                 onClose();
                 a.onSelect();
               }}
-              className={`${btn} disabled:opacity-40 ${a.destructive ? "text-red-600" : "text-[color:var(--focus)]"}`}
+              className={`${btn} disabled:opacity-40 ${a.destructive ? "text-[#d70015] [[data-theme=dark]_&]:text-[#ff6961]" : "text-[color:var(--focus)]"}`}
             >
               {a.icon && <Icon name={a.icon} className="size-5" />}
               {a.label}

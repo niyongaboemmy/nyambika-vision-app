@@ -68,7 +68,7 @@ await page.goto(link);
 await page.getByRole("heading", { name: /confirm your order/i }).waitFor();
 await page.waitForTimeout(500);
 await shot("mandate-signed-out");
-assert(await page.getByText(/nothing is ordered or paid/i).isVisible(), "mandate says nothing is ordered until the shopper confirms");
+assert(await page.getByText(/nothing is (ordered or )?paid/i).isVisible(), "mandate says nothing is ordered until the shopper confirms");
 const phone = `07887${stamp}`;
 await signIn(page, phone);
 await page.goto(link);

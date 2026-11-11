@@ -116,6 +116,9 @@ const PATHS = {
 
 export type IconName = keyof typeof PATHS;
 
+/** Raw path data, for canvas/WebGL drawing (e.g. VR reaction sprites via Path2D). */
+export const iconPath = (name: IconName): string => PATHS[name];
+
 /** Glyphs that look right filled (SF "fill" variants for selected tabs, saved hearts, ratings). */
 const FILLABLE = new Set<IconName>(["heart", "star", "home", "bell", "bag", "play", "user", "chat", "pin", "bulb", "thumbsUp", "fire", "tag", "headset"]);
 

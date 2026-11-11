@@ -1,6 +1,7 @@
 "use client";
 
 import { REACTIONS, type PresenceMember } from "@nyambika/contracts";
+import { vrReaction } from "@/lib/vr-reactions";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Sheet } from "@/components/ui";
@@ -94,7 +95,7 @@ export function SharedRoom({ engine, room, signedIn, signInHref, seated, show }:
           return;
         case "react":
           L?.react(e.sid, e.e);
-          if (cc) caption(`${nicks.current.get(e.sid) ?? "Someone"} reacted ${e.e}`);
+          if (cc) caption(`${nicks.current.get(e.sid) ?? "Someone"} reacted: ${vrReaction(e.e).label}`);
           return;
         case "mute":
           setMembers((p) => {
@@ -210,8 +211,8 @@ export function SharedRoom({ engine, room, signedIn, signInHref, seated, show }:
         {phase === "in" && you?.seat === "avatar" && (
           <div role="group" aria-label="Send a reaction" className="glass flex flex-col gap-1 rounded-full p-1">
             {REACTIONS.map((e) => (
-              <button key={e} onClick={() => react(e)} disabled={you.muted} aria-label={`React ${e}`} className="grid size-11 place-items-center rounded-full text-xl transition active:scale-75 disabled:opacity-40">
-                {e}
+              <button key={e} onClick={() => react(e)} disabled={you.muted} aria-label={`React: ${vrReaction(e).label}`} className="press grid size-11 place-items-center rounded-full transition active:scale-75 disabled:opacity-40" style={{ color: vrReaction(e).color }}>
+                <Icon name={vrReaction(e).icon} filled className="size-5" />
               </button>
             ))}
           </div>

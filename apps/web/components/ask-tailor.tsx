@@ -151,7 +151,7 @@ export function AskTailorSheet({ open, onClose, request }: { open: boolean; onCl
             <div className="grid grid-cols-2 gap-2">
               {QUICK.map((k) => (
                 <label key={k} className="block">
-                  <span className="text-xs font-semibold">{MEASUREMENT_LABEL[k].icon} {MEASUREMENT_LABEL[k].label}</span>
+                  <span className="flex items-center gap-1 text-xs font-semibold"><Icon name={MEASUREMENT_LABEL[k].glyph} className="size-3.5 text-gold" />{MEASUREMENT_LABEL[k].label}</span>
                   <input
                     inputMode="decimal"
                     value={draft[k] ?? ""}

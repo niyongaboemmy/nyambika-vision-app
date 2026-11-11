@@ -165,8 +165,8 @@ try {
   await host.snap("host-sees-two-avatars");
   await g1.snap("guest1-view");
 
-  await g1.p.getByRole("button", { name: "React 🔥" }).click();
-  await host.p.getByText(/reacted 🔥/).waitFor({ timeout: 8000 });
+  await g1.p.getByRole("button", { name: "React: Fire" }).click();
+  await host.p.getByText(/reacted: Fire/).waitFor({ timeout: 8000 });
   await host.p.waitForTimeout(400);
   await host.snap("host-sees-spatial-reaction-caption");
   assert(true, "reaction reaches the host with a caption");
@@ -190,7 +190,7 @@ try {
   await host.p.getByRole("button", { name: `Mute ${nick2}` }).click();
   await host.p.getByRole("button", { name: `Unmute ${nick2}` }).waitFor();
   await g2.p.getByText(/The host paused your reactions/).waitFor({ timeout: 8000 });
-  assert(await g2.p.getByRole("button", { name: "React 🔥" }).isDisabled(), "muted guest's reaction buttons are paused");
+  assert(await g2.p.getByRole("button", { name: "React: Fire" }).isDisabled(), "muted guest's reaction buttons are paused");
   await g2.snap("guest2-muted");
   await host.p.getByRole("button", { name: `Remove ${nick2}` }).click();
   await g2.p.getByText(/The host removed you/).waitFor({ timeout: 8000 });
