@@ -149,8 +149,8 @@ export default function Settings() {
           </Group>
           <Field label="MoMo merchant number" hint="Payments land here"><Input inputMode="tel" value={f.momoMerchant} onChange={(e) => setF({ ...f, momoMerchant: e.target.value })} /></Field>
           <Group>
-            <GroupRow icon="sparkle" tone="violet" title="Share my try-on allowance" subtitle="After their free looks" accessory={<Switch checked={f.allowanceOn} onChange={(v) => setF({ ...f, allowanceOn: v })} ariaLabel="Share my try-on allowance" />} />
-            <GroupRow icon="globe" tone="sky" title="Country, currency & export" subtitle="M-Pesa · cards · shipping" href={`/studio/${page.id}/region`} />
+            <GroupRow icon="sparkle" tone="violet" title="Share allowance" subtitle="Try-ons after their free looks" accessory={<Switch checked={f.allowanceOn} onChange={(v) => setF({ ...f, allowanceOn: v })} ariaLabel="Share my try-on allowance" />} />
+            <GroupRow icon="globe" tone="sky" title="Country & export" subtitle="M-Pesa · cards · shipping" href={`/studio/${page.id}/region`} />
           </Group>
         </Card>
 

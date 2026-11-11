@@ -34,7 +34,7 @@ export function TrainingDataLink({ pageId }: { pageId: string }) {
   const { data } = useApi<TrainingState>(`/pages/${pageId}/training-data`);
   return (
     <Group>
-      <GroupRow icon="layers" tone="violet" title="Help train Nyambika's garment helper" subtitle={data ? (data.optedIn ? "Sharing · change any time" : "Off · your choice") : "Off by default"} href={`/studio/${pageId}/training`} />
+      <GroupRow icon="layers" tone="violet" title="Help train Nyambika AI" subtitle={data ? (data.optedIn ? "Sharing · change any time" : "Off · your choice") : "Off by default"} href={`/studio/${pageId}/training`} />
     </Group>
   );
 }

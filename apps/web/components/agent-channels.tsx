@@ -34,8 +34,8 @@ export function AgentChannels({ pageId }: { pageId: string }) {
       {data ? (
         <>
           <Group footer={`30 days: ${data.last30d.agentCheckouts} checkouts · ${data.last30d.confirmed} confirmed`}>
-            <GroupRow icon="sparkle" tone="violet" title="Show my page to AI assistants" subtitle="Catalogue API · MCP · checkout" accessory={<Switch checked={data.agentsEnabled} onChange={(v) => save({ agentsEnabled: v, marketplacesEnabled: data.marketplacesEnabled })} ariaLabel="Show my page to AI assistants" />} />
-            <GroupRow icon="store" tone="sky" title="List me on external marketplaces" subtitle="Partner catalogue feeds" accessory={<Switch checked={data.marketplacesEnabled} onChange={(v) => save({ agentsEnabled: data.agentsEnabled, marketplacesEnabled: v })} ariaLabel="List me on external marketplaces" />} />
+            <GroupRow icon="sparkle" tone="violet" title="AI assistants" subtitle="Catalogue API · MCP · checkout" accessory={<Switch checked={data.agentsEnabled} onChange={(v) => save({ agentsEnabled: v, marketplacesEnabled: data.marketplacesEnabled })} ariaLabel="Show my page to AI assistants" />} />
+            <GroupRow icon="store" tone="sky" title="Marketplaces" subtitle="Partner catalogue feeds" accessory={<Switch checked={data.marketplacesEnabled} onChange={(v) => save({ agentsEnabled: data.agentsEnabled, marketplacesEnabled: v })} ariaLabel="List me on external marketplaces" />} />
           </Group>
         </>
       ) : (
