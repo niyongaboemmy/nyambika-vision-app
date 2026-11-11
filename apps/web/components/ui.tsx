@@ -93,11 +93,14 @@ export function Sheet({ open, onClose, children, title }: { open: boolean; onClo
   const [mounted, setMounted] = useState(false);
   const panel = useRef<HTMLDivElement>(null);
   const titleId = useId();
+  // Latest onClose without re-running the open/close effect on every parent render (callers pass inline arrows).
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
   useEffect(() => setMounted(true), []);
   useEffect(() => {
     if (!open) return;
     const prev = document.activeElement as HTMLElement | null;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && closeRef.current();
     window.addEventListener("keydown", onKey);
     const overflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -108,7 +111,7 @@ export function Sheet({ open, onClose, children, title }: { open: boolean; onClo
       clearTimeout(t);
       prev?.focus?.({ preventScroll: true });
     };
-  }, [open, onClose]);
+  }, [open]);
   if (!open || !mounted) return null;
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-end justify-center" role="dialog" aria-modal="true" aria-labelledby={title ? titleId : undefined}>
