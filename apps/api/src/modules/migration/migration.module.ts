@@ -1,4 +1,5 @@
 import { BadRequestException, Body, Controller, ForbiddenException, Get, Logger, Module, NotFoundException, Param, Post, Query } from "@nestjs/common";
+import { Prisma } from "@prisma/client";
 import { createHash, randomBytes } from "node:crypto";
 import { z } from "zod";
 import { Access, AuthUser, CurrentUser, Public } from "../../common/auth";
@@ -99,11 +100,14 @@ export class MigrationController {
     if (await this.prisma.redirect.findUnique({ where: { fromPath } })) throw new Error(`Legacy URL ${fromPath} already migrated`);
     const checksum = createHash("sha256").update(JSON.stringify(src)).digest("hex");
     const phone = toE164(src.ownerPhone);
-    const owner = await this.prisma.user.upsert({
-      where: { phone },
-      update: {},
-      create: { phone, name: src.ownerName, roles: { create: { role: "SHOPPER" } } },
-    });
+    // A wave can hold several pages of one new owner, imported concurrently: Prisma's upsert (nested create, so not a
+    // native ON CONFLICT) is find-then-create, and the loser of the race gets P2002. The row exists by then: read it.
+    const owner = await this.prisma.user
+      .upsert({ where: { phone }, update: {}, create: { phone, name: src.ownerName, roles: { create: { role: "SHOPPER" } } } })
+      .catch(async (e) => {
+        if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") return this.prisma.user.findUniqueOrThrow({ where: { phone } });
+        throw e;
+      });
     const defects: Defect[] = [];
     // Hidden until the owner signs off and the host goes live (OP-1: the member owns the page).
     const page = await this.prisma.page.create({

@@ -75,9 +75,9 @@ export class PartnerService implements OnModuleInit, OnModuleDestroy {
 
   onModuleInit() {
     const connection = { url: config.redisUrl, maxRetriesPerRequest: null };
-    this.queue = new Queue(QUEUE, { connection });
+    this.queue = new Queue(QUEUE, { connection, prefix: config.queuePrefix });
     if (process.env.GENERATION_WORKER !== "0") {
-      this.worker = new Worker(QUEUE, (job) => (job.name === "webhook" ? this.deliverWebhook(job) : this.run(job.data.id as string)), { connection, concurrency: 2 });
+      this.worker = new Worker(QUEUE, (job) => (job.name === "webhook" ? this.deliverWebhook(job) : this.run(job.data.id as string)), { connection, prefix: config.queuePrefix, concurrency: 2 });
       this.worker.on("failed", (job, err) => {
         if (job?.name === "webhook" && job.attemptsMade >= (job.opts.attempts ?? 1)) {
           void this.prisma.partnerTryonJob.update({ where: { id: job.data.id }, data: { webhookStatus: "FAILED" } }).catch(() => undefined);

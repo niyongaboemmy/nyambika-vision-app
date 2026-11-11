@@ -39,12 +39,14 @@ interface TryOnResult {
 
 type OutfitItem = { productId: string; variantId: string; category: string; owned: boolean };
 
+/** Job name on the generation queue (routed by GenerationService's job-name switch, like `asset3d` and `motion`). */
+export const OUTFIT_JOB = "outfit";
+
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1).replace("-", " ");
 
 @Injectable()
 export class WardrobeService implements OnModuleInit, OnModuleDestroy {
   private log = new Logger("Wardrobe");
-  private chain: Promise<unknown> = Promise.resolve();
   private timer?: NodeJS.Timeout;
 
   constructor(
@@ -61,6 +63,7 @@ export class WardrobeService implements OnModuleInit, OnModuleDestroy {
   ) {}
 
   onModuleInit() {
+    this.generations.handle(OUTFIT_JOB, (job) => this.render(job.data.id as string));
     // Events drifting into the 3-day window get their reminder even if nothing else happens.
     this.timer = setInterval(() => void this.remindDue().catch((e) => this.log.warn(e.message)), 30 * 60_000);
     this.timer.unref();
@@ -201,19 +204,22 @@ export class WardrobeService implements OnModuleInit, OnModuleDestroy {
           newCostRwf: o.newCostRwf,
         },
       });
-      this.enqueue(row.id);
+      await this.enqueue(row.id);
     }
     return this.event(userId, event.id);
   }
 
+  /** Outfit renders run on the shared generation queue (job `outfit`), so any API instance can take them and they survive restarts. */
   private enqueue(outfitId: string) {
-    // One render at a time per API instance; looks keep priority on the shared BullMQ queue.
-    this.chain = this.chain.then(() => this.render(outfitId)).catch((e) => this.log.error(`outfit ${outfitId}: ${(e as Error).message}`));
+    return this.generations.enqueue(OUTFIT_JOB, { id: outfitId }, `outfit-${outfitId}`);
   }
 
   /** Layered render on the twin through the same AI gateway, guard and C2PA signing as every look. */
   async render(outfitId: string) {
-    const o = await this.prisma.wardrobeOutfit.update({ where: { id: outfitId }, data: { status: "GENERATING" }, include: { event: true } });
+    // Claim QUEUED → GENERATING: a duplicate delivery or an outfit deleted meanwhile (privacy deletion) is a no-op.
+    const claimed = await this.prisma.wardrobeOutfit.updateMany({ where: { id: outfitId, status: "QUEUED" }, data: { status: "GENERATING" } });
+    if (!claimed.count) return;
+    const o = await this.prisma.wardrobeOutfit.findUniqueOrThrow({ where: { id: outfitId }, include: { event: true } });
     const items = o.items as OutfitItem[];
     try {
       await this.metering.assertBudgetOpen();

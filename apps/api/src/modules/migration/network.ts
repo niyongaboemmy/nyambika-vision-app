@@ -49,9 +49,9 @@ export class NetworkMigrationService implements OnModuleInit, OnModuleDestroy {
 
   onModuleInit() {
     const connection = { url: config.redisUrl, maxRetriesPerRequest: null };
-    this.queue = new Queue(QUEUE, { connection });
+    this.queue = new Queue(QUEUE, { connection, prefix: config.queuePrefix });
     if (process.env.MIGRATION_WORKER !== "0") {
-      this.worker = new Worker(QUEUE, (job) => this.run(job), { connection, concurrency: WORKER_CONCURRENCY });
+      this.worker = new Worker(QUEUE, (job) => this.run(job), { connection, prefix: config.queuePrefix, concurrency: WORKER_CONCURRENCY });
       this.worker.on("failed", (job, err) => job && void this.fail(job.data.waveId, job.data.index, err.message));
     }
     // Auto-chase unsigned pages (reminder cadence) every 10 minutes.

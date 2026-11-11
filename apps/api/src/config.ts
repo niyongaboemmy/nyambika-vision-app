@@ -11,6 +11,9 @@ export const config = {
   jwtSecret: req("JWT_SECRET", "dev-only-change-me"),
   twinKey: Buffer.from(req("TWIN_KEY", "0".repeat(63) + "1"), "hex"),
   redisUrl: process.env.REDIS_URL ?? "redis://localhost:6379",
+  /** BullMQ key prefix ("bull" is BullMQ's own default) and a key prefix for rate-limit counters. Tests set both per file. */
+  queuePrefix: process.env.QUEUE_PREFIX || "bull",
+  redisKeyPrefix: process.env.REDIS_KEY_PREFIX ?? "",
   aiUrl: req("AI_GATEWAY_URL", "http://localhost:8100"),
   webUrl: req("PUBLIC_WEB_URL", "http://localhost:3000"),
   selfUrl: process.env.SELF_URL ?? `http://localhost:${process.env.PORT ?? 4000}`,

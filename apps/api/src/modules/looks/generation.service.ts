@@ -54,7 +54,7 @@ export class GenerationService implements OnModuleInit, OnModuleDestroy {
 
   onModuleInit() {
     const connection = { url: config.redisUrl, maxRetriesPerRequest: null };
-    this.queue = new Queue(QUEUE, { connection });
+    this.queue = new Queue(QUEUE, { connection, prefix: config.queuePrefix });
     if (process.env.GENERATION_WORKER !== "0") {
       this.worker = new Worker(
         QUEUE,
@@ -62,7 +62,7 @@ export class GenerationService implements OnModuleInit, OnModuleDestroy {
           job.name === "render"
             ? this.run(job.data.id as string, job.data.persona as number, job.data.morph as MorphRender | undefined)
             : (this.handlers.get(job.name)?.(job) ?? Promise.reject(new Error(`No handler for job ${job.name}`))),
-        { connection, concurrency: CONCURRENCY },
+        { connection, prefix: config.queuePrefix, concurrency: CONCURRENCY },
       );
       this.worker.on("failed", (job, err) => this.log.error(`generation ${job?.data?.id} failed: ${err.message}`));
     }

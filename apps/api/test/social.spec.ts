@@ -251,11 +251,18 @@ describe("digital wardrobe (E26)", () => {
       expect(o.pieces.some((p: { owned: boolean }) => p.owned)).toBe(true);
       expect(o.newCostRwf).toBeLessThanOrEqual(40000);
     }
+    // Each outfit is a job on the shared generation queue, routed by job name (not an in-process chain).
+    const { GenerationService } = await import("../src/modules/looks/generation.service");
+    const queue = (app.get(GenerationService) as unknown as { queue: import("bullmq").Queue }).queue;
+    for (const o of r.body.looks) expect((await queue.getJob(`outfit-${o.id}`))?.name).toBe("outfit");
     let ev = r.body;
-    for (let i = 0; i < 60 && ev.looks.some((o: { status: string }) => ["QUEUED", "GENERATING", "GUARDING"].includes(o.status)); i++) {
+    // Wait for every outfit to reach a final state (3 layered renders can be slow on a loaded gateway).
+    for (const until = Date.now() + 100_000; ev.looks.some((o: { status: string }) => ["QUEUED", "GENERATING", "GUARDING"].includes(o.status)) && Date.now() < until; ) {
       await new Promise((ok) => setTimeout(ok, 500));
       ev = (await shopper.get(`/wardrobe/events/${r.body.id}`)).body;
     }
+    expect(ev.looks.map((o: { status: string }) => o.status).filter((s: string) => ["QUEUED", "GENERATING", "GUARDING"].includes(s))).toEqual([]);
+    expect(ev.looks.filter((o: { c2pa: unknown; status: string }) => o.status === "DELIVERED").every((o: { c2pa: unknown }) => o.c2pa)).toBe(true);
     expect(ev.looks.filter((o: { status: string }) => o.status === "DELIVERED").length).toBeGreaterThan(0);
     expect(ev.reminderSentAt).toBeTruthy();
     const usage = await prisma.usageEvent.count({ where: { userId, kind: "TRYON" } });
@@ -265,7 +272,7 @@ describe("digital wardrobe (E26)", () => {
     expect(msg?.body).toMatch(/Board presentation in 3 days: your outfit is ready/);
     const amb = await shopper.get("/wardrobe/ambient").expect(200);
     expect(amb.body.id).toBe(r.body.id);
-  }, 60000);
+  }, 120_000);
 
   it("rejects past dates and respects the AI kill switch", async () => {
     await shopper.post("/wardrobe/events").send({ occasion: "office", date: "2020-01-01" }).expect(400);
