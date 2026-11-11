@@ -4,6 +4,7 @@ No real persons: personas are flat illustrations. Usage:
   python scripts/make_seed_assets.py OUTDIR --catalogue      # ~40 garments + manifest JSON on stdout
   python scripts/make_seed_assets.py OUTDIR --personas       # persona-1..5.png
   python scripts/make_seed_assets.py OUTDIR --garment KIND HEX PATTERN NAME
+  python scripts/make_seed_assets.py OUTDIR --tee HEX NAME      # plain unbranded tee product photo
 """
 import argparse
 import json
@@ -11,7 +12,8 @@ import math
 import sys
 from pathlib import Path
 
-from PIL import Image, ImageDraw
+import numpy as np
+from PIL import Image, ImageDraw, ImageFilter
 
 STUDIO_BG = (244, 241, 236)
 TWIN_BG = (20, 18, 24)
@@ -122,6 +124,71 @@ def garment(kind: str, base_hex: str, pattern: str, out_path: str | Path, size=(
     return out_path
 
 
+# Plain unbranded crew-neck T-shirt, drawn procedurally (no photo, no logo, no person). Licence: same as this
+# repository (in-house generated asset). Proportions follow a men's M tee: chest 52 cm, length 72 cm, sleeve 20 cm.
+TEE_SOURCE = "procedural (apps/ai/scripts/make_seed_assets.py:tee), in-house generated, no third-party content"
+
+
+def _smooth_noise(rng, shape, cells: tuple[int, int], amp: float) -> np.ndarray:
+    small = rng.standard_normal((cells[1], cells[0])).astype(np.float32)
+    img = Image.fromarray(((small - small.min()) / (np.ptp(small) + 1e-6) * 255).astype(np.uint8))
+    big = np.asarray(img.resize((shape[1], shape[0]), Image.BICUBIC), dtype=np.float32) / 255 - 0.5
+    return big * 2 * amp
+
+
+def tee(base_hex: str, out_path: str | Path, size=(800, 800), seed: int = 7) -> Path:
+    """Studio photo of a plain tee: soft folds, jersey grain, rib collar, twin-needle hems, drop shadow."""
+    w, h = size
+    cx = w // 2
+    rng = np.random.default_rng(seed)
+    body = [(cx - 64, 112), (cx - 160, 138), (cx - 300, 236), (cx - 258, 306), (cx - 176, 258),
+            (cx - 180, 600), (cx - 120, 610), (cx, 614), (cx + 120, 610), (cx + 180, 600), (cx + 176, 258),
+            (cx + 258, 306), (cx + 300, 236), (cx + 160, 138), (cx + 64, 112)]
+    neck_front = [(cx - 64, 112)] + [(cx + 64 * math.cos(math.pi - t * math.pi / 16), 112 + 50 * math.sin(t * math.pi / 16))
+                                     for t in range(1, 16)] + [(cx + 64, 112)]
+    inner_back = [(cx - 60, 114), (cx - 30, 104), (cx, 102), (cx + 30, 104), (cx + 60, 114)] + neck_front[::-1][1:-1]
+
+    mask = Image.new("L", size, 0)
+    ImageDraw.Draw(mask).polygon(body, fill=255)
+    m = np.asarray(mask, dtype=np.float32) / 255
+    base = np.array(hex_rgb(base_hex), dtype=np.float32)
+    shade = 1.0 + _smooth_noise(rng, (h, w), (5, 9), 0.07)            # soft folds
+    ys, xs = np.mgrid[0:h, 0:w].astype(np.float32)
+    shade += 0.035 * np.sin((xs - cx) / 23 + 3 * np.sin(ys / 90)) * np.clip((ys - 380) / 220, 0, 1)  # hem ripples
+    shade += _smooth_noise(rng, (h, w), (w // 3, h // 3), 0.018)       # jersey grain
+    edge = np.asarray(mask.filter(ImageFilter.GaussianBlur(14)), dtype=np.float32) / 255
+    shade *= 0.86 + 0.14 * np.clip((edge - 0.5) / 0.5, 0, 1) ** 0.7     # cylindrical falloff at the sides
+    fabric = np.clip(base[None, None, :] * shade[..., None], 0, 255)
+
+    bg = np.array(STUDIO_BG, dtype=np.float32)
+    shadow = np.asarray(Image.fromarray((m * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(18)), dtype=np.float32) / 255
+    shadow = np.roll(np.roll(shadow, 10, axis=0), 6, axis=1)
+    canvas = bg[None, None, :] * (1 - 0.16 * shadow[..., None])
+    canvas = canvas * (1 - m[..., None]) + fabric * m[..., None]
+    img = Image.fromarray(canvas.astype(np.uint8))
+
+    d = ImageDraw.Draw(img)
+    dark = tuple(int(v) for v in np.clip(base * 0.62, 0, 255))
+    stitch = tuple(int(v) for v in np.clip(base * 0.78, 0, 255))
+    rib = tuple(int(v) for v in np.clip(base * 0.92, 0, 255))
+    d.polygon(inner_back, fill=dark)                                   # inside of the back neck
+    d.line(neck_front, fill=rib, width=14, joint="curve")              # rib collar band
+    d.line([(x, y + 9) for x, y in neck_front], fill=stitch, width=2, joint="curve")
+    for off in (14, 20):                                               # twin-needle hems
+        d.line([(cx - 178, 600 - off), (cx - 120, 610 - off), (cx, 614 - off), (cx + 120, 610 - off),
+                (cx + 178, 600 - off)], fill=stitch, width=2, joint="curve")
+        for s in (-1, 1):
+            d.line([(cx + s * (300 - off * 0.86), 236 - off * 0.51), (cx + s * (258 - off * 0.86), 306 - off * 0.51)],
+                   fill=stitch, width=2)  # parallel to the sleeve hem, inset toward the body
+    for s in (-1, 1):                                                  # shoulder seams
+        d.line([(cx + s * 64, 112), (cx + s * 160, 138)], fill=stitch, width=2)
+    img = img.filter(ImageFilter.GaussianBlur(0.6))
+    out_path = Path(out_path)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    img.save(out_path)
+    return out_path
+
+
 def persona(skin_hex: str, width_factor: float, out_path: str | Path, size=(720, 1280)) -> Path:
     w, h = size
     cx = w // 2
@@ -180,11 +247,14 @@ def main(argv=None):
     p.add_argument("--catalogue", action="store_true")
     p.add_argument("--personas", action="store_true")
     p.add_argument("--garment", nargs=4, metavar=("KIND", "HEX", "PATTERN", "NAME"))
+    p.add_argument("--tee", nargs=2, metavar=("HEX", "NAME"))
     args = p.parse_args(argv)
     out = Path(args.outdir)
     if args.garment:
         kind, hx, pattern, name = args.garment
         print(garment(kind, hx, pattern, out / f"{name}.png"))
+    if args.tee:
+        print(tee(args.tee[0], out / f"{args.tee[1]}.png"))
     if args.personas:
         for i, (skin, wf) in enumerate(PERSONAS, start=1):
             persona(skin, wf, out / f"persona-{i}.png")
@@ -194,8 +264,8 @@ def main(argv=None):
             garment(item["kind"], item["hex"], item["pattern"], out / f"{item['slug']}.png")
         json.dump(manifest, sys.stdout, indent=2)
         print()
-    if not (args.garment or args.personas or args.catalogue):
-        p.error("choose --catalogue, --personas and/or --garment")
+    if not (args.garment or args.tee or args.personas or args.catalogue):
+        p.error("choose --catalogue, --personas, --garment and/or --tee")
 
 
 if __name__ == "__main__":
