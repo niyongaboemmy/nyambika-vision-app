@@ -76,11 +76,13 @@ function cookiePrefs(): Partial<RegionPrefs> {
 
 /** Display preferences (cookie for everyone, saved server-side when signed in) + FX rates. */
 export function useRegion() {
-  const { me } = useSession();
-  const [prefs, setPrefs] = useState<RegionPrefs>({ displayCurrency: "RWF", country: "RW", crossBorder: false, ...cookiePrefs() });
+  const { me, loading } = useSession();
+  // Same first render on server and client (hydration-safe); cookies apply right after mount.
+  const [prefs, setPrefs] = useState<RegionPrefs>({ displayCurrency: "RWF", country: "RW", crossBorder: false });
   const [fx, setFx] = useState<FxSnapshot | null>(null);
 
   useEffect(() => {
+    setPrefs((p) => ({ ...p, ...cookiePrefs() }));
     fxCache ??= api<FxSnapshot>("/region/fx").catch(() => null);
     void fxCache.then(setFx);
     const l = (p: RegionPrefs) => setPrefs(p);
@@ -90,10 +92,22 @@ export function useRegion() {
 
   useEffect(() => {
     // Server prefs (or phone-country defaults) win unless the shopper already chose in this browser.
+    if (loading) return;
     void api<RegionPrefs>("/region/prefs")
-      .then((s) => setPrefs({ ...s, ...cookiePrefs() }))
+      .then((s) => {
+        const merged = { ...s, ...cookiePrefs() };
+        if (!readCookie(COOKIE.cc)) {
+          // First visit: remember the server-side default (e.g. Kenya from a +254 phone) so SSR pages rank by it.
+          writeCookie(COOKIE.cur, merged.displayCurrency);
+          writeCookie(COOKIE.cc, merged.country);
+          writeCookie(COOKIE.xb, merged.crossBorder ? "1" : "0");
+          // Once per browser: re-render server-ranked lists now that the country cookie is known.
+          if (merged.country !== "RW" || merged.crossBorder) window.location.reload();
+        }
+        setPrefs(merged);
+      })
       .catch(() => undefined);
-  }, [me?.id]);
+  }, [me?.id, loading]);
 
   const update = useCallback(
     async (next: Partial<RegionPrefs>) => {

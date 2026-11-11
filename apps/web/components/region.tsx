@@ -153,7 +153,18 @@ export function RegionBuy({ maker, product, variantIndex, commerce }: { maker: M
 
   return (
     <>
-      <Button className="col-span-2" onClick={() => (me ? setOpen(true) : router.push(`/signin?next=/m/${maker.handle}`))} disabled={!v.inStock}>
+      <Button
+        className="col-span-2"
+        onClick={() => {
+          if (!me) return router.push(`/signin?next=/m/${maker.handle}`);
+          // Defaults follow the shopper's country at open time (prefs load after mount).
+          setDelivery(home ? "DELIVERY" : shipCountries.length ? "SHIP" : "PICKUP");
+          setMethod(home ? methods[0] : commerce.card.enabled ? "CARD" : methods[0]);
+          if (shipCountries.includes(prefs.country)) setShipCountry(prefs.country);
+          setOpen(true);
+        }}
+        disabled={!v.inStock}
+      >
         🛍️ {t("region.buy")} · {formatMoney(price, commerce.currency)}
       </Button>
       <Sheet open={open} onClose={() => !busy && (setOpen(false), setCard(null))}>
