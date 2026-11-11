@@ -259,7 +259,7 @@ export function ShowClient({ initial }: { initial: ShowView }) {
           {show.description && <p className="text-[15px] leading-relaxed text-txt/90">{show.description}</p>}
           <div>
             <h2 className="mb-2 text-xs font-semibold uppercase tracking-[.2em] text-gold">On the runway</h2>
-            <ul className="no-scrollbar -mx-5 flex gap-3 overflow-x-auto px-5">
+            <ul tabIndex={0} aria-label="Looks in this show" className="no-scrollbar -mx-5 flex gap-3 overflow-x-auto px-5">
               {show.items.map((i) => (
                 <li key={i.position} className="w-32 shrink-0">
                   <div className="glass overflow-hidden rounded-3xl">{(i.runway?.poster ?? i.photo) && <img src={(i.runway?.poster ?? i.photo)!} alt="" className="h-40 w-full object-cover" />}</div>

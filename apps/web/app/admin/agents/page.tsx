@@ -258,7 +258,7 @@ function ClientCard({ c, models, onChange }: { c: ClientRow; models: Overview["m
         </div>
         <ul className="space-y-2">
           {c.keys.map((k) => (
-            <li key={k.id} className={`flex flex-wrap items-center gap-2 rounded-2xl bg-white p-2.5 ring-1 ring-inset ring-hairline ${k.state !== "OK" ? "opacity-60" : ""}`}>
+            <li key={k.id} className={`flex flex-wrap items-center gap-2 rounded-2xl bg-white p-2.5 ring-1 ring-inset ring-hairline ${k.state !== "OK" ? "bg-paper-2 [&_code]:line-through" : ""}`}>
               <code className="rounded-lg bg-paper-2 px-2 py-1 text-xs font-bold text-cocoa">{k.prefix}…</code>
               <Chip tone={k.env === "LIVE" ? "mint" : "sky"}>{k.env.toLowerCase()}</Chip>
               {k.state !== "OK" && <Badge value={k.state === "REVOKED" ? "CANCELLED" : "SUSPENDED"} label={k.state.toLowerCase()} />}

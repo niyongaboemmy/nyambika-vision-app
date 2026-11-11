@@ -74,7 +74,7 @@ function ArPage() {
       <nav aria-label="Mirror mode" className="fixed inset-x-0 bottom-[max(env(safe-area-inset-bottom),14px)] z-30 flex justify-center">
         <div className="glass flex rounded-full p-1.5 shadow-[0_12px_40px_rgba(0,0,0,.45)]">
           <Link href={`/mirror/3d${variant ? `?variant=${variant}` : ""}`} className="rounded-full px-5 py-2.5 text-sm font-bold text-white/80">🧊 {t("twin3d.title")}</Link>
-          <span aria-current="page" className="rounded-full bg-[#e5395f] px-5 py-2.5 text-sm font-bold text-white">🪞 {t("twin3d.ar")}</span>
+          <span aria-current="page" className="rounded-full bg-[#c81e4a] px-5 py-2.5 text-sm font-bold text-[#fff]">🪞 {t("twin3d.ar")}</span>
         </div>
       </nav>
     </Screen>

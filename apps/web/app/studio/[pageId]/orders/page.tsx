@@ -128,7 +128,8 @@ export default function Orders() {
                 {l.orders.length === 0 && <p className="rounded-2xl border border-dashed border-paper-3 px-3 py-6 text-center text-xs text-cocoa-2">{l.hint}</p>}
                 {l.orders.map((o) => (
                   <article key={o.id} data-order-card className="st-card animate-pop space-y-2 rounded-[20px] p-3">
-                    <button type="button" data-order-open onClick={() => setOpen(o.id)} className="flex w-full items-start gap-2.5 text-left" aria-label={`Open order ${o.code}: ${o.item.title}`}>
+                    <button type="button" data-order-open onClick={() => setOpen(o.id)} className="flex w-full items-start gap-2.5 text-left">
+                      <span className="sr-only">Open order {o.code}: </span>
                       {o.image ? <img src={o.image} alt="" className="h-16 w-13 shrink-0 rounded-xl object-cover" /> : <span className="grid h-16 w-13 shrink-0 place-items-center rounded-xl bg-paper-2"><Icon name="hanger" className="size-5 text-cocoa-3" /></span>}
                       <span className="min-w-0 flex-1">
                         <span className="block truncate text-sm font-extrabold text-cocoa">{o.item.title}</span>

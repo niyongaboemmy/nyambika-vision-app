@@ -40,7 +40,6 @@ export function Collection({ maker, commerce }: { maker: MakerSpace; commerce?: 
               key={p.id}
               role="option"
               aria-selected={d === 0}
-              aria-label={`${p.title}, ${rwf(p.priceRwf)}`}
               onClick={() => (d === 0 ? setOpen(p) : setI(idx))}
               className="glass absolute left-1/2 top-2 h-[270px] w-[180px] overflow-hidden rounded-3xl transition-all duration-300"
               style={{

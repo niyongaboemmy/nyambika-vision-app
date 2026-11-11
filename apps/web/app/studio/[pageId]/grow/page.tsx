@@ -68,7 +68,6 @@ function ProductPicker({ products, value, onChange, label }: { products: StudioP
               key={p.id}
               type="button"
               aria-pressed={on}
-              aria-label={`${p.title}, ${rwf(p.priceRwf)}`}
               onClick={() => onChange(p.id)}
               className={`st-press relative w-[104px] shrink-0 overflow-hidden rounded-2xl bg-white text-left ring-2 ring-inset transition ${on ? "ring-violet-ink shadow-[0_8px_20px_-10px_rgba(98,57,201,.6)]" : "ring-hairline"}`}
             >

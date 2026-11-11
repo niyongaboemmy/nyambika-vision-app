@@ -141,7 +141,6 @@ function Tile({ c, on, order, onClick, note }: { c: Candidate; on: boolean; orde
     <button
       type="button"
       aria-pressed={on}
-      aria-label={`${c.title}, ${rwf(c.priceRwf)}${note ? `, ${note}` : ""}`}
       onClick={onClick}
       className={`st-press relative w-[104px] shrink-0 overflow-hidden rounded-2xl bg-white text-left ring-2 ring-inset transition ${on ? "ring-violet-ink shadow-[0_8px_20px_-10px_rgba(98,57,201,.6)]" : "ring-hairline"}`}
     >

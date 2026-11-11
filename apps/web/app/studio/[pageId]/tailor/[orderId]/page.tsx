@@ -80,7 +80,7 @@ export default function TailorOrder() {
             {o.size && <span className="rounded-full bg-white px-3 py-1 text-sm font-semibold ring-1 ring-stone-300">Usual size {o.size}</span>}
           </div>
           <Card className="space-y-1 text-sm">
-            <p><b>{o.buyer?.name ?? "Customer"}</b> · <a className="underline" href={`tel:${o.buyer?.phone}`}>{o.buyer?.phone}</a></p>
+            <p><b>{o.buyer?.name ?? "Customer"}</b> · {o.buyer?.phone ? <a className="underline" href={`tel:${o.buyer.phone}`}>{o.buyer.phone}</a> : <span className="text-cocoa-2">no phone</span>}</p>
             {o.note && <p className="text-stone-700">“{o.note}”</p>}
             <p className="text-stone-600">Estimate from your prices: <b>{rwf(o.estimateRwf)}</b></p>
             {o.fitting && <p>📅 Fitting <b>{kigaliTime(o.fitting.startsAt, { weekday: "long", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</b> · {o.fitting.location}</p>}
