@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { RegionCode } from "./region";
 
 /** Supported UI and Muse languages (FR-ACC-09). */
 export const Locale = z.enum(["rw", "en", "fr", "sw"]);
@@ -101,8 +102,10 @@ export const IntentRequest = z.object({
 });
 export type IntentRequest = z.infer<typeof IntentRequest>;
 
-export const OtpRequest = z.object({ phone: z.string().regex(/^\+?[0-9]{9,15}$/) });
-export const OtpVerify = z.object({ phone: z.string().regex(/^\+?[0-9]{9,15}$/), code: z.string().length(6) });
+/** Phone as typed (separators allowed) + the sign-in country selector; the API normalises it with `signInPhone`. */
+const SignInPhone = z.string().trim().min(6).max(24).regex(/^\+?[0-9][0-9\s\-().]*$/);
+export const OtpRequest = z.object({ phone: SignInPhone, country: RegionCode.optional() });
+export const OtpVerify = z.object({ phone: SignInPhone, country: RegionCode.optional(), code: z.string().length(6) });
 
 export const PageInput = z.object({
   handle: z.string().regex(/^[a-z0-9-]{3,40}$/),

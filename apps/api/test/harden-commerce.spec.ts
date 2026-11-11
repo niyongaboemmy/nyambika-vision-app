@@ -77,7 +77,7 @@ async function codePage(tag: string) {
   return { owner, pageId: page.body.id as string, variantId: p.body.variants[0].id as string, code };
 }
 
-async function holdWithCode(shopper: request.Agent, phone: string, variantId: string, code: string) {
+function holdWithCode(shopper: request.Agent, phone: string, variantId: string, code: string) {
   return shopper
     .post("/orders")
     .set("idempotency-key", randomUUID())
@@ -168,6 +168,10 @@ describe("discount use is released when a hold-to-buy doesn't go through (E30)",
     expect((await prisma.order.findUniqueOrThrow({ where: { id: b.orderId } })).status).toBe("CANCELLED");
     expect(await uses(page.id, code)).toBe(0);
     await prisma.variant.update({ where: { id: v.id }, data: { stock: v.stock } });
+
+    // The bag (E29) is RWF/MoMo only and takes no codes: a KES piece is refused rather than converted.
+    const bag = await ke.agent.post("/bag/items").send({ variantId: v.id, size: "M", qty: 1 }).expect(409);
+    expect(bag.body.code).toBe("BAG_CURRENCY");
   });
 });
 

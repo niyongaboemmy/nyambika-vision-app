@@ -179,6 +179,7 @@ export class OrdersController {
     if (!isShopper && (to === "COMPLETED" || to === "PAID")) throw new ForbiddenException();
     await this.prisma.order.update({ where: { id }, data: { status: to as OrderStatus } });
     await this.prisma.orderEvent.create({ data: { orderId: id, status: to as OrderStatus, note: note ?? "", actorId: user.id } });
+    if (to === "CANCELLED" || to === "DECLINED") await this.discounts.release(id); // E30: an order that doesn't go through gives the use back
     const copy = STATUS_COPY[to as OrderStatus];
     if (copy) await this.messaging.send("WHATSAPP", o.shopper.phone, `order_${to.toLowerCase()}`, `${o.page.name} ${copy} (${o.code}).${note ? ` “${note}”` : ""}`, id);
     await this.push.orderUpdate(id); // E38: shipped/delivered alerts, silent live-activity steps
