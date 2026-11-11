@@ -103,6 +103,7 @@ function BoothCard({ data, onSaved }: { data: VrStudio; onSaved: () => void }) {
       <div className="grid grid-cols-2 gap-3 [&>*]:min-w-0">
         <Kpi label="Pieces in the room" value={data.showroom.pieces} hint={`${Math.min(data.showroom.pieces, SHOWROOM_BUDGET.mannequins)} on mannequins`} />
         <div className="st-card rounded-[18px] p-3">
+          <p className="mb-2 text-[13px] font-bold text-cocoa">Room size · {fmtMB(data.showroom.bytes)} <span className="font-semibold text-cocoa-2">of {fmtMB(data.showroom.limitBytes)}</span></p>
           <Meter value={data.showroom.bytes} max={data.showroom.limitBytes} label={`Room size ${fmtMB(data.showroom.bytes)} of ${fmtMB(data.showroom.limitBytes)}`} />
           <p className="mt-1 text-[11px] text-cocoa-2">Loads in seconds on Wi-Fi</p>
         </div>
