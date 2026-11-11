@@ -1,5 +1,5 @@
 import { ForbiddenException, Injectable, Logger, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
-import { Queue, Worker } from "bullmq";
+import { Queue, Worker, type Job } from "bullmq";
 import { ConsentService } from "../../common/consent.service";
 import { aiSpend, firstLook, generationDuration, generations, queueDepth } from "../../common/metrics";
 import { config } from "../../config";
@@ -39,6 +39,7 @@ export class GenerationService implements OnModuleInit, OnModuleDestroy {
   private log = new Logger("Generation");
   private queue!: Queue;
   private worker?: Worker;
+  private handlers = new Map<string, (job: Job) => Promise<unknown>>();
 
   constructor(
     private prisma: PrismaService,
@@ -53,9 +54,26 @@ export class GenerationService implements OnModuleInit, OnModuleDestroy {
     const connection = { url: config.redisUrl, maxRetriesPerRequest: null };
     this.queue = new Queue(QUEUE, { connection });
     if (process.env.GENERATION_WORKER !== "0") {
-      this.worker = new Worker(QUEUE, (job) => this.run(job.data.id as string, job.data.persona as number, job.data.morph as MorphRender | undefined), { connection, concurrency: CONCURRENCY });
+      this.worker = new Worker(
+        QUEUE,
+        (job) =>
+          job.name === "render"
+            ? this.run(job.data.id as string, job.data.persona as number, job.data.morph as MorphRender | undefined)
+            : (this.handlers.get(job.name)?.(job) ?? Promise.reject(new Error(`No handler for job ${job.name}`))),
+        { connection, concurrency: CONCURRENCY },
+      );
       this.worker.on("failed", (job, err) => this.log.error(`generation ${job?.data?.id} failed: ${err.message}`));
     }
+  }
+
+  /** Other generation kinds (E27 3D garment, E28 motion) run on this same queue under their own job name. */
+  handle(name: string, fn: (job: Job) => Promise<unknown>) {
+    this.handlers.set(name, fn);
+  }
+
+  /** jobId makes enqueueing idempotent, like look renders. */
+  enqueue(name: string, data: object, jobId: string) {
+    return this.queue.add(name, data, { jobId, attempts: 1, removeOnComplete: 1000, removeOnFail: 5000 });
   }
 
   async onModuleDestroy() {

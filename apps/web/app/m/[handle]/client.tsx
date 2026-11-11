@@ -4,6 +4,7 @@ import { useDrag } from "@use-gesture/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button, Sheet } from "@/components/ui";
+import { Garment3dSection } from "@/components/xr-maker";
 import { api, rwf } from "@/lib/api";
 import { waLink, type MakerProduct, type MakerSpace } from "@/lib/maker";
 import { useSession } from "@/lib/session";
@@ -97,6 +98,7 @@ function ProductSheet({ maker, product, onClose }: { maker: MakerSpace; product:
         </a>
       </div>
       {product.readiness !== "READY" && <p className="mt-2 text-center text-xs text-mut">Try-on isn't available for this item yet.</p>}
+      <Garment3dSection productId={product.id} title={product.title} variantId={v.id} />
       {product.studio.length > 0 && (
         <div className="no-scrollbar mt-4 flex gap-2 overflow-x-auto">
           {product.studio.filter(Boolean).map((src) => (

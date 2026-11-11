@@ -9,6 +9,7 @@ import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from
 import { join, resolve } from "node:path";
 import "dotenv/config";
 import { seedTailor } from "./seed-tailor";
+import { seed3d } from "./seed-3d";
 
 const prisma = new PrismaClient();
 const AI = process.env.AI_GATEWAY_URL ?? "http://localhost:8100";
@@ -308,6 +309,7 @@ async function main() {
     console.log(`✓ ${def.name}: ${picks.length} products`);
   }
   await seedTailor(prisma);
+  await seed3d(prisma);
   console.log("Seed complete. Demo shopper 0788000001 · tailor 0788100001 · coop admin 0788100002 · seller 0788100003 · coop maker 0788100004 · host 0788900001");
 }
 

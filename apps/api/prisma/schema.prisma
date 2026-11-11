@@ -928,3 +928,68 @@ model PilotIncident {
 
   @@index([kind, createdAt])
 }
+
+// ==== E27 3D garment + AR view · E28 Motion preview ====
+
+/// AI image-to-3D garment per variant (FR-3D-01a/02/03/06/07, FR-CAT-10). Member-owned public media.
+/// Shown to shoppers only once the page owner approves it (FR-3D-06).
+model GarmentAsset3d {
+  id           String    @id @default(cuid())
+  variantId    String    @unique
+  productId    String
+  pageId       String
+  /// QUEUED | GENERATING | READY | FAILED
+  status       String    @default("QUEUED")
+  progress     Int       @default(0)
+  approved     Boolean   @default(false)
+  glbPath      String?
+  posterPath   String?
+  bytes        Int?
+  triangles    Int?
+  widthM       Float?
+  heightM      Float?
+  depthM       Float?
+  size         String    @default("M")
+  modelVersion String    @default("")
+  sha256       String?
+  costRwf      Int       @default(0)
+  error        String?
+  requestedBy  String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  readyAt      DateTime?
+
+  @@index([productId])
+}
+
+/// "See it move" motion preview of a delivered look (FR-VID-01/04/05/06). Private to the shopper.
+model MotionClip {
+  id           String    @id @default(cuid())
+  userId       String
+  lookId       String
+  generationId String    @unique
+  variantId    String
+  pageId       String
+  /// QUEUED | GENERATING | GUARDING | DELIVERED | WITHHELD | FAILED
+  status       String    @default("QUEUED")
+  progress     Int       @default(0)
+  webpPath     String?
+  mp4Path      String?
+  posterPath   String?
+  frames       Int?
+  durationMs   Int?
+  width        Int?
+  height       Int?
+  guard        Json?
+  c2pa         Json?
+  source       String?
+  credits      Int       @default(0)
+  costRwf      Int       @default(0)
+  modelVersion String    @default("")
+  error        String?
+  createdAt    DateTime  @default(now())
+  deliveredAt  DateTime?
+
+  @@index([userId, createdAt])
+  @@index([lookId])
+}
