@@ -28,6 +28,7 @@ export function Twin3dViewer({
   label,
   busy,
   onLoaded,
+  badge = "🧊 3D twin · 360°",
 }: {
   src: string;
   poster: string | null;
@@ -37,6 +38,8 @@ export function Twin3dViewer({
   label: string;
   busy?: string | null;
   onLoaded?: () => void;
+  /** Top-left chip; defaults to the 3D twin label. */
+  badge?: string;
 }) {
   const ref = useRef<MV | null>(null);
   const [ready, setReady] = useState(false);
@@ -148,7 +151,7 @@ export function Twin3dViewer({
           <span className="glass rounded-full px-4 py-2 text-sm font-semibold">{busy}</span>
         </div>
       )}
-      <span className="pointer-events-none absolute left-3 top-3 rounded-full border border-white/15 bg-black/55 px-3 py-1.5 text-xs font-semibold backdrop-blur">🧊 3D twin · 360°</span>
+      <span className="pointer-events-none absolute left-3 top-3 rounded-full border border-white/15 bg-black/55 px-3 py-1.5 text-xs font-semibold backdrop-blur">{badge}</span>
       <span className="pointer-events-none absolute right-3 top-3 rounded-full border border-white/15 bg-black/55 px-2.5 py-1.5 text-[11px] font-semibold backdrop-blur">✨ {label}</span>
       {!fallback && (
         <div className="absolute bottom-4 right-3 flex flex-col gap-2">
