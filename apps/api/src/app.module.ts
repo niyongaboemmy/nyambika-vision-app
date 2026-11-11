@@ -42,6 +42,7 @@ import { Twin3dModule } from "./modules/twin3d/twin3d.module";
 import { InferenceModule } from "./modules/inference/inference.module";
 import { VideoModule } from "./modules/video/video.module";
 import { VrModule } from "./modules/vr/vr.module";
+import { MlSpikeModule } from "./modules/mlspike/mlspike.module";
 import { DrapeSpikeModule } from "./modules/drape/drape.module";
 
 @Controller()
@@ -98,6 +99,7 @@ class HealthController {
     InferenceModule,
     VideoModule,
     VrModule,
+    MlSpikeModule,
     DrapeSpikeModule,
   ],
   controllers: [HealthController],

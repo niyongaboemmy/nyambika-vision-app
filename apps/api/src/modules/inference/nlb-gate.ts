@@ -6,7 +6,7 @@ import type { PrismaClient } from "@prisma/client";
  * for shoppers only with a passing NLB evaluation for its exact version, run within the last quarter, on a
  * licence that allows commercial use. Pure decision + a thin Prisma wrapper used by `PATCH /admin/models/:id`.
  */
-export const NLB_GATED_TIERS: Record<string, string> = { VIDEO_TRYON: "NLB_VIDEO" };
+export const NLB_GATED_TIERS: Record<string, string> = { VIDEO_TRYON: "NLB_VIDEO", ATTR_SUGGEST: "ATTR_SPIKE" }; // ATTR_SUGGEST: R4 spike local model
 export const EVAL_MAX_AGE_DAYS = 92; // AI-BM-04: re-run quarterly
 
 export interface GateModel {

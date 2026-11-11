@@ -9,6 +9,7 @@ import { EDITOR_STEPS, EditorSection, ProductPreview } from "@/components/studio
 import { MorphOptions } from "@/components/morph-options";
 import { Garment3dCard } from "@/components/studio-3d";
 import { PassportCard } from "@/components/passport-editor";
+import { AttrSuggest } from "@/components/mlspike-suggest";
 import { api, rwf } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import type { StudioProduct, StudioVariant } from "@/lib/types";
@@ -106,6 +107,7 @@ function ProductDetail() {
           <PassportCard productId={p.id} title={p.title} canManage={Boolean(canManage)} />
           {page.memberType === "TAILOR" && canManage && <MorphOptions productId={p.id} />}
 
+          <AttrSuggest key={`${p.category}:${p.styles.join(",")}`} productId={p.id} canEdit onApplied={reload} />
           <DetailsEditor p={p} pageId={page.id} pageName={page.name} onSaved={reload} />
         </div>
 

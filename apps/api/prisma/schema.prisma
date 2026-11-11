@@ -1808,3 +1808,54 @@ model FashionShowReaction {
 
   @@index([showId, offsetMs])
 }
+
+// ==== R4 spike: consented training data · local attribute model · trend insights (plan §11; not committed) ====
+
+/// Immutable dataset version (manifest with provenance per item). Built only from maker catalogue images of
+/// pages that opted in (consent ledger purpose TRAINING_DATA_GARMENT:<pageId>[:<productId>]) + CC0 synthetic images.
+model TrainingDataset {
+  id         String   @id @default(cuid())
+  version    Int      @unique
+  hash       String
+  parentHash String?
+  items      Int
+  manifest   Json
+  stats      Json
+  createdBy  String?
+  createdAt  DateTime @default(now())
+}
+
+/// Withdrawal tombstone: items of the page (or one product) consented at or before `createdAt` never enter a later version.
+model TrainingTombstone {
+  id              String   @id @default(cuid())
+  pageId          String
+  productId       String?
+  consentRecordId String
+  userId          String
+  reason          String   @default("withdrawn")
+  createdAt       DateTime @default(now())
+
+  @@index([pageId])
+}
+
+/// Pseudonymised trend signal (no user ids, no free text): one row per shopper action, aggregated with k-anonymity.
+model TrendSignal {
+  id        String   @id @default(cuid())
+  /// Monday (UTC) of the ISO week
+  week      DateTime @db.Date
+  region    String
+  /// ASK | TRYON | ORDER
+  source    String
+  category  String?
+  colour    String?
+  pattern   String?
+  occasion  String?
+  priceBand String?
+  pseudoId  String
+  /// Maker page for TRYON/ORDER (supply side + maker-dominance rule); never shown.
+  pageId    String?
+  synthetic Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([week])
+}
