@@ -256,8 +256,10 @@ describe("digital wardrobe (E26)", () => {
     const queue = (app.get(GenerationService) as unknown as { queue: import("bullmq").Queue }).queue;
     for (const o of r.body.looks) expect((await queue.getJob(`outfit-${o.id}`))?.name).toBe("outfit");
     let ev = r.body;
-    // Wait for every outfit to reach a final state (3 layered renders can be slow on a loaded gateway).
-    for (const until = Date.now() + 100_000; ev.looks.some((o: { status: string }) => ["QUEUED", "GENERATING", "GUARDING"].includes(o.status)) && Date.now() < until; ) {
+    // Wait for every outfit to reach a final state (3 layered renders can be slow on a loaded gateway) and for the
+    // reminder, which the last render sends right *after* its final status is written.
+    const settled = (e: { reminderSentAt: unknown; looks: { status: string }[] }) => !e.looks.some((o) => ["QUEUED", "GENERATING", "GUARDING"].includes(o.status)) && Boolean(e.reminderSentAt);
+    for (const until = Date.now() + 100_000; !settled(ev) && Date.now() < until; ) {
       await new Promise((ok) => setTimeout(ok, 500));
       ev = (await shopper.get(`/wardrobe/events/${r.body.id}`)).body;
     }
