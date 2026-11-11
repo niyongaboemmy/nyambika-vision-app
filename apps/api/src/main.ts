@@ -13,6 +13,8 @@ async function bootstrap() {
   app.use("/admin/migration", json({ limit: "40mb" }));
   // Partner try-on (E37) sends one garment image as base64 (≤ 10 MB decoded).
   app.use("/v1/partner", json({ limit: "15mb" }));
+  // E40: Stripe webhook signatures are computed over the raw body.
+  app.use("/stripe/webhook", json({ limit: "1mb", verify: (req, _res, buf) => void ((req as Request & { rawBody?: Buffer }).rawBody = buf) }));
   app.use(json({ limit: "2mb" }));
   app.use(cookieParser());
   app.use((req: Request, res: Response, next: NextFunction) => {

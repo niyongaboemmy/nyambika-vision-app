@@ -535,6 +535,12 @@ export class ShowroomEngine {
     this.glideTo(START.clone(), 0);
   }
 
+  /** Redraw the spatial labels with new price text (display-currency change). */
+  setPrices(prices: Record<string, string>) {
+    for (const n of this.nodes) if (prices[n.piece.id]) n.piece.price = prices[n.piece.id];
+    this.select(this.selected, false);
+  }
+
   setHighContrast(on: boolean) {
     this.o.highContrast = on;
     this.select(this.selected, false);

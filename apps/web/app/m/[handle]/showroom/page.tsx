@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { serverApi } from "@/lib/server-api";
+import type { Commerce } from "@/lib/region";
 import type { Showroom } from "@/lib/vr";
 import { ShowroomClient } from "./client";
 
@@ -23,5 +24,6 @@ export default async function ShowroomPage({ params }: Props) {
   const { handle } = await params;
   const s = await serverApi<Showroom>(`/vr/public/pages/${handle}/showroom`, 10);
   if (!s) notFound();
-  return <ShowroomClient room={s} />;
+  const commerce = await serverApi<Commerce>(`/region/pages/by-handle/${handle}/commerce`, 10); // E40/E41 prices
+  return <ShowroomClient room={s} commerce={commerce} />;
 }

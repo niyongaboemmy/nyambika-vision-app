@@ -8,6 +8,7 @@ import { HoldToBuy } from "@/components/hold-to-buy";
 import type { ShowroomEngine } from "@/components/vr-engine";
 import { XrStage } from "@/components/xr-viewer";
 import { api, rwf } from "@/lib/api";
+import { useRegion, type Commerce } from "@/lib/region";
 import { useSession } from "@/lib/session";
 import type { FitView, Twin3dState } from "@/lib/twin3d";
 import { fmtWhen, lookFor, lowEnd, xrSupported, type RoomItem, type Showroom } from "@/lib/vr";
@@ -15,16 +16,27 @@ import { fmtMB, hasWebGL2, load3d, prefersReducedMotion, type Garment3d } from "
 
 type Mode = "loading" | "3d" | "flat";
 
-export function ShowroomClient({ room }: { room: Showroom }) {
+export function ShowroomClient({ room, commerce }: { room: Showroom; commerce?: Commerce | null }) {
   return (
     <Suspense fallback={<div className="min-h-dvh bg-ink" />}>
-      <Room room={room} />
+      <Room room={room} commerce={commerce ?? null} />
     </Suspense>
   );
 }
 
-function Room({ room }: { room: Showroom }) {
+function Room({ room, commerce }: { room: Showroom; commerce: Commerce | null }) {
   const { me, t } = useSession();
+  const { show } = useRegion();
+  /** E40/E41: page currency, plus "≈" in the shopper's display currency; RWF when the page has no regional price. */
+  const price = useCallback(
+    (i: { productId: string; priceRwf: number }) => {
+      const minor = commerce?.prices[i.productId];
+      if (!commerce || minor == null) return rwf(i.priceRwf);
+      const d = show(minor, commerce.currency);
+      return d.approx ? `${d.primary} ${d.approx}` : d.primary;
+    },
+    [commerce, show],
+  );
   const router = useRouter();
   const q = useSearchParams();
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -94,9 +106,11 @@ function Room({ room }: { room: Showroom }) {
   }, [pieces]);
 
   useEffect(() => {
-    if (item) setAnnounce(`${item.title}, ${rwf(item.priceRwf)} selected`);
+    if (item) setAnnounce(`${item.title}, ${price(item)} selected`);
   }, [item]);
   useEffect(() => engine.current?.setHighContrast(contrast), [contrast]);
+  // Spatial labels follow the display currency (redrawn in place, no scene rebuild).
+  useEffect(() => engine.current?.setPrices(Object.fromEntries(room.items.map((i) => [i.productId, price(i)]))), [price, room.items, mode]);
   useEffect(() => engine.current?.setSeated(seated), [seated]);
   useAmbient(sound);
 
@@ -216,7 +230,7 @@ function Room({ room }: { room: Showroom }) {
       )}
       {sound && <p className="absolute inset-x-0 top-[104px] z-10 text-center text-xs text-txt/80" aria-live="polite">♪ Soft ambient music is playing</p>}
 
-      {mode === "flat" && <FlatRoom room={room} onPick={(id) => setSelected(id)} />}
+      {mode === "flat" && <FlatRoom room={room} onPick={(id) => setSelected(id)} price={price} />}
 
       {/* Bottom: controls, piece rail, selected card */}
       <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/85 via-black/55 to-transparent px-3 pb-[max(env(safe-area-inset-bottom),12px)] pt-10">
@@ -229,7 +243,7 @@ function Room({ room }: { room: Showroom }) {
                   <h2 className="min-w-0 flex-1 font-display text-lg font-black leading-tight">{item.title}</h2>
                   <button onClick={() => (offTwin(), pick(null))} aria-label="Close piece details" className="grid size-9 shrink-0 place-items-center rounded-full bg-white/10">✕</button>
                 </div>
-                <p className="font-semibold text-gold">{rwf(item.priceRwf)}{item.product.madeToOrder ? " · made to measure" : ""}</p>
+                <p className="font-semibold text-gold">{price(item)}{item.product.madeToOrder ? " · made to measure" : ""}</p>
                 <p className="text-xs text-mut">{item.colours.map((c) => c.colourName).join(" · ")} · paid directly to {room.page.name}</p>
               </div>
               <div className="self-end">
@@ -262,11 +276,11 @@ function Room({ room }: { room: Showroom }) {
             {mode === "3d" && <p className="mb-2 text-center text-[11px] text-txt/75">Drag to look · tap the floor or a ring to walk · tap a piece</p>}
             <nav aria-label="Pieces in this room" className="no-scrollbar -mx-3 flex gap-2 overflow-x-auto px-3 pb-1">
               {room.items.map((i) => (
-                <button key={i.productId} onClick={() => pick(i.productId)} aria-label={`${i.title}, ${rwf(i.priceRwf)}`} className="glass flex shrink-0 items-center gap-2 rounded-2xl p-1.5 pr-3 text-left">
+                <button key={i.productId} onClick={() => pick(i.productId)} aria-label={`${i.title}, ${price(i)}`} className="glass flex shrink-0 items-center gap-2 rounded-2xl p-1.5 pr-3 text-left">
                   {i.poster ? <img src={i.poster} alt="" className="size-11 rounded-xl bg-black/30 object-contain" /> : <span className="size-11 rounded-xl bg-white/10" />}
                   <span className="max-w-[120px]">
                     <span className="block truncate text-xs font-bold">{i.title}</span>
-                    <span className="block text-[11px] text-gold">{rwf(i.priceRwf)}</span>
+                    <span className="block text-[11px] text-gold">{price(i)}</span>
                   </span>
                 </button>
               ))}
@@ -289,13 +303,13 @@ function Room({ room }: { room: Showroom }) {
         <p className="mt-2 text-center text-[10px] text-txt/60">✨ {room.label} · shapes and drape are approximate</p>
       </div>
 
-      {stage && <XrStage open onClose={() => setStage(null)} title={stage.item.title} subtitle={`${room.page.name} · ${rwf(stage.item.priceRwf)}`} assets={stage.assets} initialVariantId={stage.item.variantId} />}
+      {stage && <XrStage open onClose={() => setStage(null)} title={stage.item.title} subtitle={`${room.page.name} · ${price(stage.item)}`} assets={stage.assets} initialVariantId={stage.item.variantId} />}
     </main>
   );
 }
 
 /** No WebGL2: the same pieces as an image grid with the same actions (FR-3D-08 style fallback). */
-function FlatRoom({ room, onPick }: { room: Showroom; onPick: (id: string) => void }) {
+function FlatRoom({ room, onPick, price }: { room: Showroom; onPick: (id: string) => void; price: (i: RoomItem) => string }) {
   return (
     <div className="absolute inset-0 overflow-y-auto px-4 pb-72 pt-24">
       <p className="mb-3 text-center text-sm text-mut">3D needs a newer browser on this device. Here are the pieces.</p>
@@ -305,7 +319,7 @@ function FlatRoom({ room, onPick }: { room: Showroom; onPick: (id: string) => vo
             <button onClick={() => onPick(i.productId)} className="glass w-full overflow-hidden rounded-3xl text-left">
               {(i.poster ?? i.photo) && <img src={(i.poster ?? i.photo)!} alt="" className="h-44 w-full object-contain p-2" />}
               <span className="block truncate px-3 text-sm font-bold">{i.title}</span>
-              <span className="block px-3 pb-3 text-xs text-gold">{rwf(i.priceRwf)}</span>
+              <span className="block px-3 pb-3 text-xs text-gold">{price(i)}</span>
             </button>
           </li>
         ))}

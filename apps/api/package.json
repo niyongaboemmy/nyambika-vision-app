@@ -15,6 +15,7 @@
     "db:seed:3d": "tsx prisma/seed-3d.ts",
     "db:seed:vr": "tsx prisma/seed-vr.ts",
     "db:seed:agents": "tsx prisma/seed-agents.ts",
+    "db:seed:region": "tsx prisma/seed-region.ts",
     "db:reset": "prisma migrate reset --force"
   },
   "prisma": {

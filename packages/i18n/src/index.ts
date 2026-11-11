@@ -1,9 +1,9 @@
 /**
- * Kinyarwanda / English / French catalogues (FR-ACC-09).
+ * Kinyarwanda / English / French catalogues (FR-ACC-09), plus a Swahili starter catalogue (E41).
  * Kinyarwanda and French strings need native-speaker review before the pilot (plan §15.1 localisation).
  */
-export type Locale = "rw" | "en" | "fr";
-export const LOCALES: Locale[] = ["rw", "en", "fr"];
+export type Locale = "rw" | "en" | "fr" | "sw";
+export const LOCALES: Locale[] = ["rw", "en", "fr", "sw"];
 
 const en = {
   "app.tagline": "Ask. See it on you. Hold to buy.",
@@ -177,6 +177,18 @@ const en = {
   "mandate.expired": "This link has expired. Ask your assistant to start again.",
   "mandate.signIn": "Sign in to confirm",
   "mandate.verifiedAgent": "Verified assistant",
+  "region.showPricesIn": "Show prices in",
+  "region.approxNote": "≈ is a conversion for reference only. You pay the maker in their own currency.",
+  "region.country": "Your country",
+  "region.crossBorder": "Show makers from other countries",
+  "region.crossBorderHint": "Off: you only see makers in your country.",
+  "region.buy": "Buy",
+  "region.payWith": "Pay with",
+  "region.card": "Card · international",
+  "region.charged": "You'll be charged",
+  "region.ship": "Ship abroad",
+  "region.passport": "Product passport",
+  "region.approve": "Approve the prompt on your phone",
   "twin3d.title": "3D twin",
   "twin3d.ar": "AR mirror",
   "twin3d.tryIn3d": "Try on my 3D twin",
@@ -374,6 +386,18 @@ const rw: Messages = {
   "mandate.expired": "Iyi link yararangiye. Saba umufasha wawe wongere utangire.",
   "mandate.signIn": "Injira kugira ngo wemeze",
   "mandate.verifiedAgent": "Umufasha wemewe",
+  "region.showPricesIn": "Erekana ibiciro muri",
+  "region.approxNote": "≈ ni ikigereranyo gusa. Wishyura umudozi mu mafaranga ye.",
+  "region.country": "Igihugu cyawe",
+  "region.crossBorder": "Erekana abadozi bo mu bindi bihugu",
+  "region.crossBorderHint": "Bizimije: ubona abadozi bo mu gihugu cyawe gusa.",
+  "region.buy": "Gura",
+  "region.payWith": "Ishyura ukoresheje",
+  "region.card": "Ikarita · mpuzamahanga",
+  "region.charged": "Uzishyura",
+  "region.ship": "Ohereza mu mahanga",
+  "region.passport": "Pasiporo y'igicuruzwa",
+  "region.approve": "Emeza ubutumwa kuri telefoni yawe",
   "twin3d.title": "Impanga ya 3D",
   "twin3d.ar": "Indorerwamo ya AR",
   "twin3d.tryIn3d": "Gerageza ku mpanga yanjye ya 3D",
@@ -568,6 +592,18 @@ const fr: Messages = {
   "mandate.expired": "Ce lien a expiré. Demandez à votre assistant de recommencer.",
   "mandate.signIn": "Connectez-vous pour confirmer",
   "mandate.verifiedAgent": "Assistant vérifié",
+  "region.showPricesIn": "Afficher les prix en",
+  "region.approxNote": "≈ est une conversion indicative. Vous payez l'artisan dans sa devise.",
+  "region.country": "Votre pays",
+  "region.crossBorder": "Voir les artisans d'autres pays",
+  "region.crossBorderHint": "Désactivé : seulement les artisans de votre pays.",
+  "region.buy": "Acheter",
+  "region.payWith": "Payer avec",
+  "region.card": "Carte · international",
+  "region.charged": "Vous serez débité de",
+  "region.ship": "Expédier à l'étranger",
+  "region.passport": "Passeport produit",
+  "region.approve": "Validez la demande sur votre téléphone",
   "twin3d.title": "Jumeau 3D",
   "twin3d.ar": "Miroir AR",
   "twin3d.tryIn3d": "Essayer sur mon jumeau 3D",
@@ -590,7 +626,69 @@ const fr: Messages = {
   "vr.watching": "spectateurs",
 };
 
-export const catalogues: Record<Locale, Messages> = { en, rw, fr };
+/**
+ * Swahili (sw) STARTER catalogue for the Kenya / Uganda / Tanzania pilots (E41).
+ * MACHINE-DRAFTED, NOT YET REVIEWED: every string needs native-speaker review before launch
+ * (country launch checklist item "language"). Missing keys fall back to English.
+ */
+export const SW_MACHINE_DRAFTED = true;
+const sw: Partial<Messages> = {
+  "app.tagline": "Uliza. Jione umevaa. Shikilia ununue.",
+  "lang.pick": "Chagua lugha yako",
+  "auth.title": "Ingia kwa simu yako",
+  "auth.phone": "Nambari ya simu",
+  "auth.sendCode": "Tuma msimbo",
+  "auth.code": "Msimbo wa tarakimu 6",
+  "auth.verify": "Endelea",
+  "auth.devCode": "Msimbo wa majaribio",
+  "home.greeting": "Habari",
+  "muse.question": "Ni tukio gani?",
+  "muse.type": "Andika unachohitaji…",
+  "muse.showLooks": "Onyesha mitindo yangu",
+  "mirror.title": "Wakati wa kioo",
+  "mirror.consentTitle": "Pacha wa faragha",
+  "mirror.ready": "Pacha wako yuko tayari",
+  "looks.save": "Hifadhi",
+  "looks.saved": "Imehifadhiwa",
+  "looks.share": "Shiriki",
+  "looks.colours": "Rangi",
+  "buy.title": "Shikilia ununue",
+  "buy.paidTo": "Imelipwa moja kwa moja kwa",
+  "buy.holding": "Endelea kushikilia…",
+  "buy.approve": "Thibitisha kwenye simu yako kwa PIN yako",
+  "buy.paid": "Imelipwa",
+  "buy.paidDirect": "imelipwa moja kwa moja kwa",
+  "maker.follow": "Fuata",
+  "maker.following": "Unafuata",
+  "maker.chat": "Ongea",
+  "maker.managedBy": "Ukurasa wao · unaendeshwa na fundi",
+  "orders.title": "Maagizo yako",
+  "trust.title": "Kituo cha uaminifu",
+  "studio.title": "Msimamizi wa ukurasa",
+  "common.back": "Rudi",
+  "common.save": "Hifadhi",
+  "common.cancel": "Ghairi",
+  "common.delete": "Futa",
+  "wardrobe.title": "Kabati lako",
+  "tailor.measurements": "Vipimo vyangu",
+  "size.recommended": "Inapendekezwa",
+  "survey.send": "Tuma",
+  "survey.later": "Si sasa",
+  "region.showPricesIn": "Onyesha bei kwa",
+  "region.approxNote": "≈ ni ubadilishaji wa makadirio tu. Unamlipa fundi kwa sarafu yake.",
+  "region.country": "Nchi yako",
+  "region.crossBorder": "Onyesha mafundi wa nchi nyingine",
+  "region.crossBorderHint": "Imezimwa: unaona mafundi wa nchi yako tu.",
+  "region.buy": "Nunua",
+  "region.payWith": "Lipa kwa",
+  "region.card": "Kadi · kimataifa",
+  "region.charged": "Utatozwa",
+  "region.ship": "Safirisha nje ya nchi",
+  "region.passport": "Pasipoti ya bidhaa",
+  "region.approve": "Thibitisha ombi kwenye simu yako",
+};
+
+export const catalogues: Record<Locale, Partial<Messages>> = { en, rw, fr, sw };
 
 export function translate(locale: Locale, key: MessageKey): string {
   return catalogues[locale]?.[key] ?? en[key] ?? key;

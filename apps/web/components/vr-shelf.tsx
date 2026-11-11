@@ -3,8 +3,10 @@
 import { useDrag } from "@use-gesture/react";
 import Link from "next/link";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { Price } from "@/components/region";
 import { XrStage } from "@/components/xr-viewer";
 import { rwf } from "@/lib/api";
+import { useRegion, type Commerce } from "@/lib/region";
 import { useSession } from "@/lib/session";
 import { countdown, fmtWhen, type Shelf, type ShelfItemView } from "@/lib/vr";
 import { hasWebGL2, load3d, loadModelViewer, prefersReducedMotion, type Garment3d } from "@/lib/xr";
@@ -15,8 +17,16 @@ import { hasWebGL2, load3d, loadModelViewer, prefersReducedMotion, type Garment3
  * the side buttons move along the shelf; tapping / Enter opens the full 3D viewer (E27). Entry to the
  * showroom and the next fashion show sit underneath.
  */
-export function Shelf3d({ shelf, brand }: { shelf: Shelf; brand: string }) {
+export function Shelf3d({ shelf, brand, commerce }: { shelf: Shelf; brand: string; commerce?: Commerce | null }) {
   const { t } = useSession();
+  const { show } = useRegion();
+  // E40/E41: page currency + the shopper's display currency ("≈"); RWF for pages without regional prices.
+  const priceText = (it: ShelfItemView) => {
+    const minor = commerce?.prices[it.productId];
+    if (!commerce || minor == null) return rwf(it.priceRwf);
+    const d = show(minor, commerce.currency);
+    return d.approx ? `${d.primary} (${d.approx})` : d.primary;
+  };
   const items = shelf.items;
   const [i, setI] = useState(0);
   const [live, setLive] = useState(false);
@@ -114,7 +124,7 @@ export function Shelf3d({ shelf, brand }: { shelf: Shelf; brand: string }) {
               id={`shelf-${it.productId}`}
               role="option"
               aria-selected={on}
-              aria-label={`${it.title}, ${rwf(it.priceRwf)}${it.colours.length > 1 ? `, ${it.colours.length} colours` : ""}`}
+              aria-label={`${it.title}, ${priceText(it)}${it.colours.length > 1 ? `, ${it.colours.length} colours` : ""}`}
               onClick={() => (on ? void open(it) : setI(idx))}
               className="absolute bottom-[76px] left-1/2 flex h-[220px] w-[150px] cursor-pointer items-end justify-center"
               style={style}
@@ -148,7 +158,7 @@ export function Shelf3d({ shelf, brand }: { shelf: Shelf; brand: string }) {
           <ShelfButton label="Previous piece" disabled={i === 0} onClick={() => go(-1)}>‹</ShelfButton>
           <button onClick={() => void open(focus)} className="min-w-0 flex-1 rounded-2xl px-2 py-1 text-center">
             <span className="block truncate text-sm font-bold">{focus.title}</span>
-            <span className="block text-xs text-gold">{rwf(focus.priceRwf)} · {t("vr.tapToTurn")}</span>
+            <span className="block text-xs text-gold">{commerce && commerce.prices[focus.productId] != null ? <Price minor={commerce.prices[focus.productId]!} currency={commerce.currency} approxClassName="text-txt/70" /> : rwf(focus.priceRwf)} · {t("vr.tapToTurn")}</span>
           </button>
           <ShelfButton label="Next piece" disabled={i === count - 1} onClick={() => go(1)}>›</ShelfButton>
         </div>
@@ -187,7 +197,7 @@ export function Shelf3d({ shelf, brand }: { shelf: Shelf; brand: string }) {
       </div>
 
       {stage && (
-        <XrStage open onClose={() => setStage(null)} title={stage.item.title} subtitle={`${brand} · ${rwf(stage.item.priceRwf)}`} assets={stage.assets} initialVariantId={stage.item.variantId} />
+        <XrStage open onClose={() => setStage(null)} title={stage.item.title} subtitle={`${brand} · ${priceText(stage.item)}`} assets={stage.assets} initialVariantId={stage.item.variantId} />
       )}
     </section>
   );

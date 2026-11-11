@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 /** Supported UI and Muse languages (FR-ACC-09). */
-export const Locale = z.enum(["rw", "en", "fr"]);
+export const Locale = z.enum(["rw", "en", "fr", "sw"]);
 export type Locale = z.infer<typeof Locale>;
 
 /** Roles evaluated per page (FR-ACC-03/04). */
@@ -170,3 +170,4 @@ export * from "./pilot";
 export * from "./agents";
 export * from "./growth";
 export * from "./vr";
+export * from "./region";

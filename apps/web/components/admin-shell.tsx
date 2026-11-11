@@ -6,6 +6,7 @@ import { Brand } from "@/components/studio-shell";
 
 const ICONS: Record<string, IconName> = {
   Overview: "grid",
+  Regions: "globe",
   Verify: "shield",
   Moderation: "flag",
   Migration: "swap",
