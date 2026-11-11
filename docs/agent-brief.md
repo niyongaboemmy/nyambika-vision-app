@@ -24,6 +24,7 @@ export PLAYWRIGHT_BROWSERS_PATH=$MAIN/.cache/ms-playwright
 - AI gateway: shared one at :8100 is running from main. If you change `apps/ai`, run your own: `cd apps/ai && $MAIN/apps/ai/.venv/bin/uvicorn app.main:app --port 810N --reload` and tests with `$MAIN/apps/ai/.venv/bin/pytest -q`.
 - Run long-lived servers as background tasks; stop them when done. Never kill processes you didn't start (main stack runs on 3000/4000/8100).
 - Docker is not available. Python is 3.12 via `$MAIN/apps/ai/.venv`.
+- **Disk is tight (about 2 GB free for everyone).** Never run `next build` or `playwright install`; keep crawl screenshots to what you review; before you finish, stop your servers and delete `apps/web/.next` and `scripts/crawl-output` in your worktree, and `dropdb nyambika_<slug>`. If `df -h ~` shows under 500 MB free, stop and report instead of continuing.
 
 ## 2. Merge-safety rules
 
