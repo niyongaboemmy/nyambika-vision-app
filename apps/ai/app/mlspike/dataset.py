@@ -18,6 +18,7 @@ same consented set are byte-identical and any change is visible as a new hash an
 from __future__ import annotations
 
 import hashlib
+import re
 import json
 from datetime import datetime, timezone
 from typing import Callable, Iterable
@@ -30,8 +31,8 @@ ALLOWED_SOURCES = ("synthetic", "catalogue")
 SYNTHETIC_LICENCE = "CC0-1.0 (synthetic, generated in-house)"
 CATALOGUE_LICENCE = "Nyambika training-contribution consent v1 (revocable; no redistribution)"
 # Storage prefixes / kinds that hold shopper data. Never valid as training input.
-SHOPPER_MARKERS = ("private/", "twins", "twin-previews", "looks", "wardrobe", "avatars", "polls", "custom-orders",
-                   "motion", "partner", "video", "clip", "measurement", "persona")
+SHOPPER_MARKERS = ("private", "twin", "twins", "previews", "look", "looks", "wardrobe", "avatar", "avatars", "poll", "polls",
+                   "custom", "orders", "motion", "partner", "video", "clip", "clips", "measurement", "measurements", "persona", "personas")
 REQUIRED = ("item_id", "page_id", "product_id", "consent_record_id", "licence", "consented_at")
 
 
@@ -51,13 +52,31 @@ def assert_trainable(item: dict) -> None:
     ref = str(item.get("image_ref") or "").lower()
     if src == "catalogue" and (not ref.startswith("public/media/") and not ref.startswith("seed/")):
         raise ShopperDataError(f"{item.get('item_id')}: catalogue images must come from public catalogue media, got {ref!r}")
-    if any(m in ref for m in SHOPPER_MARKERS):
+    # Token match on path segments / filename words (ids are random, substring matching would misfire).
+    tokens = set(re.split(r"[/._:-]+", ref))
+    if tokens & set(SHOPPER_MARKERS):
         raise ShopperDataError(f"{item.get('item_id')}: {ref!r} looks like shopper data")
 
 
+def _ts(v) -> datetime | None:
+    if not v:
+        return None
+    try:
+        d = datetime.fromisoformat(str(v).replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    return d if d.tzinfo else d.replace(tzinfo=timezone.utc)
+
+
 def tombstoned(item: dict, tombstones: Iterable[dict]) -> dict | None:
+    """The tombstone covering this item, if any. A tombstone with `at` covers contributions consented
+    at or before that moment; a later re-consent covers only new contributions (old pixels stay out
+    through the withdrawn-hash list)."""
     for t in tombstones:
         if t.get("page_id") != item.get("page_id"):
+            continue
+        at, consented = _ts(t.get("at")), _ts(item.get("consented_at"))
+        if at and consented and consented > at:
             continue
         if not t.get("product_id") or t.get("product_id") == item.get("product_id"):
             return t

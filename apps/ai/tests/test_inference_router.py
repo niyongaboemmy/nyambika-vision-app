@@ -202,7 +202,7 @@ def test_router_with_fake_pool_chaos(pool, assets, cutouts):
 
 def test_gateway_inference_endpoints(client):
     s = client.get("/v1/inference/status").json()
-    assert set(s["routes"]) == {"tryon", "stt", "llm", "avatar", "video"}
+    assert set(s["routes"]) == {"tryon", "stt", "llm", "avatar", "video", "attr"}  # attr: R4 spike local model
     assert s["routes"]["tryon"]["backends"]["hosted"]["configured"] is True
     pol = s["policy"]
     pol["version"] = 7
