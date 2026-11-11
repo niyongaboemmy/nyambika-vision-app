@@ -1443,3 +1443,84 @@ model AvatarFit3d {
   @@unique([avatarId, variantId, size])
   @@index([userId])
 }
+
+// ==== E35 Maker Space 3D shelf + VR showroom + virtual fashion shows (FR-VR-01..05, 07, 08) ====
+
+/// Per-page showroom booth settings (FR-VR-01/03). No row = defaults (on, every approved 3D piece).
+model ShowroomBooth {
+  pageId    String   @id
+  enabled   Boolean  @default(true)
+  /// Welcome line on the showroom banner (≤ 80 chars).
+  banner    String   @default("")
+  /// Product ids placed on mannequins first, in order (the rest hang on the rails).
+  featured  String[] @default([])
+  updatedAt DateTime @updatedAt
+}
+
+/// A virtual fashion show (FR-VR-05): a scheduled runway of collection pieces worn by a synthetic avatar.
+/// LIVE / ENDED are derived from startsAt + duration; status only records SCHEDULED or CANCELLED.
+model FashionShow {
+  id           String            @id @default(cuid())
+  pageId       String
+  title        String
+  description  String            @default("")
+  startsAt     DateTime
+  /// Seconds each look stays on the runway.
+  walkSec      Int               @default(14)
+  coverPath    String?
+  /// SCHEDULED | CANCELLED
+  status       String            @default("SCHEDULED")
+  /// QUEUED | BUILDING | READY | PARTIAL | FAILED: runway models dressed on the synthetic avatar.
+  runwayStatus String            @default("QUEUED")
+  /// Synthetic runway model: Monk-scale skin swatch + size (never a shopper's twin).
+  modelSkin    String            @default("#825C43")
+  modelSize    String            @default("M")
+  createdById  String
+  peakViewers  Int               @default(0)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  items        FashionShowItem[]
+
+  @@index([pageId, startsAt])
+  @@index([status, startsAt])
+}
+
+model FashionShowItem {
+  id         String      @id @default(cuid())
+  showId     String
+  show       FashionShow @relation(fields: [showId], references: [id], onDelete: Cascade)
+  productId  String
+  variantId  String
+  position   Int
+  /// QUEUED | READY | FALLBACK (garment on a stand, no avatar fit) | FAILED
+  status     String      @default("QUEUED")
+  glbPath    String?
+  posterPath String?
+  bytes      Int?
+  error      String?
+
+  @@unique([showId, position])
+}
+
+/// A shopper's RSVP (asks for one WhatsApp reminder before the show). Makers only ever see the count.
+model FashionShowRsvp {
+  id         String    @id @default(cuid())
+  showId     String
+  userId     String
+  remindedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@unique([showId, userId])
+  @@index([userId])
+}
+
+/// Anonymous reaction during a live show; replay plays them back at the same offset.
+model FashionShowReaction {
+  id        String   @id @default(cuid())
+  showId    String
+  emoji     String
+  offsetMs  Int
+  createdAt DateTime @default(now())
+
+  @@index([showId, offsetMs])
+}
