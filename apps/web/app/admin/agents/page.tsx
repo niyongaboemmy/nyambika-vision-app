@@ -66,7 +66,7 @@ export default function AgentsAdmin() {
           <div className="flex flex-wrap items-center gap-2">
             <Chip tone={data.killSwitch["agents.kill_switch"] ? "red" : "mint"}>{data.killSwitch["agents.kill_switch"] ? "■ Agent channel paused" : "● Agent channel open"}</Chip>
             <Chip tone={data.killSwitch["partners.kill_switch"] ? "red" : "mint"}>{data.killSwitch["partners.kill_switch"] ? "■ Partner API paused" : "● Partner API open"}</Chip>
-            <span className="text-xs font-semibold text-cocoa-2">Kill switches live in Flags & models.</span>
+            <a href="/admin?tab=Flags%20%26%20models" className="st-press inline-flex min-h-11 items-center gap-1 rounded-2xl px-2 text-xs font-bold text-violet-ink hover:bg-paper-2">Kill switches <Icon name="chevron" className="size-3.5" /></a>
             <SButton className="ml-auto" onClick={() => setNewClient(true)}><Icon name="plus" className="size-4" /> New client</SButton>
           </div>
 
@@ -233,7 +233,7 @@ function ClientCard({ c, models, onChange }: { c: ClientRow; models: Overview["m
             <Chip>{c.calls14d} calls · 14 d</Chip>
           </div>
         </div>
-        <SButton variant="ghost" className="min-h-10" onClick={async () => { await api(`/admin/agents/clients/${c.id}/status`, { method: "POST", json: { status: c.status === "ACTIVE" ? "SUSPENDED" : "ACTIVE" } }); onChange(); }}>
+        <SButton variant="ghost" onClick={async () => { await api(`/admin/agents/clients/${c.id}/status`, { method: "POST", json: { status: c.status === "ACTIVE" ? "SUSPENDED" : "ACTIVE" } }); onChange(); }}>
           {c.status === "ACTIVE" ? "Suspend" : "Reactivate"}
         </SButton>
       </div>
@@ -245,12 +245,12 @@ function ClientCard({ c, models, onChange }: { c: ClientRow; models: Overview["m
             <p className="text-xs font-semibold text-cocoa-2">{rwf(c.contract.monthlyFeeRwf)}/month · overage {rwf(c.contract.overagePriceRwf)}{c.contract.hardCap ? " · hard cap" : ""}</p>
           </div>
           <Meter value={c.usage.billed} max={c.contract.monthlyQuota} label="Looks used this month against quota" />
-          <p className="text-xs text-cocoa-2"><b className="text-cocoa">{c.usage.billed}</b> of {c.contract.monthlyQuota} included looks this month · {c.usage.overage} overage ({rwf(c.usage.overageRwf)}) · {c.usage.sandbox} sandbox</p>
+          <p className="text-xs text-cocoa-2"><b className="text-cocoa tabular-nums">{c.usage.billed}/{c.contract.monthlyQuota}</b> looks · {c.usage.overage} overage ({rwf(c.usage.overageRwf)}) · {c.usage.sandbox} sandbox</p>
           <div className="flex flex-wrap gap-2 pt-1">
-            <SButton variant="outline" className="min-h-10" onClick={() => setContractSheet(true)}>Edit contract</SButton>
-            <SButton variant="outline" className="min-h-10" onClick={() => setSandboxSheet(true)}><Icon name="sparkle" className="size-4" /> Sandbox try-on</SButton>
-            <a className="st-press inline-flex min-h-10 items-center gap-1.5 rounded-2xl border border-hairline bg-white px-3.5 text-sm font-bold text-cocoa" href={`/api/admin/agents/clients/${c.id}/usage.csv`} download><Icon name="download" className="size-4" /> Usage CSV</a>
-            <SButton variant="ghost" className="min-h-10" onClick={async () => setSecret((await api<{ secret: string }>(`/admin/agents/clients/${c.id}/webhook-secret`, { method: "POST" })).secret)}>
+            <SButton variant="outline" onClick={() => setContractSheet(true)}>Edit contract</SButton>
+            <SButton variant="outline" onClick={() => setSandboxSheet(true)}><Icon name="sparkle" className="size-4" /> Sandbox try-on</SButton>
+            <a className="st-press inline-flex min-h-11 items-center gap-1.5 rounded-2xl border border-hairline bg-white px-3.5 text-sm font-bold text-cocoa" href={`/api/admin/agents/clients/${c.id}/usage.csv`} download><Icon name="download" className="size-4" /> Usage CSV</a>
+            <SButton variant="ghost" onClick={async () => setSecret((await api<{ secret: string }>(`/admin/agents/clients/${c.id}/webhook-secret`, { method: "POST" })).secret)}>
               {c.hasWebhookSecret ? "Rotate webhook secret" : "Create webhook secret"}
             </SButton>
           </div>
@@ -260,7 +260,7 @@ function ClientCard({ c, models, onChange }: { c: ClientRow; models: Overview["m
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <p className="text-sm font-bold text-cocoa">Keys <span className="text-cocoa-2">· {live.length} active</span></p>
-          <SButton variant="dark" className="min-h-10" onClick={() => setKeySheet(true)}><Icon name="plus" className="size-4" /> New key</SButton>
+          <SButton variant="dark" onClick={() => setKeySheet(true)}><Icon name="plus" className="size-4" /> New key</SButton>
         </div>
         <ul className="space-y-2">
           {c.keys.map((k) => (
@@ -270,7 +270,7 @@ function ClientCard({ c, models, onChange }: { c: ClientRow; models: Overview["m
               {k.state !== "OK" && <Badge value={k.state === "REVOKED" ? "CANCELLED" : "SUSPENDED"} label={k.state.toLowerCase()} />}
               <span className="order-last w-full text-xs leading-relaxed text-cocoa-2">{k.scopes.join(" · ")} · {k.rateLimitPerMin}/min{k.monthlyQuota ? ` · ${k.monthlyQuota.toLocaleString()}/month` : ""} · used {ago(k.lastUsedAt)}</span>
               {k.state === "OK" && (
-                <SButton variant="ghost" className="ml-auto min-h-9 text-red-800" aria-label={`Revoke key ${k.prefix}`} onClick={async () => { await api(`/admin/agents/keys/${k.id}/revoke`, { method: "POST" }); onChange(); }}>Revoke</SButton>
+                <SButton variant="ghost" className="ml-auto text-red-800" aria-label={`Revoke key ${k.prefix}`} onClick={async () => { await api(`/admin/agents/keys/${k.id}/revoke`, { method: "POST" }); onChange(); }}>Revoke</SButton>
               )}
             </li>
           ))}
@@ -292,7 +292,7 @@ function SecretSheet({ secret, onClose }: { secret: string | null; onClose: () =
   return (
     <StudioSheet open={Boolean(secret)} onClose={() => { setCopied(false); onClose(); }} title="Copy this secret now" footer={<SButton className="w-full" onClick={() => { setCopied(false); onClose(); }}>I saved it</SButton>}>
       <div className="space-y-3">
-        <p className="text-sm text-cocoa-2">Nyambika stores only a hash. This is the only time it is shown.</p>
+        <div className="flex flex-wrap gap-1.5"><Fact icon="lock">Stored as a hash</Fact><Fact icon="eye">Shown once</Fact></div>
         <code data-testid="new-secret" className="block break-all rounded-2xl bg-cocoa p-4 font-mono text-sm font-bold text-white">{secret}</code>
         <SButton variant="outline" onClick={async () => { await navigator.clipboard?.writeText(secret ?? "").catch(() => undefined); setCopied(true); }}><Icon name="copy" className="size-4" /> {copied ? "Copied" : "Copy"}</SButton>
       </div>
@@ -346,7 +346,7 @@ function KeySheet({ client, open, onClose, onCreated, onError }: { client: Clien
             ))}
           </div>
         </Field>
-        <Field label="Scopes" group hint="A key can only call routes whose scope it holds.">
+        <Field label="Scopes" group hint="Routes this key may call">
           <div className="space-y-1">
             {allowed.map((s) => (
               <Switch key={s} checked={scopes.includes(s)} onChange={(v) => setScopes(v ? [...scopes, s] : scopes.filter((x) => x !== s))} label={s} />
@@ -354,7 +354,7 @@ function KeySheet({ client, open, onClose, onCreated, onError }: { client: Clien
           </div>
         </Field>
         <Field label="Rate limit (requests per minute)"><Input inputMode="numeric" value={rate} onChange={(e) => setRate(e.target.value.replace(/\D/g, ""))} /></Field>
-        <Field label="Monthly quota (calls)" hint="Leave empty for no monthly cap."><Input inputMode="numeric" value={quota} onChange={(e) => setQuota(e.target.value.replace(/\D/g, ""))} placeholder="e.g. 50000" /></Field>
+        <Field label="Monthly quota (calls)" hint="Empty = no cap"><Input inputMode="numeric" value={quota} onChange={(e) => setQuota(e.target.value.replace(/\D/g, ""))} placeholder="e.g. 50000" /></Field>
       </div>
     </StudioSheet>
   );
@@ -399,7 +399,7 @@ function ContractSheet({ client, open, onClose, onDone }: { client: ClientRow; o
           <Field label="Overage price (RWF / look)"><Input inputMode="numeric" value={f.overagePriceRwf} onChange={(e) => setF({ ...f, overagePriceRwf: e.target.value })} /></Field>
           <Field label="Sandbox calls / day"><Input inputMode="numeric" value={f.sandboxDailyCap} onChange={(e) => setF({ ...f, sandboxDailyCap: e.target.value })} /></Field>
         </div>
-        <Switch checked={f.hardCap} onChange={(v) => setF({ ...f, hardCap: v })} label="Hard cap" description="Refuse calls past the quota instead of billing overage." />
+        <Switch checked={f.hardCap} onChange={(v) => setF({ ...f, hardCap: v })} label="Hard cap" description="Refuse past quota, no overage" />
         <Note error={err} />
       </div>
     </StudioSheet>
@@ -451,7 +451,7 @@ function SandboxSheet({ client, models, open, onClose, onDone }: { client: Clien
       }
     >
       <div className="space-y-4">
-        <p className="text-sm text-cocoa-2">Runs as {client.name} with its sandbox key: same guard and C2PA as live, watermarked, never billed.</p>
+        <div className="flex flex-wrap gap-1.5"><Fact icon="lock">Sandbox key</Fact><Fact icon="shield">Guard + C2PA</Fact><Fact icon="sparkle">Watermarked · not billed</Fact></div>
         <Field label="Synthetic model">
           <Select value={model} onChange={(e) => setModel(e.target.value)}>
             {models.map((m) => <option key={m.id} value={m.id}>{m.label} ({m.id})</option>)}

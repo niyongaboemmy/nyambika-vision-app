@@ -9,7 +9,7 @@ import { Badge, Card, Chip, Field, Icon, Input, Kpi, Meter, Note, ScreenSkeleton
 import { api } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { useApi } from "@/lib/use-api";
-import { Fact, LearnMore } from "@/components/kit";
+import { Fact, InfoTip, LearnMore } from "@/components/kit";
 
 const TABS = ["Overview", "Verify", "Moderation", "Migration", "Flags & models", "Outbox", "Audit", "Pilot", "Agents & partners", "Regions"] as const;
 
@@ -95,23 +95,30 @@ export default function RegionsAdmin() {
               </div>
               <Meter value={r.checklist.items.filter((i) => i.done).length} max={r.checklist.items.length} label="Checklist progress" />
               <ul className="divide-y divide-hairline">
-                {r.checklist.items.map((i) => (
-                  <li key={i.key} className="flex items-start gap-3 py-2.5">
-                    {i.kind === "auto" ? (
-                      <>
-                        <span className={`mt-0.5 grid size-6 shrink-0 place-items-center rounded-full ${i.done ? "bg-mint-ink text-white" : "bg-paper-2 text-cocoa-3 ring-1 ring-inset ring-hairline"}`}>{i.done ? <Icon name="check" className="size-3.5" /> : <Icon name="clock" className="size-3.5" />}</span>
-                        <span className="min-w-0 flex-1">
-                          <span className="block text-sm font-bold">{i.label} <span className="text-xs font-semibold text-cocoa-2">· automatic</span></span>
-                          <span className="block text-xs text-cocoa-2">{i.detail}</span>
-                        </span>
-                      </>
-                    ) : (
-                      <div className="min-w-0 flex-1">
-                        <Switch checked={i.done} onChange={(v) => run(() => api(`/admin/regions/${r.code}/checklist`, { method: "POST", json: { item: i.key, done: v } }), v ? `Signed off: ${i.label}` : `Reopened: ${i.label}`)} label={i.label} description={i.done && i.by ? `Signed off by ${i.by}${i.at ? ` · ${new Date(i.at).toLocaleDateString("en-GB")}` : ""}` : "Manual sign-off"} />
-                      </div>
-                    )}
-                  </li>
-                ))}
+                {r.checklist.items.map((i) => {
+                  // "Label (examples…)" → short label; the parenthetical moves into an ⓘ.
+                  const [head, extra] = i.label.includes(" (") ? [i.label.slice(0, i.label.indexOf(" (")), i.label.slice(i.label.indexOf(" (") + 2, -1)] : [i.label, ""];
+                  return (
+                    <li key={i.key} className="flex min-h-12 items-center gap-3 py-2">
+                      {i.kind === "auto" ? (
+                        <>
+                          <span className={`grid size-6 shrink-0 place-items-center rounded-full ${i.done ? "bg-mint-ink text-white" : "bg-paper-2 text-cocoa-3 ring-1 ring-inset ring-hairline"}`}>{i.done ? <Icon name="check" className="size-3.5" /> : <Icon name="clock" className="size-3.5" />}</span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block text-sm font-bold">{head}</span>
+                            <span className="block truncate text-xs text-cocoa-2">Auto · {i.detail}</span>
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <div className="min-w-0 flex-1 [&>label]:min-h-11 [&>label]:items-center">
+                            <Switch checked={i.done} onChange={(v) => run(() => api(`/admin/regions/${r.code}/checklist`, { method: "POST", json: { item: i.key, done: v } }), v ? `Signed off: ${i.label}` : `Reopened: ${i.label}`)} label={head} description={i.done && i.by ? `Signed off by ${i.by}${i.at ? ` · ${new Date(i.at).toLocaleDateString("en-GB")}` : ""}` : undefined} />
+                          </div>
+                          {extra && <InfoTip label={`About ${head}`}>{extra}</InfoTip>}
+                        </>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
               {r.code !== "RW" && (
                 <SButton className="w-full" variant={r.launched ? "outline" : "primary"} disabled={!r.launched && !r.checklist.ready} onClick={() => run(() => api(`/admin/regions/${r.code}/launch`, { method: "POST", json: { launched: !r.launched } }), r.launched ? `${r.name} paused` : `${r.name} launched`)}>
@@ -123,21 +130,21 @@ export default function RegionsAdmin() {
             <div className="space-y-4">
               <ConfigCard key={r.code} r={r} onSave={(json) => run(() => api(`/admin/regions/${r.code}`, { method: "PATCH", json }), "Country config saved (audit-logged)")} />
               <Card className="space-y-2">
-                <h2 className="font-display text-lg font-black tracking-tight">Data residency</h2>
+                <h2 className="flex items-center gap-1 font-display text-lg font-black tracking-tight">Data residency<InfoTip label="About data residency">Routing seam only: separate regional databases are not provisioned yet (ADR-0006).</InfoTip></h2>
                 <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
                   <dt className="text-cocoa-2">Bucket</dt><dd className="font-mono">{r.route.bucket}</dd>
                   <dt className="text-cocoa-2">DB schema</dt><dd className="font-mono">{r.route.dbSchema}</dd>
                   <dt className="text-cocoa-2">Database</dt><dd>{r.route.database === "regional" ? "Regional (DATABASE_URL_" + r.code + ")" : "Home (shared)"}</dd>
                   <dt className="text-cocoa-2">Storage</dt><dd>{r.route.applied ? <span className="font-mono">{r.route.storagePrefix}</span> : `Home store (RESIDENCY_MODE=${data.residencyMode})`}</dd>
                 </dl>
-                <p className="text-xs text-cocoa-2">Routing seam only: separate regional databases are not provisioned yet (ADR-0006).</p>
+                
               </Card>
               <Card className="space-y-2">
                 <div className="flex items-center justify-between gap-2">
                   <h2 className="font-display text-lg font-black tracking-tight">FX rates</h2>
                   <SButton variant="soft" onClick={() => run(() => api("/admin/regions/fx/refresh", { method: "POST" }), "Rates refreshed")}><Icon name="refresh" className="size-4" /> Refresh</SButton>
                 </div>
-                <p className="text-xs text-cocoa-2">{data.fx.source === "dev-fixed-synthetic" ? "Synthetic dev rates (not market data)." : data.fx.source} · {new Date(data.fx.fetchedAt).toLocaleString("en-GB")} · display only, never used to charge.</p>
+                <p className="text-xs text-cocoa-2">{data.fx.source === "dev-fixed-synthetic" ? "Synthetic" : data.fx.source} · {new Date(data.fx.fetchedAt).toLocaleString("en-GB")} · display only</p>
                 <div className="flex flex-wrap gap-1.5">{Object.entries(data.fx.rates).map(([c, v]) => <Chip key={c}>1 USD = {v} {c}</Chip>)}</div>
               </Card>
             </div>
@@ -150,7 +157,7 @@ export default function RegionsAdmin() {
                 {data.claims.map((c) => (
                   <li key={c.productId} className="flex items-center gap-3 py-2.5">
                     <span className="min-w-0 flex-1"><span className="block text-sm font-bold">{c.title} · {c.page}</span><span className="block truncate text-xs text-cocoa-2">{c.madeIn}{c.impactStory ? ` · “${c.impactStory}”` : ""}</span></span>
-                    <Link href={`/p/${c.productId}`} className="text-sm font-bold text-violet-ink underline">Review</Link>
+                    <Link href={`/p/${c.productId}`} className="st-press inline-flex min-h-11 shrink-0 items-center gap-1 rounded-2xl px-2 text-sm font-bold text-violet-ink hover:bg-paper-2">Review <Icon name="chevron" className="size-4" /></Link>
                   </li>
                 ))}
               </ul>
@@ -176,7 +183,7 @@ function ConfigCard({ r, onSave }: { r: Region; onSave: (json: object) => void }
         {r.languages.map((l) => <Chip key={l}>{l}{l === "sw" ? " · machine-drafted" : ""}</Chip>)}
       </div>
       <Field label="VAT rate (%)"><Input inputMode="decimal" value={vat} onChange={(e) => setVat(e.target.value.replace(/[^\d.]/g, ""))} /></Field>
-      <Field label="Tax / VAT note" hint="Shown at checkout. Starts with “Draft” until counsel approves."><Textarea value={tax} onChange={(e) => setTax(e.target.value)} className="min-h-20" /></Field>
+      <Field label="Tax / VAT note" hint="Shown at checkout · “Draft” until counsel approves"><Textarea value={tax} onChange={(e) => setTax(e.target.value)} className="min-h-20" /></Field>
       <Field label="Legal entity text"><Textarea value={legal} onChange={(e) => setLegal(e.target.value)} className="min-h-20" /></Field>
       <SButton variant="dark" disabled={!dirty} onClick={() => onSave({ taxNote: tax, legalEntity: legal, vatRateBp: Math.round(Number(vat) * 100) })}>Save config</SButton>
     </Card>

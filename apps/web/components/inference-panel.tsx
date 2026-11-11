@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Badge, Chip, Field, Icon, Input, Note, ScreenSkeleton, SButton, Segmented, StudioSheet, Switch } from "@/components/studio";
 import { api, ApiError } from "@/lib/api";
+import { InfoTip } from "@/components/kit";
 
 type Route = "tryon" | "stt" | "llm" | "avatar" | "video" | "attr";
 type Strategy = "cost" | "latency" | "pool-first" | "hosted-only" | "pool-only";
@@ -118,7 +119,7 @@ export function InferencePanel() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2 id="inference-t" className="font-display text-xl font-black tracking-tight text-cocoa">Inference</h2>
-          <p className="text-sm text-cocoa-2">Self-hosted GPU pool or hosted providers, chosen per call by policy. Live every 3 s.</p>
+          <p className="flex items-center gap-1 text-sm text-cocoa-2">Pool or hosted · live every 3 s<InfoTip label="About inference routing">Self-hosted GPU pool or hosted providers, chosen per call by policy.</InfoTip></p>
         </div>
         <div className="flex flex-wrap gap-1.5">
           <Chip tone={data.routingEnabled ? "mint" : "stone"}>{data.routingEnabled ? "Routing on" : "Routing off"}</Chip>
@@ -155,7 +156,7 @@ export function InferencePanel() {
           {data.fakePool ? (
             <div role="group" aria-label="Fake pool failure mode" className="flex flex-wrap gap-1.5">
               {(["healthy", "slow", "flaky", "failing", "down"] as const).map((m) => (
-                <SButton key={m} variant={data.fakePool?.mode === m ? "dark" : "outline"} aria-pressed={data.fakePool?.mode === m} className="min-h-10" disabled={busy !== null} onClick={() => run(`chaos-${m}`, async () => {
+                <SButton key={m} variant={data.fakePool?.mode === m ? "dark" : "outline"} aria-pressed={data.fakePool?.mode === m} disabled={busy !== null} onClick={() => run(`chaos-${m}`, async () => {
                   await api("/admin/inference/chaos", { method: "POST", json: { mode: m } });
                   return `Fake pool set to ${m}`;
                 })}>
@@ -164,9 +165,9 @@ export function InferencePanel() {
               ))}
             </div>
           ) : (
-            <p className="text-sm text-cocoa-2">Chaos controls appear only for the local fake pool.</p>
+            <p className="text-sm text-cocoa-2">Chaos: local fake pool only</p>
           )}
-          <SButton variant="soft" className="min-h-10" disabled={busy !== null} onClick={() => run("health", async () => { await api("/admin/inference/health", { method: "POST" }); return "Health checked"; })}>
+          <SButton variant="soft" disabled={busy !== null} onClick={() => run("health", async () => { await api("/admin/inference/health", { method: "POST" }); return "Health checked"; })}>
             <Icon name="shield" className="size-4" /> Check health now
           </SButton>
         </div>
@@ -186,7 +187,7 @@ export function InferencePanel() {
                   {!r.policy.fallback && <Chip>No fallback</Chip>}
                 </div>
               </div>
-              <SButton variant="outline" className="min-h-10 shrink-0" onClick={() => setEdit(r)} aria-label={`Edit ${ROUTE_LABEL[r.route]} policy`}>
+              <SButton variant="outline" className="shrink-0" onClick={() => setEdit(r)} aria-label={`Edit ${ROUTE_LABEL[r.route]} policy`}>
                 Edit
               </SButton>
             </div>
@@ -257,7 +258,7 @@ function VideoModels({ models, busy, run }: { models: VideoModel[]; busy: string
   return (
     <div className="space-y-2" aria-labelledby="video-models-t">
       <h3 id="video-models-t" className="font-display text-lg font-black tracking-tight text-cocoa">Video try-on providers · NLB gate</h3>
-      <p className="text-sm text-cocoa-2">A provider reaches shoppers only after its NLB video eval passes on every skin tone × body size subgroup (identity stable across frames, garment faithful).</p>
+      <p className="flex items-center gap-1 text-sm text-cocoa-2">Live only after an NLB pass<InfoTip label="About the NLB gate">A provider reaches shoppers only after its NLB video eval passes on every skin tone × body size subgroup (identity stable across frames, garment faithful).</InfoTip></p>
       <ul className="grid grid-cols-1 gap-3 lg:grid-cols-3">
         {models.map((m) => {
           const s = m.lastEval?.summary;
@@ -291,13 +292,13 @@ function VideoModels({ models, busy, run }: { models: VideoModel[]; busy: string
                 )}
               </div>
               <div className="flex flex-wrap gap-2">
-                <SButton variant="soft" className="min-h-10" disabled={busy !== null} onClick={() => act(m.id, `eval-${m.id}`, async () => {
+                <SButton variant="soft" disabled={busy !== null} onClick={() => act(m.id, `eval-${m.id}`, async () => {
                   const r = await api<{ passed: boolean }>(`/admin/video/models/${encodeURIComponent(m.id)}/eval`, { method: "POST" });
                   return r.passed ? `NLB video eval passed for ${m.id}` : `NLB video eval did not pass for ${m.id}`;
                 })}>
                   <Icon name="shield" className="size-4" /> {busy === `eval-${m.id}` ? "Evaluating 15 subgroups…" : "Run NLB eval"}
                 </SButton>
-                <SButton variant={m.status === "ACTIVE" ? "outline" : "primary"} className="min-h-10" disabled={busy !== null} onClick={() => act(m.id, `status-${m.id}`, async () => {
+                <SButton variant={m.status === "ACTIVE" ? "outline" : "primary"} disabled={busy !== null} onClick={() => act(m.id, `status-${m.id}`, async () => {
                   const next = m.status === "ACTIVE" ? "RETIRED" : "ACTIVE";
                   await api(`/admin/models/${encodeURIComponent(m.id)}`, { method: "PATCH", json: { status: next } });
                   return next === "ACTIVE" ? `${m.id} activated for shoppers` : `${m.id} retired`;
@@ -342,8 +343,8 @@ function PolicyEditor({ view, breaker, onClose, onSaved }: { view: RouteView; br
         <Field label="Latency SLO (ms, p95)" hint="Cheapest-in-SLO skips a backend whose observed p95 is above this.">
           <Input type="number" inputMode="numeric" min={50} max={600000} value={p.latency_slo_ms} onChange={(e) => setP({ ...p, latency_slo_ms: Number(e.target.value) })} />
         </Field>
-        <Switch checked={p.residency === "in-region"} onChange={(v) => setP({ ...p, residency: v ? "in-region" : "any" })} label="Keep data in the shopper's country" description="Only backends in the request's region are used. If none is healthy the call fails rather than leaving the country." />
-        <Switch checked={video ? false : p.fallback} disabled={video} onChange={(v) => setP({ ...p, fallback: v })} label="Fall back to the next backend on failure" description={video ? "Always off for video: every backend serving shoppers needs its own NLB pass." : "A failure trips the circuit breaker and the call is retried on the other backend."} />
+        <Switch checked={p.residency === "in-region"} onChange={(v) => setP({ ...p, residency: v ? "in-region" : "any" })} label="Keep data in the shopper's country" description="In-region backends only; else the call fails" />
+        <Switch checked={video ? false : p.fallback} disabled={video} onChange={(v) => setP({ ...p, fallback: v })} label="Fall back to the next backend on failure" description={video ? "Off for video: each backend needs its own NLB pass" : "Retry on the other backend"} />
         {(["pool", "hosted"] as const).map((k) => (
           <fieldset key={k} className="space-y-2 rounded-2xl bg-paper-2 p-3 ring-1 ring-inset ring-hairline">
             <legend className="sr-only">{k === "pool" ? "Self-hosted pool" : "Hosted provider"}</legend>
