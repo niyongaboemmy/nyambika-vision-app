@@ -5,15 +5,16 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button, Sheet } from "@/components/ui";
-import { PassportLink, Price, RegionBuy } from "@/components/region";
+import { PassportLink, Price } from "@/components/region";
 import { api, rwf } from "@/lib/api";
 import { waLink, type MakerProduct, type MakerSpace } from "@/lib/maker";
 import type { Commerce } from "@/lib/region";
 import { useSession } from "@/lib/session";
 import { track, trackOnce } from "@/lib/track";
 
-// Only drawn inside an opened product sheet: the 3D section loads on first open (JS budget pass).
+// Only drawn inside an opened product sheet: the 3D section and checkout load on first open (JS budget pass).
 const Garment3dSection = dynamic(() => import("@/components/xr-maker").then((m) => m.Garment3dSection), { ssr: false });
+const RegionBuy = dynamic(() => import("@/components/region-buy").then((m) => m.RegionBuy), { ssr: false });
 
 /** 2D coverflow collection (Maker Space v1). Swipe to browse, tap to open. */
 export function Collection({ maker, commerce }: { maker: MakerSpace; commerce?: Commerce | null }) {
