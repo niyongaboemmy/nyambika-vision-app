@@ -67,7 +67,7 @@ interface Summary {
   recommendation: { decision: "Scale" | "Iterate" | "Pivot"; reasons: string[] };
 }
 
-const TABS = ["Overview", "Verify", "Moderation", "Migration", "Flags & models", "Outbox", "Audit", "Pilot"] as const;
+const TABS = ["Overview", "Verify", "Moderation", "Migration", "Flags & models", "Outbox", "Audit", "Pilot", "Agents & partners"] as const;
 const RAG: Record<Rag, { tone: "mint" | "gold" | "red" | "stone"; label: string; icon: string }> = {
   green: { tone: "mint", label: "On target", icon: "●" },
   amber: { tone: "gold", label: "Near target", icon: "▲" },
@@ -100,7 +100,7 @@ export default function PilotAdmin() {
   const { data, reload, error } = useApi<Summary>(me?.isHost ? "/admin/pilot" : null);
   if (!me?.isHost) return null;
   return (
-    <AdminShell tabs={TABS} tab="Pilot" onTab={(t) => t !== "Pilot" && router.push(`/admin?tab=${encodeURIComponent(t)}`)}>
+    <AdminShell tabs={TABS} tab="Pilot" onTab={(t) => (t === "Agents & partners" ? router.push("/admin/agents") : t !== "Pilot" && router.push(`/admin?tab=${encodeURIComponent(t)}`))}>
       {error && <Note error={error} />}
       {!data ? <ScreenSkeleton /> : <Dashboard s={data} reload={reload} />}
     </AdminShell>

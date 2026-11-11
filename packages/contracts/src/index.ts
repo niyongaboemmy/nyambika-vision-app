@@ -164,3 +164,5 @@ export type ConsentPurpose = (typeof CONSENT_PURPOSES)[number];
 export * from "./tailor";
 
 export * from "./pilot";
+
+export * from "./agents";

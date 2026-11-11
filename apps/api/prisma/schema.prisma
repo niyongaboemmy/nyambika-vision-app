@@ -1063,3 +1063,157 @@ model Checkout {
   orderIds       String[]
   createdAt      DateTime @default(now())
 }
+
+// ==== E36 Agentic commerce · E37 Try-on as a Service (FR-AGT-01..06, 08) ====
+
+/// An external AI agent or B2B partner (SRS role "API Client"). Never a shopper account.
+model ApiClient {
+  id                  String   @id @default(cuid())
+  name                String
+  /// AGENT | PARTNER
+  kind                String
+  contactEmail        String   @default("")
+  /// ACTIVE | SUSPENDED
+  status              String   @default("ACTIVE")
+  /// HMAC secret for webhook signatures, sealed with AES-256-GCM (shown once on rotation).
+  webhookSecretSealed String?
+  createdBy           String?
+  createdAt           DateTime @default(now())
+
+  @@index([kind, status])
+}
+
+/// API key: only a peppered HMAC-SHA-256 of the secret is stored; the prefix identifies it in the UI.
+model ApiKey {
+  id              String    @id @default(cuid())
+  clientId        String
+  name            String    @default("")
+  prefix          String    @unique
+  hash            String    @unique
+  /// LIVE | SANDBOX (sandbox partner results are watermarked and never billed)
+  env             String    @default("LIVE")
+  scopes          String[]
+  rateLimitPerMin Int       @default(120)
+  /// Calls per calendar month (null = unlimited)
+  monthlyQuota    Int?
+  expiresAt       DateTime?
+  revokedAt       DateTime?
+  lastUsedAt      DateTime?
+  createdBy       String?
+  createdAt       DateTime  @default(now())
+
+  @@index([clientId])
+}
+
+/// Audit log of every agent/partner call (FR-AGT-08). IPs are stored only as an HMAC.
+model AgentCall {
+  id        String   @id @default(cuid())
+  clientId  String?
+  keyId     String?
+  method    String
+  route     String
+  tool      String?
+  status    Int
+  latencyMs Int
+  ipHash    String
+  createdAt DateTime @default(now())
+
+  @@index([clientId, createdAt])
+  @@index([createdAt])
+}
+
+/// Member opt-in/out of agent channels and external marketplaces (FR-AGT-05). No row = opted in.
+model AgentChannelSetting {
+  pageId              String   @id
+  agentsEnabled       Boolean  @default(true)
+  marketplacesEnabled Boolean  @default(true)
+  updatedBy           String?
+  updatedAt           DateTime @updatedAt
+}
+
+/// Agent-initiated checkout session (ACP/UCP aligned). Nothing is ordered or paid until the shopper
+/// confirms the signed, single-use, expiring mandate inside Nyambika (FR-AGT-04).
+model AgentCheckout {
+  id               String    @id @default(cuid())
+  clientId         String
+  keyId            String
+  pageId           String
+  /// AWAITING_CONFIRMATION | CONFIRMED | CANCELED | EXPIRED (payment state comes from the order)
+  status           String    @default("AWAITING_CONFIRMATION")
+  /// [{ productId, variantId, title, colourName, size, qty, unitPriceRwf, makerName }]
+  items            Json
+  itemsHash        String
+  subtotalRwf      Int
+  payoutLabel      String
+  currency         String    @default("RWF")
+  mandateNonce     String    @unique
+  mandateExpiresAt DateTime
+  mandateUsedAt    DateTime?
+  confirmedById    String?
+  orderId          String?   @unique
+  idempotencyKey   String
+  externalRef      String?
+  /// REST | MCP
+  channel          String    @default("REST")
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@unique([clientId, idempotencyKey])
+  @@index([createdAt])
+  @@index([pageId])
+}
+
+/// B2B try-on contract (FR-AGT-06): monthly quota, fee and overage price.
+model PartnerContract {
+  id              String    @id @default(cuid())
+  clientId        String    @unique
+  /// DRAFT | ACTIVE | SUSPENDED | ENDED
+  status          String    @default("DRAFT")
+  monthlyQuota    Int       @default(1000)
+  monthlyFeeRwf   Int       @default(0)
+  overagePriceRwf Int       @default(150)
+  /// true: stop at the quota; false: allow overage at overagePriceRwf
+  hardCap         Boolean   @default(false)
+  sandboxDailyCap Int       @default(50)
+  startsAt        DateTime  @default(now())
+  endsAt          DateTime?
+  notes           String    @default("")
+  updatedBy       String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+/// One partner try-on call: garment + synthetic AI model only (never a Nyambika shopper's twin).
+model PartnerTryonJob {
+  id              String    @id @default(cuid())
+  clientId        String
+  keyId           String
+  sandbox         Boolean   @default(false)
+  /// QUEUED | GENERATING | GUARDING | DELIVERED | WITHHELD | FAILED
+  status          String    @default("QUEUED")
+  modelId         String
+  category        String
+  garmentPath     String
+  outputPath      String?
+  guard           Json?
+  c2pa            Json?
+  modelVersion    String    @default("")
+  clientReference String?
+  webhookUrl      String?
+  /// NONE | PENDING | DELIVERED | FAILED
+  webhookStatus   String    @default("NONE")
+  webhookAttempts Int       @default(0)
+  webhookLastAt   DateTime?
+  billable        Boolean   @default(false)
+  overage         Boolean   @default(false)
+  priceRwf        Int       @default(0)
+  costRwf         Int       @default(0)
+  latencyMs       Int?
+  error           String?
+  idempotencyKey  String?
+  createdAt       DateTime  @default(now())
+  deliveredAt     DateTime?
+
+  @@unique([clientId, idempotencyKey])
+  @@index([clientId, createdAt])
+}

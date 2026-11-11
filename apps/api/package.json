@@ -13,6 +13,7 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:seed:pilot": "tsx prisma/seed-pilot.ts",
     "db:seed:3d": "tsx prisma/seed-3d.ts",
+    "db:seed:agents": "tsx prisma/seed-agents.ts",
     "db:reset": "prisma migrate reset --force"
   },
   "prisma": {
@@ -36,6 +37,7 @@
     "vitest": "^4.1.12"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.2",
     "@nestjs/common": "11.2.9",
     "@nestjs/core": "11.2.9",
     "@nestjs/platform-express": "11.2.9",

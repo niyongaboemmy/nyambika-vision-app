@@ -13,6 +13,7 @@ const ICONS: Record<string, IconName> = {
   Outbox: "mail",
   Audit: "list",
   Pilot: "trend",
+  "Agents & partners": "globe",
 };
 
 /**
