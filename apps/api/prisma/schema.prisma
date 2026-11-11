@@ -1443,3 +1443,79 @@ model AvatarFit3d {
   @@unique([avatarId, variantId, size])
   @@index([userId])
 }
+
+// ==== E39 Video try-on + E42 Self-hosted inference ====
+
+/// Evaluation records in the model registry (AI-BM-04). E39 gate: a VIDEO_TRYON model cannot be activated
+/// without a passing NLB_VIDEO record for its exact version, newer than a quarter, on a commercial licence.
+model ModelEval {
+  id            String   @id @default(cuid())
+  modelId       String
+  /// NLB_VIDEO
+  kind          String
+  /// Version the provider reported while evaluated; must equal modelId for the gate to accept it.
+  modelVersion  String
+  passed        Boolean
+  licence       String   @default("")
+  commercialUse Boolean  @default(false)
+  summary       Json
+  report        Json
+  createdBy     String?
+  createdAt     DateTime @default(now())
+
+  @@index([modelId, createdAt])
+}
+
+/// "See it on video" (FR-VID-03/04/05). Private to the shopper. A CLIP source is the shopper's own frames
+/// (VIDEO_CLIP_UPLOAD consent), AES-256-GCM sealed and deleted as soon as processing ends (clipDeletedAt).
+model VideoTryOn {
+  id            String    @id @default(cuid())
+  userId        String
+  lookId        String
+  generationId  String?
+  variantId     String
+  pageId        String
+  /// CLIP | TURNAROUND
+  source        String
+  /// QUEUED | GENERATING | GUARDING | DELIVERED | WITHHELD | FAILED
+  status        String    @default("QUEUED")
+  progress      Int       @default(0)
+  modelId       String
+  provider      String
+  clipPath      String?
+  clipIv        String?
+  clipTag       String?
+  clipFrames    Int       @default(0)
+  clipDeletedAt DateTime?
+  consentId     String?
+  gatewayJob    String?
+  webpPath      String?
+  mp4Path       String?
+  posterPath    String?
+  frames        Int?
+  durationMs    Int?
+  width         Int?
+  height        Int?
+  guard         Json?
+  c2pa          Json?
+  routing       Json?
+  billing       String?
+  credits       Int       @default(0)
+  costRwf       Int       @default(0)
+  modelVersion  String    @default("")
+  error         String?
+  createdAt     DateTime  @default(now())
+  deliveredAt   DateTime?
+
+  @@index([userId, createdAt])
+  @@index([lookId])
+}
+
+/// Inference routing policy (E42, AI-GW-07). One row ("default"); the API pushes it to the gateway by version.
+model InferencePolicy {
+  id        String   @id
+  policy    Json
+  version   Int      @default(1)
+  updatedBy String?
+  updatedAt DateTime @updatedAt
+}

@@ -13,6 +13,8 @@ async function bootstrap() {
   app.use("/admin/migration", json({ limit: "40mb" }));
   // Partner try-on (E37) sends one garment image as base64 (≤ 10 MB decoded).
   app.use("/v1/partner", json({ limit: "15mb" }));
+  // Video try-on (E39) sends the shopper clip as ≤ 24 device-extracted frames.
+  app.use("/video", json({ limit: "6mb" }));
   app.use(json({ limit: "2mb" }));
   app.use(cookieParser());
   app.use((req: Request, res: Response, next: NextFunction) => {
