@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AdminShell } from "@/components/admin-shell";
+import { InferencePanel } from "@/components/inference-panel";
 import { Badge, Card, Chip, Empty, Icon, Kpi, Meter, Monogram, Note, ScreenSkeleton, SButton, Switch } from "@/components/studio";
 import { api, rwf } from "@/lib/api";
 import { useSession } from "@/lib/session";
@@ -198,6 +199,7 @@ function FlagsTab() {
   const { data: flags, reload, setData: setFlags } = useApi<{ key: string; enabled: boolean; rollout: number; description: string }[]>("/admin/flags");
   const { data: models, reload: reloadModels } = useApi<{ id: string; tier: string; status: string; costRwf: number; generations: number; guardFailureRate: number; avgLatencyMs: number }[]>("/admin/models");
   return (
+    <div className="space-y-8">
     <div className="grid grid-cols-1 items-start gap-5 xl:grid-cols-2">
       <section aria-labelledby="flags-t" className="space-y-2">
         <h2 id="flags-t" className="font-display text-xl font-black tracking-tight text-cocoa">Feature flags</h2>
@@ -223,7 +225,7 @@ function FlagsTab() {
         <h2 id="models-t" className="font-display text-xl font-black tracking-tight text-cocoa">Model registry</h2>
         {!models && <ScreenSkeleton variant="list" />}
         <ul className="space-y-2">
-          {models?.map((m) => (
+          {models?.filter((m) => m.tier !== "VIDEO_TRYON").map((m) => (
             <li key={m.id} className="st-card space-y-2 rounded-[22px] p-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
@@ -249,6 +251,8 @@ function FlagsTab() {
           ))}
         </ul>
       </section>
+    </div>
+    <InferencePanel />
     </div>
   );
 }
