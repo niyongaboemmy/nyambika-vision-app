@@ -1,19 +1,23 @@
 "use client";
 
 import type { Intent } from "@nyambika/contracts";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { MenuSheet } from "@/components/menu";
-import { TwinNudge } from "@/components/twin-nudge";
 import { RecordingTimer, TranscriptReview, VoiceConsentSheet, VoiceOrb, VoiceSettingsSheet } from "@/components/voice-muse";
-import { WardrobeAmbient } from "@/components/wardrobe-ambient";
+import { Icon } from "@/components/studio";
 import { Button, Chip, ErrorNote, Screen, Sheet, Spinner } from "@/components/ui";
 import { api, ApiError, rwf } from "@/lib/api";
 import { museReply } from "@/lib/muse-reply";
 import { useSession } from "@/lib/session";
 import { track } from "@/lib/track";
 import { canRecord, loadPrefs, savePrefs, speak, SPEECH_LANG, stopSpeaking, useRecorder, type SttResult, type VoicePrefs } from "@/lib/voice";
+
+// Below-the-fold / on-demand pieces load after first paint (perf budget, docs/design/ui-audit.md).
+const MenuSheet = dynamic(() => import("@/components/menu").then((m) => m.MenuSheet), { ssr: false });
+const TwinNudge = dynamic(() => import("@/components/twin-nudge").then((m) => m.TwinNudge), { ssr: false });
+const WardrobeAmbient = dynamic(() => import("@/components/wardrobe-ambient").then((m) => m.WardrobeAmbient), { ssr: false });
 
 type Phase = "idle" | "listening" | "transcribing" | "review" | "typing" | "thinking" | "understood" | "snapping";
 
@@ -283,12 +287,12 @@ export default function Muse() {
                 aria-pressed={!prefs.muted}
                 aria-label={t("voice.speakReplies")}
                 title={prefs.muted ? t("voice.unmute") : t("voice.mute")}
-                className="glass grid size-10 place-items-center rounded-full text-lg"
+                className="glass press grid size-10 place-items-center rounded-full"
               >
-                <span aria-hidden>{prefs.muted ? "🔇" : "🔊"}</span>
+                <Icon name={prefs.muted ? "mute" : "volume"} className="size-5" />
               </button>
             )}
-            <button onClick={() => setMenu(true)} aria-label="Menu" className="glass grid size-10 place-items-center rounded-full text-lg">☰</button>
+            <button onClick={() => setMenu(true)} onPointerEnter={() => void import("@/components/menu")} aria-label="Menu" className="glass press grid size-10 place-items-center rounded-full"><Icon name="menu" className="size-5" /></button>
           </span>
         ) : (
           <Link href="/signin" className="glass rounded-full px-4 py-2 text-sm font-semibold">Sign in</Link>
@@ -371,8 +375,8 @@ export default function Muse() {
 
       <footer className="sticky bottom-0 z-20 px-6 pb-[max(env(safe-area-inset-bottom),18px)] pt-3">
         <div className="flex items-center justify-center gap-7">
-          <label className="glass grid size-16 cursor-pointer place-items-center rounded-full text-2xl" aria-label={t("muse.snap")}>
-            📷
+          <label className="glass press grid size-16 cursor-pointer place-items-center rounded-full" aria-label={t("muse.snap")}>
+            <Icon name="camera" className="size-7" />
             <input type="file" accept="image/*" capture="environment" className="sr-only" onChange={(e) => e.target.files?.[0] && snap(e.target.files[0])} />
           </label>
           <button
@@ -402,9 +406,9 @@ export default function Muse() {
             onContextMenu={(e) => e.preventDefault()}
             className={`grad-cta grid size-24 touch-none select-none place-items-center rounded-full text-4xl shadow-[0_0_40px_rgba(224,112,63,.45)] transition ${phase === "listening" ? "scale-110" : ""}`}
           >
-            <span aria-hidden>🎙️</span>
+            <Icon name="mic" className="size-10 text-[#fff]" />
           </button>
-          <button aria-label={t("muse.type")} title={t("muse.type")} onClick={() => setPhase("typing")} className="glass grid size-16 place-items-center rounded-full text-2xl"><span aria-hidden>⌨️</span></button>
+          <button aria-label={t("muse.type")} title={t("muse.type")} onClick={() => setPhase("typing")} className="glass press grid size-16 place-items-center rounded-full"><Icon name="keyboard" className="size-7" /></button>
         </div>
         <p className="mt-2 text-center text-xs text-mut">
           {voiceOn ? t("muse.hold") : t("muse.type")}
@@ -412,7 +416,7 @@ export default function Muse() {
         </p>
       </footer>
 
-      <MenuSheet open={menu} onClose={() => setMenu(false)} />
+      {menu && <MenuSheet open={menu} onClose={() => setMenu(false)} />}
       <VoiceConsentSheet open={askConsent} onClose={() => setAskConsent(false)} onAllow={() => void allowVoice()} onType={() => { setAskConsent(false); setPhase("typing"); }} />
       <VoiceSettingsSheet open={voiceSheet} onClose={() => setVoiceSheet(false)} prefs={prefs} setPrefs={setPrefs} />
 

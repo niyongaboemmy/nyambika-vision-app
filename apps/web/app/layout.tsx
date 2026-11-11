@@ -1,8 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Nunito, Plus_Jakarta_Sans } from "next/font/google";
 import { Toaster } from "@/components/kit";
-import { NativeBridge } from "@/components/native-bridge";
-import { PilotSurvey } from "@/components/pilot-survey";
+import { DeferredGlobals } from "@/components/deferred-globals";
 import { SessionProvider } from "@/lib/session";
 import { THEME_SCRIPT } from "@/lib/theme-script";
 import "./globals.css";
@@ -39,8 +38,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SessionProvider>
           {children}
           <Toaster />
-          <PilotSurvey />
-          <NativeBridge />
+          <DeferredGlobals />
         </SessionProvider>
       </body>
     </html>

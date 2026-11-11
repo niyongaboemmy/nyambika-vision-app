@@ -3,7 +3,12 @@ import type { NextConfig } from "next";
 const API = process.env.API_INTERNAL_URL ?? "http://localhost:4000";
 
 const nextConfig: NextConfig = {
-  transpilePackages: ["@nyambika/i18n"],
+  transpilePackages: ["@nyambika/i18n", "@nyambika/contracts"],
+  turbopack: {
+    // Browser bundles compile the contracts from their ESM source so zod tree-shakes (the CommonJS dist pulled
+    // the whole of zod + every locale, ~80 KB gz, into every route). The server keeps using dist.
+    resolveAlias: { "@nyambika/contracts": { browser: "../../packages/contracts/src/index.ts" } },
+  },
   poweredByHeader: false,
   // `NEXT_DIST_DIR=.next-build next build` measures a production bundle while `next dev` keeps using .next.
   distDir: process.env.NEXT_DIST_DIR ?? ".next",
