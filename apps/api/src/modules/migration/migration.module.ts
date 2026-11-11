@@ -31,7 +31,7 @@ const LegacyProduct = z.object({
   fabric: z.string().default(""),
   colours: z.array(LegacyColour).min(1),
 });
-const LegacyPage = z.object({
+export const LegacyPage = z.object({
   legacyUrl: z.string().min(1),
   handle: z.string().regex(/^[a-z0-9-]{3,40}$/),
   name: z.string().min(2),
@@ -48,7 +48,7 @@ const LegacyPage = z.object({
 const WaveBundle = z.object({ wave: z.string().min(1), pages: z.array(LegacyPage).min(1).max(50) });
 
 const toE164 = (p: string) => (p.startsWith("+") ? p : `+250${p.replace(/\D/g, "").replace(/^0/, "")}`);
-const legacyPath = (u: string) => {
+export const legacyPath = (u: string) => {
   try {
     return new URL(u).pathname.replace(/\/+$/, "") || "/";
   } catch {
@@ -92,7 +92,8 @@ export class MigrationController {
     return { waveId: wave.id, report };
   }
 
-  private async importPage(waveId: string, src: z.infer<typeof LegacyPage>): Promise<Defect[]> {
+  /** Also used by the full-network wave runner (E21, network.ts). */
+  async importPage(waveId: string, src: z.infer<typeof LegacyPage>): Promise<Defect[]> {
     if (await this.prisma.page.findUnique({ where: { handle: src.handle } })) throw new Error(`Handle ${src.handle} already exists`);
     const fromPath = legacyPath(src.legacyUrl);
     if (await this.prisma.redirect.findUnique({ where: { fromPath } })) throw new Error(`Legacy URL ${fromPath} already migrated`);

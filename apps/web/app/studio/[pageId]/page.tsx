@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Icon, Kpi, Meter, ScreenSkeleton, Skeleton, type IconName } from "@/components/studio";
 import { ShareSheet } from "@/components/studio-shell";
+import { GrowthHomeCard } from "@/components/growth-insights";
+import { VoiceModeGate } from "@/components/coop-assist";
 import { rwf } from "@/lib/api";
 import type { OrderView } from "@/lib/orders";
 import { useSession } from "@/lib/session";
@@ -210,6 +212,8 @@ export default function Home() {
         </section>
       )}
 
+      {manager && <GrowthHomeCard pageId={page.id} />}
+
       {manager && a && a.topProducts.length > 0 && (
         <section aria-labelledby="top-title" className="st-card rounded-[24px] p-4 sm:p-5">
           <h2 id="top-title" className="font-display text-lg font-black tracking-tight text-cocoa">Most tried on</h2>
@@ -241,6 +245,7 @@ export default function Home() {
         </section>
       )}
 
+      {!manager && page.memberType === "COOPERATIVE" && <VoiceModeGate pageId={page.id} />}
       {!manager && (
         <section className="st-card rounded-[24px] p-4 text-sm leading-relaxed text-cocoa-2">
           <p className="font-extrabold text-cocoa">You make for {page.name}</p>

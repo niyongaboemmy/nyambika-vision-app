@@ -264,7 +264,7 @@ export function StudioShell({ page, pages, member, badges = {}, children }: { pa
       <StudioSheet open={more} onClose={close} title="More">
         <div className="space-y-2">
           {nav.filter((n) => n.secondary).map((n) => (
-            <SheetLink key={n.href} href={n.href} icon={n.icon} label={n.label} hint="Profile, theme, payouts, plan, staff" onClick={close} />
+            <SheetLink key={n.href} href={n.href} icon={n.icon} label={n.label} hint={n.hint} onClick={close} />
           ))}
           <button type="button" onClick={() => { close(); setSharing(true); }} className="st-press flex min-h-14 w-full items-center gap-3 rounded-2xl bg-white px-3.5 text-left ring-1 ring-inset ring-hairline hover:ring-cocoa-3">
             <span className="grid size-9 place-items-center rounded-xl bg-paper-2 text-cocoa"><Icon name="qr" className="size-[18px]" /></span>

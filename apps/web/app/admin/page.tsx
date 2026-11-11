@@ -21,7 +21,7 @@ interface Overview {
   openModeration: number;
 }
 
-const TABS = ["Overview", "Verify", "Moderation", "Migration", "Flags & models", "Outbox", "Audit", "Pilot"] as const;
+const TABS = ["Overview", "Verify", "Moderation", "Migration", "Flags & models", "Outbox", "Audit", "Pilot", "Agents & partners"] as const;
 
 /** Host admin console (FR-ADM). Host roles only. */
 export default function Admin() {
@@ -29,7 +29,7 @@ export default function Admin() {
   const router = useRouter();
   const [tab, setTab] = useState<(typeof TABS)[number]>(() => {
     const q = typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("tab");
-    return (TABS as readonly string[]).includes(q ?? "") && q !== "Pilot" ? (q as (typeof TABS)[number]) : "Overview";
+    return (TABS as readonly string[]).includes(q ?? "") && q !== "Pilot" && q !== "Agents & partners" ? (q as (typeof TABS)[number]) : "Overview";
   });
   useEffect(() => {
     if (!loading && !me?.isHost) router.replace("/signin?next=/admin");
@@ -37,7 +37,7 @@ export default function Admin() {
   const { data: counts } = useApi<Overview>(me?.isHost ? "/admin/overview" : null);
   if (!me?.isHost) return null;
   return (
-    <AdminShell tabs={TABS} tab={tab} onTab={(t) => (t === "Pilot" ? router.push("/admin/pilot") : setTab(t))} counts={{ Verify: counts?.pages.PENDING_VERIFICATION ?? 0, Moderation: counts?.openModeration ?? 0 }}>
+    <AdminShell tabs={TABS} tab={tab} onTab={(t) => (t === "Pilot" ? router.push("/admin/pilot") : t === "Agents & partners" ? router.push("/admin/agents") : setTab(t))} counts={{ Verify: counts?.pages.PENDING_VERIFICATION ?? 0, Moderation: counts?.openModeration ?? 0 }}>
         {tab === "Overview" && <OverviewTab />}
         {tab === "Verify" && <VerifyTab />}
         {tab === "Moderation" && <ModerationTab />}
@@ -348,6 +348,7 @@ function MigrationTab() {
           <div>
             <p className="font-extrabold text-cocoa">Import a wave</p>
             <p className="text-sm text-cocoa-2">JSON bundle from the legacy export (format in docs/migration.md). Pages are imported hidden; photos go through the readiness pipeline.</p>
+            <a href="/admin/network" className="mt-1 inline-block text-sm font-bold text-violet-ink underline">Whole network (waves, outreach, cut-over) →</a>
           </div>
         </div>
         <label className={`st-press flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-paper-3 bg-paper text-sm font-bold text-cocoa hover:border-cocoa-3 focus-within:outline focus-within:outline-[2.5px] focus-within:outline-violet-ink ${busy ? "opacity-50" : ""}`}>

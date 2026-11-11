@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { AddToBag } from "@/components/bag";
+import { DiscountField, type AppliedDiscount } from "@/components/growth-offer";
 import { SizeNotes, useSizeRecommendation } from "@/components/size-hint";
 import { Chip, ErrorNote, Sheet, Spinner } from "@/components/ui";
 import { api, rwf } from "@/lib/api";
@@ -27,6 +28,7 @@ export function HoldToBuy({ look }: { look: Look }) {
   const [progress, setProgress] = useState(0);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [discount, setDiscount] = useState<AppliedDiscount | null>(null);
   const raf = useRef<number | null>(null);
   const started = useRef(0);
   const key = useRef<string>("");
@@ -38,7 +40,7 @@ export function HoldToBuy({ look }: { look: Look }) {
   const picked = useRef(false);
   useEffect(() => { if (recSize && !picked.current) setSize(recSize); }, [recSize]);
 
-  const total = look.product.priceRwf + (delivery === "DELIVERY" ? DELIVERY_FEE : 0);
+  const total = look.product.priceRwf - (discount?.amountRwf ?? 0) + (delivery === "DELIVERY" ? DELIVERY_FEE : 0);
   const eta = new Date(Date.now() + Math.max(1, look.product.leadTimeDays + (delivery === "DELIVERY" ? 1 : 0)) * 86400_000).toLocaleDateString("en-GB", { weekday: "short" });
 
   function begin() {
@@ -68,7 +70,7 @@ export function HoldToBuy({ look }: { look: Look }) {
       const o = await api<OrderView>("/orders", {
         method: "POST",
         headers: { "idempotency-key": key.current },
-        json: { lookId: look.id, variantId: look.variant.id, size, delivery, wallet, payerPhone: me!.phone, address },
+        json: { lookId: look.id, variantId: look.variant.id, size, delivery, wallet, payerPhone: me!.phone, address, discountCode: discount?.code ?? undefined },
       });
       track("hold_started", { lookId: look.id, orderId: o.id, pageId: look.maker.pageId });
       router.push(`/orders/${o.id}?fresh=1`);
@@ -113,6 +115,7 @@ export function HoldToBuy({ look }: { look: Look }) {
             <Chip active={wallet === "MTN_MOMO"} onClick={() => setWallet("MTN_MOMO")}>🟡 MTN MoMo · {me.phone.slice(-4).padStart(8, "•")}</Chip>
             <Chip active={wallet === "AIRTEL_MONEY"} onClick={() => setWallet("AIRTEL_MONEY")}>🔴 Airtel Money</Chip>
           </div>
+          <DiscountField variantId={look.variant.id} open={open} onChange={setDiscount} />
         </div>
 
         <p className="mt-5 text-center text-sm">🔐 {t("buy.paidTo")} <b>{look.maker.madeBy[0] ? `${look.maker.madeBy[0]}, ${look.maker.name}` : look.maker.name}</b> · {rwf(total)}</p>
