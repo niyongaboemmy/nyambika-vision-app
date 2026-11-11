@@ -34,7 +34,7 @@ await shopper.getByText(/synthetic demo persona/i).click();
 await shopper.getByRole("button", { name: "Persona 5" }).click();
 await shopper.getByText(/your twin is ready/i).waitFor({ timeout: 20000 });
 await shopper.goto(`${BASE}/m/imena-styles`);
-await shopper.getByRole("option", { selected: true }).click();
+await shopper.getByRole("listbox", { name: "Collection" }).getByRole("option", { selected: true }).click();
 await shopper.getByRole("button", { name: /try on me/i }).click();
 await shopper.getByText(/looks are paused/i).waitFor({ timeout: 15000 });
 await shopper.screenshot({ path: new URL("./crawl-output/s5/90-killswitch-blocks-shopper.png", import.meta.url).pathname });
@@ -55,7 +55,7 @@ await shopper.screenshot({ path: new URL("./crawl-output/s5/91-trust-centre.png"
 await shopper.getByLabel("Render looks on my twin").uncheck({ force: true });
 await shopper.waitForTimeout(500);
 await shopper.goto(`${BASE}/m/kigali-kitenge-house`);
-await shopper.getByRole("option", { selected: true }).click();
+await shopper.getByRole("listbox", { name: "Collection" }).getByRole("option", { selected: true }).click();
 await shopper.getByRole("button", { name: /try on me/i }).click();
 await shopper.getByText(/paused looks on your twin/i).waitFor({ timeout: 15000 });
 await shopper.screenshot({ path: new URL("./crawl-output/s5/92-consent-withdrawn-blocks.png", import.meta.url).pathname });

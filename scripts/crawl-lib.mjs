@@ -15,7 +15,7 @@ export async function start(name, launch = {}) {
   const issues = [];
   page.on("console", (m) => m.type() === "error" && issues.push(`console: ${m.text()}`));
   page.on("pageerror", (e) => issues.push(`pageerror: ${e.message}`));
-  page.on("response", (r) => r.status() >= 500 && issues.push(`HTTP ${r.status()} ${r.url()}`));
+  page.on("response", (r) => (r.status() >= 500 || r.status() === 429) && issues.push(`HTTP ${r.status()} ${r.url()}`));
   let n = 0;
   const shot = async (label) => {
     n += 1;

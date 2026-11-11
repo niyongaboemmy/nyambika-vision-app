@@ -9,7 +9,7 @@ import { execSync } from "node:child_process";
 import { createRequire } from "node:module";
 import { BASE, signIn, start } from "./crawl-lib.mjs";
 
-const DB = process.env.CRAWL_DB ?? "nyambika_mrvr";
+const DB = process.env.CRAWL_DB ?? "nyambika_mrvr"; // CRAWL_DB=nyambika_dev for the main stack
 const sql = (q) => execSync(`psql -d ${DB} -tAc ${JSON.stringify(q)}`).toString().trim();
 const setFlag = (key, on) => sql(`update "FeatureFlag" set enabled=${on} where key='${key}'`);
 const { devices } = createRequire(new URL("../apps/web/package.json", import.meta.url))("@playwright/test");

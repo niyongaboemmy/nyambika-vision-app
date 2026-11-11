@@ -3,7 +3,13 @@ import { BASE, signIn, start } from "./crawl-lib.mjs";
 const OWNERS = { "Uwase Couture": "0788100001", "Abahizi Sewing Cooperative": "0788100002", "Kigali Kitenge House": "0788100003", "Inzozi Atelier": "0788100005", "Imena Styles": "0788100006" };
 const { browser, context, page, shot, finish } = await start("s4");
 
-await signIn(page, "0788000001");
+// Fresh shopper per run: the daily generation cap (15) is per user, so reusing one account trips it.
+await signIn(page, `07882${String(Date.now()).slice(-5)}`);
+await page.goto(`${BASE}/mirror`);
+await page.getByRole("switch").check({ force: true });
+await page.getByText(/synthetic demo persona/i).click();
+await page.getByRole("button", { name: "Persona 2" }).click();
+await page.getByText(/your twin is ready/i).waitFor({ timeout: 20000 });
 await page.goto(BASE);
 await page.locator("footer button[title]").click();
 await page.getByRole("textbox").fill("Wedding outfit for Saturday under 50k");
