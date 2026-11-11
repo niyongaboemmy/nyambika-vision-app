@@ -8,7 +8,7 @@ const { page, shot, finish } = await start("e05");
 await signIn(page, "0788100001");
 await page.goto(`${BASE}/studio`);
 await page.getByText("Uwase Couture").first().click();
-await page.getByRole("link", { name: "Products" }).click();
+await page.getByRole("navigation", { name: "Studio" }).getByRole("link", { name: "Products" }).click();
 await page.getByRole("button", { name: "Add product" }).click();
 await page.getByRole("button", { name: "umushanana" }).first().waitFor().catch(() => {});
 await page.locator("select").first().selectOption("umushanana");
@@ -29,7 +29,9 @@ await page.locator('img[alt="Product on an AI model"]').nth(2).waitFor({ timeout
 await shot("ai-product-studio");
 const title = (await page.locator("h2").first().textContent()).trim();
 
-await page.getByRole("link", { name: "Settings" }).click();
+// Settings lives under "More" in the phone dock.
+await page.getByRole("navigation", { name: "Studio" }).getByRole("button", { name: "More" }).click();
+await page.getByRole("dialog").getByRole("link", { name: "Settings" }).click();
 await page.getByRole("button", { name: /write it for me/i }).click();
 await page.waitForTimeout(800);
 await shot("ai-page-story");

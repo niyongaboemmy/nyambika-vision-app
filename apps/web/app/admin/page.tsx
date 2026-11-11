@@ -2,7 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Badge, Card, Empty, SButton } from "@/components/studio";
+import { AdminShell } from "@/components/admin-shell";
+import { Badge, Card, Chip, Empty, Icon, Kpi, Meter, Monogram, Note, ScreenSkeleton, SButton, Switch } from "@/components/studio";
 import { api, rwf } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { useApi } from "@/lib/use-api";
@@ -30,20 +31,10 @@ export default function Admin() {
   useEffect(() => {
     if (!loading && !me?.isHost) router.replace("/signin?next=/admin");
   }, [loading, me, router]);
+  const { data: counts } = useApi<Overview>(me?.isHost ? "/admin/overview" : null);
   if (!me?.isHost) return null;
   return (
-    <div className="theme-light min-h-dvh">
-      <header className="sticky top-0 z-30 border-b border-stone-200 bg-[#faf7f3]/90 backdrop-blur">
-        <div className="mx-auto max-w-5xl px-4 pt-3">
-          <p className="font-display text-lg font-black">🛠️ Nyambika host admin</p>
-          <nav className="no-scrollbar -mx-4 mt-2 flex gap-1 overflow-x-auto px-4">
-            {TABS.map((t) => (
-              <button key={t} onClick={() => setTab(t)} className={`whitespace-nowrap border-b-2 px-3 py-2 text-sm font-semibold ${tab === t ? "border-stone-900" : "border-transparent text-stone-500"}`}>{t}</button>
-            ))}
-          </nav>
-        </div>
-      </header>
-      <main className="mx-auto max-w-5xl space-y-4 px-4 py-5">
+    <AdminShell tabs={TABS} tab={tab} onTab={setTab} counts={{ Verify: counts?.pages.PENDING_VERIFICATION ?? 0, Moderation: counts?.openModeration ?? 0 }}>
         {tab === "Overview" && <OverviewTab />}
         {tab === "Verify" && <VerifyTab />}
         {tab === "Moderation" && <ModerationTab />}
@@ -51,92 +42,152 @@ export default function Admin() {
         {tab === "Flags & models" && <FlagsTab />}
         {tab === "Outbox" && <OutboxTab />}
         {tab === "Audit" && <AuditTab />}
-      </main>
+    </AdminShell>
+  );
+}
+
+/** SLO meter row: value against a target, with the target written out (not colour alone). */
+function Slo({ label, value, display, target, targetLabel }: { label: string; value: number | null; display: string; target: number; targetLabel: string }) {
+  const bad = value !== null && value > target;
+  return (
+    <div className={`st-card space-y-2 rounded-[22px] p-4 ${bad ? "!border-amber-300 !bg-amber-50" : ""}`}>
+      <div className="flex items-baseline justify-between gap-2">
+        <p className="text-xs font-bold text-cocoa-2">{label}</p>
+        <Chip tone={value === null ? "stone" : bad ? "gold" : "mint"}>{value === null ? "no data" : bad ? "over target" : "on target"}</Chip>
+      </div>
+      <p className="font-display text-2xl font-black tabular-nums text-cocoa">{display}</p>
+      <Meter value={value ?? 0} max={target} label={`${label} against target`} />
+      <p className="text-[11px] font-semibold text-cocoa-2">Target {targetLabel}</p>
     </div>
   );
 }
 
 function OverviewTab() {
   const { data: o, reload } = useApi<Overview>("/admin/overview");
-  if (!o) return <p className="text-stone-500">Loading…</p>;
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
+  if (!o) return <ScreenSkeleton />;
   const gpo = o.ai.generationsPerPaidOrder;
   return (
     <>
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <Stat label="Live pages" value={o.pages.PUBLISHED ?? 0} />
-        <Stat label="Pending verification" value={o.pages.PENDING_VERIFICATION ?? 0} />
-        <Stat label="Published products" value={o.products} />
-        <Stat label="Shoppers · twins" value={`${o.shoppers} · ${o.twins}`} />
-        <Stat label="Orders (completed)" value={`${o.orders} (${o.completedOrders})`} />
-        <Stat label="Paid directly to makers" value={rwf(o.gmvDirectToMakersRwf)} />
-        <Stat label="Unreconciled payments" value={o.unreconciledPayments} warn={o.unreconciledPayments > 0} />
-        <Stat label="Open moderation" value={o.openModeration} warn={o.openModeration > 0} />
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <section className="st-hero relative col-span-2 overflow-hidden rounded-[28px] p-5 lg:row-span-2 lg:p-6">
+          <div aria-hidden className="orb absolute -right-12 -top-12 size-44 animate-orb rounded-full opacity-20 blur-2xl" />
+          <p className="relative flex items-center gap-2 text-sm font-extrabold text-mint-ink"><Icon name="wallet" className="size-4" /> Paid directly to makers</p>
+          <p className="relative mt-1 font-display text-4xl font-black tracking-tight tabular-nums text-cocoa lg:text-5xl">{rwf(o.gmvDirectToMakersRwf)}</p>
+          <p className="relative mt-1 text-sm text-cocoa-2">{o.orders} orders · {o.completedOrders} completed. Nyambika never holds the money.</p>
+          <div className="relative mt-5 grid grid-cols-2 gap-2">
+            <div className="rounded-2xl bg-white/75 p-3">
+              <p className="text-xs font-bold text-cocoa-2">Live pages</p>
+              <p className="font-display text-2xl font-black tabular-nums text-cocoa">{o.pages.PUBLISHED ?? 0}</p>
+            </div>
+            <div className="rounded-2xl bg-white/75 p-3">
+              <p className="text-xs font-bold text-cocoa-2">Published products</p>
+              <p className="font-display text-2xl font-black tabular-nums text-cocoa">{o.products}</p>
+            </div>
+          </div>
+        </section>
+        <Kpi label="Pending verification" value={o.pages.PENDING_VERIFICATION ?? 0} warn={(o.pages.PENDING_VERIFICATION ?? 0) > 0} />
+        <Kpi label="Open moderation" value={o.openModeration} warn={o.openModeration > 0} />
+        <Kpi label="Shoppers · twins" value={`${o.shoppers} · ${o.twins}`} tone="violet" />
+        <Kpi label="Unreconciled payments" value={o.unreconciledPayments} warn={o.unreconciledPayments > 0} />
       </div>
-      <h2 className="pt-2 font-bold">AI unit economics</h2>
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-        <Stat label="Generations today" value={o.ai.generationsToday} />
-        <Stat label="Guard failure rate (≤ 2%)" value={`${(o.ai.guardFailureRate * 100).toFixed(1)}%`} warn={o.ai.guardFailureRate > 0.02} />
-        <Stat label="AI cost today" value={rwf(o.ai.costTodayRwf)} />
-        <Stat label="Cost / generation (≤ RWF 120)" value={rwf(o.ai.costPerGenerationRwf)} warn={o.ai.costPerGenerationRwf > 120} />
-        <Stat label="Generations / paid order (≤ 15)" value={gpo ?? "—"} warn={gpo !== null && gpo > 15} />
-        <Stat label="AI cost / paid order (alert > RWF 1,600)" value={o.ai.costPerPaidOrderRwf !== null ? rwf(o.ai.costPerPaidOrderRwf) : "—"} warn={(o.ai.costPerPaidOrderRwf ?? 0) > 1600} />
+
+      <div className="flex flex-wrap items-center gap-3">
+        <SButton
+          variant="outline"
+          disabled={busy}
+          onClick={async () => {
+            setBusy(true);
+            await api("/payments/reconcile", { method: "POST" });
+            await reload();
+            setMsg("Reconciliation finished.");
+            setBusy(false);
+          }}
+        >
+          <Icon name="refresh" className="size-4" /> {busy ? "Reconciling…" : "Run payment reconciliation"}
+        </SButton>
+        <Note ok={msg} />
       </div>
-      <SButton variant="outline" onClick={async () => { await api("/payments/reconcile", { method: "POST" }); await reload(); }}>Run payment reconciliation</SButton>
+
+      <section aria-labelledby="ai-econ" className="space-y-3">
+        <div>
+          <h2 id="ai-econ" className="font-display text-xl font-black tracking-tight text-cocoa">AI unit economics</h2>
+          <p className="text-sm text-cocoa-2">{o.ai.generationsToday} generations today · {rwf(o.ai.costTodayRwf)} spent</p>
+        </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <Slo label="Guard failure rate" value={o.ai.guardFailureRate} display={`${(o.ai.guardFailureRate * 100).toFixed(1)}%`} target={0.02} targetLabel="≤ 2%" />
+          <Slo label="Cost / generation" value={o.ai.costPerGenerationRwf} display={rwf(o.ai.costPerGenerationRwf)} target={120} targetLabel="≤ RWF 120" />
+          <Slo label="Generations / paid order" value={gpo} display={gpo === null ? "—" : String(gpo)} target={15} targetLabel="≤ 15" />
+          <Slo label="AI cost / paid order" value={o.ai.costPerPaidOrderRwf} display={o.ai.costPerPaidOrderRwf !== null ? rwf(o.ai.costPerPaidOrderRwf) : "—"} target={1600} targetLabel="alert above RWF 1,600" />
+        </div>
+      </section>
     </>
   );
 }
 
 function VerifyTab() {
   const { data, reload } = useApi<{ id: string; name: string; handle: string; memberType: string; status: string; district: string; story: string; roles: { role: string; user: { phone: string; name: string | null } }[]; _count: { products: number } }[]>("/admin/verifications");
+  const [busy, setBusy] = useState<string | null>(null);
   const act = async (id: string, action: string) => {
-    await api(`/admin/pages/${id}/${action}`, { method: "POST", json: {} });
-    await reload();
+    setBusy(id);
+    try {
+      await api(`/admin/pages/${id}/${action}`, { method: "POST", json: {} });
+      await reload();
+    } finally {
+      setBusy(null);
+    }
   };
-  if (data?.length === 0) return <Empty>No pages waiting for verification.</Empty>;
+  if (!data) return <ScreenSkeleton variant="list" />;
+  if (data.length === 0) return <Empty icon="shield" title="All caught up">No pages waiting for verification.</Empty>;
   return (
-    <div className="space-y-3">
-      {data?.map((p) => (
-        <Card key={p.id} className="space-y-2">
-          <div className="flex items-start justify-between gap-2">
-            <div>
-              <p className="font-semibold">{p.name} <span className="text-sm font-normal text-stone-500">/{p.handle}</span></p>
-              <p className="text-sm text-stone-600">{p.memberType.toLowerCase()} · {p.district || "—"} · {p._count.products} products · owner {p.roles[0]?.user.name ?? ""} {p.roles[0]?.user.phone}</p>
-              {p.story && <p className="mt-1 text-sm text-stone-500">“{p.story}”</p>}
+    <ul className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+      {data.map((p) => (
+        <li key={p.id} className="st-card animate-rise space-y-3 rounded-[24px] p-4">
+          <div className="flex items-start gap-3">
+            <Monogram name={p.name} size={48} />
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-extrabold text-cocoa">{p.name} <span className="text-sm font-semibold text-cocoa-2">/{p.handle}</span></p>
+              <p className="text-sm text-cocoa-2">{p.memberType.toLowerCase()} · {p.district || "—"} · {p._count.products} products</p>
+              <p className="text-xs text-cocoa-2">Owner {p.roles[0]?.user.name ?? ""} {p.roles[0]?.user.phone}</p>
             </div>
             <Badge value={p.status} />
           </div>
+          {p.story && <p className="rounded-2xl bg-paper p-3 text-sm italic leading-relaxed text-cocoa-2 ring-1 ring-inset ring-hairline">“{p.story}”</p>}
           <div className="flex gap-2">
             {p.status === "SUSPENDED" ? (
-              <SButton onClick={() => act(p.id, "reinstate")}>Reinstate</SButton>
+              <SButton disabled={busy === p.id} onClick={() => act(p.id, "reinstate")}>Reinstate</SButton>
             ) : (
               <>
-                <SButton onClick={() => act(p.id, "verify")}>Verify &amp; publish</SButton>
-                <SButton variant="outline" onClick={() => act(p.id, "reject")}>Reject</SButton>
+                <SButton disabled={busy === p.id} className="flex-1" onClick={() => act(p.id, "verify")}>Verify &amp; publish</SButton>
+                <SButton variant="outline" disabled={busy === p.id} onClick={() => act(p.id, "reject")}>Reject</SButton>
               </>
             )}
           </div>
-        </Card>
+        </li>
       ))}
-    </div>
+    </ul>
   );
 }
 
 function ModerationTab() {
   const { data, reload } = useApi<{ id: string; kind: string; refId: string; reason: string; createdAt: string }[]>("/admin/moderation");
-  if (data?.length === 0) return <Empty>Moderation queue is clear.</Empty>;
+  if (!data) return <ScreenSkeleton variant="list" />;
+  if (data.length === 0) return <Empty icon="flag" title="Queue is clear">Moderation queue is clear.</Empty>;
   return (
-    <div className="space-y-2">
-      {data?.map((m) => (
-        <Card key={m.id} className="flex items-center justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-sm font-semibold">{m.kind.replace(/_/g, " ").toLowerCase()}</p>
-            <p className="truncate text-sm text-stone-600">{m.reason}</p>
-            <p className="text-xs text-stone-400">{new Date(m.createdAt).toLocaleString()} · ref {m.refId.slice(-8)}</p>
+    <ul className="space-y-2">
+      {data.map((m) => (
+        <li key={m.id} className="st-card flex items-center gap-3 rounded-[22px] p-4">
+          <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-amber-100 text-gold-ink"><Icon name="flag" className="size-5" /></span>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-extrabold capitalize text-cocoa">{m.kind.replace(/_/g, " ").toLowerCase()}</p>
+            <p className="truncate text-sm text-cocoa-2">{m.reason}</p>
+            <p className="text-xs text-cocoa-3">{new Date(m.createdAt).toLocaleString()} · ref {m.refId.slice(-8)}</p>
           </div>
           <SButton variant="outline" onClick={async () => { await api(`/admin/moderation/${m.id}/resolve`, { method: "POST", json: { resolution: "Reviewed by host" } }); await reload(); }}>Resolve</SButton>
-        </Card>
+        </li>
       ))}
-    </div>
+    </ul>
   );
 }
 
@@ -144,86 +195,95 @@ function FlagsTab() {
   const { data: flags, reload, setData: setFlags } = useApi<{ key: string; enabled: boolean; rollout: number; description: string }[]>("/admin/flags");
   const { data: models, reload: reloadModels } = useApi<{ id: string; tier: string; status: string; costRwf: number; generations: number; guardFailureRate: number; avgLatencyMs: number }[]>("/admin/models");
   return (
-    <>
-      <h2 className="font-bold">Feature flags</h2>
-      {flags?.map((f) => (
-        <Card key={f.key} className="flex items-center justify-between gap-3">
-          <div className="min-w-0">
-            <p className="font-mono text-sm font-semibold">{f.key}</p>
-            <p className="text-xs text-stone-500">{f.description}</p>
-          </div>
-          <label className="flex items-center gap-2 text-sm font-semibold">
-            <input
-              type="checkbox"
-              checked={f.enabled}
-              onChange={async (e) => {
-                const enabled = e.target.checked;
-                setFlags((all) => all?.map((x) => (x.key === f.key ? { ...x, enabled } : x)) ?? null);
-                await api(`/admin/flags/${f.key}`, { method: "PATCH", json: { enabled } }).catch(() => reload());
-              }}
-              className="size-5"
-              aria-label={f.key}
-            />
-            {f.enabled ? "on" : "off"}
-          </label>
-        </Card>
-      ))}
-      <h2 className="pt-2 font-bold">Model registry</h2>
-      {models?.map((m) => (
-        <Card key={m.id} className="flex items-center justify-between gap-3">
-          <div>
-            <p className="font-mono text-sm font-semibold">{m.id}</p>
-            <p className="text-xs text-stone-500">{m.tier} · RWF {m.costRwf}/gen · {m.generations} gens · guard fail {(m.guardFailureRate * 100).toFixed(1)}% · {m.avgLatencyMs} ms avg</p>
-          </div>
-          <SButton variant="outline" onClick={async () => { await api(`/admin/models/${m.id}`, { method: "PATCH", json: { status: m.status === "ACTIVE" ? "RETIRED" : "ACTIVE" } }); await reloadModels(); }}>
-            {m.status === "ACTIVE" ? "Retire" : "Activate"}
-          </SButton>
-        </Card>
-      ))}
-    </>
+    <div className="grid grid-cols-1 items-start gap-5 xl:grid-cols-2">
+      <section aria-labelledby="flags-t" className="space-y-2">
+        <h2 id="flags-t" className="font-display text-xl font-black tracking-tight text-cocoa">Feature flags</h2>
+        {!flags && <ScreenSkeleton variant="list" />}
+        <ul className="st-card divide-y divide-hairline rounded-[24px] px-4">
+          {flags?.map((f) => (
+            <li key={f.key} className="py-3.5">
+              <Switch
+                checked={f.enabled}
+                ariaLabel={f.key}
+                label={<span className="font-mono text-[13px]">{f.key}</span>}
+                description={f.description}
+                onChange={async (enabled) => {
+                  setFlags((all) => all?.map((x) => (x.key === f.key ? { ...x, enabled } : x)) ?? null);
+                  await api(`/admin/flags/${f.key}`, { method: "PATCH", json: { enabled } }).catch(() => reload());
+                }}
+              />
+            </li>
+          ))}
+        </ul>
+      </section>
+      <section aria-labelledby="models-t" className="space-y-2">
+        <h2 id="models-t" className="font-display text-xl font-black tracking-tight text-cocoa">Model registry</h2>
+        {!models && <ScreenSkeleton variant="list" />}
+        <ul className="space-y-2">
+          {models?.map((m) => (
+            <li key={m.id} className="st-card space-y-2 rounded-[22px] p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="truncate font-mono text-sm font-bold text-cocoa">{m.id}</p>
+                  <div className="mt-1 flex flex-wrap gap-1.5">
+                    <Badge value={m.status} />
+                    <Chip>{m.tier}</Chip>
+                  </div>
+                </div>
+                <SButton variant="outline" className="min-h-10" onClick={async () => { await api(`/admin/models/${m.id}`, { method: "PATCH", json: { status: m.status === "ACTIVE" ? "RETIRED" : "ACTIVE" } }); await reloadModels(); }}>
+                  {m.status === "ACTIVE" ? "Retire" : "Activate"}
+                </SButton>
+              </div>
+              <dl className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
+                {[["Cost / gen", `RWF ${m.costRwf}`], ["Generations", m.generations], ["Guard fail", `${(m.guardFailureRate * 100).toFixed(1)}%`], ["Avg latency", `${m.avgLatencyMs} ms`]].map(([k, v]) => (
+                  <div key={k} className="rounded-xl bg-paper px-2.5 py-1.5 ring-1 ring-inset ring-hairline">
+                    <dt className="font-semibold text-cocoa-2">{k}</dt>
+                    <dd className="font-bold tabular-nums text-cocoa">{v}</dd>
+                  </div>
+                ))}
+              </dl>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </div>
   );
 }
 
 function OutboxTab() {
   const { data } = useApi<{ id: string; channel: string; to: string; template: string; body: string; createdAt: string }[]>("/admin/notifications");
+  if (!data) return <ScreenSkeleton variant="list" />;
+  if (data.length === 0) return <Empty icon="mail">No messages sent yet.</Empty>;
   return (
-    <div className="space-y-2">
-      {data?.map((n) => (
-        <Card key={n.id}>
-          <p className="text-xs text-stone-500">{n.channel} → {n.to} · {n.template} · {new Date(n.createdAt).toLocaleString()}</p>
-          <p className="mt-1 text-sm">{n.body.replace(/code: \d{6}/, "code: ••••••")}</p>
-        </Card>
+    <ul className="grid grid-cols-1 gap-2 lg:grid-cols-2">
+      {data.map((n) => (
+        <li key={n.id} className="st-card space-y-2 rounded-[22px] p-4">
+          <div className="flex flex-wrap items-center gap-1.5 text-xs">
+            <Chip tone={n.channel === "WHATSAPP" ? "mint" : "sky"}>{n.channel.toLowerCase()}</Chip>
+            <span className="font-semibold text-cocoa">{n.to}</span>
+            <span className="text-cocoa-2">· {n.template}</span>
+            <span className="ml-auto text-cocoa-2">{new Date(n.createdAt).toLocaleString()}</span>
+          </div>
+          <p className="rounded-2xl rounded-tl-md bg-paper p-3 text-sm leading-relaxed text-cocoa ring-1 ring-inset ring-hairline">{n.body.replace(/code: \d{6}/, "code: ••••••")}</p>
+        </li>
       ))}
-    </div>
+    </ul>
   );
 }
 
 function AuditTab() {
   const { data } = useApi<{ id: string; actorId: string | null; pageId: string | null; action: string; data: unknown; createdAt: string }[]>("/admin/audit");
+  if (!data) return <ScreenSkeleton variant="list" />;
   return (
-    <Card className="overflow-x-auto p-0">
-      <table className="w-full text-left text-sm">
-        <thead className="border-b border-stone-200 text-xs text-stone-500"><tr><th className="p-2">When</th><th className="p-2">Action</th><th className="p-2">Details</th></tr></thead>
-        <tbody>
-          {data?.map((a) => (
-            <tr key={a.id} className="border-b border-stone-100 align-top">
-              <td className="whitespace-nowrap p-2 text-xs text-stone-500">{new Date(a.createdAt).toLocaleString()}</td>
-              <td className="p-2 font-mono text-xs">{a.action}</td>
-              <td className="max-w-[420px] truncate p-2 font-mono text-xs text-stone-600">{JSON.stringify(a.data)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </Card>
-  );
-}
-
-function Stat({ label, value, warn }: { label: string; value: string | number; warn?: boolean }) {
-  return (
-    <Card className={warn ? "border-amber-400 bg-amber-50" : ""}>
-      <p className="text-xs text-stone-500">{label}</p>
-      <p className="mt-1 text-xl font-bold">{value}</p>
-    </Card>
+    <ol className="st-card divide-y divide-hairline overflow-hidden rounded-[24px]">
+      {data.map((a) => (
+        <li key={a.id} className="grid gap-1 px-4 py-3 sm:grid-cols-[170px_220px_minmax(0,1fr)] sm:items-start sm:gap-4">
+          <time className="text-xs font-semibold text-cocoa-2">{new Date(a.createdAt).toLocaleString()}</time>
+          <span className="truncate font-mono text-xs font-bold text-cocoa">{a.action}</span>
+          <code className="block truncate font-mono text-xs text-cocoa-2">{JSON.stringify(a.data)}</code>
+        </li>
+      ))}
+    </ol>
   );
 }
 
@@ -243,6 +303,8 @@ interface Wave {
     redirect: { from: string; active: boolean; hits: number } | null;
   }[];
 }
+
+const MIG_STEPS = ["IMPORTED", "IN_REVIEW", "SIGNED_OFF", "LIVE"];
 
 /** Migration waves (plan §16): import → owner review → sign-off → go live, with rollback and 404 monitoring. */
 function MigrationTab() {
@@ -277,50 +339,77 @@ function MigrationTab() {
 
   return (
     <>
-      <Card className="space-y-2">
-        <p className="font-semibold">Import a wave</p>
-        <p className="text-sm text-stone-500">JSON bundle from the legacy export (format in docs/migration.md). Pages are imported hidden; photos go through the readiness pipeline.</p>
-        <label className={`flex min-h-11 cursor-pointer items-center justify-center rounded-xl border border-dashed border-stone-400 text-sm font-semibold ${busy ? "opacity-50" : ""}`}>
+      <Card className="space-y-3">
+        <div className="flex items-start gap-3">
+          <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-paper-2 text-cocoa"><Icon name="upload" className="size-5" /></span>
+          <div>
+            <p className="font-extrabold text-cocoa">Import a wave</p>
+            <p className="text-sm text-cocoa-2">JSON bundle from the legacy export (format in docs/migration.md). Pages are imported hidden; photos go through the readiness pipeline.</p>
+          </div>
+        </div>
+        <label className={`st-press flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-paper-3 bg-paper text-sm font-bold text-cocoa hover:border-cocoa-3 focus-within:outline focus-within:outline-[2.5px] focus-within:outline-violet-ink ${busy ? "opacity-50" : ""}`}>
+          <Icon name="upload" className="size-4" />
           {busy ? "Importing…" : "Choose bundle (.json)"}
           <input type="file" accept="application/json,.json" className="sr-only" disabled={busy} onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} />
         </label>
-        {err && <p className="text-sm text-red-700">{err}</p>}
+        <Note error={err} />
         {report && (
-          <ul className="text-sm">
-            {report.map((r) => <li key={r.handle}>{r.ok ? "✓" : "✕"} {r.handle} {r.ok ? `· ${r.defects.length} item(s) to check` : `· ${r.error}`}</li>)}
+          <ul className="space-y-1 text-sm">
+            {report.map((r) => (
+              <li key={r.handle} className={r.ok ? "text-mint-ink" : "text-red-800"}>{r.ok ? "✓" : "✕"} {r.handle} {r.ok ? `· ${r.defects.length} item(s) to check` : `· ${r.error}`}</li>
+            ))}
           </ul>
         )}
       </Card>
+      {waves?.length === 0 && <Empty icon="swap">No migration waves yet. Import a bundle to start.</Empty>}
       {waves?.map((w) => (
         <section key={w.id} className="space-y-2">
-          <h3 className="font-bold">{w.name} <span className="text-sm font-normal text-stone-500">· {new Date(w.createdAt).toLocaleString()}</span></h3>
-          {w.items.map((i) => (
-            <Card key={i.id} className="space-y-2">
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <p className="font-semibold">{i.page?.name} <span className="text-sm font-normal text-stone-500">· {i.page?.products} products</span></p>
-                  <p className="truncate text-xs text-stone-500">{i.redirect?.from} → /m/{i.page?.handle} · redirect {i.redirect?.active ? `on (${i.redirect.hits} hits)` : "off"} · sha {i.checksum}</p>
-                  {i.defects.length > 0 && <p className="text-xs text-amber-700">{i.defects.length} item(s): {i.defects.map((d) => d.message).join(" · ").slice(0, 160)}</p>}
-                  {i.ownerNote && <p className="text-xs text-red-700">Owner: “{i.ownerNote}”</p>}
-                </div>
-                <Badge value={i.status} label={i.status.replace(/_/g, " ").toLowerCase()} />
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {["IMPORTED", "CHANGES_REQUESTED", "IN_REVIEW"].includes(i.status) && <SButton variant="outline" onClick={() => act(i.id, "send-review")}>{i.status === "IMPORTED" ? "Send review link" : "Resend review link"}</SButton>}
-                {i.status === "SIGNED_OFF" && <SButton onClick={() => act(i.id, "go-live")}>Go live + redirect</SButton>}
-                {(i.status === "LIVE" || i.status === "SIGNED_OFF") && <SButton variant="outline" onClick={() => act(i.id, "rollback")}>Roll back</SButton>}
-                <a href={i.reviewUrl} target="_blank" rel="noreferrer" className="self-center text-xs underline">review link</a>
-              </div>
-            </Card>
-          ))}
+          <h3 className="font-display text-lg font-black text-cocoa">{w.name} <span className="text-sm font-semibold text-cocoa-2">· {new Date(w.createdAt).toLocaleString()}</span></h3>
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+            {w.items.map((i) => {
+              const at = i.status === "ROLLED_BACK" ? -1 : MIG_STEPS.indexOf(i.status === "CHANGES_REQUESTED" ? "IN_REVIEW" : i.status);
+              return (
+                <article key={i.id} aria-label={i.page?.name ?? "Migrated page"} className="st-card min-w-0 space-y-3 rounded-[24px] p-4">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="font-extrabold text-cocoa">{i.page?.name} <span className="text-sm font-semibold text-cocoa-2">· {i.page?.products} products</span></p>
+                      <p className="truncate text-xs text-cocoa-2">{i.redirect?.from} → /m/{i.page?.handle} · redirect {i.redirect?.active ? `on (${i.redirect.hits} hits)` : "off"} · sha {i.checksum}</p>
+                    </div>
+                    <Badge value={i.status} label={i.status.replace(/_/g, " ").toLowerCase()} />
+                  </div>
+                  <ol aria-label="Migration progress" className="grid grid-cols-4 gap-1">
+                    {["Imported", "Review", "Signed off", "Live"].map((s, k) => (
+                      <li key={s} className="space-y-1">
+                        <span className={`block h-1.5 rounded-full ${k <= at ? "bg-mint-ink" : "bg-paper-3"}`} />
+                        <span className={`block text-[10px] font-bold ${k <= at ? "text-cocoa" : "text-cocoa-2"}`}>{s}</span>
+                      </li>
+                    ))}
+                  </ol>
+                  {i.defects.length > 0 && <p className="rounded-xl bg-amber-50 px-3 py-2 text-xs text-gold-ink ring-1 ring-inset ring-amber-200">{i.defects.length} item(s): {i.defects.map((d) => d.message).join(" · ").slice(0, 160)}</p>}
+                  {i.ownerNote && <p className="rounded-xl bg-red-50 px-3 py-2 text-xs text-red-800 ring-1 ring-inset ring-red-200">Owner: “{i.ownerNote}”</p>}
+                  <div className="flex flex-wrap items-center gap-2">
+                    {["IMPORTED", "CHANGES_REQUESTED", "IN_REVIEW"].includes(i.status) && <SButton variant="outline" className="min-h-10" onClick={() => act(i.id, "send-review")}>{i.status === "IMPORTED" ? "Send review link" : "Resend review link"}</SButton>}
+                    {i.status === "SIGNED_OFF" && <SButton className="min-h-10" onClick={() => act(i.id, "go-live")}>Go live + redirect</SButton>}
+                    {(i.status === "LIVE" || i.status === "SIGNED_OFF") && <SButton variant="outline" className="min-h-10" onClick={() => act(i.id, "rollback")}>Roll back</SButton>}
+                    <a href={i.reviewUrl} target="_blank" rel="noreferrer" className="ml-auto text-xs font-bold text-violet-ink underline">review link</a>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
         </section>
       ))}
       {misses && misses.length > 0 && (
         <Card>
-          <p className="mb-1 font-semibold">Unmatched legacy URLs (404s)</p>
-          <ul className="text-sm text-stone-600">{misses.map((m) => <li key={m.path} className="flex justify-between"><span className="truncate">{m.path}</span><span>{m.hits}</span></li>)}</ul>
+          <p className="mb-2 font-extrabold text-cocoa">Unmatched legacy URLs (404s)</p>
+          <ul className="divide-y divide-hairline text-sm text-cocoa-2">
+            {misses.map((m) => (
+              <li key={m.path} className="flex justify-between gap-3 py-1.5"><span className="truncate font-mono text-xs">{m.path}</span><span className="font-bold tabular-nums">{m.hits}</span></li>
+            ))}
+          </ul>
         </Card>
       )}
     </>
   );
 }
+

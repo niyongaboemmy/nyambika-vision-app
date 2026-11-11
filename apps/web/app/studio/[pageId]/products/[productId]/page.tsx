@@ -1,8 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
-import { Badge, Card, Note, SButton } from "@/components/studio";
+import { AiWrite } from "@/components/ai-write";
+import { Badge, Card, Field, Icon, Input, Note, ScreenSkeleton, SButton, Steps, Textarea } from "@/components/studio";
+import { EDITOR_STEPS, EditorSection, ProductPreview } from "@/components/studio-product";
 import { api, rwf } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import type { StudioProduct, StudioVariant } from "@/lib/types";
@@ -17,52 +20,167 @@ function ProductDetail() {
   const { data: p, reload, error } = useApi<StudioProduct>(`/products/${productId}`);
   const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
   if (error) return <Note error={error} />;
-  if (!p) return <p className="text-stone-500">Loading…</p>;
+  if (!p) return <ScreenSkeleton variant="list" />;
 
   const canManage = me?.isHost || me?.roles.some((r) => r.page?.id === page.id && ["PAGE_OWNER", "PAGE_STAFF", "COOP_ADMIN"].includes(r.role));
+  const photos = p.variants.filter((v) => v.image).length;
+  const allPhotos = photos === p.variants.length && photos > 0;
+  const step = p.status === "PUBLISHED" ? 4 : allPhotos ? 3 : 2;
+  const cover = p.variants.find((v) => v.image)?.image;
 
   async function act(action: string) {
     setErr(null);
+    setBusy(true);
     try {
       await api(`/products/${productId}/status`, { method: "POST", json: { action } });
       setMsg(action === "publish" && !canManage ? "Sent to your cooperative admin for approval." : `Done: ${action}.`);
+      if (action === "publish") navigator.vibrate?.([10, 30, 10]);
       await reload();
     } catch (e) {
       setErr((e as Error).message);
+    } finally {
+      setBusy(false);
     }
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
+      <div className="flex items-center gap-3">
+        <Link href={`/studio/${page.id}/products`} aria-label="Back to products" className="st-press grid size-11 shrink-0 place-items-center rounded-full bg-white text-cocoa ring-1 ring-inset ring-hairline">
+          <Icon name="back" className="size-5" />
+        </Link>
+        <div className="min-w-0 flex-1">
+          <Steps steps={EDITOR_STEPS} current={step} label="Product steps" />
+        </div>
+      </div>
       {isNew && <Note ok="Saved. Now add a clear photo for each colour so shoppers can try it on." />}
-      <Card className="space-y-2">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h2 className="text-lg font-bold">{p.title}</h2>
-            <p className="text-sm text-stone-500">{rwf(p.priceRwf)} · {p.category}{p.madeToOrder ? ` · made to order (${p.leadTimeDays} days)` : ""}</p>
-          </div>
-          <Badge value={p.status} />
+
+      <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
+        <div className="min-w-0 space-y-4">
+          {/* Status + publish */}
+          <Card className="space-y-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <h2 className="font-display text-2xl font-black leading-tight tracking-tight text-cocoa">{p.title}</h2>
+                <p className="mt-0.5 text-sm text-cocoa-2">{rwf(p.priceRwf)} · {p.category}{p.madeToOrder ? ` · made to order (${p.leadTimeDays} days)` : ""}</p>
+              </div>
+              <Badge value={p.status} label={p.status === "PUBLISHED" ? "live" : undefined} />
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge value={p.readiness} label={`try-on: ${p.readiness.replace(/_/g, " ").toLowerCase()}`} />
+              {p.qualityScore !== null && <span className="text-xs font-semibold text-cocoa-2">photo quality {Math.round(p.qualityScore * 100)}%</span>}
+            </div>
+            {p.readinessNotes.length > 0 && (
+              <ul className="space-y-1 rounded-2xl bg-amber-50 p-3 text-sm text-gold-ink ring-1 ring-inset ring-amber-200">
+                {p.readinessNotes.map((n) => <li key={n} className="flex gap-2"><Icon name="camera" className="mt-0.5 size-4 shrink-0" />{n}</li>)}
+              </ul>
+            )}
+            {p.makers.length > 0 && <p className="text-sm text-cocoa">Made by {p.makers.map((m) => m.name).join(", ")} · pays {p.payoutTarget === "MAKER" ? "the maker" : "the cooperative"}</p>}
+            <Note error={err} ok={msg} />
+            <div className="flex flex-wrap gap-2 pt-1">
+              {(p.status === "DRAFT" || p.status === "OUT_OF_STOCK") && (
+                <SButton disabled={busy} onClick={() => act("publish")} className="min-h-12 flex-1 text-base sm:flex-none sm:px-6">
+                  <Icon name="sparkle" className="size-4" /> {canManage ? "Publish" : "Submit for approval"}
+                </SButton>
+              )}
+              {p.status === "PUBLISHED" && <SButton variant="outline" disabled={busy} onClick={() => act("unpublish")}>Unpublish</SButton>}
+              {canManage && p.status !== "ARCHIVED" && <SButton variant="ghost" disabled={busy} onClick={() => act("archive")}>Archive</SButton>}
+            </div>
+            {(p.status === "DRAFT" || p.status === "OUT_OF_STOCK") && !allPhotos && (
+              <p className="text-xs text-cocoa-2">Tip: add a photo for every colour first, so shoppers can try it on.</p>
+            )}
+          </Card>
+
+          {/* Step 3: photos */}
+          <EditorSection n={3} id="photos" title="Colours and photos" hint="Lay the garment flat on a plain light background, fully in frame, in daylight.">
+            {p.variants.map((v) => <VariantRow key={v.id} v={v} onChange={reload} />)}
+          </EditorSection>
+
+          <StudioCard p={p} onChange={reload} />
+
+          <DetailsEditor p={p} pageId={page.id} pageName={page.name} onSaved={reload} />
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge value={p.readiness} label={`try-on: ${p.readiness.replace(/_/g, " ").toLowerCase()}`} />
-          {p.qualityScore !== null && <span className="text-xs text-stone-500">photo quality {Math.round(p.qualityScore * 100)}%</span>}
-        </div>
-        {p.readinessNotes.length > 0 && (
-          <ul className="list-disc space-y-0.5 pl-5 text-sm text-amber-800">{p.readinessNotes.map((n) => <li key={n}>{n}</li>)}</ul>
-        )}
-        {p.makers.length > 0 && <p className="text-sm">Made by {p.makers.map((m) => m.name).join(", ")} · pays {p.payoutTarget === "MAKER" ? "the maker" : "the cooperative"}</p>}
-        <Note error={err} ok={msg} />
-        <div className="flex flex-wrap gap-2 pt-1">
-          {(p.status === "DRAFT" || p.status === "OUT_OF_STOCK") && <SButton onClick={() => act("publish")}>{canManage ? "Publish" : "Submit for approval"}</SButton>}
-          {p.status === "PUBLISHED" && <SButton variant="outline" onClick={() => act("unpublish")}>Unpublish</SButton>}
-          {canManage && p.status !== "ARCHIVED" && <SButton variant="ghost" onClick={() => act("archive")}>Archive</SButton>}
-        </div>
-      </Card>
-      <StudioCard p={p} onChange={reload} />
-      <h3 className="font-bold">Colours and photos</h3>
-      {p.variants.map((v) => <VariantRow key={v.id} v={v} onChange={reload} />)}
+
+        <aside className="space-y-3 lg:sticky lg:top-28" aria-label="Live preview">
+          {[true, false].map((compact) => (
+            <div key={String(compact)} className={compact ? "lg:hidden" : "hidden lg:block"}>
+              <ProductPreview
+                compact={compact}
+                title={p.title}
+                priceRwf={p.priceRwf}
+                image={cover}
+                colours={p.variants.map((v) => ({ name: v.colourName, hex: v.colourHex }))}
+                madeToOrder={p.madeToOrder}
+                leadTimeDays={p.leadTimeDays}
+                pageName={page.name}
+                theme={page.theme}
+              />
+            </div>
+          ))}
+          <Card className="space-y-2.5 p-4">
+            <p className="text-sm font-extrabold text-cocoa">Ready to go live?</p>
+            <Check ok={!!p.title && p.priceRwf > 0} label="Title and price" />
+            <Check ok={allPhotos} label={`Photo for every colour (${photos}/${p.variants.length})`} />
+            <Check ok={p.readiness === "READY"} label="Try-on check passed" />
+            <Check ok={(p.description ?? "").trim().length >= 60} label="Full description" />
+            <Check ok={p.status === "PUBLISHED"} label="Published" />
+          </Card>
+        </aside>
+      </div>
     </div>
+  );
+}
+
+function Check({ ok, label }: { ok: boolean; label: string }) {
+  return (
+    <p className="flex items-center gap-2 text-sm">
+      <span className={`grid size-5 shrink-0 place-items-center rounded-full ${ok ? "bg-mint-ink text-white" : "bg-paper-2 text-cocoa-3 ring-1 ring-inset ring-hairline"}`}>
+        {ok && <Icon name="check" className="size-3" />}
+      </span>
+      <span className={ok ? "font-semibold text-cocoa" : "text-cocoa-2"}>
+        <span className="sr-only">{ok ? "Completed: " : "To do: "}</span>
+        {label}
+      </span>
+    </p>
+  );
+}
+
+/** Edit title, price and description after creation, with the ✨ AI writer (FR-PAGE-07). */
+function DetailsEditor({ p, pageId, pageName, onSaved }: { p: StudioProduct; pageId: string; pageName: string; onSaved: () => Promise<void> }) {
+  const [f, setF] = useState({ title: p.title, description: p.description ?? "", priceRwf: String(p.priceRwf) });
+  const [msg, setMsg] = useState<string | null>(null);
+  const [err, setErr] = useState<string | null>(null);
+  const dirty = f.title !== p.title || f.description !== (p.description ?? "") || Number(f.priceRwf) !== p.priceRwf;
+  async function save(e: React.FormEvent) {
+    e.preventDefault();
+    setErr(null);
+    setMsg(null);
+    try {
+      await api(`/products/${p.id}`, { method: "PATCH", json: { title: f.title, description: f.description, priceRwf: Number(f.priceRwf) } });
+      setMsg("Details saved.");
+      await onSaved();
+    } catch (x) {
+      setErr((x as Error).message);
+    }
+  }
+  return (
+    <form onSubmit={save}>
+      <EditorSection n={1} id="details" title="Details" hint="Polish the words any time. ✨ drafts them from your details in RW, EN or FR.">
+        <Field label="Product title"><Input required value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} /></Field>
+        <Field label="Price in RWF"><Input required type="number" min={0} value={f.priceRwf} onChange={(e) => setF({ ...f, priceRwf: e.target.value })} /></Field>
+        <Field label="Product description"><Textarea value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} /></Field>
+        <AiWrite<{ title: string; description: string }>
+          pageId={pageId}
+          kind="product"
+          fields={() => ({ category: p.category, colours: p.variants.map((v) => v.colourName), occasions: p.occasions, styles: p.styles, fabric: p.fabric, madeToOrder: p.madeToOrder, leadTimeDays: p.leadTimeDays, makerName: pageName })}
+          onResult={(r) => setF((x) => ({ ...x, description: r.description }))}
+        />
+        <Note error={err} ok={msg} />
+        <SButton variant="dark" disabled={!dirty} className="w-full sm:w-auto">Save details</SButton>
+      </EditorSection>
+    </form>
   );
 }
 
@@ -92,40 +210,72 @@ function StudioCard({ p, onChange }: { p: StudioProduct; onChange: () => Promise
     }
   }
   return (
-    <Card className="space-y-3">
-      <div>
-        <h3 className="font-bold">✨ AI product studio</h3>
-        <p className="text-sm text-stone-600">Show this piece on AI models with different skin tones. Photos are labelled as AI and use your page allowance.</p>
-      </div>
-      <div className="flex flex-wrap items-center gap-2">
-        {ready.map((v) => (
-          <button key={v.id} type="button" aria-pressed={v.id === variantId} onClick={() => setVariantId(v.id)} className={`rounded-full border px-3 py-1 text-sm ${v.id === variantId ? "border-stone-900 bg-stone-900 text-white" : "border-stone-300"}`}>{v.colourName}</button>
-        ))}
-      </div>
-      <fieldset className="flex items-center gap-2">
-        <legend className="mb-1 text-xs font-semibold text-stone-600">Models</legend>
-        {MODEL_TONES.map((tone, i) => {
-          const n = i + 1;
-          const on = models.includes(n);
-          return (
-            <button key={n} type="button" aria-pressed={on} aria-label={`AI model ${n}`} onClick={() => setModels(on ? models.filter((x) => x !== n) : [...models, n])} className={`size-9 rounded-full border-4 ${on ? "border-violet-500" : "border-transparent opacity-50"}`} style={{ background: tone }} />
-          );
-        })}
-      </fieldset>
-      <SButton onClick={generate} disabled={busy || !models.length || !variantId}>{busy ? "Creating photos…" : `Create ${models.length} photo(s)`}</SButton>
-      <Note error={err} />
-      {p.studio.length > 0 && (
-        <div className="grid grid-cols-3 gap-2">
-          {p.studio.map((m) => (
-            <figure key={m.id} className="relative overflow-hidden rounded-xl bg-stone-900">
-              {m.image && <img src={m.image} alt="Product on an AI model" className="aspect-[9/16] w-full object-cover" />}
-              <figcaption className="absolute left-1 top-1 rounded bg-black/60 px-1.5 py-0.5 text-[10px] text-white">AI model · C2PA</figcaption>
-              <button onClick={async () => { await api(`/products/${p.id}/media/${m.id}`, { method: "DELETE" }); await onChange(); }} className="absolute right-1 top-1 rounded bg-white/90 px-1.5 text-xs" aria-label="Remove photo">✕</button>
-            </figure>
+    <section aria-labelledby="ai-studio-t" className="relative overflow-hidden rounded-[24px] bg-gradient-to-br from-violet-50 via-white to-orange-50 p-4 ring-1 ring-inset ring-violet-200 sm:p-5">
+      <div className="space-y-3">
+        <div className="flex items-start gap-3">
+          <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-violet-ink text-white shadow-[0_8px_18px_-8px_rgba(98,57,201,.8)]"><Icon name="sparkle" className="size-5" /></span>
+          <div>
+            <h3 id="ai-studio-t" className="font-display text-lg font-black tracking-tight text-cocoa">✨ AI product studio</h3>
+            <p className="text-sm text-cocoa-2">Show this piece on AI models with different skin tones. Photos are labelled as AI and use your page allowance.</p>
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {ready.map((v) => (
+            <button key={v.id} type="button" aria-pressed={v.id === variantId} onClick={() => setVariantId(v.id)} className={`st-press inline-flex min-h-10 items-center gap-2 rounded-full px-3.5 text-sm font-semibold ring-1 ring-inset ${v.id === variantId ? "bg-cocoa text-white ring-cocoa" : "bg-white text-cocoa ring-hairline"}`}>
+              <span className="size-3.5 rounded-full ring-1 ring-white/60" style={{ background: v.colourHex }} />
+              {v.colourName}
+            </button>
           ))}
         </div>
-      )}
-    </Card>
+        <fieldset className="flex flex-wrap items-center gap-2">
+          <legend className="mb-1.5 text-xs font-bold text-cocoa-2">Models</legend>
+          {MODEL_TONES.map((tone, i) => {
+            const n = i + 1;
+            const on = models.includes(n);
+            return (
+              <button
+                key={n}
+                type="button"
+                aria-pressed={on}
+                aria-label={`AI model ${n}`}
+                onClick={() => setModels(on ? models.filter((x) => x !== n) : [...models, n])}
+                className={`st-press relative size-11 rounded-full ring-offset-2 ${on ? "ring-[3px] ring-violet-ink" : "opacity-45 ring-1 ring-hairline"}`}
+                style={{ background: tone }}
+              >
+                {on && <Icon name="check" className="absolute inset-0 m-auto size-4 text-white" />}
+              </button>
+            );
+          })}
+        </fieldset>
+        <SButton onClick={generate} disabled={busy || !models.length || !variantId}>{busy ? "Creating photos…" : `Create ${models.length} photo(s)`}</SButton>
+        <Note error={err} />
+        {busy && (
+          <div className="grid grid-cols-3 gap-2" aria-hidden>
+            {models.map((m) => <div key={m} data-skeleton className="st-skel aspect-[9/16] rounded-2xl" />)}
+          </div>
+        )}
+        {p.studio.length > 0 && (
+          <div className="grid grid-cols-3 gap-2">
+            {p.studio.map((m) => (
+              <figure key={m.id} className="relative animate-pop overflow-hidden rounded-2xl bg-cocoa">
+                {m.image && <img src={m.image} alt="Product on an AI model" className="aspect-[9/16] w-full object-cover" />}
+                <figcaption className="absolute bottom-1.5 left-1.5 rounded-full bg-black/65 px-2 py-0.5 text-[10px] font-bold text-white">AI model · C2PA</figcaption>
+                <button
+                  onClick={async () => {
+                    await api(`/products/${p.id}/media/${m.id}`, { method: "DELETE" });
+                    await onChange();
+                  }}
+                  className="st-press absolute right-1.5 top-1.5 grid size-8 place-items-center rounded-full bg-white/90 text-cocoa"
+                  aria-label="Remove photo"
+                >
+                  <Icon name="x" className="size-4" />
+                </button>
+              </figure>
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
   );
 }
 
@@ -150,41 +300,47 @@ function VariantRow({ v, onChange }: { v: StudioVariant; onChange: () => Promise
   }
 
   return (
-    <Card className="space-y-3">
+    <div className="space-y-3 rounded-[20px] bg-paper p-3 ring-1 ring-inset ring-hairline">
       <div className="flex items-center gap-2">
-        <span className="size-5 rounded-full border border-stone-300" style={{ background: v.colourHex }} />
-        <span className="font-semibold">{v.colourName}</span>
-        <span className="text-xs text-stone-500">· sizes {v.sizes.join(", ")} · stock {v.stock}</span>
+        <span className="size-5 rounded-full ring-2 ring-white" style={{ background: v.colourHex }} />
+        <span className="font-extrabold text-cocoa">{v.colourName}</span>
+        <span className="truncate text-xs text-cocoa-2">· sizes {v.sizes.join(", ")} · stock {v.stock}</span>
       </div>
       <div className="grid grid-cols-2 gap-2">
-        <figure className="overflow-hidden rounded-xl bg-stone-100">
-          {v.image ? <img src={v.image} alt={`${v.colourName} photo`} className="aspect-[4/5] w-full object-cover" /> : <div className="grid aspect-[4/5] place-items-center text-sm text-stone-400">No photo</div>}
-          <figcaption className="px-2 py-1 text-xs text-stone-500">Your photo</figcaption>
+        <figure className="overflow-hidden rounded-2xl bg-white ring-1 ring-hairline">
+          {busy ? (
+            <div data-skeleton className="st-skel aspect-[4/5]" />
+          ) : v.image ? (
+            <img src={v.image} alt={`${v.colourName} photo`} className="aspect-[4/5] w-full object-cover" />
+          ) : (
+            <div className="grid aspect-[4/5] place-items-center text-cocoa-3"><Icon name="camera" className="size-8" /></div>
+          )}
+          <figcaption className="px-2.5 py-1.5 text-xs font-semibold text-cocoa-2">Your photo</figcaption>
         </figure>
-        <figure className="overflow-hidden rounded-xl bg-[repeating-conic-gradient(#eee_0_25%,#fff_0_50%)] bg-[length:16px_16px]">
-          {v.cutout ? <img src={v.cutout} alt={`${v.colourName} cut-out`} className="aspect-[4/5] w-full object-contain" /> : <div className="grid aspect-[4/5] place-items-center text-sm text-stone-400">—</div>}
-          <figcaption className="bg-white/80 px-2 py-1 text-xs text-stone-500">Try-on cut-out (auto)</figcaption>
+        <figure className="st-checker overflow-hidden rounded-2xl ring-1 ring-hairline">
+          {v.cutout ? <img src={v.cutout} alt={`${v.colourName} cut-out`} className="aspect-[4/5] w-full object-contain" /> : <div className="grid aspect-[4/5] place-items-center text-sm text-cocoa-3">—</div>}
+          <figcaption className="bg-white/85 px-2.5 py-1.5 text-xs font-semibold text-cocoa-2">Try-on cut-out (auto)</figcaption>
         </figure>
       </div>
       {result && (
         <div className="text-sm">
           <Badge value={result.readiness} />
-          {result.notes.length > 0 && <ul className="mt-1 list-disc pl-5 text-amber-800">{result.notes.map((n) => <li key={n}>{n}</li>)}</ul>}
+          {result.notes.length > 0 && <ul className="mt-1 list-disc pl-5 text-gold-ink">{result.notes.map((n) => <li key={n}>{n}</li>)}</ul>}
         </div>
       )}
       <Note error={err} />
-      <label className={`flex min-h-11 cursor-pointer items-center justify-center rounded-xl border border-dashed border-stone-400 text-sm font-semibold ${busy ? "opacity-50" : ""}`}>
+      <label className={`st-press flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-paper-3 bg-white text-sm font-bold text-cocoa hover:border-cocoa-3 focus-within:outline focus-within:outline-[2.5px] focus-within:outline-violet-ink ${busy ? "opacity-50" : ""}`}>
+        <Icon name={v.image ? "refresh" : "camera"} className="size-4" />
         {busy ? "Checking photo…" : v.image ? "Replace photo" : "Upload photo"}
         <input type="file" accept="image/png,image/jpeg,image/webp" capture="environment" className="sr-only" disabled={busy} onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} />
       </label>
-      <p className="text-xs text-stone-500">Tip: lay the garment flat on a plain light background, fully in frame, in daylight.</p>
-    </Card>
+    </div>
   );
 }
 
 export default function Page() {
   return (
-    <Suspense>
+    <Suspense fallback={<ScreenSkeleton variant="list" />}>
       <ProductDetail />
     </Suspense>
   );
