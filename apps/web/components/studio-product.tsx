@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { InfoTip } from "@/components/kit";
 import { Icon } from "@/components/studio";
 import { rwf } from "@/lib/api";
 import { THEMES } from "@/lib/maker";
@@ -9,12 +10,10 @@ import { THEMES } from "@/lib/maker";
 export function EditorSection({ n, title, hint, children, id }: { n: number; title: string; hint?: string; children: ReactNode; id?: string }) {
   return (
     <section id={id} aria-labelledby={`${id ?? n}-t`} className="st-card scroll-mt-28 rounded-[24px] p-4 sm:p-5">
-      <div className="mb-4 flex items-start gap-3">
+      <div className="mb-4 flex items-center gap-3">
         <span aria-hidden className="grid size-8 shrink-0 place-items-center rounded-full bg-cocoa font-display text-sm font-black text-white">{n}</span>
-        <div className="min-w-0">
-          <h3 id={`${id ?? n}-t`} className="font-display text-lg font-black leading-tight tracking-tight text-cocoa">{title}</h3>
-          {hint && <p className="mt-0.5 text-xs leading-relaxed text-cocoa-2">{hint}</p>}
-        </div>
+        <h3 id={`${id ?? n}-t`} className="min-w-0 font-display text-lg font-black leading-tight tracking-tight text-cocoa">{title}</h3>
+        {hint && <InfoTip label={`About ${title}`} className="-ml-2">{hint}</InfoTip>}
       </div>
       <div className="space-y-4">{children}</div>
     </section>

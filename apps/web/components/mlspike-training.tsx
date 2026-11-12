@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { Group, GroupRow } from "@/components/ios";
+import { LearnMore } from "@/components/kit";
 import { Card, Icon, Note, Skeleton, Switch } from "@/components/studio";
 import { api } from "@/lib/api";
 import { useSession } from "@/lib/session";
@@ -31,22 +33,17 @@ interface TrainingState {
 export function TrainingDataLink({ pageId }: { pageId: string }) {
   const { data } = useApi<TrainingState>(`/pages/${pageId}/training-data`);
   return (
-    <Link href={`/studio/${pageId}/training`} className="st-card st-press st-lift flex items-center gap-3 rounded-[24px] p-4">
-      <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-violet-100 text-violet-ink"><Icon name="layers" className="size-5" /></span>
-      <span className="min-w-0 flex-1">
-        <span className="block font-extrabold text-cocoa">Help train Nyambika&apos;s garment helper</span>
-        <span className="block text-sm text-cocoa-2">{data ? (data.optedIn ? "You share garment photos · change any time" : "Off · you decide which photos to share") : "Your choice, off by default"}</span>
-      </span>
-      <Icon name="chevron" className="size-5 shrink-0 text-cocoa-3" />
-    </Link>
+    <Group>
+      <GroupRow icon="layers" tone="violet" title="Help train Nyambika AI" subtitle={data ? (data.optedIn ? "Sharing · change any time" : "Off · your choice") : "Off by default"} href={`/studio/${pageId}/training`} />
+    </Group>
   );
 }
 
 const WHAT = [
-  { icon: "hanger", ok: true, text: "Only your garment photos from your catalogue" },
-  { icon: "shield", ok: false, text: "Never shoppers' photos, twins, looks or measurements" },
-  { icon: "eye", ok: false, text: "Photos showing a person or face are removed automatically" },
-  { icon: "refresh", ok: true, text: "Stop any time: your photos leave every future version" },
+  { icon: "hanger", ok: true, text: "Only your catalogue garment photos" },
+  { icon: "shield", ok: false, text: "Never shopper photos or twins" },
+  { icon: "eye", ok: false, text: "Faces removed automatically" },
+  { icon: "refresh", ok: true, text: "Stop any time · removed next version" },
 ] as const;
 
 /** Maker opt-in for training-data contribution (R4 spike), per page with per-product overrides. */
@@ -86,9 +83,9 @@ export function TrainingDataConsent({ pageId }: { pageId: string }) {
         <div aria-hidden className="orb absolute -right-10 -top-10 size-36 animate-orb rounded-full opacity-20 blur-2xl" />
         <p className="relative text-sm font-bold text-violet-ink">Your photos, your choice</p>
         <h2 className="relative font-display text-2xl font-black tracking-tight text-cocoa">Help train a helper that knows Rwandan fashion</h2>
-        <p className="relative mt-1.5 text-sm leading-relaxed text-cocoa-2">
+        <LearnMore className="relative mt-2">
           Nyambika is testing a small model that recognises umushanana, imigongo, kitenge and wax so it can fill in your listings for you. Sharing your garment photos makes it better for every maker. It is off until you switch it on.
-        </p>
+        </LearnMore>
       </section>
 
       <Card className="space-y-3">
@@ -97,13 +94,13 @@ export function TrainingDataConsent({ pageId }: { pageId: string }) {
           disabled={busy}
           onChange={(v) => put(`/pages/${pageId}/training-data`, { optedIn: v }, v ? "Thank you! Your garment photos can now help train the helper." : "Stopped. Your photos will be removed from the next dataset version.")}
           label="Share my garment photos for training"
-          description={data.decidedAt ? `Last changed ${new Date(data.decidedAt).toLocaleDateString()} · recorded in your consent ledger` : "Recorded in your consent ledger. Withdraw any time."}
+          description={data.decidedAt ? `Changed ${new Date(data.decidedAt).toLocaleDateString()} · in your consent ledger` : "Off · withdraw any time"}
         />
         <Note error={err} ok={msg} />
         {data.latestDataset && (
           <p className="rounded-2xl bg-paper p-3 text-xs text-cocoa-2">
-            Dataset v{data.latestDataset.version}: {data.latestDataset.itemsFromThisPage} photo{data.latestDataset.itemsFromThisPage === 1 ? "" : "s"} from your page.
-            {data.tombstones > 0 ? ` ${data.tombstones} withdrawal${data.tombstones === 1 ? "" : "s"} on record: those photos never come back.` : ""}
+            Dataset v{data.latestDataset.version} · {data.latestDataset.itemsFromThisPage} photo{data.latestDataset.itemsFromThisPage === 1 ? "" : "s"} from you
+            {data.tombstones > 0 ? ` · ${data.tombstones} withdrawal${data.tombstones === 1 ? "" : "s"} on record (never return)` : ""}
           </p>
         )}
       </Card>
@@ -122,7 +119,7 @@ export function TrainingDataConsent({ pageId }: { pageId: string }) {
           <h3 className="font-display text-lg font-black tracking-tight text-cocoa">Choose pieces</h3>
           <span className="text-xs font-bold text-cocoa-2">{included} shared</span>
         </div>
-        <p className="text-sm text-cocoa-2">Keep a design private, or share just one piece without sharing the rest.</p>
+        <p className="text-sm text-cocoa-2">Share or keep private, per piece</p>
         <ul className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
           {data.products.map((p) => (
             <li key={p.id} className="overflow-hidden rounded-[20px] bg-paper ring-1 ring-inset ring-hairline">
@@ -214,9 +211,9 @@ export function MakerTrainingConsent({ pageId }: { pageId: string }) {
       <section className="st-hero relative overflow-hidden rounded-[28px] p-5">
         <p className="relative text-sm font-bold text-violet-ink">Your work, your choice</p>
         <h2 className="relative font-display text-2xl font-black tracking-tight text-cocoa">Share photos of pieces you made?</h2>
-        <p className="relative mt-1.5 text-sm leading-relaxed text-cocoa-2">
+        <LearnMore className="relative mt-2">
           Your cooperative can share garment photos to train a helper that knows Rwandan fashion. Pieces credited to you are only used if you say yes too. It is off until you switch it on.
-        </p>
+        </LearnMore>
       </section>
       <Card className="space-y-3">
         <Switch
@@ -224,7 +221,7 @@ export function MakerTrainingConsent({ pageId }: { pageId: string }) {
           disabled={busy}
           onChange={set}
           label="Share photos of pieces I made"
-          description={data.decidedAt ? `Last changed ${new Date(data.decidedAt).toLocaleDateString()} · recorded in your consent ledger` : "Recorded in your consent ledger. Stop any time."}
+          description={data.decidedAt ? `Changed ${new Date(data.decidedAt).toLocaleDateString()} · in your consent ledger` : "Off · stop any time"}
         />
         <Note error={err} ok={msg} />
       </Card>

@@ -4,11 +4,13 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AdminShell } from "@/components/admin-shell";
+import { ADMIN_TABS as TABS, adminTabHref } from "./tabs";
 import { Badge, Card, Chip, Empty, Icon, Kpi, Meter, Monogram, Note, ScreenSkeleton, SButton, Skeleton, Switch } from "@/components/studio";
 import { api, rwf } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { useApi } from "@/lib/use-api";
-import { LearnMore } from "@/components/kit";
+import { InfoTip } from "@/components/kit";
+import { Group, GroupRow, MoreActions } from "@/components/ios";
 
 // Lazy (below the fold / on demand): keeps this route's first-load JS small.
 const InferencePanel = dynamic(() => import("@/components/inference-panel").then((m) => m.InferencePanel), { ssr: false, loading: () => <Skeleton className="h-72" /> });
@@ -26,7 +28,6 @@ interface Overview {
   openModeration: number;
 }
 
-const TABS = ["Overview", "Verify", "Moderation", "Migration", "Flags & models", "Outbox", "Audit", "Pilot", "Agents & partners", "Regions"] as const;
 
 /** Host admin console (FR-ADM). Host roles only. */
 export default function Admin() {
@@ -42,7 +43,7 @@ export default function Admin() {
   const { data: counts } = useApi<Overview>(me?.isHost ? "/admin/overview" : null);
   if (!me?.isHost) return null;
   return (
-    <AdminShell tabs={TABS} tab={tab} onTab={(t) => (t === "Pilot" ? router.push("/admin/pilot") : t === "Agents & partners" ? router.push("/admin/agents") : t === "Regions" ? router.push("/admin/regions") : setTab(t))} counts={{ Verify: counts?.pages.PENDING_VERIFICATION ?? 0, Moderation: counts?.openModeration ?? 0 }}>
+    <AdminShell tabs={TABS} tab={tab} onTab={(t) => (t === "Pilot" || t === "Agents & partners" || t === "Regions" ? router.push(adminTabHref(t)) : setTab(t))} counts={{ Verify: counts?.pages.PENDING_VERIFICATION ?? 0, Moderation: counts?.openModeration ?? 0 }}>
         {tab === "Overview" && <OverviewTab />}
         {tab === "Verify" && <VerifyTab />}
         {tab === "Moderation" && <ModerationTab />}
@@ -83,7 +84,10 @@ function OverviewTab() {
           <div aria-hidden className="orb absolute -right-12 -top-12 size-44 animate-orb rounded-full opacity-20 blur-2xl" />
           <p className="relative flex items-center gap-2 text-sm font-extrabold text-mint-ink"><Icon name="wallet" className="size-4" /> Paid directly to makers</p>
           <p className="relative mt-1 font-display text-4xl font-black tracking-tight tabular-nums text-cocoa lg:text-5xl">{rwf(o.gmvDirectToMakersRwf)}</p>
-          <p className="relative mt-1 text-sm text-cocoa-2">{o.orders} orders · {o.completedOrders} completed. Nyambika never holds the money.</p>
+          <p className="relative mt-1 flex flex-wrap items-center gap-1.5 text-sm text-cocoa-2">
+            <span className="tabular-nums">{o.orders} orders · {o.completedOrders} completed</span>
+            <InfoTip label="Who holds the money">Shoppers pay makers directly. Nyambika never holds the money.</InfoTip>
+          </p>
           <div className="relative mt-5 grid grid-cols-2 gap-2">
             <div className="rounded-2xl bg-white/75 p-3">
               <p className="text-xs font-bold text-cocoa-2">Live pages</p>
@@ -147,7 +151,7 @@ function VerifyTab() {
     }
   };
   if (!data) return <ScreenSkeleton variant="list" />;
-  if (data.length === 0) return <Empty icon="shield" title="All caught up">No pages waiting for verification.</Empty>;
+  if (data.length === 0) return <Empty icon="shield" title="All caught up">Nothing waiting.</Empty>;
   return (
     <ul className="grid grid-cols-1 gap-3 lg:grid-cols-2">
       {data.map((p) => (
@@ -181,7 +185,7 @@ function VerifyTab() {
 function ModerationTab() {
   const { data, reload } = useApi<{ id: string; kind: string; refId: string; reason: string; createdAt: string }[]>("/admin/moderation");
   if (!data) return <ScreenSkeleton variant="list" />;
-  if (data.length === 0) return <Empty icon="flag" title="Queue is clear">Moderation queue is clear.</Empty>;
+  if (data.length === 0) return <Empty icon="flag" title="Queue is clear">Nothing to review.</Empty>;
   return (
     <ul className="space-y-2">
       {data.map((m) => (
@@ -208,22 +212,29 @@ function FlagsTab() {
       <section aria-labelledby="flags-t" className="space-y-2">
         <h2 id="flags-t" className="font-display text-xl font-black tracking-tight text-cocoa">Feature flags</h2>
         {!flags && <ScreenSkeleton variant="list" />}
-        <ul className="st-card divide-y divide-hairline rounded-[24px] px-4">
-          {flags?.map((f) => (
-            <li key={f.key} className="py-3.5">
-              <Switch
-                checked={f.enabled}
-                ariaLabel={f.key}
-                label={<span className="font-mono text-[13px]">{f.key}</span>}
-                description={f.description}
-                onChange={async (enabled) => {
-                  setFlags((all) => all?.map((x) => (x.key === f.key ? { ...x, enabled } : x)) ?? null);
-                  await api(`/admin/flags/${f.key}`, { method: "PATCH", json: { enabled } }).catch(() => reload());
-                }}
+        {flags && (
+          <Group>
+            {flags.map((f) => (
+              <GroupRow
+                key={f.key}
+                icon={f.key.includes("kill_switch") ? "alert" : "flag"}
+                tone={f.key.includes("kill_switch") ? "red" : "stone"}
+                title={<span className="font-mono text-[13px]">{f.key}</span>}
+                subtitle={f.description}
+                accessory={
+                  <Switch
+                    checked={f.enabled}
+                    ariaLabel={f.key}
+                    onChange={async (enabled) => {
+                      setFlags((all) => all?.map((x) => (x.key === f.key ? { ...x, enabled } : x)) ?? null);
+                      await api(`/admin/flags/${f.key}`, { method: "PATCH", json: { enabled } }).catch(() => reload());
+                    }}
+                  />
+                }
               />
-            </li>
-          ))}
-        </ul>
+            ))}
+          </Group>
+        )}
       </section>
       <section aria-labelledby="models-t" className="space-y-2">
         <h2 id="models-t" className="font-display text-xl font-black tracking-tight text-cocoa">Model registry</h2>
@@ -239,7 +250,7 @@ function FlagsTab() {
                     <Chip>{m.tier}</Chip>
                   </div>
                 </div>
-                <SButton variant="outline" className="min-h-10" onClick={async () => { await api(`/admin/models/${m.id}`, { method: "PATCH", json: { status: m.status === "ACTIVE" ? "RETIRED" : "ACTIVE" } }); await reloadModels(); }}>
+                <SButton variant="outline" onClick={async () => { await api(`/admin/models/${m.id}`, { method: "PATCH", json: { status: m.status === "ACTIVE" ? "RETIRED" : "ACTIVE" } }); await reloadModels(); }}>
                   {m.status === "ACTIVE" ? "Retire" : "Activate"}
                 </SButton>
               </div>
@@ -317,6 +328,20 @@ interface Wave {
 
 const MIG_STEPS = ["IMPORTED", "IN_REVIEW", "SIGNED_OFF", "LIVE"];
 
+/** Two-word tags for the defect kinds (the full messages live in the ⓘ popover). */
+function defectTags(defects: { message: string }[]) {
+  const tags = new Set<string>();
+  for (const d of defects) {
+    const m = d.message.toLowerCase();
+    if (m.includes("momo")) tags.add("No MoMo number");
+    else if (m.includes("photo")) tags.add("Photo");
+    else if (m.includes("image")) tags.add("Image missing");
+    else if (m.includes("no products")) continue; // the header already says "0 products"
+    else tags.add("Other");
+  }
+  return [...tags];
+}
+
 /** Migration waves (plan §16): import → owner review → sign-off → go live, with rollback and 404 monitoring. */
 function MigrationTab() {
   const { data: waves, reload } = useApi<Wave[]>("/admin/migration/waves");
@@ -353,12 +378,16 @@ function MigrationTab() {
       <Card className="space-y-3">
         <div className="flex items-start gap-3">
           <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-paper-2 text-cocoa"><Icon name="upload" className="size-5" /></span>
-          <div>
-            <p className="font-extrabold text-cocoa">Import a wave</p>
-            <p className="text-sm text-cocoa-2">Legacy JSON bundle · imported hidden</p>
-            <LearnMore>JSON bundle from the legacy export (format in docs/migration.md). Pages are imported hidden; photos go through the readiness pipeline.</LearnMore>
-            <a href="/admin/network" className="mt-1 inline-block text-sm font-bold text-violet-ink underline">Whole network (waves, outreach, cut-over) →</a>
+          <div className="min-w-0 flex-1">
+            <p className="flex items-center gap-1 font-extrabold text-cocoa">
+              Import a wave
+              <InfoTip label="About importing">JSON bundle from the legacy export (format in docs/migration.md). Pages are imported hidden; photos go through the readiness pipeline.</InfoTip>
+            </p>
+            <p className="text-sm text-cocoa-2">Legacy JSON · hidden</p>
           </div>
+          <a href="/admin/network" className="st-press inline-flex min-h-11 shrink-0 items-center gap-1 rounded-2xl px-2 text-sm font-bold text-violet-ink hover:bg-paper-2">
+            Network <Icon name="chevron" className="size-4" />
+          </a>
         </div>
         <label className={`st-press flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-paper-3 bg-paper text-sm font-bold text-cocoa hover:border-cocoa-3 focus-within:outline focus-within:outline-[2.5px] focus-within:outline-violet-ink ${busy ? "opacity-50" : ""}`}>
           <Icon name="upload" className="size-4" />
@@ -369,15 +398,15 @@ function MigrationTab() {
         {report && (
           <ul className="space-y-1 text-sm">
             {report.map((r) => (
-              <li key={r.handle} className={r.ok ? "text-mint-ink" : "text-red-800"}>{r.ok ? "✓" : "✕"} {r.handle} {r.ok ? `· ${r.defects.length} item(s) to check` : `· ${r.error}`}</li>
+              <li key={r.handle} className={r.ok ? "text-mint-ink" : "text-red-800"}><Icon name={r.ok ? "check" : "x"} className="mr-1 inline size-4 align-[-3px]" /><span className="sr-only">{r.ok ? "Imported: " : "Failed: "}</span>{r.handle} {r.ok ? `· ${r.defects.length} to fix` : `· ${r.error}`}</li>
             ))}
           </ul>
         )}
       </Card>
-      {waves?.length === 0 && <Empty icon="swap">No migration waves yet. Import a bundle to start.</Empty>}
+      {waves?.length === 0 && <Empty icon="swap" title="No waves yet">Import a bundle.</Empty>}
       {waves?.map((w) => (
         <section key={w.id} className="space-y-2">
-          <h3 className="font-display text-lg font-black text-cocoa">{w.name} <span className="text-sm font-semibold text-cocoa-2">· {new Date(w.createdAt).toLocaleString()}</span></h3>
+          <h3 className="font-display text-lg font-black text-cocoa">{w.name}<span className="block text-xs font-semibold text-cocoa-2">{new Date(w.createdAt).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span></h3>
           <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
             {w.items.map((i) => {
               const at = i.status === "ROLLED_BACK" ? -1 : MIG_STEPS.indexOf(i.status === "CHANGES_REQUESTED" ? "IN_REVIEW" : i.status);
@@ -398,13 +427,26 @@ function MigrationTab() {
                       </li>
                     ))}
                   </ol>
-                  {i.defects.length > 0 && <p className="rounded-xl bg-amber-50 px-3 py-2 text-xs text-gold-ink ring-1 ring-inset ring-amber-200">{i.defects.length} item(s): {i.defects.map((d) => d.message).join(" · ").slice(0, 160)}</p>}
-                  {i.ownerNote && <p className="rounded-xl bg-red-50 px-3 py-2 text-xs text-red-800 ring-1 ring-inset ring-red-200">Owner: “{i.ownerNote}”</p>}
+                  {i.defects.length > 0 && (
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="inline-flex items-center gap-0.5">
+                        <Chip tone="gold"><Icon name="alert" className="size-3.5" /> {i.defects.length} to fix</Chip>
+                        <InfoTip label={`Defects for ${i.page?.name ?? "this page"}`}>
+                          <ul className="list-disc space-y-1 pl-4">{i.defects.map((d, k) => <li key={k}>{d.message}</li>)}</ul>
+                        </InfoTip>
+                      </span>
+                      {defectTags(i.defects).map((t) => <Chip key={t}>{t}</Chip>)}
+                    </div>
+                  )}
+                  {i.ownerNote && <p className="truncate rounded-xl bg-red-50 px-3 py-2 text-xs text-red-800 ring-1 ring-inset ring-red-200" title={i.ownerNote}>Owner: “{i.ownerNote}”</p>}
                   <div className="flex flex-wrap items-center gap-2">
-                    {["IMPORTED", "CHANGES_REQUESTED", "IN_REVIEW"].includes(i.status) && <SButton variant="outline" className="min-h-10" onClick={() => act(i.id, "send-review")}>{i.status === "IMPORTED" ? "Send review link" : "Resend review link"}</SButton>}
-                    {i.status === "SIGNED_OFF" && <SButton className="min-h-10" onClick={() => act(i.id, "go-live")}>Go live + redirect</SButton>}
-                    {(i.status === "LIVE" || i.status === "SIGNED_OFF") && <SButton variant="outline" className="min-h-10" onClick={() => act(i.id, "rollback")}>Roll back</SButton>}
-                    <a href={i.reviewUrl} target="_blank" rel="noreferrer" className="ml-auto text-xs font-bold text-violet-ink underline">review link</a>
+                    {["IMPORTED", "CHANGES_REQUESTED", "IN_REVIEW"].includes(i.status) && <SButton variant="outline" onClick={() => act(i.id, "send-review")}>{i.status === "IMPORTED" ? "Send review link" : "Resend review link"}</SButton>}
+                    {i.status === "SIGNED_OFF" && <SButton onClick={() => act(i.id, "go-live")}>Go live + redirect</SButton>}
+                    {i.status === "LIVE" && <SButton variant="outline" onClick={() => act(i.id, "rollback")}>Roll back</SButton>}
+                    {i.status === "SIGNED_OFF" && <MoreActions label={`More for ${i.page?.name ?? "page"}`} title={i.page?.name} actions={[{ label: "Roll back", icon: "rotate", destructive: true, onSelect: () => act(i.id, "rollback") }]} />}
+                    <a href={i.reviewUrl} target="_blank" rel="noreferrer" className="st-press ml-auto inline-flex min-h-11 items-center gap-1 rounded-2xl px-2 text-sm font-bold text-violet-ink hover:bg-paper-2">
+                      Open review link <Icon name="chevron" className="size-4" />
+                    </a>
                   </div>
                 </article>
               );

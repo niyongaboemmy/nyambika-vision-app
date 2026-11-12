@@ -10,6 +10,7 @@ import { useRegion, type Commerce } from "@/lib/region";
 import { useSession } from "@/lib/session";
 import { countdown, fmtWhen, type Shelf, type ShelfItemView } from "@/lib/vr";
 import { hasWebGL2, load3d, loadModelViewer, prefersReducedMotion, type Garment3d } from "@/lib/xr";
+import { Icon } from "@/components/icons";
 
 const XrStage = dynamic(() => import("@/components/xr-viewer").then((m) => m.XrStage), { ssr: false }); // full viewer on tap
 
@@ -167,7 +168,7 @@ export function Shelf3d({ shelf, brand, commerce }: { shelf: Shelf; brand: strin
           </button>
           <ShelfButton label="Next piece" disabled={i === count - 1} onClick={() => go(1)}>›</ShelfButton>
         </div>
-        <span className="pointer-events-none absolute left-3 top-3 z-20 rounded-full border border-white/15 bg-black/55 px-2.5 py-1 text-[11px] font-semibold backdrop-blur">✨ {t("xr.aiLabel")}</span>
+        <span className="pointer-events-none absolute left-3 top-3 z-20 rounded-full border border-white/15 bg-black/55 px-2.5 py-1 text-[11px] font-semibold backdrop-blur"><Icon name="sparkle" className="mr-1 inline size-3 align-[-2px]" />{t("xr.aiLabel")}</span>
       </div>
 
       <div className="mt-3 grid gap-2 px-4">
@@ -178,7 +179,7 @@ export function Shelf3d({ shelf, brand, commerce }: { shelf: Shelf; brand: strin
             className="group relative flex min-h-16 items-center gap-3 overflow-hidden rounded-[22px] border border-white/10 px-4 py-3"
             style={{ background: "linear-gradient(110deg, rgba(224,112,63,.28), rgba(139,92,246,.28) 60%, rgba(56,189,248,.18))" }}
           >
-            <span aria-hidden className="grid size-11 shrink-0 place-items-center rounded-2xl bg-black/35 text-xl">🥽</span>
+            <span aria-hidden className="grid size-11 shrink-0 place-items-center rounded-2xl bg-black/35"><Icon name="headset" className="size-5" /></span>
             <span className="min-w-0 flex-1">
               <span className="block font-display text-lg font-black leading-tight">{t("vr.enterShowroom")}</span>
               <span className="block text-xs text-txt/80">{t("vr.showroomHint")}</span>
@@ -194,7 +195,7 @@ export function Shelf3d({ shelf, brand, commerce }: { shelf: Shelf; brand: strin
                 {s.phase === "LIVE" ? <span className="rounded-full bg-terra px-2 py-0.5 text-white">● {t("vr.live")}</span> : <span className="text-gold">{t("vr.fashionShow")}</span>}
               </span>
               <span className="block truncate font-bold">{s.title}</span>
-              <span className="block text-xs text-mut">{s.phase === "LIVE" ? t("vr.watchNow") : `${fmtWhen(s.startsAt)} · in ${countdown(new Date(s.startsAt).getTime() - Date.now())}`}</span>
+              <span className="block text-xs text-mut" suppressHydrationWarning>{s.phase === "LIVE" ? t("vr.watchNow") : `${fmtWhen(s.startsAt)} · in ${countdown(new Date(s.startsAt).getTime() - Date.now())}`}</span>
             </span>
             <span aria-hidden>›</span>
           </Link>

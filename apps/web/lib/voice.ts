@@ -191,7 +191,7 @@ export function voicesFor(locale: Locale): SpeechSynthesisVoice[] {
 export function voiceLabel(v: SpeechSynthesisVoice) {
   const name = v.name.replace(/^(Microsoft) /, "").replace(/\s*\(.*\)\s*$/, "").replace(/ - .*$/, "");
   const region = v.lang.split(/[-_]/)[1]?.toUpperCase();
-  return `${name}${region ? ` · ${region}` : ""}${v.localService ? "" : " ☁"}`;
+  return `${name}${region ? ` · ${region}` : ""}${v.localService ? "" : " · cloud"}`;
 }
 
 /** Same default everywhere: the browser default for the language, else the first on-device voice. */

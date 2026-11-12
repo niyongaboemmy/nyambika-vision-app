@@ -7,6 +7,7 @@ import { Button, Chip, ErrorNote, Sheet } from "@/components/ui";
 import { api, rwf } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { MEASUREMENT_LABEL, specChips, type CustomOrderView, type MeasurementsView } from "@/lib/tailor";
+import { Icon } from "@/components/icons";
 
 export interface AskRequest {
   pageId: string;
@@ -107,7 +108,7 @@ export function AskTailorSheet({ open, onClose, request }: { open: boolean; onCl
           {request.image ? (
             <img src={request.image} alt="" className="h-28 w-20 shrink-0 rounded-2xl bg-black/40 object-cover" />
           ) : (
-            <div className="grid h-28 w-20 shrink-0 place-items-center rounded-2xl bg-white/10 text-3xl" aria-hidden>🪡</div>
+            <div className="grid h-28 w-20 shrink-0 place-items-center rounded-2xl bg-white/10" aria-hidden><Icon name="needle" className="size-8 text-gold" /></div>
           )}
           <div className="min-w-0">
             <h3 className="font-display text-xl font-black leading-tight">Ask {first} to sew this</h3>
@@ -132,7 +133,7 @@ export function AskTailorSheet({ open, onClose, request }: { open: boolean; onCl
           <legend className="mb-1 text-xs font-semibold uppercase tracking-widest text-mut">What {first} will see</legend>
           <label className="glass flex items-start gap-3 rounded-2xl p-3">
             <input type="checkbox" checked={shareMeasurements} onChange={(e) => setShareMeasurements(e.target.checked)} className="mt-1 size-5 accent-[#f2b84b]" />
-            <span className="text-sm"><b>My measurements for 14 days</b><br /><span className="text-mut">Only for this order. You can stop sharing any time; it ends when the order does.</span></span>
+            <span className="text-sm"><b>My measurements for 14 days</b><br /><span className="text-mut">Only this order · stop sharing anytime</span></span>
           </label>
           {request.renderId && (
             <label className="glass flex items-start gap-3 rounded-2xl p-3">
@@ -146,11 +147,11 @@ export function AskTailorSheet({ open, onClose, request }: { open: boolean; onCl
         {needsProfile && (
           <fieldset className="mt-4 rounded-2xl border border-gold/30 bg-gold/10 p-3">
             <legend className="px-1 text-sm font-bold">Your measurements (cm)</legend>
-            <p className="mb-2 text-xs text-txt/80">{m?.prefill ? `Prefilled from your twin's size estimate (${m.twinSize}, ±3 cm). Adjust if you know better.` : "A soft tape measure helps. You can refine them later."}</p>
+            <p className="mb-2 text-xs text-txt/80">{m?.prefill ? `From your twin (${m.twinSize}, ±3 cm) · adjust if needed` : "A soft tape measure helps. You can refine them later."}</p>
             <div className="grid grid-cols-2 gap-2">
               {QUICK.map((k) => (
                 <label key={k} className="block">
-                  <span className="text-xs font-semibold">{MEASUREMENT_LABEL[k].icon} {MEASUREMENT_LABEL[k].label}</span>
+                  <span className="flex items-center gap-1 text-xs font-semibold"><Icon name={MEASUREMENT_LABEL[k].glyph} className="size-3.5 text-gold" />{MEASUREMENT_LABEL[k].label}</span>
                   <input
                     inputMode="decimal"
                     value={draft[k] ?? ""}
@@ -160,7 +161,7 @@ export function AskTailorSheet({ open, onClose, request }: { open: boolean; onCl
                 </label>
               ))}
             </div>
-            <p className="mt-2 text-[11px] text-mut">Saved encrypted to your private profile.</p>
+            <p className="mt-2 text-[11px] text-mut">Saved encrypted · private</p>
           </fieldset>
         )}
 
@@ -171,7 +172,7 @@ export function AskTailorSheet({ open, onClose, request }: { open: boolean; onCl
         <ErrorNote error={error} />
       </div>
       <Button className="mt-3 w-full" disabled={busy || !quickOk} onClick={send}>
-        {busy ? "Sending…" : `🪡 Send request to ${first}`}
+        {busy ? "Sending…" : `Send request to ${first}`}
       </Button>
       {!quickOk && <p className="mt-1 text-center text-xs text-gold">Add the four measurements, or untick sharing</p>}
     </Sheet>

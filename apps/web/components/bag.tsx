@@ -7,6 +7,7 @@ import { api } from "@/lib/api";
 import type { Bag, SavedAddress } from "@/lib/bag";
 import type { Look } from "@/lib/looks";
 import { useSession } from "@/lib/session";
+import { Icon } from "@/components/icons";
 
 /** "Add to bag": the secondary action in the hold-to-buy sheet (E29). Hold-to-buy stays primary. */
 export function AddToBag({ look, size }: { look: Look; size: string }) {
@@ -34,7 +35,7 @@ export function AddToBag({ look, size }: { look: Look; size: string }) {
     <div className="mt-3 flex flex-col items-center gap-1">
       {count === null ? (
         <button type="button" onClick={add} disabled={busy} className="glass min-h-11 rounded-2xl px-5 text-sm font-semibold disabled:opacity-50">
-          🛍️ {t("bag.add")} · {size}
+          <Icon name="bag" className="size-5" /> {t("bag.add")} · {size}
         </button>
       ) : (
         <p className="flex animate-rise items-center gap-3 text-sm" role="status">
@@ -58,8 +59,8 @@ export function AddressesCard() {
   if (rows !== null && rows.length === 0) return null;
   return (
     <section className="glass space-y-2 rounded-3xl p-4" aria-labelledby="addr-h">
-      <p id="addr-h" className="font-semibold">📍 {t("bag.addresses")}</p>
-      <p className="text-xs text-mut">Encrypted on our side. Only the maker you order from sees the address, for delivery.</p>
+      <p id="addr-h" className="font-semibold"><Icon name="pin" className="mr-1 inline size-4 align-[-3px]" />{t("bag.addresses")}</p>
+      <p className="text-xs text-mut">Encrypted · only your maker sees it</p>
       {rows === null ? (
         <div className="h-12 animate-pulse rounded-2xl bg-white/10" />
       ) : (
@@ -90,7 +91,7 @@ export function EmptyBag() {
   const { t } = useSession();
   return (
     <div className="pt-6">
-      <EmptyState icon="bag" title={t("bag.empty")} action={<Link href="/" className="grad-cta press inline-flex min-h-12 items-center justify-center rounded-2xl px-5 font-semibold text-white">✨ {t("bag.keepLooking")}</Link>}>
+      <EmptyState icon="bag" title={t("bag.empty")} action={<Link href="/" className="grad-cta press inline-flex min-h-12 items-center justify-center rounded-2xl px-5 gap-2 font-semibold text-white"><Icon name="sparkle" className="size-5" /> {t("bag.keepLooking")}</Link>}>
         {t("bag.emptyBody")}
       </EmptyState>
     </div>

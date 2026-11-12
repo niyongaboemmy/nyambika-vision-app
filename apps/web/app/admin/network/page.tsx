@@ -3,12 +3,13 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { AdminShell } from "@/components/admin-shell";
+import { ADMIN_TABS, adminTabHref } from "../tabs";
 import { Card, Chip, Empty, Icon, Kpi, Note, ScreenSkeleton, SButton, Select } from "@/components/studio";
 import { api } from "@/lib/api";
 import { useApi } from "@/lib/use-api";
-import { LearnMore } from "@/components/kit";
+import { InfoTip } from "@/components/kit";
+import { MoreActions } from "@/components/ios";
 
-const TABS = ["Overview", "Verify", "Moderation", "Migration", "Flags & models", "Outbox", "Audit", "Pilot"] as const;
 
 interface RunRow {
   waveId: string;
@@ -100,14 +101,11 @@ export default function NetworkMigration() {
   ] : [];
 
   return (
-    <AdminShell tabs={TABS} tab="Migration" onTab={(t) => (t === "Pilot" ? router.push("/admin/pilot") : router.push(`/admin?tab=${encodeURIComponent(t)}`))}>
+    <AdminShell tabs={ADMIN_TABS} tab="Migration" onTab={(t) => router.push(adminTabHref(t))}>
       <div className="space-y-4">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-terra-ink">E21 · full network</p>
-            <h1 className="font-display text-2xl font-black tracking-tight text-cocoa">Network migration</h1>
-          </div>
-          <a href="/admin?tab=Migration" className="text-sm font-bold text-violet-ink underline">Per-page view</a>
+        <div className="-mt-2 flex items-center justify-between gap-3">
+          <h2 className="font-display text-lg font-black tracking-tight text-cocoa">Whole network</h2>
+          <a href="/admin?tab=Migration" className="st-press inline-flex min-h-11 items-center gap-1 rounded-2xl px-2 text-sm font-bold text-violet-ink hover:bg-paper-2">Per-page view <Icon name="chevron" className="size-4" /></a>
         </div>
 
         <Card className="space-y-3">
@@ -117,12 +115,12 @@ export default function NetworkMigration() {
               <Select value={concurrency} onChange={(e) => setConcurrency(e.target.value)}>{[1, 2, 4, 6, 8, 12, 16].map((n) => <option key={n}>{n}</option>)}</Select>
             </label>
             <label className={`st-press flex min-h-12 flex-1 cursor-pointer items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-paper-3 bg-paper px-4 text-sm font-bold text-cocoa hover:border-cocoa-3 focus-within:outline focus-within:outline-[2.5px] focus-within:outline-violet-ink ${busy === "upload" ? "opacity-50" : ""}`}>
-              <Icon name="upload" className="size-4" /> {busy === "upload" ? "Uploading…" : "Start a network wave (.json)"}
+              <Icon name="upload" className="size-4" /> {busy === "upload" ? "Uploading…" : "Start wave (.json)"}
               <input type="file" accept="application/json,.json" className="sr-only" disabled={!!busy} onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])} />
             </label>
           </div>
-          <p className="text-xs font-semibold text-cocoa-2">≤ 2,000 pages per bundle · owners keep their old page until sign-off</p>
-          <LearnMore><p className="text-xs">Up to 2,000 pages per bundle. Pages import on the queue with this many in flight; owners keep their old page until they sign off. Synthetic network: <code className="rounded bg-paper-2 px-1">scripts/migration/make-network.py</code>.</p></LearnMore>
+          <p className="flex items-center gap-1 text-xs font-semibold text-cocoa-2">≤ 2,000 pages · old page stays until sign-off
+          <InfoTip label="About network waves">Up to 2,000 pages per bundle. Pages import on the queue with this many in flight; owners keep their old page until they sign off. Synthetic network: <code className="rounded bg-paper-2 px-1">scripts/migration/make-network.py</code>.</InfoTip></p>
           {runs && runs.length > 0 && (
             <label className="block space-y-1.5">
               <span className="text-[13px] font-bold text-cocoa">Wave</span>
@@ -134,7 +132,7 @@ export default function NetworkMigration() {
           <Note error={err} ok={ok} />
         </Card>
 
-        {runs?.length === 0 && <Empty icon="swap" title="No network waves yet">Upload a bundle to migrate the whole legacy network in waves.</Empty>}
+        {runs?.length === 0 && <Empty icon="swap" title="No network waves yet">Upload a bundle.</Empty>}
         {waveId && !d && <ScreenSkeleton />}
         {d && (
           <>
@@ -175,7 +173,7 @@ export default function NetworkMigration() {
               </Card>
               <Card>
                 <h3 className="font-extrabold text-cocoa">Defects by category</h3>
-                <p className="text-xs text-cocoa-2">{d.pagesWithDefects} pages need a fix before or after go-live</p>
+                <p className="text-xs text-cocoa-2">{d.pagesWithDefects} pages to fix</p>
                 <ul className="mt-3 space-y-2.5">
                   {Object.entries(d.defects).map(([k, v]) => (
                     <li key={k}>
@@ -189,16 +187,25 @@ export default function NetworkMigration() {
 
             <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
               <Card className="space-y-3">
-                <h3 className="font-extrabold text-cocoa">Owner outreach</h3>
-                <p className="text-sm text-cocoa-2">WhatsApp review links, then reminders on days {d.run.cadenceDays.join(", ")} after the invite for pages not signed off.</p>
+                <h3 className="flex items-center gap-1 font-extrabold text-cocoa">
+                  Owner outreach
+                  <InfoTip label="About outreach">WhatsApp review links, then reminders on days {d.run.cadenceDays.join(", ")} after the invite for pages not signed off.</InfoTip>
+                </h3>
                 <div className="flex flex-wrap gap-2">
+                  <Chip><Icon name="clock" className="size-3.5" /> days {d.run.cadenceDays.join(" · ")}</Chip>
                   <Chip tone="sky">{d.outreach.invites} invited</Chip>
                   {d.outreach.byReminder.map((n, i) => <Chip key={i} tone={n ? "gold" : "stone"}>reminder {i + 1}: {n}</Chip>)}
                 </div>
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                  <SButton onClick={() => act("outreach", "Review links sent")} disabled={!!busy || d.run.status === "ROLLED_BACK"}><Icon name="mail" className="size-4" /> Send review links</SButton>
-                  <SButton variant="outline" onClick={() => act("chase", "Reminders sent")} disabled={!!busy}>Chase unsigned now</SButton>
-                  <SButton variant="ghost" className="sm:col-span-2" onClick={() => act("chase", "Rehearsal reminders", { asOf: new Date(Date.now() + 3 * 86400_000).toISOString() })} disabled={!!busy}>Rehearse cadence (+3 days, dev)</SButton>
+                <div className="flex items-center gap-2">
+                  <SButton className="flex-1" onClick={() => act("outreach", "Review links sent")} disabled={!!busy || d.run.status === "ROLLED_BACK"}><Icon name="mail" className="size-4" /> Send review links</SButton>
+                  <MoreActions
+                    label="More outreach actions"
+                    title="Owner outreach"
+                    actions={[
+                      { label: "Chase unsigned now", icon: "bell", disabled: !!busy, onSelect: () => act("chase", "Reminders sent") },
+                      { label: "Rehearse cadence (+3 days, dev)", icon: "clock", disabled: !!busy, onSelect: () => act("chase", "Rehearsal reminders", { asOf: new Date(Date.now() + 3 * 86400_000).toISOString() }) },
+                    ]}
+                  />
                 </div>
               </Card>
               <Card className="space-y-3">
@@ -224,10 +231,10 @@ export default function NetworkMigration() {
                     <span className={`grid size-8 shrink-0 place-items-center rounded-full ${c.done ? "bg-emerald-600 text-white" : "bg-white text-cocoa-3 ring-1 ring-inset ring-hairline"}`}>{c.done ? <Icon name="check" className="size-4" /> : null}</span>
                     <span className="min-w-0 flex-1">
                       <span className="block text-sm font-bold text-cocoa">{c.label}</span>
-                      <span className="block text-xs text-cocoa-2">{c.auto ? "Checked automatically" : "Manual sign-off"}{c.hint ? ` · ${c.hint}` : ""}</span>
+                      <span className="block truncate text-xs text-cocoa-2">{c.auto ? "Auto" : "Manual"}{c.hint ? ` · ${c.hint}` : ""}</span>
                     </span>
                     {!c.auto && (
-                      <SButton variant={c.done ? "ghost" : "outline"} className="!min-h-9 px-3 text-xs" onClick={() => act("checklist", c.done ? "Unticked" : "Ticked", { key: c.key, done: !c.done })}>{c.done ? "Undo" : "Tick"}</SButton>
+                      <SButton variant={c.done ? "ghost" : "outline"} className="px-3 text-xs" onClick={() => act("checklist", c.done ? "Unticked" : "Ticked", { key: c.key, done: !c.done })}>{c.done ? "Undo" : "Tick"}</SButton>
                     )}
                   </li>
                 ))}

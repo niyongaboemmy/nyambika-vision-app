@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { InfoTip } from "@/components/kit";
 import { Badge, Card, Field, Icon, Input, Monogram, Note, SButton, ScreenSkeleton, Steps, Textarea, type IconName } from "@/components/studio";
 import { Brand, pageStatusLabel } from "@/components/studio-shell";
 import { api } from "@/lib/api";
@@ -42,7 +43,7 @@ export default function StudioHome() {
         {loading && <ScreenSkeleton variant="list" />}
         {!loading && !creating && (
           <div className="animate-rise">
-            <p className="text-sm font-bold text-terra-ink">Muraho{me?.name ? `, ${me.name.split(" ")[0]}` : ""} 👋</p>
+            <p className="text-sm font-bold text-terra-ink">Muraho{me?.name ? `, ${me.name.split(" ")[0]}` : ""}</p>
             <h1 className="font-display text-3xl font-black tracking-tight text-cocoa">Your pages</h1>
           </div>
         )}
@@ -74,13 +75,11 @@ export default function StudioHome() {
           <div className="st-hero relative overflow-hidden rounded-[30px] p-6 text-center sm:p-10">
             <div className="orb mx-auto size-16 animate-orb rounded-full opacity-90 shadow-[0_12px_40px_-8px_rgba(224,112,63,.7)]" />
             <h2 className="mt-5 font-display text-2xl font-black tracking-tight text-cocoa">Your own page on Nyambika</h2>
-            <p className="mx-auto mt-2 max-w-md text-[15px] leading-relaxed text-cocoa-2">
-              Tailors, cooperatives and sellers each get a Maker Space. Shoppers see your pieces on their own twin, and pay you directly by Mobile Money.
-            </p>
+            <p className="mx-auto mt-2 max-w-md text-[15px] text-cocoa-2">Tailors · cooperatives · sellers</p>
             <ul className="mx-auto mt-5 grid max-w-md gap-2 text-left text-sm font-semibold text-cocoa">
-              {["Free to start, set up in 3 steps", "Paid directly to your MoMo, Nyambika never holds your money", "✨ AI helps you write listings in Kinyarwanda, English and French"].map((x) => (
-                <li key={x} className="flex items-start gap-2 rounded-2xl bg-white/70 px-3 py-2.5">
-                  <Icon name="check" className="mt-0.5 size-4 shrink-0 text-mint-ink" /> {x}
+              {["Free · 3 steps", "Paid directly to your MoMo", "AI writes in RW · EN · FR"].map((x) => (
+                <li key={x} className="flex items-center gap-2 rounded-2xl bg-white/70 px-3 py-2.5">
+                  <Icon name="check" className="size-4 shrink-0 text-mint-ink" /> {x}
                 </li>
               ))}
             </ul>
@@ -182,7 +181,7 @@ function CreatePage({ onDone, onCancel }: { onDone: () => void; onCancel: () => 
 
       {step === 1 && (
         <Card key="s1" className="animate-slide-in space-y-4">
-          <Field label="Your story" hint="What you make, since when, what makes it special. You can let ✨ AI rewrite it later in Settings.">
+          <Field label="Your story" hint="What you make, since when, what makes it special. You can let AI rewrite it later in Settings.">
             <Textarea value={f.story} onChange={set("story")} placeholder="Since 2014 I design wedding and office wear from Rwandan kitenge…" />
           </Field>
           <div className="grid grid-cols-2 gap-3">
@@ -196,14 +195,14 @@ function CreatePage({ onDone, onCancel }: { onDone: () => void; onCancel: () => 
       {step === 2 && (
         <div key="s2" className="animate-slide-in space-y-4">
           <Card className="space-y-4">
-            <div className="flex items-start gap-3 rounded-2xl bg-emerald-50 p-3.5 ring-1 ring-inset ring-emerald-200">
+            <div className="flex items-center gap-3 rounded-2xl bg-emerald-50 p-3.5 ring-1 ring-inset ring-emerald-200">
               <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white text-mint-ink"><Icon name="wallet" className="size-5" /></span>
-              <p className="text-sm leading-relaxed text-mint-ink">
+              <p className="text-sm text-mint-ink">
                 <strong className="block text-[15px]">Paid directly to you</strong>
-                Shoppers approve Mobile Money straight to your number. Nyambika never holds your money.
+                Never held by Nyambika
               </p>
             </div>
-            <Field label="MoMo merchant number" hint="Shoppers pay you directly here. Nyambika never holds your money.">
+            <Field label="MoMo merchant number" hint="Shoppers pay you here">
               <Input value={f.momoMerchant} onChange={set("momoMerchant")} inputMode="tel" placeholder="0788…" />
             </Field>
           </Card>
@@ -235,8 +234,9 @@ function CreatePage({ onDone, onCancel }: { onDone: () => void; onCancel: () => 
         )}
       </div>
       {step === STEPS.length - 1 && (
-        <p className="flex items-start gap-2 text-xs leading-relaxed text-cocoa-2">
-          <Icon name="shield" className="size-4 shrink-0" /> Your page goes live after the Nyambika team verifies it (ID or cooperative registration). You can add products meanwhile.
+        <p className="flex items-center justify-center gap-1.5 text-xs font-semibold text-cocoa-2">
+          <Icon name="shield" className="size-4 shrink-0" /> Live after verification
+          <InfoTip label="About verification">Your page goes live after the Nyambika team verifies it (ID or cooperative registration). You can add products meanwhile.</InfoTip>
         </p>
       )}
     </form>

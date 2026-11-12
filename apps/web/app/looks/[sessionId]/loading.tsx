@@ -1,6 +1,6 @@
-import { ShopperSkeleton } from "@/components/kit";
+import { LooksSkeleton } from "@/components/look-material";
 
-/** Route skeleton shaped like the final layout (streams instantly while the route loads). */
+/** Route skeleton shaped like the final full-bleed stream (streams instantly while the route loads). */
 export default function Loading() {
-  return <div className="theme-media"><ShopperSkeleton variant="media" title={false} /></div>;
+  return <LooksSkeleton />;
 }

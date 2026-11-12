@@ -47,7 +47,21 @@ export interface OwnerPoll extends Snapshot {
   options: { id: string; votes: number; pct: number; label: string; lookId: string; image: string | null; look: Look | null }[];
 }
 
-export const REACTIONS = ["❤️", "🔥", "😍", "👏", "💛", "💙", "👑", "✨"] as const;
+/** Wire values accepted by the API (apps/api circle/guards.ts REACTIONS; unchanged, written as escapes so the source
+ *  stays emoji-free). The UI never shows them: each maps to an SF-style glyph and a spoken name. */
+export const REACTIONS = ["\u2764\uFE0F", "\u{1F525}", "\u{1F60D}", "\u{1F44F}", "\u{1F49B}", "\u{1F499}", "\u{1F451}", "\u2728"] as const;
+export type Reaction = (typeof REACTIONS)[number];
+export const REACTION_META: Record<Reaction, { icon: "heart" | "fire" | "smile" | "clap" | "star" | "thumbsUp" | "crown" | "sparkle"; label: string; tint: string }> = {
+  "\u2764\uFE0F": { icon: "heart", label: "Love", tint: "text-[#ff375f]" },
+  "\u{1F525}": { icon: "fire", label: "Fire", tint: "text-[#ff9f0a]" },
+  "\u{1F60D}": { icon: "smile", label: "Gorgeous", tint: "text-[#ffd60a]" },
+  "\u{1F44F}": { icon: "clap", label: "Applause", tint: "text-[#ffb340]" },
+  "\u{1F49B}": { icon: "star", label: "Gold star", tint: "text-[#f2b84b]" },
+  "\u{1F499}": { icon: "thumbsUp", label: "Yes", tint: "text-[#0a84ff]" },
+  "\u{1F451}": { icon: "crown", label: "Queen", tint: "text-[#f2b84b]" },
+  "\u2728": { icon: "sparkle", label: "Sparkle", tint: "text-[#bf5af2]" },
+};
+export const reactionMeta = (v: string | null | undefined) => (v && v in REACTION_META ? REACTION_META[v as Reaction] : null);
 
 export interface OwnedItem {
   id: string;

@@ -100,7 +100,7 @@ for (const vp of ["phone", "desk"]) {
         await shot(page, "tailor-share-qr", vp);
         await page.keyboard.press("Escape");
       }
-      const more = page.getByRole("button", { name: "More" });
+      const more = page.getByRole("button", { name: "More", exact: true });
       if (await more.count()) {
         await more.click();
         await shot(page, "more-sheet", vp);

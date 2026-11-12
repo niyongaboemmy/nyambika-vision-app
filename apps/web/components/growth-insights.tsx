@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
+import { Fact, InfoTip } from "@/components/kit";
 import { Icon, Skeleton } from "@/components/studio";
 import { rwf } from "@/lib/api";
 import { SOURCE_LABEL, type Insights, type Suggestion } from "@/lib/growth";
@@ -16,7 +18,22 @@ const TONE: Record<Suggestion["tone"], string> = {
 
 const hh = (h: number) => `${String(h).padStart(2, "0")}:00`;
 
-/** ✨ suggestions as swipeable cards (rule-based; rephrased by the LLM when enabled). */
+/** Long suggestion text: 3 lines, tap to expand (an animated disclosure instead of a wall of text). */
+function SuggestionText({ text }: { text: string }) {
+  const [open, setOpen] = useState(false);
+  const long = text.length > 80;
+  if (!long) return <p className="mt-1.5 text-[15px] font-semibold leading-snug text-cocoa">{text}</p>;
+  return (
+    <button type="button" aria-expanded={open} onClick={() => setOpen((o) => !o)} className="st-press mt-1.5 block w-full text-left">
+      <span className={`text-[15px] font-semibold leading-snug text-cocoa ${open ? "block" : "line-clamp-2"}`}>{text}</span>
+      <span className="mt-0.5 inline-flex items-center gap-0.5 text-xs font-bold opacity-80">
+        {open ? "Less" : "More"} <Icon name="chevron" className={`size-3.5 transition-transform ${open ? "-rotate-90" : "rotate-90"}`} />
+      </span>
+    </button>
+  );
+}
+
+/** AI suggestions as swipeable cards (rule-based; rephrased by the LLM when enabled). */
 export function SuggestionCards({ items, writer }: { items: Suggestion[]; writer: Insights["writer"] }) {
   return (
     <div>
@@ -24,21 +41,25 @@ export function SuggestionCards({ items, writer }: { items: Suggestion[]; writer
         {items.map((s, i) => (
           <li key={s.key} className={`animate-rise min-w-[82%] snap-start rounded-[22px] bg-gradient-to-br p-4 ring-1 ring-inset ring-black/5 sm:min-w-0 ${TONE[s.tone]}`} style={{ animationDelay: `${i * 50}ms` }}>
             <p className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider"><Icon name="sparkle" className="size-3.5" /> Suggestion</p>
-            <p className="mt-1.5 text-[15px] font-semibold leading-snug text-cocoa">{s.text}</p>
+            <SuggestionText text={s.text} />
             {s.action && (
-              <Link href={s.action.href} className="st-press mt-3 inline-flex min-h-10 items-center gap-1.5 rounded-xl bg-white px-3 text-sm font-bold text-cocoa ring-1 ring-inset ring-hairline hover:ring-cocoa-3">
+              <Link href={s.action.href} className="st-press mt-3 inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-white px-3 text-sm font-bold text-cocoa ring-1 ring-inset ring-hairline hover:ring-cocoa-3">
                 {s.action.label} <Icon name="chevron" className="size-4" />
               </Link>
             )}
           </li>
         ))}
       </ul>
-      <p className="mt-1.5 text-[11px] text-cocoa-2">{writer === "llm" ? "✨ Written by AI from your page's numbers (aggregates only)." : "✨ Based on your page's numbers (aggregates only, never shopper photos)."}</p>
+      <div className="mt-2 flex flex-wrap items-center gap-1.5">
+        <Fact icon="sparkle">{writer === "llm" ? "Written by AI" : "From your numbers"}</Fact>
+        <Fact icon="shield">Aggregates only</Fact>
+        <InfoTip label="About suggestions">{writer === "llm" ? "Written by AI from your page's numbers (aggregates only)." : "Based on your page's numbers (aggregates only, never shopper photos)."}</InfoTip>
+      </div>
     </div>
   );
 }
 
-/** Insights v2 (FR-ANL-01/03): traffic sources, try-on → sale by product, best posting times, ✨ suggestions. */
+/** Insights v2 (FR-ANL-01/03): traffic sources, try-on → sale by product, best posting times, AI suggestions. */
 export function GrowthInsights({ pageId, compact = false }: { pageId: string; compact?: boolean }) {
   const { locale } = useSession();
   const { data: a } = useApi<Insights>(`/pages/${pageId}/insights?locale=${locale}`);
@@ -123,7 +144,7 @@ export function GrowthHomeCard({ pageId }: { pageId: string }) {
     <section aria-labelledby="grow-home" className="space-y-3">
       <div className="flex items-end justify-between">
         <h2 id="grow-home" className="font-display text-xl font-black tracking-tight text-cocoa">Grow your page</h2>
-        <Link href={`/studio/${pageId}/grow`} className="text-sm font-bold text-violet-ink underline-offset-2 hover:underline">Share kit &amp; offers</Link>
+        <Link href={`/studio/${pageId}/grow`} className="inline-flex min-h-11 items-center text-sm font-bold text-violet-ink underline-offset-2 hover:underline">Share kit &amp; offers</Link>
       </div>
       <GrowthInsights pageId={pageId} compact />
     </section>

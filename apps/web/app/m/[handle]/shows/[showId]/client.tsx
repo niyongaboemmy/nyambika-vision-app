@@ -2,10 +2,13 @@
 
 import { isExpectedText, LimitState } from "@/components/limit-state";
 import { REACTIONS, runwayCursor, showPhase, type RunwayCursor, type ShowPhase } from "@nyambika/contracts";
+import { haptic } from "@/lib/native";
+import { vrReaction } from "@/lib/vr-reactions";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { HoldToBuy } from "@/components/hold-to-buy";
+import { Fact } from "@/components/kit";
 import type { RunwayEngine } from "@/components/vr-engine";
 import { api, rwf } from "@/lib/api";
 import { Price } from "@/components/region";
@@ -14,6 +17,7 @@ import { useSession } from "@/lib/session";
 import { useLive } from "@/lib/use-live";
 import { countdown, fmtWhen, lookFor, lowEnd, type ShowSnapshot, type ShowView } from "@/lib/vr";
 import { hasWebGL2, prefersReducedMotion } from "@/lib/xr";
+import { Icon } from "@/components/icons";
 
 interface Floater {
   key: string;
@@ -219,7 +223,7 @@ export function ShowClient({ initial }: { initial: ShowView }) {
         <header className="relative h-[58dvh] min-h-[360px]">
           {show.cover && <img loading="lazy" decoding="async" src={show.cover} alt="" className="absolute inset-0 size-full object-cover" />}
           <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-ink" />
-          <Link href={`/m/${show.maker.handle}`} aria-label={`Back to ${show.maker.name}`} className="glass absolute left-4 top-[max(env(safe-area-inset-top),14px)] grid size-11 place-items-center rounded-full">←</Link>
+          <Link href={`/m/${show.maker.handle}`} aria-label={`Back to ${show.maker.name}`} className="glass absolute left-4 top-[max(env(safe-area-inset-top),14px)] grid size-11 place-items-center rounded-full !bg-black/40 text-[#fff]">←</Link>
           <div className="absolute inset-x-5 bottom-4">
             <p className="text-[11px] font-bold uppercase tracking-[.22em] text-gold">{t("vr.fashionShow")} · {show.maker.name}</p>
             <h1 className="mt-1 font-display text-4xl font-black leading-[1.05]">{show.title}</h1>
@@ -238,8 +242,8 @@ export function ShowClient({ initial }: { initial: ShowView }) {
           ) : (
             <div className="glass rounded-3xl p-4">
               <p className="font-display text-2xl font-black">That&apos;s a wrap</p>
-              <p className="text-sm text-mut">The show has ended. Replay it with the audience&apos;s reactions.</p>
-              <button onClick={() => void startReplay()} className="grad-cta mt-3 flex min-h-12 w-full items-center justify-center rounded-2xl font-bold">▶ {t("vr.replay")}</button>
+              <p className="text-sm text-mut">Replay with live reactions</p>
+              <button onClick={() => void startReplay()} className="grad-cta mt-3 flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl font-bold"><Icon name="play" className="size-5" filled /> {t("vr.replay")}</button>
             </div>
           )}
           {phase === "UPCOMING" && (
@@ -250,10 +254,10 @@ export function ShowClient({ initial }: { initial: ShowView }) {
                 </button>
               ) : (
                 <button onClick={() => void rsvp(true)} disabled={rsvpBusy} className="grad-cta flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl text-lg font-black shadow-[0_14px_36px_rgba(224,112,63,.4)]">
-                  🔔 {me ? t("vr.rsvp") : `Sign in · ${t("vr.rsvp")}`}
+                  <Icon name="bell" className="size-5" /> {me ? t("vr.rsvp") : `Sign in · ${t("vr.rsvp")}`}
                 </button>
               )}
-              <p className="mt-1.5 text-center text-xs text-mut">One WhatsApp message about an hour before. Your number is never shown to the maker.</p>
+              <div className="mt-2 flex flex-wrap justify-center gap-1.5"><Fact icon="clock">1 h before</Fact><Fact icon="lock">Never shared with makers</Fact></div>
             </div>
           )}
           {err && (isExpectedText(err) ? <LimitState error={err} /> : <p role="alert" className="text-sm text-terra">{err}</p>)}
@@ -270,7 +274,7 @@ export function ShowClient({ initial }: { initial: ShowView }) {
               ))}
             </ul>
           </div>
-          <Link href={`/m/${show.maker.handle}/showroom`} className="glass flex min-h-12 items-center justify-center rounded-2xl text-sm font-semibold">🥽 {t("vr.enterShowroom")}</Link>
+          <Link href={`/m/${show.maker.handle}/showroom`} className="glass flex min-h-12 items-center justify-center rounded-2xl gap-2 text-sm font-semibold"><Icon name="headset" className="size-5" /> {t("vr.enterShowroom")}</Link>
           <p className="text-center text-[11px] text-mut">{show.model.label}</p>
         </section>
       </main>
@@ -303,7 +307,7 @@ export function ShowClient({ initial }: { initial: ShowView }) {
         )}
         {!replay && (
           <span className="glass rounded-full px-2.5 py-1 text-xs font-bold tabular-nums" aria-live="polite" aria-label={`${snap?.viewers ?? 0} ${t("vr.watching")}`}>
-            👁 {snap?.viewers ?? "…"} <span className="sr-only">{t("vr.watching")}</span>
+            <Icon name="eye" className="mr-1 inline size-4 align-[-3px]" />{snap?.viewers ?? "…"} <span className="sr-only">{t("vr.watching")}</span>
           </span>
         )}
       </header>
@@ -311,7 +315,7 @@ export function ShowClient({ initial }: { initial: ShowView }) {
       {/* Floating reactions (off with reduced motion: counts only) */}
       <div aria-hidden className="pointer-events-none absolute inset-0 z-10 overflow-hidden">
         {floaters.map((f) => (
-          <span key={f.key} className="vr-float absolute bottom-40 text-3xl" style={{ right: `${f.x}%` }}>{f.emoji}</span>
+          <span key={f.key} aria-hidden className="vr-float absolute bottom-40" style={{ right: `${f.x}%`, color: vrReaction(f.emoji).color }}><Icon name={vrReaction(f.emoji).icon} filled className="size-9 drop-shadow-[0_4px_12px_rgba(0,0,0,.5)]" /></span>
         ))}
       </div>
 
@@ -331,22 +335,22 @@ export function ShowClient({ initial }: { initial: ShowView }) {
             {!replay ? (
               <div role="group" aria-label="Send a reaction" className="glass flex flex-1 justify-between rounded-full px-1.5 py-1">
                 {REACTIONS.map((e) => (
-                  <button key={e} onClick={() => void react(e)} aria-label={`React ${e}${snap ? `, ${snap.reactions[e] ?? 0} so far` : ""}`} className="grid size-11 place-items-center rounded-full text-2xl transition active:scale-125">
-                    <span aria-hidden>{e}</span>
+                  <button key={e} onClick={() => { haptic("light"); void react(e); }} aria-label={`React: ${vrReaction(e).label}${snap ? `, ${snap.reactions[e] ?? 0} so far` : ""}`} className="press grid size-11 place-items-center rounded-full transition active:scale-125" style={{ color: vrReaction(e).color }}>
+                    <Icon name={vrReaction(e).icon} filled className="size-6" />
                   </button>
                 ))}
               </div>
             ) : (
               <div className="flex flex-1 gap-2">
-                <button onClick={togglePause} className="glass min-h-12 flex-1 rounded-2xl font-bold">{replay.pausedAt ? "▶ Play" : "❚❚ Pause"}</button>
-                <button onClick={() => void startReplay()} className="glass min-h-12 rounded-2xl px-4 font-bold" aria-label="Restart the replay">↺</button>
+                <button onClick={togglePause} className="glass inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-2xl font-bold">{replay.pausedAt ? <><Icon name="play" className="size-5" filled /> Play</> : <><Icon name="pause" className="size-5" filled /> Pause</>}</button>
+                <button onClick={() => void startReplay()} className="glass min-h-12 rounded-2xl px-4 font-bold" aria-label="Restart the replay"><Icon name="refresh" className="size-5" /></button>
               </div>
             )}
-            {look && (me ? <HoldToBuy key={look.variant.id} look={look} /> : <Link href={`/signin?next=${encodeURIComponent(`/m/${show.maker.handle}/shows/${show.id}`)}`} className="grad-cta shrink-0 rounded-2xl px-4 py-2 text-sm font-bold">✋ Buy</Link>)}
+            {look && (me ? <HoldToBuy key={look.variant.id} look={look} /> : <Link href={`/signin?next=${encodeURIComponent(`/m/${show.maker.handle}/shows/${show.id}`)}`} className="grad-cta inline-flex shrink-0 items-center gap-1.5 rounded-2xl px-4 py-2 text-sm font-bold"><Icon name="hand" className="size-4" /> Buy</Link>)}
           </div>
           {snap && !replay && (
             <p className="mt-2 text-center text-[11px] text-txt/70">
-              {REACTIONS.map((e) => `${e} ${snap.reactions[e] ?? 0}`).join("  ·  ")}{mode === "polling" ? " · refreshing every few seconds" : ""}
+              {REACTIONS.map((e) => <span key={e} className="mx-1 inline-flex items-center gap-1 tabular-nums"><Icon name={vrReaction(e).icon} className="size-3.5" /><span className="sr-only">{vrReaction(e).label} </span>{snap.reactions[e] ?? 0}</span>)}{mode === "polling" ? " · live" : ""}
             </p>
           )}
           {err && (isExpectedText(err) ? <LimitState error={err} /> : <p role="alert" className="mt-1 text-center text-xs text-terra">{err}</p>)}

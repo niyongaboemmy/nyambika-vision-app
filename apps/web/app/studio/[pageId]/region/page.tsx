@@ -3,7 +3,8 @@
 import { formatMoney, toMajorString, type CurrencyCode } from "@nyambika/contracts/money";
 import { REGIONS, WALLET_LABEL, type RegionCode, type Wallet } from "@nyambika/contracts/region-data";
 import { useState } from "react";
-import { Card, Chip, Field, Icon, Input, Note, ScreenSkeleton, SButton, SectionTitle, StudioSheet, Switch } from "@/components/studio";
+import { Fact, InfoTip } from "@/components/kit";
+import { Card, Chip, Field, Icon, Input, Note, ScreenSkeleton, SButton, SectionTitle, SLink, StudioSheet, Switch } from "@/components/studio";
 import { api } from "@/lib/api";
 import { COUNTRY_NAMES } from "@/lib/region";
 import { useApi } from "@/lib/use-api";
@@ -70,20 +71,23 @@ export default function RegionStudio() {
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card className="space-y-4">
-          <h2 className="font-display text-lg font-black tracking-tight text-cocoa">Your country</h2>
+          <h2 className="flex items-center gap-1 font-display text-lg font-black tracking-tight text-cocoa">
+            Your country
+            <InfoTip label="About currency">Shoppers are always charged in your currency ({s.currency}). They may see an “≈” conversion, but nothing is converted when they pay.</InfoTip>
+          </h2>
           <fieldset>
             <legend className="sr-only">Country</legend>
             <div className="grid grid-cols-2 gap-2">
               {s.regions.map((r) => (
                 <button key={r.code} type="button" aria-pressed={s.region === r.code} onClick={() => r.code !== s.region && save({ region: r.code }, `Your page is now in ${r.name}. Prices are charged in ${r.currency}.`)} className={`st-press flex min-h-16 items-center gap-3 rounded-2xl px-3 text-left ring-1 ring-inset ${s.region === r.code ? "bg-cocoa text-white ring-cocoa" : "bg-white text-cocoa ring-hairline"}`}>
-                  <span className="text-2xl" aria-hidden>{r.flag}</span>
+                  <span aria-hidden className={`grid size-9 shrink-0 place-items-center rounded-xl text-xs font-black tracking-wide ${s.region === r.code ? "bg-white/15" : "bg-paper-2 text-cocoa-2"}`}>{r.code}</span>
                   <span className="min-w-0"><span className="block text-sm font-bold">{r.name}</span><span className={`block text-xs ${s.region === r.code ? "text-white/80" : "text-cocoa-2"}`}>{r.currency}{r.launched ? "" : " · pilot"}</span></span>
                 </button>
               ))}
             </div>
           </fieldset>
-          <p className="text-xs text-cocoa-2">Shoppers are always charged in your currency ({s.currency}). They may see an “≈” conversion, but nothing is converted when they pay.</p>
-          <Switch checked={s.crossBorder} onChange={(v) => save({ crossBorder: v }, v ? "Shoppers in other EAC countries who opt in can now find you." : "Only shoppers in your country see you.")} label="Sell to other EAC countries" description="Your page appears to shoppers abroad who chose to see cross-border makers." />
+          <Fact icon="wallet">Charged in {s.currency} · never converted</Fact>
+          <Switch checked={s.crossBorder} onChange={(v) => save({ crossBorder: v }, v ? "Visible to opted-in EAC shoppers" : "Visible in your country only")} label="Sell to other EAC countries" description="Shoppers abroad who opt in" />
         </Card>
 
         <Card className="space-y-4">
@@ -91,16 +95,16 @@ export default function RegionStudio() {
           <div className="flex flex-wrap gap-2">
             {allowed.map((w) => {
               const on = w === "MPESA" ? Boolean(s.mpesaTill) : w === "MTN_MOMO" ? Boolean(s.momoMerchant) : Boolean(s.airtelMerchant || (s.region === "RW" && s.momoMerchant));
-              return <Chip key={w} tone={on ? "mint" : "stone"}>{on ? "✓ " : ""}{WALLET_LABEL[w]}</Chip>;
+              return <Chip key={w} tone={on ? "mint" : "stone"}>{on && <Icon name="check" className="size-3.5" />}{WALLET_LABEL[w]}</Chip>;
             })}
           </div>
           {allowed.includes("MPESA") && (
             <form className="flex items-end gap-2" onSubmit={(e) => { e.preventDefault(); void save({ mpesaTill: tillValue.trim() }, "M-Pesa till saved. Payments go straight to it."); }}>
-              <div className="flex-1"><Field label="M-Pesa till (Buy Goods) · 5–8 digits, money goes straight to your till"><Input inputMode="numeric" value={tillValue} onChange={(e) => setTill(e.target.value.replace(/\D/g, ""))} /></Field></div>
+              <div className="flex-1"><Field label="M-Pesa till (Buy Goods)" hint="5–8 digits · straight to you"><Input inputMode="numeric" value={tillValue} onChange={(e) => setTill(e.target.value.replace(/\D/g, ""))} /></Field></div>
               <SButton variant="dark" disabled={tillValue === s.mpesaTill}>Save</SButton>
             </form>
           )}
-          {s.region === "RW" && <p className="text-sm text-cocoa-2">MTN MoMo and Airtel Money are set in Settings → Payouts.</p>}
+          {s.region === "RW" && <SLink href={`/studio/${page.id}/settings#payouts`} variant="soft" className="self-start"><Icon name="wallet" className="size-4" /> MoMo &amp; Airtel payouts</SLink>}
         </Card>
 
         <Card className="space-y-4 lg:col-span-2">
@@ -108,25 +112,30 @@ export default function RegionStudio() {
             <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-violet-ink text-white"><Icon name="globe" className="size-5" /></span>
             <div className="min-w-0 flex-1">
               <h2 className="font-display text-lg font-black tracking-tight text-cocoa">Card payments for international buyers</h2>
-              <p className="text-sm text-cocoa-2">Diaspora and export buyers pay by card through <b>your own Stripe account</b>. Nyambika takes no fee and never holds the money.</p>
+              <div className="mt-1.5 flex flex-wrap gap-1.5">
+                <Fact icon="wallet">Your own Stripe account</Fact>
+                <Fact icon="shield">Paid directly to the maker</Fact>
+              </div>
             </div>
             <Chip tone={s.stripeStatus === "ACTIVE" ? "mint" : s.stripeStatus === "PENDING" ? "gold" : "stone"}>{s.stripeStatus === "ACTIVE" ? "Connected" : s.stripeStatus === "PENDING" ? "Onboarding" : "Not connected"}</Chip>
           </div>
-          {s.stripeMode !== "live" && <p className="rounded-2xl bg-amber-50 px-3 py-2 text-xs text-gold-ink ring-1 ring-inset ring-amber-200">{s.stripeMode === "mock" ? "Offline test mock: no Stripe keys are configured, accounts and payments are simulated." : "Stripe test mode: no real money moves."}</p>}
+          {s.stripeMode !== "live" && <p className="rounded-2xl bg-amber-50 px-3 py-2 text-xs text-gold-ink ring-1 ring-inset ring-amber-200">{s.stripeMode === "mock" ? "Test mock · payments simulated" : "Stripe test mode · no real money"}</p>}
           <div className="flex flex-wrap items-center gap-3">
             {s.stripeStatus !== "ACTIVE" && <SButton onClick={connect}><Icon name="wallet" className="size-4" /> {s.stripeAccountId ? "Continue Stripe onboarding" : "Connect my Stripe account"}</SButton>}
             {s.stripeAccountId && <span className="font-mono text-xs text-cocoa-2">{s.stripeAccountId}</span>}
           </div>
-          <Switch disabled={s.stripeStatus !== "ACTIVE"} checked={s.exportEnabled} onChange={(v) => save({ exportEnabled: v }, v ? "Card checkout is on for international buyers." : "Card checkout is off.")} label="Take card payments" description="Shown as “Card · international” at checkout." />
+          <Switch disabled={s.stripeStatus !== "ACTIVE"} checked={s.exportEnabled} onChange={(v) => save({ exportEnabled: v }, v ? "Card checkout is on for international buyers." : "Card checkout is off.")} label="Take card payments" description="“Card · international” at checkout" />
         </Card>
 
         <Card className="space-y-3 lg:col-span-2">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="font-display text-lg font-black tracking-tight text-cocoa">International shipping</h2>
+            <h2 className="flex items-center gap-1 font-display text-lg font-black tracking-tight text-cocoa">
+              International shipping
+              <InfoTip label="About shipping zones">One flat fee per zone, in {s.currency}. You ship it yourself or with your courier.</InfoTip>
+            </h2>
             <SButton variant="soft" onClick={() => setZoneOpen(true)}><Icon name="plus" className="size-4" /> Add zone</SButton>
           </div>
-          <p className="text-sm text-cocoa-2">One flat fee per zone, in {s.currency}. You ship it yourself or with your courier.</p>
-          {s.zones.length === 0 && <p className="rounded-2xl bg-paper-2 p-4 text-sm text-cocoa-2">No zones yet. Add “East Africa” or “Europe” to sell abroad.</p>}
+          {s.zones.length === 0 && <p className="rounded-2xl bg-paper-2 p-4 text-sm text-cocoa-2">No zones yet</p>}
           <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {s.zones.map((z) => (
               <li key={z.id} className="flex items-start gap-3 rounded-2xl bg-white p-3 ring-1 ring-inset ring-hairline">
@@ -135,7 +144,7 @@ export default function RegionStudio() {
                   <p className="font-bold text-cocoa">{z.name} · {formatMoney(z.feeMinor, z.currency)}</p>
                   <p className="text-xs text-cocoa-2">{z.countries.map((c) => (c === "*" ? "Rest of world" : (COUNTRY_NAMES[c] ?? c))).join(", ")} · ~{z.etaDays} days</p>
                 </div>
-                <button type="button" aria-label={`Remove ${z.name}`} onClick={async () => setData(await api<Settings>(`/region/zones/${z.id}`, { method: "DELETE" }))} className="st-press grid size-10 place-items-center rounded-full bg-paper-2 text-cocoa-2"><Icon name="x" className="size-4" /></button>
+                <button type="button" aria-label={`Remove ${z.name}`} onClick={async () => setData(await api<Settings>(`/region/zones/${z.id}`, { method: "DELETE" }))} className="hit st-press grid size-10 place-items-center rounded-full bg-paper-2 text-cocoa-2"><Icon name="x" className="size-4" /></button>
               </li>
             ))}
           </ul>
@@ -143,15 +152,17 @@ export default function RegionStudio() {
 
         {s.currency !== "RWF" && (
           <Card className="space-y-3 lg:col-span-2">
-            <h2 className="font-display text-lg font-black tracking-tight text-cocoa">Prices in {s.currency}</h2>
-            <p className="text-sm text-cocoa-2">Set each piece's price in your currency. A piece without a {s.currency} price can't be bought yet: we never convert prices for you.</p>
+            <h2 className="flex items-center gap-1 font-display text-lg font-black tracking-tight text-cocoa">
+              Prices in {s.currency}
+              <InfoTip label={`About ${s.currency} prices`}>A piece without a {s.currency} price can't be bought yet: we never convert prices for you.</InfoTip>
+            </h2>
             <ul className="divide-y divide-hairline">{s.products.map((p) => <PriceRow key={p.id} p={p} currency={s.currency} />)}</ul>
           </Card>
         )}
       </div>
 
       <ZoneSheet open={zoneOpen} currency={s.currency} pageId={page.id} onClose={() => setZoneOpen(false)} onSaved={(x) => { setData(x); setZoneOpen(false); }} />
-      <p className="text-xs text-cocoa-2">{REGIONS[s.region].flag} Phone numbers for {REGIONS[s.region].name} look like {REGIONS[s.region].phoneExample}.</p>
+      <p className="flex items-center gap-1 text-xs text-cocoa-2"><Icon name="phone" className="size-3.5" /> {REGIONS[s.region].name} phone format: {REGIONS[s.region].phoneExample}</p>
     </div>
   );
 }

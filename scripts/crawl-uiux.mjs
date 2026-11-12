@@ -5,8 +5,9 @@
 // Usage: BASE_URL=http://localhost:3104 node scripts/crawl-uiux.mjs [label]
 //   THEMES=light,dark   (default both)     VIEWPORTS=390,1280 (default; add 360 to also screenshot 360)
 //   ONLY=muse,bag       (substring filter on screen names)   AXE=0 to skip axe (quick visual runs)
+//   FULL=1 full-page screenshots (review)   STRICT_TARGETS=1 fail on tap targets under 44 px
 // Screenshots: scripts/crawl-output/uiux/<label>/<theme>-<vp>/<nn>-<screen>.png
-import { mkdirSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { BASE, signIn } from "./crawl-lib.mjs";
 
@@ -23,6 +24,10 @@ const root = new URL(`./crawl-output/uiux/${label}/`, import.meta.url).pathname;
 const browser = await chromium.launch({ args: ["--enable-unsafe-swiftshader", "--use-gl=angle", "--use-angle=swiftshader", "--use-fake-ui-for-media-stream", "--use-fake-device-for-media-stream"] });
 const issues = [];
 const axeSummary = [];
+// Copy & alignment pass: per-screen words, paragraphs taller than 2 lines and small tap targets at 390 px.
+// STRICT_TARGETS=1 turns tap targets under 44 px into failures.
+const metrics = {};
+const STRICT = process.env.STRICT_TARGETS === "1";
 
 const vpOpts = (w) =>
   w >= 1000
@@ -136,6 +141,54 @@ async function settle(page) {
   await page.waitForTimeout(400);
 }
 
+/** Visible words; paragraphs taller than 2 lines (closed LearnMore details are hidden, so not counted); and
+ *  interactive elements whose hit area (own box, wrapping <label>, or a `.hit` ::after expansion) is under 44 px. */
+async function copyMetrics(page) {
+  return page.evaluate(() => {
+    const vis = (el) => {
+      const r = el.getBoundingClientRect();
+      const cs = getComputedStyle(el);
+      return r.width > 0 && r.height > 0 && cs.visibility !== "hidden" && cs.display !== "none" && !el.closest("[aria-hidden=true],.sr-only");
+    };
+    const words = (document.body.innerText.match(/[\p{L}\p{N}][\p{L}\p{N}'’.-]*/gu) ?? []).length;
+    const paras = [];
+    for (const el of document.querySelectorAll("p,li,span,div,dd,figcaption,small,label,legend")) {
+      if (!vis(el) || el.closest("input,textarea,select,code,pre,[role=log],[data-allow-prose]") || el.closest("details:not([open]) > :not(summary)")) continue;
+      const own = [...el.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join("").trim();
+      if (own.length < 40) continue;
+      const cs = getComputedStyle(el);
+      const lh = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.4;
+      const lines = Math.round((el.getBoundingClientRect().height - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom)) / lh); // content lines, not padding
+      if (lines > 2) paras.push({ lines, text: el.innerText.slice(0, 90) });
+    }
+    const small = [];
+    for (const el of document.querySelectorAll("a[href],button,[role=button],[role=switch],[role=tab],[role=option],select,summary,input:not([type=hidden]),textarea")) {
+      if (!vis(el) || el.disabled) continue;
+      if (el.tagName === "A" && getComputedStyle(el).display === "inline" && el.parentElement?.closest("p,li")) continue; // inline text link
+      const r = el.getBoundingClientRect();
+      const host = el.closest("label") ?? el;
+      const hr = host.getBoundingClientRect();
+      // `.hit` expansion on the control itself or on its wrapping <label> (inputs can't have ::after).
+      const hits = [el, host].map((x) => getComputedStyle(x, "::after")).filter((af) => af.content !== "none" && af.position === "absolute");
+      const w = Math.max(r.width, hr.width, ...hits.map((af) => parseFloat(af.width) || 0));
+      const h = Math.max(r.height, hr.height, ...hits.map((af) => parseFloat(af.height) || 0));
+      if (w < 43.5 || h < 43.5) small.push(`${el.tagName.toLowerCase()} ${Math.round(w)}x${Math.round(h)} "${(el.getAttribute("aria-label") ?? el.innerText ?? "").trim().slice(0, 30)}"`);
+    }
+    // iOS pass: no emoji in rendered text or in names/placeholders (Extended_Pictographic + U+FE0F; © ® ™ allowed).
+    const EMO = /[\p{Extended_Pictographic}\u{FE0F}\u{1F1E6}-\u{1F1FF}]/u; // + regional indicators (flags)
+    const emo = (s) => [...(s ?? "")].filter((c) => EMO.test(c) && !"©®™".includes(c)).join("");
+    const emoji = [];
+    const bodyEmo = emo(document.body.innerText);
+    if (bodyEmo) emoji.push(`text "${bodyEmo.slice(0, 12)}"`);
+    for (const el of document.querySelectorAll("[aria-label],[title],[placeholder],img[alt]")) {
+      const v = ["aria-label", "title", "placeholder", "alt"].map((a) => el.getAttribute(a)).filter(Boolean).join(" ");
+      const e = emo(v);
+      if (e) emoji.push(`${el.tagName.toLowerCase()} "${v.slice(0, 40)}"`);
+    }
+    return { words, longParas: paras.length, paras: paras.sort((a, b) => b.lines - a.lines).slice(0, 8), smallTargets: small.length, small: small.slice(0, 12), emoji: emoji.slice(0, 6) };
+  });
+}
+
 async function overflow(page, name) {
   const w = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   if (w > 1) issues.push(`[360] horizontal overflow ${w}px on ${name}`);
@@ -171,9 +224,15 @@ for (const theme of THEMES) {
         await settle(page);
         if (action) { await action(page); await page.waitForTimeout(500); }
         if (vp === 360) await overflow(page, name);
+        if (vp === 390) {
+          const m = await copyMetrics(page);
+          (metrics[name] ??= {})[theme] = m;
+          if (m.emoji.length) issues.push(`${tag} emoji in UI: ${m.emoji.join(", ")}`);
+          if (STRICT && m.smallTargets) issues.push(`${tag} ${m.smallTargets} tap target(s) under 44px e.g. ${m.small.slice(0, 3).join(", ")}`);
+        }
         if (shoot) {
           n += 1;
-          await page.screenshot({ path: `${out}${String(n).padStart(2, "0")}-${name}.png`, caret: "initial" });
+          await page.screenshot({ path: `${out}${String(n).padStart(2, "0")}-${name}.png`, caret: "initial", fullPage: process.env.FULL === "1" });
         }
         if (AXE && vp === 390) {
           const res = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]).exclude("canvas").analyze();
@@ -192,6 +251,13 @@ for (const theme of THEMES) {
 }
 
 await browser.close();
+mkdirSync(root, { recursive: true });
+writeFileSync(`${root}metrics.json`, JSON.stringify(metrics, null, 1));
+console.log(`\ncopy metrics (390, ${THEMES[0]}): screen · words · paragraphs >2 lines · tap targets <44px`);
+for (const [name, m] of Object.entries(metrics)) {
+  const x = m[THEMES[0]];
+  if (x) console.log(` - ${name.padEnd(24)} ${String(x.words).padStart(4)} · ${x.longParas} · ${x.smallTargets}`);
+}
 if (AXE) console.log(`\naxe (390px):\n${axeSummary.map((s) => ` - ${s}`).join("\n")}`);
 console.log(`\nscreens: ${S.length} · themes: ${THEMES.join("/")} · viewports: ${VPS.join("/")} (+360 overflow) · output ${root}`);
 if (issues.length) {

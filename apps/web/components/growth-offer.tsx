@@ -1,10 +1,15 @@
 "use client";
 
-import { isExpectedText, LimitState } from "@/components/limit-state";
+import dynamic from "next/dynamic";
+import { recallFriendly } from "@/lib/api-errors";
 import { useEffect, useState } from "react";
 import { api, rwf } from "@/lib/api";
 import type { MakerSpace } from "@/lib/maker";
 import { useSession } from "@/lib/session";
+import { Icon } from "@/components/icons";
+
+// Only after a failed call: load the limit card on demand (Maker Space first-load JS).
+const LimitState = dynamic(() => import("@/components/limit-state").then((m) => m.LimitState), { ssr: false });
 
 export interface AppliedDiscount {
   code: string | null;
@@ -58,7 +63,7 @@ export function DiscountField({ variantId, open, onChange }: { variantId: string
     <div className="space-y-2">
       {offer && !applied?.code && (
         <p className="flex items-center gap-2 rounded-2xl bg-gold/15 px-3 py-2 text-sm text-gold ring-1 ring-inset ring-gold/30">
-          <span aria-hidden>🏷️</span>
+          <span aria-hidden><Icon name="tag" className="size-4" /></span>
           <span className="flex-1"><b>{offer.label || "Offer"}</b> {offer.display} · −{rwf(offer.amountRwf)}{ends ? ` · until ${ends}` : ""}</span>
         </p>
       )}
@@ -78,7 +83,7 @@ export function DiscountField({ variantId, open, onChange }: { variantId: string
         ) : (
           <button type="button" onClick={() => setEditing(true)} className="text-xs font-semibold text-white/70 underline underline-offset-2">Have a code from the maker?</button>
         ))}
-      {err && (isExpectedText(err) ? <LimitState error={err} /> : <p className="text-xs text-gold" role="status">{err}</p>)}
+      {err && (recallFriendly(err)?.expected ? <LimitState error={err} /> : <p className="text-xs text-gold" role="status">{err}</p>)}
     </div>
   );
 }
@@ -99,10 +104,10 @@ export function CollectionAlerts({ maker }: { maker: MakerSpace }) {
   }
   return (
     <section className="mx-5 mt-5 flex items-center gap-3 rounded-3xl glass p-4">
-      <span className="text-2xl" aria-hidden>💬</span>
+      <span aria-hidden><Icon name="chat" className="size-6 text-gold" /></span>
       <span className="min-w-0 flex-1">
         <span className="block text-sm font-bold">New pieces on WhatsApp</span>
-        <span className="block text-xs text-mut">{on ? "You'll hear when they post a new collection. Reply STOP any time." : `Get ${maker.name}'s new collections. At most a few a week.`}</span>
+        <span className="block text-xs text-mut">{on ? "New collections only · reply STOP anytime" : `Get ${maker.name}'s new collections. At most a few a week.`}</span>
       </span>
       <button type="button" role="switch" aria-checked={on} aria-label="WhatsApp updates from this maker" onClick={toggle} className={`relative h-8 w-14 shrink-0 rounded-full transition ${on ? "bg-mint" : "bg-white/20"}`}>
         <span className={`absolute top-1 size-6 rounded-full bg-white shadow transition-all ${on ? "left-7" : "left-1"}`} />

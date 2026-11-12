@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { GarmentViewer } from "@/components/xr-viewer";
 import { useSession } from "@/lib/session";
 import { fmtM, load3d, type Product3d } from "@/lib/xr";
+import { Icon } from "@/components/icons";
 
 /**
  * Maker Space product sheet: 3D section (E27, FR-3D-04, FR-AR-01). Shows a poster card first; the
@@ -40,7 +41,7 @@ export function Garment3dSection({ productId, title, variantId }: { productId: s
           <span className="rounded-md bg-sky/20 px-1.5 text-sm text-sky">3D</span> View in 3D
         </span>
         <span className="mt-0.5 block text-sm text-txt/80">Turn it around, switch colours{p3d.assets.length > 1 ? ` (${p3d.assets.length})` : ""}, place it in your room.</span>
-        <span className="mt-1 block text-[11px] text-mut">✨ {t("xr.aiLabel")} · {fmtM(a.dimensions.height)}</span>
+        <span className="mt-1 block text-[11px] text-mut"><Icon name="sparkle" className="mr-1 inline size-3 align-[-2px]" />{t("xr.aiLabel")} · {fmtM(a.dimensions.height)}</span>
       </span>
       <span aria-hidden className="glass grid size-10 shrink-0 place-items-center rounded-full">›</span>
     </button>

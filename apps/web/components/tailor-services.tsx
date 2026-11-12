@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { api, rwf } from "@/lib/api";
 import { MEASUREMENT_LABEL, type TailorServiceView } from "@/lib/tailor";
+import { Icon } from "@/components/icons";
 
 const AskTailorSheet = dynamic(() => import("@/components/ask-tailor").then((m) => m.AskTailorSheet), { ssr: false }); // opens on "Request this"
 
@@ -22,7 +23,7 @@ export function TailorServices({ maker }: { maker: { id: string; name: string; m
       <div className="no-scrollbar -mx-5 mt-2 flex snap-x gap-3 overflow-x-auto px-5 pb-1">
         {services.map((s) => (
           <article key={s.id} className="glass flex w-[78%] max-w-[300px] shrink-0 snap-start flex-col rounded-3xl p-4">
-            <p className="text-2xl" aria-hidden>🪡</p>
+            <p aria-hidden><Icon name="needle" className="size-6 text-gold" /></p>
             <h3 className="mt-1 font-display text-lg font-black leading-tight">{s.title}</h3>
             <p className="mt-1 line-clamp-3 text-sm text-txt/80">{s.description}</p>
             <p className="mt-2 text-sm"><b className="text-gold">from {rwf(s.startingPriceRwf)}</b> · {s.leadTimeDays} days</p>

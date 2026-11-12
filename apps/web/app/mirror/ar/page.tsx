@@ -9,6 +9,7 @@ import { api } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import type { WardrobeItem } from "@/lib/twin3d";
 import { useFlag } from "@/lib/flags";
+import { Icon } from "@/components/icons";
 
 export default function ArMirrorPage() {
   return (
@@ -55,17 +56,17 @@ function ArPage() {
         <ErrorNote error={error} />
         {mrMirror && (
           <Link href={`/mirror/mr${variant ? `?variant=${variant}` : ""}`} className="glass mb-3 flex min-h-12 items-center gap-2 rounded-2xl px-4 text-sm font-bold">
-            🥽 Try the mixed-reality mirror <span className="rounded-full bg-violet/35 px-2 py-0.5 text-[10px] uppercase tracking-wide">experimental</span>
+            <Icon name="headset" className="size-5" /> Try the mixed-reality mirror <span className="rounded-full bg-violet/35 px-2 py-0.5 text-[10px] uppercase tracking-wide">experimental</span>
           </Link>
         )}
         {enabled === null || items === null ? (
           <div className="skeleton h-[60dvh] rounded-[32px]" />
         ) : !enabled ? (
           <section className="glass mt-6 space-y-3 rounded-3xl p-5 text-center">
-            <p className="text-4xl" aria-hidden>🪞</p>
+            <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-white/10 text-gold" aria-hidden><Icon name="mirror" className="size-7" /></span>
             <p className="font-display text-xl font-black">AR mirror is a pilot</p>
-            <p className="text-sm text-mut">Testing with a small group · not on for you yet. Your 3D twin shows the same pieces.</p>
-            <Link href={`/mirror/3d${variant ? `?variant=${variant}` : ""}`} className="grad-cta inline-flex min-h-12 items-center justify-center rounded-2xl px-5 font-semibold text-white">🧊 Open my 3D twin</Link>
+            <p className="text-sm text-mut">Small test group · not on for you yet</p>
+            <Link href={`/mirror/3d${variant ? `?variant=${variant}` : ""}`} className="grad-cta inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl px-5 font-semibold text-white"><Icon name="cube" className="size-5" /> Open my 3D twin</Link>
           </section>
         ) : (
           <ArMirror items={items} initial={variant} />
@@ -73,8 +74,8 @@ function ArPage() {
       </main>
       <nav aria-label="Mirror mode" className="fixed inset-x-0 bottom-[max(env(safe-area-inset-bottom),14px)] z-30 flex justify-center">
         <div className="glass flex rounded-full p-1.5 shadow-[0_12px_40px_rgba(0,0,0,.45)]">
-          <Link href={`/mirror/3d${variant ? `?variant=${variant}` : ""}`} className="rounded-full px-5 py-2.5 text-sm font-bold text-white/80">🧊 {t("twin3d.title")}</Link>
-          <span aria-current="page" className="rounded-full bg-[#c81e4a] px-5 py-2.5 text-sm font-bold text-[#fff]">🪞 {t("twin3d.ar")}</span>
+          <Link href={`/mirror/3d${variant ? `?variant=${variant}` : ""}`} className="flex min-h-11 items-center gap-1.5 rounded-full px-5 text-sm font-bold text-white/80"><Icon name="cube" className="size-4" /> {t("twin3d.title")}</Link>
+          <span aria-current="page" className="flex min-h-11 items-center gap-1.5 rounded-full bg-[#c81e4a] px-5 text-sm font-bold text-[#fff]"><Icon name="mirror" className="size-4" /> {t("twin3d.ar")}</span>
         </div>
       </nav>
     </Screen>

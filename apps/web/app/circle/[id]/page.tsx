@@ -4,11 +4,12 @@ import { useParams } from "next/navigation";
 import { useCallback, useState } from "react";
 import { Bubble } from "@/components/circle-bits";
 import { HoldToBuy } from "@/components/hold-to-buy";
-import { Button, ErrorNote, Screen, Sheet, TopBar } from "@/components/ui";
+import { Button, ErrorNote, Fact, Screen, Sheet, TopBar } from "@/components/ui";
 import { api, rwf } from "@/lib/api";
 import { timeLeft, type OwnerPoll, type Snapshot } from "@/lib/social";
 import { useApi } from "@/lib/use-api";
 import { useLive } from "@/lib/use-live";
+import { Icon } from "@/components/icons";
 
 /** Owner view of a circle poll: live votes and comments, share, take down, hold to buy the winner. */
 export default function PollOwner() {
@@ -64,7 +65,7 @@ export default function PollOwner() {
   const open = poll.state === "OPEN";
   const winner = poll.options.find((o) => o.lookId === poll.winner);
   const lead = Math.max(...poll.options.map((o) => o.votes));
-  const shareText = `${poll.question} Vote for my outfit 👗 ${poll.shareUrl}`;
+  const shareText = `${poll.question} Vote for my outfit: ${poll.shareUrl}`;
 
   return (
     <Screen className="pb-10">
@@ -73,7 +74,7 @@ export default function PollOwner() {
         right={open ? <span className="glass inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold"><span className={`size-2 rounded-full ${mode === "live" ? "animate-pulse bg-mint" : "bg-gold"}`} />{mode === "live" ? "Live" : mode === "polling" ? "Refreshing" : "…"}</span> : null}
       />
       <header className="px-5 text-center">
-        <h1 className="font-display text-[30px] font-black leading-tight">Ask your circle 👥</h1>
+        <h1 className="font-display text-[30px] font-black leading-tight">Ask your circle</h1>
         <p className="mt-1 text-[17px] text-txt/90">“{poll.question}”</p>
         <p className="mt-1 text-xs text-mut">{poll.total} vote{poll.total === 1 ? "" : "s"} · {open ? timeLeft(poll.expiresAt) : poll.state === "REVOKED" ? "taken down" : "closed"}</p>
       </header>
@@ -85,7 +86,7 @@ export default function PollOwner() {
             <div key={o.id} className="text-center">
               <div className={`relative aspect-[9/16] overflow-hidden rounded-[22px] border bg-white/[.06] transition duration-500 ${leading ? "border-gold/80 shadow-[0_0_30px_rgba(242,184,75,.3)]" : "border-white/15"} ${flash && leading ? "scale-[1.03]" : ""}`}>
                 {o.image ? <img loading="lazy" decoding="async" src={o.image} alt={`${o.label} look`} className="h-full w-full object-cover" /> : <div className="skeleton h-full" />}
-                {leading && <span className="absolute left-1/2 top-2 -translate-x-1/2 text-lg" aria-label="Leading">👑</span>}
+                {leading && <span role="img" aria-label="Leading" className="spring-pop absolute left-1/2 top-2 grid size-8 -translate-x-1/2 place-items-center rounded-full bg-black/55 text-gold backdrop-blur"><Icon name="crown" filled className="size-4" /></span>}
               </div>
               <p className="mt-2 truncate text-sm font-bold">{o.label}</p>
               <div className="mx-auto mt-1.5 h-2 w-full overflow-hidden rounded-full bg-white/10">
@@ -107,7 +108,7 @@ export default function PollOwner() {
             </div>
             <HoldToBuy look={winner.look} />
           </div>
-          <p className="mt-2 text-xs text-mut">✋ Hold to buy the winner · paid straight to the maker</p>
+          <p className="mt-2 flex items-center gap-1.5 text-xs text-mut"><Icon name="hand" className="size-3.5" /> Hold to buy · paid directly to the maker</p>
         </section>
       )}
 
@@ -116,7 +117,7 @@ export default function PollOwner() {
           {poll.comments.map((c) => <Bubble key={c.id} c={c} />)}
         </section>
       ) : (
-        open && <p className="mt-8 px-8 text-center text-sm text-mut">Votes and comments appear here the moment your friends tap. Share the link to get started.</p>
+        open && <p className="mt-8 px-8 text-center text-sm text-mut">No votes yet · share the link</p>
       )}
 
       {open ? (
@@ -126,15 +127,19 @@ export default function PollOwner() {
             <Button variant="glass" className="flex-1" onClick={async () => { await navigator.clipboard?.writeText(poll.shareUrl).catch(() => {}); setCopied(true); }}>{copied ? "Copied ✓" : "Copy link"}</Button>
             <Button variant="glass" className="flex-1" onClick={() => setConfirm(true)}>Take down</Button>
           </div>
-          <p className="pt-1 text-center text-xs text-mut">🔗 Shared as a private live poll · AI-preview watermark · makers never see it</p>
+          <ul aria-label="How this poll is shared" className="flex flex-wrap justify-center gap-2 pt-1">
+            <li><Fact icon="lock">Private link</Fact></li>
+            <li><Fact icon="sparkle">AI label</Fact></li>
+            <li><Fact icon="shield">Never shared with makers</Fact></li>
+          </ul>
         </div>
       ) : (
-        <p className="mt-8 px-6 text-center text-sm text-mut">The shared copies are deleted. Only you can still see these results.</p>
+        <p className="mt-8 px-6 text-center text-sm text-mut">The shared copies are deleted · only you see results</p>
       )}
 
       <Sheet open={confirm} onClose={() => setConfirm(false)}>
         <h2 className="font-display text-xl font-black">Take this poll down?</h2>
-        <p className="mt-1 text-sm text-txt/80">The link stops working right away and the shared previews are deleted. You keep the results.</p>
+        <p className="mt-1 text-sm text-txt/80">Link off · previews deleted · you keep the results</p>
         <div className="mt-4 flex gap-2">
           <Button variant="glass" className="flex-1" onClick={() => setConfirm(false)}>Keep it</Button>
           <Button variant="danger" className="flex-1" disabled={busy} onClick={revoke}>Take down</Button>

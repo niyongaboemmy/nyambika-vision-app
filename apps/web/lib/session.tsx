@@ -1,7 +1,7 @@
 "use client";
 
-import { translate, type Locale, type MessageKey } from "@nyambika/i18n";
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { loadLocale, translate, type Locale, type MessageKey } from "@nyambika/i18n";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { api } from "./api";
 
 export interface Me {
@@ -36,10 +36,28 @@ function storedLocale(): Locale | null {
   }
 }
 
+// JS budget pass 2: only English ships in first-load JS; another locale's catalogue is fetched on demand. A stored
+// choice starts downloading while this module evaluates, before hydration, so it is usually in by the first effect.
+if (typeof window !== "undefined") {
+  const l = storedLocale();
+  if (l) loadLocale(l).catch(() => {});
+}
+
 export function SessionProvider({ children }: { children: React.ReactNode }) {
   const [me, setMe] = useState<Me | null>(null);
   const [loading, setLoading] = useState(true);
-  const [locale, setLocaleState] = useState<Locale>("en");
+  const [locale, setShownLocale] = useState<Locale>("en");
+  // Switch once the catalogue is in, so text, chips and <html lang> change together (no English flash). The latest
+  // request wins if two taps race.
+  const wanted = useRef<Locale>("en");
+  const setLocaleState = useCallback((l: Locale) => {
+    wanted.current = l;
+    loadLocale(l)
+      .catch(() => {}) // offline: English strings, same as a missing key
+      .then(() => {
+        if (wanted.current === l) setShownLocale(l);
+      });
+  }, []);
 
   const reload = useCallback(async () => {
     try {
@@ -59,7 +77,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [setLocaleState]);
 
   useEffect(() => {
     const l = storedLocale();
@@ -68,7 +86,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     if ("serviceWorker" in navigator && process.env.NODE_ENV === "production") {
       navigator.serviceWorker.register("/sw.js").catch(() => {});
     }
-  }, [reload]);
+  }, [reload, setLocaleState]);
 
   useEffect(() => {
     document.documentElement.lang = locale;
@@ -82,7 +100,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
       } catch {}
       if (me) void api("/auth/me", { method: "PATCH", json: { locale: l } }).catch(() => {});
     },
-    [me],
+    [me, setLocaleState],
   );
 
   const signOut = useCallback(async () => {

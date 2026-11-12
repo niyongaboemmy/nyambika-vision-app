@@ -8,6 +8,7 @@ import { api, rwf } from "@/lib/api";
 import type { BroadcastState, Discount, PromoCard } from "@/lib/growth";
 import type { StudioProduct } from "@/lib/types";
 import { useApi } from "@/lib/use-api";
+import { Fact, InfoTip } from "@/components/kit";
 import { useManagedPage } from "../layout";
 
 // Lazy (below the fold / on demand): keeps this route's first-load JS small.
@@ -55,7 +56,20 @@ function Grow() {
 
 const thumb = (p: StudioProduct) => p.variants.find((v) => v.image)?.image ?? null;
 
+/** Same-title pieces get "No. 2", "No. 3"… so identical cards stay distinguishable. */
+function dupNumbers(products: StudioProduct[]) {
+  const seen = new Map<string, number>();
+  const total = new Map<string, number>();
+  for (const p of products) total.set(p.title, (total.get(p.title) ?? 0) + 1);
+  return new Map(products.map((p) => {
+    const n = (seen.get(p.title) ?? 0) + 1;
+    seen.set(p.title, n);
+    return [p.id, (total.get(p.title) ?? 1) > 1 ? n : 0] as const;
+  }));
+}
+
 function ProductPicker({ products, value, onChange, label }: { products: StudioProduct[]; value: string | null; onChange: (id: string) => void; label: string }) {
+  const nums = dupNumbers(products);
   return (
     <fieldset>
       <legend className="mb-2 text-[13px] font-bold text-cocoa">{label}</legend>
@@ -69,11 +83,20 @@ function ProductPicker({ products, value, onChange, label }: { products: StudioP
               type="button"
               aria-pressed={on}
               onClick={() => onChange(p.id)}
-              className={`st-press relative w-[104px] shrink-0 overflow-hidden rounded-2xl bg-white text-left ring-2 ring-inset transition ${on ? "ring-violet-ink shadow-[0_8px_20px_-10px_rgba(98,57,201,.6)]" : "ring-hairline"}`}
+              className={`st-press relative w-[128px] shrink-0 overflow-hidden rounded-2xl bg-white text-left ring-2 ring-inset transition ${on ? "ring-violet-ink shadow-[0_8px_20px_-10px_rgba(98,57,201,.6)]" : "ring-hairline"}`}
             >
               <span className="block aspect-[4/5] bg-paper-2">{img ? <img loading="lazy" decoding="async" src={img} alt="" className="size-full object-cover" /> : <Icon name="hanger" className="m-auto mt-8 size-6 text-cocoa-3" />}</span>
-              <span className="block truncate px-2 pt-1.5 text-xs font-bold text-cocoa">{p.title}</span>
-              <span className="block px-2 pb-2 text-[11px] font-semibold text-cocoa-2">{rwf(p.priceRwf)}</span>
+              <span className="block px-2 pt-1.5"><span className="line-clamp-2 h-8 text-xs font-bold leading-4 text-cocoa">{p.title}</span></span>
+              <span className="mt-1 flex items-center gap-1 px-2">
+                {p.variants.slice(0, 3).map((v) => (
+                  <span key={v.id} aria-hidden className="size-3 shrink-0 rounded-full ring-1 ring-inset ring-black/10" style={{ background: v.colourHex }} />
+                ))}
+                <span className="truncate text-[11px] font-semibold text-cocoa-2">{p.variants[0]?.colourName}{p.variants.length > 1 ? ` +${p.variants.length - 1}` : ""}</span>
+              </span>
+              <span className="flex items-center justify-between gap-1 px-2 pb-2 pt-0.5 text-[11px] font-semibold text-cocoa-2">
+                <span className="whitespace-nowrap tabular-nums">{rwf(p.priceRwf)}</span>
+                {nums.get(p.id) ? <span className="whitespace-nowrap rounded-full bg-paper-2 px-1.5 text-[10px] font-bold text-cocoa">No. {nums.get(p.id)}</span> : null}
+              </span>
               {on && <span className="absolute right-1.5 top-1.5 grid size-6 place-items-center rounded-full bg-violet-ink text-white"><Icon name="check" className="size-3.5" /></span>}
             </button>
           );
@@ -133,7 +156,7 @@ function ShareKit({ products, initial }: { products: StudioProduct[]; initial: s
     }
   }
 
-  if (!products.length) return <Empty icon="share" title="Publish a product first">Story and square cards are made from your live products.</Empty>;
+  if (!products.length) return <Empty icon="share" title="Publish a product first">Cards use live pieces.</Empty>;
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_380px]">
       <section className="st-card space-y-4 rounded-[24px] p-4">
@@ -146,7 +169,12 @@ function ShareKit({ products, initial }: { products: StudioProduct[]; initial: s
           <Icon name="sparkle" className="size-4" /> {busy ? "Making your card…" : card ? "Make it again" : "Make my card"}
         </SButton>
         <Note error={err} />
-        <p className="text-xs leading-relaxed text-cocoa-2">Every card carries your price, a QR code to your Maker Space and “Try it on you”. Scans and taps are counted under Insights → where visitors come from.</p>
+        <div className="flex flex-wrap items-center gap-1.5" aria-label="On every card">
+          <Fact icon="tag">Price</Fact>
+          <Fact icon="qr">QR</Fact>
+          <Fact icon="sparkle">Try it on you</Fact>
+          <InfoTip label="Where scans show up">Scans and taps are counted in Insights → Where visitors come from.</InfoTip>
+        </div>
       </section>
 
       <section aria-label="Card preview" className="space-y-3">
@@ -155,7 +183,7 @@ function ShareKit({ products, initial }: { products: StudioProduct[]; initial: s
           {card && !busy && <img src={card.url} alt={`Promo card: ${products.find((p) => p.id === productId)?.title ?? ""}`} className="animate-pop size-full object-cover" />}
           {!card && !busy && (
             <div className="grid size-full place-items-center p-6 text-center text-sm text-cocoa-2">
-              <span><Icon name="sparkle" className="mx-auto mb-2 size-7 text-violet-ink" />Your {format === "story" ? "1080×1920 story" : "1080×1080 square"} card appears here</span>
+              <span><Icon name="image" className="mx-auto mb-2 size-7 text-violet-ink" />{format === "story" ? "1080 × 1920" : "1080 × 1080"}</span>
             </div>
           )}
         </div>
@@ -163,12 +191,12 @@ function ShareKit({ products, initial }: { products: StudioProduct[]; initial: s
           <div className="grid grid-cols-2 gap-2">
             <SButton onClick={share}><Icon name="share" className="size-4" /> Share</SButton>
             <a href={card.url} download={`nyambika-${format}-${locale}.png`} className="st-press inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-hairline bg-white px-4 text-sm font-bold text-cocoa"><Icon name="download" className="size-4" /> Download</a>
-            <a href={card.links.wa_status.whatsapp} target="_blank" rel="noreferrer" className="st-press col-span-2 inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-4 text-sm font-bold text-white hover:bg-emerald-700">WhatsApp Status / chat</a>
+            <a href={card.links.wa_status.whatsapp} target="_blank" rel="noreferrer" className="st-press col-span-2 inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-emerald-700 px-4 text-sm font-bold text-[#fff] hover:bg-emerald-800"><Icon name="chat" className="size-4" /> WhatsApp</a>
           </div>
         )}
         {card && (
           <div className="st-card rounded-[22px] p-3">
-            <p className="mb-2 text-xs font-bold text-cocoa">Tagged links (each one shows up in Insights)</p>
+            <p className="mb-2 flex items-center gap-1 text-xs font-bold text-cocoa">Tagged links <InfoTip label="About tagged links">Each link is counted separately in Insights.</InfoTip></p>
             <ul className="space-y-1.5">
               {(["wa_catalogue", "wa_status", "ig_story", "link"] as const).map((k) => (
                 <li key={k} className="flex items-center gap-2">
@@ -239,13 +267,16 @@ function Offers({ products, initial }: { products: StudioProduct[]; initial: str
   return (
     <div className="space-y-4">
       <div className="st-hero relative overflow-hidden rounded-[24px] p-4">
-        <p className="font-extrabold text-cocoa">Codes and time-boxed offers</p>
-        <p className="mt-1 max-w-prose text-sm leading-relaxed text-cocoa-2">You fund every discount: the shopper pays you a little less, straight to your MoMo. Nyambika never adds or takes anything. Codes are checked when the shopper holds to buy.</p>
+        <p className="flex items-center gap-1 font-bold text-cocoa">Codes and offers <InfoTip label="How offers work">You fund every discount: the shopper pays you a little less, straight to your MoMo. Nyambika never adds or takes anything. Codes are checked when the shopper holds to buy.</InfoTip></p>
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          <Fact icon="wallet">You fund it</Fact>
+          <Fact icon="shield">Paid directly to you</Fact>
+        </div>
         <SButton className="mt-3" onClick={() => setOpen(true)}><Icon name="plus" className="size-4" /> New offer</SButton>
       </div>
       <Note ok={ok} />
       {loading && !data && <ScreenSkeleton variant="list" />}
-      {data?.length === 0 && <Empty icon="wallet" title="No offers yet">Try a weekend offer on a piece that gets many try-ons but few sales.</Empty>}
+      {data?.length === 0 && <Empty icon="wallet" title="No offers yet">Try one on a much-tried piece.</Empty>}
       <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
         {data?.map((d) => (
           <li key={d.id} className="st-card space-y-3 rounded-[24px] p-4">
@@ -309,7 +340,11 @@ function Offers({ products, initial }: { products: StudioProduct[]; initial: str
             <Field label="Max uses" hint="Optional"><Input inputMode="numeric" value={f.maxUses} onChange={(e) => setF({ ...f, maxUses: e.target.value.replace(/\D/g, "") })} /></Field>
             <Field label="Min price (RWF)" hint="Optional"><Input inputMode="numeric" value={f.minSpend} onChange={(e) => setF({ ...f, minSpend: e.target.value.replace(/\D/g, "") })} /></Field>
           </div>
-          <p className="rounded-2xl bg-amber-50 p-3 text-xs leading-relaxed text-gold-ink ring-1 ring-inset ring-amber-200">You fund this: the Mobile Money request is smaller and goes straight to you. Discounts never go above 90% and never touch the delivery fee.</p>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <Fact icon="wallet">You fund it</Fact>
+            <Fact icon="shield">Max 90% · not delivery</Fact>
+            <InfoTip label="About discounts">The Mobile Money request is smaller and goes straight to you. Discounts never go above 90% and never touch the delivery fee.</InfoTip>
+          </div>
           <Note error={err} />
           <SButton className="min-h-12 w-full">Start offer</SButton>
         </form>
@@ -321,7 +356,7 @@ function Offers({ products, initial }: { products: StudioProduct[]; initial: str
 // ---------------- Broadcast ----------------
 
 const TEMPLATES = [
-  "Our new collection is here! Come and try it on you ✨",
+  "Our new collection is here! Come and try it on you.",
   "Back in stock in new colours. Try them on before they go.",
   "Wedding season: new umushanana and kitenge pieces, made to your measure.",
 ];
@@ -340,7 +375,7 @@ function Broadcast({ products }: { products: StudioProduct[] }) {
     setErr(null);
     try {
       const r = await api<{ recipients: number; skipped: number }>(`/pages/${page.id}/broadcasts`, { method: "POST", json: { message: msg, productIds: picked, locale: "rw" } });
-      setOk(`Sent to ${r.recipients} follower${r.recipients === 1 ? "" : "s"} on WhatsApp${r.skipped ? ` · ${r.skipped} skipped (not opted in or already got enough this week)` : ""}.`);
+      setOk(`Sent to ${r.recipients} on WhatsApp${r.skipped ? ` · ${r.skipped} skipped` : ""}`);
       await reload();
     } catch (e) {
       setErr((e as Error).message);
@@ -358,12 +393,12 @@ function Broadcast({ products }: { products: StudioProduct[] }) {
           <div className="rounded-2xl bg-emerald-50 p-3 ring-1 ring-inset ring-emerald-200"><p className="text-[11px] font-bold text-mint-ink">Want WhatsApp updates</p><p className="font-display text-2xl font-black tabular-nums text-cocoa">{data.optedIn}</p></div>
         </div>
         <fieldset>
-          <legend className="mb-2 text-[13px] font-bold text-cocoa">✨ Start from</legend>
+          <legend className="mb-2 flex items-center gap-1.5 text-[13px] font-bold text-cocoa"><Icon name="sparkle" className="size-4 text-violet-ink" /> Start from</legend>
           <div className="flex flex-wrap gap-2">
-            {TEMPLATES.map((t, i) => <button key={i} type="button" onClick={() => setMsg(t)} aria-pressed={msg === t} className={`st-press rounded-full px-3 py-1.5 text-left text-xs font-bold ring-1 ring-inset ${msg === t ? "bg-violet-50 text-violet-ink ring-violet-200" : "bg-white text-cocoa-2 ring-hairline"}`}>{t.split(/[.!:]/)[0]}</button>)}
+            {TEMPLATES.map((t, i) => <button key={i} type="button" onClick={() => setMsg(t)} aria-pressed={msg === t} className={`st-press min-h-11 rounded-full px-3.5 text-left text-xs font-bold ring-1 ring-inset ${msg === t ? "bg-violet-50 text-violet-ink ring-violet-200" : "bg-white text-cocoa-2 ring-hairline"}`}>{t.split(/[.!:]/)[0]}</button>)}
           </div>
         </fieldset>
-        <Field label="Message" hint={`${msg.length}/320 · a link to your Maker Space and an opt-out line are added for you.`}><Textarea value={msg} maxLength={320} onChange={(e) => setMsg(e.target.value)} /></Field>
+        <Field label="Message" hint={`${msg.length}/320`}><Textarea value={msg} maxLength={320} onChange={(e) => setMsg(e.target.value)} /></Field>
         {products.length > 0 && (
           <ProductPicker products={products} value={picked[0] ?? null} onChange={(id) => setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : [id, ...p].slice(0, 6)))} label="Feature a piece (optional)" />
         )}
@@ -372,13 +407,17 @@ function Broadcast({ products }: { products: StudioProduct[] }) {
         <SButton className="min-h-12 w-full" onClick={send} disabled={busy || !data.canSend || msg.trim().length < 10 || data.optedIn === 0}>
           <Icon name="mail" className="size-4" /> {busy ? "Sending…" : data.optedIn === 0 ? "No opted-in followers yet" : `Send to ${data.optedIn} on WhatsApp`}
         </SButton>
-        <p className="text-xs leading-relaxed text-cocoa-2">Only followers who said yes to WhatsApp updates get it. Limits keep it friendly: one update a day, three a week, and nobody gets more than four updates a week from all makers.</p>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <Fact icon="checkCircle">Opted-in only</Fact>
+          <Fact icon="clock">1 a day · 3 a week</Fact>
+          <InfoTip label="About update limits">Only followers who said yes to WhatsApp updates get it. Nobody gets more than four updates a week from all makers.</InfoTip>
+        </div>
       </section>
       <section aria-label="Preview and history" className="space-y-3">
         <div className="rounded-[24px] bg-[#e7ded3] p-4">
           <p className="mb-2 text-center text-[11px] font-bold text-cocoa-2">Preview on WhatsApp</p>
           <div className="ml-auto max-w-[92%] rounded-2xl rounded-tr-md bg-[#d9fdd3] p-3 text-[13px] leading-snug text-cocoa shadow-sm">
-            <p><b>{page.name}</b> ✨ {msg}</p>
+            <p><b>{page.name}</b> · {msg}</p>
             <p className="mt-1 text-sky-800 underline">{`nyambika.rw/m/${page.handle}?src=broadcast`}</p>
             <p className="mt-1 text-[11px] text-cocoa-2">Ohereza STOP ngo ntuzongere kubona ubu butumwa.</p>
           </div>

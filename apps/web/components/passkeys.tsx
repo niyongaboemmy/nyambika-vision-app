@@ -5,6 +5,7 @@ import { Button, ErrorNote, Sheet } from "@/components/ui";
 import { api } from "@/lib/api";
 import { deviceName, dismissOffer, passkeysSupported, registerPasskey, signInWithPasskey, type PasskeyView } from "@/lib/passkeys";
 import { useSession } from "@/lib/session";
+import { Icon } from "@/components/icons";
 
 /** Passkeys (E29): offer after OTP, sign-in button, and trust-centre management. */
 
@@ -31,7 +32,7 @@ export function PasskeyOffer({ onDone }: { onDone: () => void }) {
   return (
     <div className="flex animate-rise flex-col items-center gap-5 text-center">
       <span className={`grid size-24 place-items-center rounded-full text-5xl ${saved ? "bg-mint text-ink" : "glass"} shadow-[0_0_60px_rgba(139,92,246,.45)] transition`} aria-hidden>
-        {saved ? "✓" : "🔑"}
+        {saved ? <Icon name="check" className="size-4" /> : <Icon name="key" className="size-4" />}
       </span>
       <div>
         <h2 className="font-display text-3xl font-black leading-tight text-grad">{saved ? t("passkey.created") : t("passkey.offerTitle")}</h2>
@@ -40,7 +41,7 @@ export function PasskeyOffer({ onDone }: { onDone: () => void }) {
       <ErrorNote error={error} />
       {!saved && (
         <div className="flex w-full flex-col gap-2">
-          <Button onClick={create} disabled={busy}>🔑 {t("passkey.create")}</Button>
+          <Button onClick={create} disabled={busy}><Icon name="key" className="size-5" /> {t("passkey.create")}</Button>
           <Button variant="ghost" onClick={() => { dismissOffer(); onDone(); }} disabled={busy}>{t("passkey.notNow")}</Button>
         </div>
       )}
@@ -74,7 +75,7 @@ export function PasskeySignInButton({ onSignedIn }: { onSignedIn: () => void }) 
           }
         }}
       >
-        🔑 {t("passkey.signIn")}
+        <Icon name="key" className="size-5" /> {t("passkey.signIn")}
       </Button>
       <ErrorNote error={error} />
     </div>
@@ -114,9 +115,12 @@ export function PasskeysCard() {
 
   return (
     <section className="glass space-y-3 rounded-3xl p-4" aria-labelledby="passkeys-h">
-      <div className="flex items-center justify-between">
-        <p id="passkeys-h" className="font-semibold">🔑 {t("passkey.title")}</p>
-        <span className="text-xs text-mut">{t("passkey.otpFallback")}</span>
+      <div className="flex items-center gap-3">
+        <span className="grid size-10 shrink-0 place-items-center rounded-full bg-violet/25" aria-hidden><Icon name="key" className="size-5" /></span>
+        <div className="min-w-0">
+          <p id="passkeys-h" className="font-semibold leading-tight">{t("passkey.title")}</p>
+          <p className="mt-0.5 text-xs text-mut">{t("passkey.otpFallback")}</p>
+        </div>
       </div>
       {keys === null ? (
         <div className="h-14 animate-pulse rounded-2xl bg-white/10" />
@@ -126,22 +130,22 @@ export function PasskeysCard() {
         <ul className="space-y-2">
           {keys.map((k) => (
             <li key={k.id} className="flex items-center gap-3 rounded-2xl bg-white/5 px-3 py-2.5">
-              <span className="grid size-10 shrink-0 place-items-center rounded-full bg-violet/25 text-lg" aria-hidden>🔑</span>
+              <span className="grid size-10 shrink-0 place-items-center rounded-full bg-violet/25" aria-hidden><Icon name="key" className="size-5" /></span>
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-sm font-semibold">{k.name}</span>
                 <span className="block text-xs text-mut">
                   {k.lastUsedAt ? `${t("passkey.lastUsed")} ${ago(k.lastUsedAt)}` : `Added ${ago(k.createdAt)}`}{k.backedUp ? " · synced" : ""}
                 </span>
               </span>
-              <button className="rounded-xl px-2 py-2 text-xs font-semibold text-gold" onClick={() => { setEditing(k); setName(k.name); }} aria-label={`${t("passkey.rename")} ${k.name}`}>{t("passkey.rename")}</button>
-              <button className="rounded-xl px-2 py-2 text-xs font-semibold text-terra" onClick={() => setRemoving(k)} aria-label={`${t("passkey.remove")} ${k.name}`}>{t("passkey.remove")}</button>
+              <button className="press min-h-11 rounded-xl px-2 text-xs font-semibold text-gold" onClick={() => { setEditing(k); setName(k.name); }} aria-label={`${t("passkey.rename")} ${k.name}`}>{t("passkey.rename")}</button>
+              <button className="press min-h-11 rounded-xl px-2 text-xs font-semibold text-terra" onClick={() => setRemoving(k)} aria-label={`${t("passkey.remove")} ${k.name}`}>{t("passkey.remove")}</button>
             </li>
           ))}
         </ul>
       )}
       <ErrorNote error={error} />
       {supported && (
-        <Button variant="glass" className="w-full" disabled={busy} onClick={() => run(() => registerPasskey(deviceName()))}>＋ {t("passkey.add")}</Button>
+        <Button variant="glass" className="w-full" disabled={busy} onClick={() => run(() => registerPasskey(deviceName()))}><Icon name="plus" className="size-5" /> {t("passkey.add")}</Button>
       )}
 
       <Sheet open={editing !== null} onClose={() => setEditing(null)}>

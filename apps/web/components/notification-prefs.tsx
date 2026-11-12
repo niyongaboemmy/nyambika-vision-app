@@ -3,7 +3,10 @@
 import type { NotificationPrefs } from "@nyambika/contracts";
 import type { MessageKey } from "@nyambika/i18n";
 import { useEffect, useState } from "react";
-import { Button, ErrorNote } from "@/components/ui";
+import { ErrorNote } from "@/components/ui";
+import { Icon, type IconName } from "@/components/icons";
+import { Group, GroupRow } from "@/components/ios";
+import { ShopperSwitch } from "@/components/shopper-switch";
 import { api } from "@/lib/api";
 import { installationId, isNative } from "@/lib/native";
 import { enablePush, pushState, type PushState } from "@/lib/push";
@@ -30,7 +33,16 @@ const ROWS: { key: keyof NotificationPrefs; title: MessageKey; body: MessageKey;
   { key: "circle", title: "push.circle", body: "push.circleBody" },
   { key: "wardrobe", title: "push.wardrobe", body: "push.wardrobeBody" },
 ];
-const DEVICE_LABEL = { IOS: "📱 iPhone app", ANDROID: "📱 Android app", WEB: "🌐 Browser" } as const;
+const DEVICE_LABEL = { IOS: "iPhone app", ANDROID: "Android app", WEB: "Browser" } as const;
+const DEVICE_ICON = { IOS: "phone", ANDROID: "phone", WEB: "globe" } as const;
+const ROW_ICON: Record<keyof NotificationPrefs, { icon: IconName; tone: "terra" | "violet" | "mint" | "sky" | "gold" }> = {
+  orders: { icon: "bag", tone: "gold" },
+  liveActivity: { icon: "signal", tone: "mint" },
+  looks: { icon: "sparkle", tone: "terra" },
+  custom: { icon: "scissors", tone: "violet" },
+  circle: { icon: "users", tone: "sky" },
+  wardrobe: { icon: "calendar", tone: "terra" },
+};
 
 /** Trust centre card: what may ping me, and which devices can (E38). */
 export function NotificationPrefsCard() {
@@ -71,70 +83,57 @@ export function NotificationPrefsCard() {
     setNote(r.sent ? `✓ ${r.sent}` : "–");
   }
 
+  const blocked = state === "denied" ? t("push.denied") : state === "unsupported" ? t("push.unsupported") : null;
   return (
-    <section className="glass space-y-3 rounded-3xl p-4" aria-labelledby="notif-title" data-testid="notification-prefs">
-      <div className="flex items-center justify-between gap-2">
-        <p id="notif-title" className="font-semibold">🔔 {t("push.prefsTitle")}</p>
-        {state === "on" && <span className="text-xs text-mint">✓ {t("push.on").replace(" ✓", "")}</span>}
-      </div>
+    <div className="space-y-6" data-testid="notification-prefs">
       <ErrorNote error={error ?? err} />
       {data && (
         <>
-          {ROWS.filter((r) => !r.appOnly || isNative() || data.devices.some((d) => d.platform !== "WEB")).map((r) => (
-            <label key={r.key} className="flex items-center gap-3">
-              <span className="flex-1">
-                <span className="block text-sm font-semibold">{t(r.title)}</span>
-                <span className="block text-xs text-mut">{t(r.body)}</span>
-              </span>
-              <input type="checkbox" role="switch" className="peer sr-only" checked={data.prefs[r.key]} onChange={(e) => toggle(r.key, e.target.checked)} />
-              <span aria-hidden className={`relative h-7 w-12 shrink-0 rounded-full transition peer-focus-visible:outline-2 peer-focus-visible:outline-gold ${data.prefs[r.key] ? "bg-mint" : "bg-white/20"}`}>
-                <span className={`absolute top-0.5 size-6 rounded-full bg-white transition-all ${data.prefs[r.key] ? "left-[22px]" : "left-0.5"}`} />
-              </span>
-            </label>
-          ))}
+          <Group
+            header={t("push.prefsTitle")}
+            footer={state === "on" ? <span className="inline-flex items-center gap-1 text-mint"><Icon name="checkCircle" className="size-3.5" />{t("push.on").replace(" ✓", "")}</span> : undefined}
+          >
+            {ROWS.filter((r) => !r.appOnly || isNative() || data.devices.some((d) => d.platform !== "WEB")).map((r) => (
+              <GroupRow
+                key={r.key}
+                icon={ROW_ICON[r.key].icon}
+                tone={ROW_ICON[r.key].tone}
+                title={t(r.title)}
+                subtitle={t(r.body)}
+                accessory={<ShopperSwitch checked={data.prefs[r.key]} onChange={(v) => toggle(r.key, v)} label={t(r.title)} />}
+              />
+            ))}
+          </Group>
 
-          <div className="border-t border-white/10 pt-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-mut">{t("push.devices")}</p>
-            {data.devices.length === 0 ? (
-              <p className="mt-1 text-sm text-mut">{t("push.none")}</p>
-            ) : (
-              <ul className="mt-2 space-y-2">
-                {data.devices.map((d) => (
-                  <li key={d.id} className="flex items-center gap-2 text-sm">
-                    <span className="flex-1">
-                      {DEVICE_LABEL[d.platform]}
-                      {d.installationId === here && <span className="ml-1 text-xs text-gold">· this device</span>}
-                      <span className="block text-xs text-mut">{new Date(d.lastSeenAt).toLocaleDateString(locale === "fr" ? "fr-FR" : "en-GB", { day: "numeric", month: "short", year: "numeric" })}{d.appVersion ? ` · v${d.appVersion}` : ""}</span>
-                    </span>
-                    <button
-                      type="button"
-                      className="glass min-h-10 rounded-xl px-3 text-xs font-semibold"
-                      aria-label={`Remove ${DEVICE_LABEL[d.platform]}`}
-                      onClick={async () => {
-                        await api(`/push/devices/${d.id}`, { method: "DELETE" });
-                        await reload();
-                      }}
-                    >
-                      ✕
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
-          {state === "unsupported" && <p className="text-xs text-mut">{t("push.unsupported")}</p>}
-          {state === "denied" && <p className="text-xs text-mut">{t("push.denied")}</p>}
-          <div className="grid grid-cols-2 gap-2">
-            {state !== "on" && state !== "unsupported" && state !== "denied" && <Button variant="glass" onClick={turnOn}>{t("push.thisDevice")}</Button>}
-            {data.devices.length > 0 && (
-              <Button variant="glass" onClick={test} className={state === "on" ? "col-span-2" : ""}>
-                {t("push.test")} {note && <span className="text-xs text-mint">{note}</span>}
-              </Button>
-            )}
-          </div>
+          <Group header={t("push.devices")} footer={data.devices.length > 0 ? blocked ?? undefined : undefined}>
+            {data.devices.length === 0 && <GroupRow icon={blocked ? "eyeOff" : "phone"} tone="stone" title={blocked ?? t("push.none")} />}
+            {data.devices.map((d) => (
+              <GroupRow
+                key={d.id}
+                icon={DEVICE_ICON[d.platform]}
+                tone="stone"
+                title={<>{DEVICE_LABEL[d.platform]}{d.installationId === here && <span className="ml-1 text-[13px] text-gold">· this device</span>}</>}
+                subtitle={`${new Date(d.lastSeenAt).toLocaleDateString(locale === "fr" ? "fr-FR" : "en-GB", { day: "numeric", month: "short", year: "numeric" })}${d.appVersion ? ` · v${d.appVersion}` : ""}`}
+                accessory={
+                  <button
+                    type="button"
+                    className="hit press grid size-9 shrink-0 place-items-center rounded-full text-red-500"
+                    aria-label={`Remove ${DEVICE_LABEL[d.platform]}`}
+                    onClick={async () => {
+                      await api(`/push/devices/${d.id}`, { method: "DELETE" });
+                      await reload();
+                    }}
+                  >
+                    <Icon name="trash" className="size-[18px]" />
+                  </button>
+                }
+              />
+            ))}
+            {state !== "on" && state !== "unsupported" && state !== "denied" && <GroupRow icon="bell" tone="sky" title={t("push.thisDevice")} onClick={turnOn} />}
+            {data.devices.length > 0 && <GroupRow icon="send" tone="violet" title={t("push.test")} value={note ?? undefined} onClick={test} />}
+          </Group>
         </>
       )}
-    </section>
+    </div>
   );
 }

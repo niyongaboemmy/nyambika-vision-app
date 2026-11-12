@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { Avatar, Button, Chip, ErrorNote, Screen, Spinner, TopBar } from "@/components/ui";
 import { api, ApiError, rwf } from "@/lib/api";
 import { useSession } from "@/lib/session";
+import { Icon } from "@/components/icons";
 
 interface Mandate {
   id: string;
@@ -109,7 +110,7 @@ export default function ConfirmMandate() {
         <TopBar />
         <main className="grid min-h-[70dvh] place-items-center px-6 text-center">
           <div className="space-y-3">
-            <span aria-hidden className="text-5xl">⌛</span>
+            <span aria-hidden><Icon name="hourglass" className="size-12 text-gold" /></span>
             <p className="font-display text-2xl font-black">{msg}</p>
             <Link href="/" className="text-sm text-gold underline">Nyambika</Link>
           </div>
@@ -175,9 +176,9 @@ export default function ConfirmMandate() {
         </section>
 
         <section className="rounded-3xl border border-gold/30 bg-gold/10 p-4 text-sm leading-relaxed" role="note">
-          <p>🔐 {t("mandate.paidTo")} <b className="text-white">{m.paidTo}</b>. Nyambika never holds your money.</p>
+          <p><Icon name="lock" className="mr-1 inline size-4 align-[-3px]" />{t("mandate.paidTo")} <b className="text-white">{m.paidTo}</b>. Nyambika never holds your money.</p>
           <p className="mt-1 text-txt/85">{t("mandate.nothingYet")}</p>
-          {m.state === "open" && clock && !expired && <p className="mt-2 text-xs text-mut">⏱ {t("mandate.expires")} {clock.label}</p>}
+          {m.state === "open" && clock && !expired && <p className="mt-2 text-xs text-mut"><Icon name="clock" className="mr-1 inline size-3.5 align-[-2px]" />{t("mandate.expires")} {clock.label}</p>}
         </section>
 
         {declined ? (
@@ -199,8 +200,8 @@ export default function ConfirmMandate() {
             <fieldset>
               <legend className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-mut">Delivery</legend>
               <div className="flex flex-wrap gap-2">
-                <Chip active={delivery === "PICKUP"} onClick={() => setDelivery("PICKUP")}>🏪 Pickup in {m.maker.sector} · free</Chip>
-                <Chip active={delivery === "DELIVERY"} onClick={() => setDelivery("DELIVERY")}>🛵 Delivery · +{rwf(m.deliveryFeeRwf)}</Chip>
+                <Chip active={delivery === "PICKUP"} onClick={() => setDelivery("PICKUP")}><Icon name="store" className="size-4" /> Pickup in {m.maker.sector} · free</Chip>
+                <Chip active={delivery === "DELIVERY"} onClick={() => setDelivery("DELIVERY")}><Icon name="moto" className="size-4" /> Delivery · +{rwf(m.deliveryFeeRwf)}</Chip>
               </div>
             </fieldset>
             {delivery === "DELIVERY" && (
@@ -209,8 +210,8 @@ export default function ConfirmMandate() {
             <fieldset>
               <legend className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-mut">Pay with</legend>
               <div className="flex flex-wrap gap-2">
-                <Chip active={wallet === "MTN_MOMO"} onClick={() => setWallet("MTN_MOMO")}>🟡 MTN MoMo · {me.phone.slice(-4).padStart(8, "•")}</Chip>
-                <Chip active={wallet === "AIRTEL_MONEY"} onClick={() => setWallet("AIRTEL_MONEY")}>🔴 Airtel Money</Chip>
+                <Chip active={wallet === "MTN_MOMO"} onClick={() => setWallet("MTN_MOMO")}><span aria-hidden className="size-2.5 rounded-full bg-[#ffcc00]" /> MTN MoMo · {me.phone.slice(-4).padStart(8, "•")}</Chip>
+                <Chip active={wallet === "AIRTEL_MONEY"} onClick={() => setWallet("AIRTEL_MONEY")}><span aria-hidden className="size-2.5 rounded-full bg-[#e40000]" /> Airtel Money</Chip>
               </div>
             </fieldset>
             <ErrorNote error={error} />
@@ -232,7 +233,7 @@ export default function ConfirmMandate() {
                   <circle cx="60" cy="60" r={r} stroke="#F2B84B" strokeWidth="8" fill="none" strokeLinecap="round" strokeDasharray={c} strokeDashoffset={c * (1 - progress)} />
                 </svg>
                 <span className="grad-cta grid size-28 place-items-center rounded-full px-2 text-center font-display text-base font-black leading-tight motion-safe:transition-transform" style={{ transform: `scale(${1 - progress * 0.06})` }}>
-                  {busy ? <Spinner /> : <>✋<br />{t("mandate.hold")}</>}
+                  {busy ? <Spinner /> : <><Icon name="hand" className="mx-auto size-6" />{t("mandate.hold")}</>}
                 </span>
               </button>
               <p className="text-center text-xs text-mut">Press and hold 1 second · then approve {rwf(total)} with your PIN</p>

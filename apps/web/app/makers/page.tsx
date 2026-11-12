@@ -4,6 +4,7 @@ import { serverApi } from "@/lib/server-api";
 import { THEMES, TYPE_LABEL } from "@/lib/maker";
 import { cookies } from "next/headers";
 import { RegionPill } from "@/components/region";
+import { TopBar } from "@/components/ui";
 
 export const metadata: Metadata = { title: "Browse makers", description: "Rwandan tailors, sewing cooperatives and sellers on Nyambika." };
 
@@ -39,16 +40,13 @@ export default async function Makers({ searchParams }: { searchParams: Promise<{
     { label: "Sellers", href: "/makers?type=SELLER" },
   ];
   return (
-    <div className="aurora mx-auto min-h-dvh w-full max-w-[480px] px-4 pb-10">
-      <div className="flex items-center justify-between pt-[max(env(safe-area-inset-top),14px)] pb-2">
-        <Link href="/" className="glass grid size-10 place-items-center rounded-full" aria-label="Back">←</Link>
-        <h1 className="font-display text-xl font-black">Browse makers</h1>
-        <RegionPill />
-      </div>
-      <form className="mt-2"><input name="q" defaultValue={q} placeholder="Search makers" className="glass h-12 w-full rounded-2xl px-4 outline-none placeholder:text-white/40" /></form>
+    <div className="aurora mx-auto min-h-dvh w-full max-w-[480px] pb-[max(env(safe-area-inset-bottom),40px)]">
+      <TopBar large back="/" title="Browse makers" right={<RegionPill />} />
+      <div className="px-4">
+      <form className="mt-1" role="search"><input name="q" type="search" aria-label="Search makers" defaultValue={q} placeholder="Search makers" className="glass h-12 w-full rounded-2xl px-4 outline-none placeholder:text-white/40" /></form>
       <div className="no-scrollbar mt-3 flex gap-2 overflow-x-auto">
         {filters.map((f) => (
-          <Link key={f.href} href={f.href} className={`whitespace-nowrap rounded-2xl border px-3.5 py-2 text-sm font-semibold ${(type ?? "") === (f.href.split("=")[1] ?? "") ? "border-gold/70 bg-gold/20" : "border-white/20 bg-white/10"}`}>{f.label}</Link>
+          <Link key={f.href} href={f.href} aria-current={(type ?? "") === (f.href.split("=")[1] ?? "") ? "page" : undefined} className={`press inline-flex min-h-11 items-center whitespace-nowrap rounded-2xl border px-3.5 text-sm font-semibold ${(type ?? "") === (f.href.split("=")[1] ?? "") ? "border-gold/70 bg-gold/20" : "border-white/20 bg-white/10"}`}>{f.label}</Link>
         ))}
       </div>
       <div className="mt-4 space-y-3">
@@ -58,13 +56,14 @@ export default async function Makers({ searchParams }: { searchParams: Promise<{
               {p.name.split(/\s+/).map((w) => w[0]).join("").slice(0, 2)}
             </span>
             <div className="min-w-0">
-              <p className="truncate font-semibold">{p.name} {p.verified && <span className="text-mint">✓</span>} {p.crossBorderListing && <span className="ml-1 rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-bold text-gold">{p.flag} ships to you</span>}</p>
-              <p className="text-xs text-mut">{TYPE_LABEL[p.memberType]} · {p.sector} · ★ {p.rating.toFixed(1)} · {p.productCount} items</p>
+              <p className="truncate font-semibold">{p.name} {p.verified && <span className="text-mint">✓</span>} {p.crossBorderListing && <span className="ml-1 rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-bold text-gold">Ships to you</span>}</p>
+              <p className="text-xs text-mut">{[TYPE_LABEL[p.memberType], p.sector, p.rating > 0 ? `★ ${p.rating.toFixed(1)}` : null, `${p.productCount} ${p.productCount === 1 ? "item" : "items"}`].filter(Boolean).join(" · ")}</p>
               <p className="mt-0.5 truncate text-xs text-txt/70">{p.tagline}</p>
             </div>
           </Link>
         ))}
         {pages.length === 0 && <p className="text-center text-mut">No makers match.</p>}
+      </div>
       </div>
     </div>
   );

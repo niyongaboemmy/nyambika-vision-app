@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { ThemeToggle } from "@/components/kit";
 import { Badge, Icon, isNavActive, Monogram, SButton, StudioSheet, studioNav, type IconName, Skeleton } from "@/components/studio";
 import { useSession } from "@/lib/session";
@@ -144,6 +144,22 @@ export function StudioShell({ page, pages, member, badges = {}, children }: { pa
   const [more, setMore] = useState(false);
   const [switching, setSwitching] = useState(false);
   const [sharing, setSharing] = useState(false);
+  // Compact nav title: the screen's large h1 (SectionTitle as="h1") once it has scrolled under the sticky header.
+  const [section, setSection] = useState<string | null>(null);
+  useEffect(() => {
+    setSection(null);
+    let io: IntersectionObserver | null = null;
+    const t = setTimeout(() => {
+      const h = document.querySelector<HTMLElement>("main h1");
+      if (!h || typeof IntersectionObserver === "undefined") return;
+      io = new IntersectionObserver(([e]) => setSection(e.isIntersecting || e.boundingClientRect.top > 0 ? null : (h.textContent ?? "").trim() || null), { rootMargin: "-72px 0px 0px 0px" });
+      io.observe(h);
+    }, 400);
+    return () => {
+      clearTimeout(t);
+      io?.disconnect();
+    };
+  }, [path]);
   const isCoop = page.memberType === "COOPERATIVE";
   const nav = studioNav(page.id, isCoop, member, page.memberType === "TAILOR");
   const dock = nav.filter((n) => !n.secondary);
@@ -200,7 +216,7 @@ export function StudioShell({ page, pages, member, badges = {}, children }: { pa
 
       <div className="min-w-0 flex-1">
         {/* Sticky contextual header */}
-        <header className="st-glass-light sticky top-0 z-30 border-b border-hairline/70">
+        <header className="material sticky top-0 z-30 border-b">
           <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 pb-2.5 pt-[max(env(safe-area-inset-top),10px)] lg:px-8 lg:py-3.5">
             <span className="shrink-0 lg:hidden">
               <Monogram name={page.name} size={38} />
@@ -209,14 +225,19 @@ export function StudioShell({ page, pages, member, badges = {}, children }: { pa
               <div className="flex min-w-0 items-center gap-2">
                 <h1 className="truncate font-display text-[19px] font-black tracking-tight text-cocoa lg:text-2xl">{page.name}</h1>
                 {multi && (
-                  <button type="button" onClick={() => setSwitching(true)} aria-label="Switch page" className="st-press -ml-1 grid size-7 shrink-0 place-items-center rounded-full text-cocoa-2 hover:bg-paper-2 lg:hidden">
+                  <button type="button" onClick={() => setSwitching(true)} aria-label="Switch page" className="hit st-press -ml-1 grid size-7 shrink-0 place-items-center rounded-full text-cocoa-2 hover:bg-paper-2 lg:hidden">
                     <Icon name="chevron" className="size-4 rotate-90" />
                   </button>
                 )}
               </div>
+              {/* iOS large title → compact: once the screen's own h1 scrolls under the bar, it replaces the URL line. */}
               <div className="mt-0.5 flex min-w-0 items-center gap-2">
                 <Badge value={page.status} label={pageStatusLabel(page.status)} />
-                <span className="truncate text-xs font-semibold text-cocoa-2">nyambika.rw/{page.handle}</span>
+                {section ? (
+                  <span key={section} aria-hidden className="animate-fade truncate text-[13px] font-semibold text-cocoa">{section}</span>
+                ) : (
+                  <span className="truncate text-xs font-semibold text-cocoa-2">nyambika.rw/{page.handle}</span>
+                )}
               </div>
             </div>
             <a
@@ -230,7 +251,7 @@ export function StudioShell({ page, pages, member, badges = {}, children }: { pa
           </div>
         </header>
 
-        <main className="mx-auto max-w-6xl px-4 pb-36 pt-5 lg:px-8 lg:pb-14 lg:pt-7">{children}</main>
+        <main className="mx-auto max-w-6xl px-4 pb-[calc(env(safe-area-inset-bottom)+124px)] pt-5 lg:px-8 lg:pb-14 lg:pt-7">{children}</main>
       </div>
 
       {/* Phone: floating bottom dock */}

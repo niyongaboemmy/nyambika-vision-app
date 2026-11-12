@@ -1,13 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Nunito, Plus_Jakarta_Sans } from "next/font/google";
+import { Nunito } from "next/font/google";
 import { ErrorToaster } from "@/components/error-toaster";
-import { Toaster } from "@/components/kit";
+import { Toaster } from "@/components/toast";
 import { DeferredGlobals } from "@/components/deferred-globals";
 import { ThemeScript } from "@/components/theme-script";
 import { SessionProvider } from "@/lib/session";
 import "./globals.css";
 
-const body = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-body", display: "swap" });
+// Brand face only (wordmark, Muse hero via `font-brand`); UI text uses the SF system stack (iOS pass).
 const display = Nunito({ subsets: ["latin"], weight: ["800", "900"], variable: "--font-display-face", display: "swap" });
 
 export const metadata: Metadata = {
@@ -32,7 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     // <html data-theme> is set before first paint by ThemeScript (cookie `nv-theme`, else the OS preference). It is
     // deliberately not a JSX prop, so a client re-render of the shell (e.g. a not-found boundary) never resets it.
-    <html lang="en" className={`${body.variable} ${display.variable}`} suppressHydrationWarning>
+    <html lang="en" className={display.variable} suppressHydrationWarning>
       <body className="antialiased">
         {/* Next "preventing flash" pattern via useServerInsertedHTML: in the first HTML only, never in a client render. */}
         <ThemeScript />

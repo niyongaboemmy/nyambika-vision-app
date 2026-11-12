@@ -4,8 +4,9 @@ import type { Intent } from "@nyambika/contracts";
 import { useParams, useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
-import { LimitState } from "@/components/limit-state";
-import { Screen, ShopperSkeleton } from "@/components/ui";
+import { LooksSkeleton } from "@/components/look-material";
+const LimitState = dynamic(() => import("@/components/limit-state").then((m) => m.LimitState), { ssr: false }); // error-only
+import { Screen } from "@/components/ui";
 import { api } from "@/lib/api";
 import { isRendering, type Look } from "@/lib/looks";
 import { track, trackOnce } from "@/lib/track";
@@ -14,7 +15,7 @@ import { track, trackOnce } from "@/lib/track";
 // session data is in, so their code loads in parallel with that fetch instead of on the critical path.
 const loadLookView = () => import("@/components/look-view");
 const loadHoldToBuy = () => import("@/components/hold-to-buy");
-const LookView = dynamic(() => loadLookView().then((m) => m.LookView), { ssr: false, loading: () => <div className="theme-media"><ShopperSkeleton variant="media" title={false} /></div> });
+const LookView = dynamic(() => loadLookView().then((m) => m.LookView), { ssr: false, loading: () => <LooksSkeleton /> });
 const HoldToBuy = dynamic(() => loadHoldToBuy().then((m) => m.HoldToBuy), { ssr: false });
 const TwinNudge = dynamic(() => import("@/components/twin-nudge").then((m) => m.TwinNudge), { ssr: false });
 
@@ -71,13 +72,47 @@ function Stream() {
       });
   }, [index, data, sessionId, load]);
 
+  // Current look + parallax: each section gets --p (its offset in screens, -1…1) for the media layer.
   useEffect(() => {
     const el = container.current;
     if (!el) return;
-    const onScroll = () => setIndex(Math.round(el.scrollTop / el.clientHeight));
+    const still = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    let frame = 0;
+    const paint = () => {
+      frame = 0;
+      setIndex(Math.round(el.scrollTop / el.clientHeight));
+      if (still) return;
+      for (const sec of el.children) {
+        if (!(sec instanceof HTMLElement) || sec.tagName !== "SECTION") continue;
+        const p = (sec.offsetTop - el.scrollTop) / el.clientHeight;
+        if (Math.abs(p) <= 1.05) sec.style.setProperty("--p", p.toFixed(3));
+      }
+    };
+    const onScroll = () => { if (!frame) frame = requestAnimationFrame(paint); };
+    paint();
     el.addEventListener("scroll", onScroll, { passive: true });
-    return () => el.removeEventListener("scroll", onScroll);
+    return () => {
+      el.removeEventListener("scroll", onScroll);
+      if (frame) cancelAnimationFrame(frame);
+    };
   }, [data]);
+
+  // Keyboard paging: ↓/PageDown/j next look, ↑/PageUp/k previous (not while typing or in a sheet).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const el = container.current;
+      const tgt = e.target as HTMLElement | null;
+      if (!el || e.defaultPrevented || e.altKey || e.metaKey || e.ctrlKey) return;
+      if (tgt?.closest("input,textarea,select,[contenteditable],[role=dialog]") || document.querySelector("[role=dialog]")) return;
+      const dir = ["ArrowDown", "PageDown", "j"].includes(e.key) ? 1 : ["ArrowUp", "PageUp", "k"].includes(e.key) ? -1 : 0;
+      if (!dir) return;
+      e.preventDefault();
+      const still = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+      el.scrollTo({ top: (Math.round(el.scrollTop / el.clientHeight) + dir) * el.clientHeight, behavior: still ? "auto" : "smooth" });
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   // Pilot funnel: a look counts as viewed once it is on screen and rendered.
   const current = data?.looks[index];
@@ -92,16 +127,17 @@ function Stream() {
     void load().catch(setError);
   };
   if (error && !data) return <Screen><div className="p-6 pt-20"><LimitState error={error} onRetry={retry} /></div></Screen>;
-  if (!data) return <div className="theme-media"><ShopperSkeleton variant="media" title={false} /></div>;
+  if (!data) return <LooksSkeleton />;
   if (!data.looks.length) return <Screen><p className="p-6 pt-24 text-center text-mut">No matching looks yet. Try asking differently.</p></Screen>;
 
   const label = intentLabel(data, snap);
   return (
-    <div ref={container} className="no-scrollbar mx-auto h-dvh w-full max-w-[480px] snap-y snap-mandatory overflow-y-scroll" aria-label="Looks stream">
+    <div ref={container} className="theme-media no-scrollbar mx-auto h-dvh w-full max-w-[480px] snap-y snap-mandatory overflow-y-scroll overscroll-contain bg-black" aria-label="Looks stream">
       {data.looks.map((look, i) => (
         <section key={look.id} className="relative h-dvh snap-start snap-always" aria-label={`Look ${i + 1} of ${data.looks.length}`}>
           <LookView
             paused={error != null}
+            active={i === index}
             look={look}
             index={i}
             total={data.looks.length}
@@ -118,9 +154,6 @@ function Stream() {
           >
             <HoldToBuy look={look} />
           </LookView>
-          {i === 0 && index === 0 && data.looks.length > 1 && (
-            <p className="pointer-events-none absolute inset-x-0 bottom-[178px] z-10 text-center text-sm text-txt/80">↑ swipe up · next look</p>
-          )}
         </section>
       ))}
       <TwinNudge place="stream" index={index} />

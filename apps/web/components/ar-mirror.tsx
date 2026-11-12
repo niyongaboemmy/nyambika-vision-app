@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui";
+import { Button, InfoTip } from "@/components/ui";
 import { anchorsFromAlpha, isLowEnd, LM, loadPoseTracker, smoothLandmarks, warpStrips, type Anchors, type Landmark, type PoseTracker, type Pt, type WardrobeItem } from "@/lib/twin3d";
 import { prefersReducedMotion } from "@/lib/xr";
+import { Icon } from "@/components/icons";
 
 type Mode = "idle" | "starting" | "live" | "static" | "error";
 const MIN_FPS = 10;
@@ -227,7 +228,7 @@ export function ArMirror({ items, initial }: { items: WardrobeItem[]; initial: s
 
       {why && <p className="mt-3 rounded-2xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-mut" role="status">{why}</p>}
       {mode !== "live" && mode !== "starting" && (
-        <Button className="mt-3 w-full" onClick={start}>📷 {why ? "Try live mirror anyway" : "Start live mirror"}</Button>
+        <Button className="mt-3 w-full" onClick={start}><Icon name="camera" className="size-5" /> {why ? "Try live mirror anyway" : "Start live mirror"}</Button>
       )}
 
       {items.length > 0 && (
@@ -239,7 +240,10 @@ export function ArMirror({ items, initial }: { items: WardrobeItem[]; initial: s
           ))}
         </div>
       )}
-      <p className="mt-3 text-center text-xs text-mut">Pilot: overlay accuracy is still being validated. Visual guidance only. Actual fit may differ.</p>
+      <p className="mt-3 flex items-center justify-center gap-1 text-center text-xs text-mut">
+        Pilot · visual guide only
+        <InfoTip label="About AR accuracy">Overlay accuracy is still being validated. Visual guidance only. Actual fit may differ.</InfoTip>
+      </p>
     </div>
   );
 }
@@ -254,8 +258,8 @@ function StaticTryOn({ item }: { item: WardrobeItem | null }) {
       </svg>
       {item?.cutout && <img src={item.cutout} alt={`${item.title} in ${item.colourName}`} className="relative mt-[12%] h-[52%] object-contain drop-shadow-[0_18px_30px_rgba(0,0,0,.5)]" />}
       <figcaption className="absolute inset-x-4 bottom-4 flex justify-center gap-2">
-        {item && <Link href={`/looks/try?variant=${item.variantId}`} className="glass rounded-full px-4 py-2 text-sm font-semibold">See it on my twin</Link>}
-        {item && <Link href={`/mirror/3d?variant=${item.variantId}`} className="glass rounded-full px-4 py-2 text-sm font-semibold">🧊 Try in 3D</Link>}
+        {item && <Link href={`/looks/try?variant=${item.variantId}`} className="glass press inline-flex min-h-11 items-center rounded-full px-4 text-sm font-semibold">See it on my twin</Link>}
+        {item && <Link href={`/mirror/3d?variant=${item.variantId}`} className="glass press inline-flex min-h-11 items-center gap-1.5 rounded-full px-4 text-sm font-semibold"><Icon name="cube" className="size-4" /> Try in 3D</Link>}
       </figcaption>
     </figure>
   );

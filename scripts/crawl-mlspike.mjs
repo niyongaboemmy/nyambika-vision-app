@@ -136,7 +136,7 @@ if (await use.count()) {
   const after = await (await maker.request.get(`${BASE}/api/products/${PRODUCT}`)).json();
   assert(after.variants.find((v) => v.id === firstPhoto.id)?.colourName === suggested && suggested !== "Crimson", `colour name fixed to the suggested "${suggested}" (was mistyped "Crimson") only after the maker tapped Use`);
 }
-assert(await card.getByText(/stay off until they pass/).count(), "blocked heads are explained to the maker");
+assert(await card.getByText(/off until fairness checks pass/).count(), "blocked heads are explained to the maker");
 
 // ── Trends: seed synthetic signals, privacy + stability eval, card ───────────
 const seeded = await api("POST", "/admin/mlspike/trends/seed");

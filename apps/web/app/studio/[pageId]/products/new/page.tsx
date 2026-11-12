@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { AiWrite } from "@/components/ai-write";
 import { Field, Icon, Input, Note, SButton, Select, Steps, Switch, Textarea, TogglePills } from "@/components/studio";
+import { Stepper } from "@/components/ios";
 import { EDITOR_STEPS, EditorSection, ProductPreview } from "@/components/studio-product";
 import { api } from "@/lib/api";
 import { CATEGORIES, type Maker, OCCASIONS, STYLES } from "@/lib/types";
@@ -110,7 +111,7 @@ export default function NewProduct() {
             />
           </div>
 
-          <EditorSection n={1} id="details" title="Details" hint="What it is and what it costs. Let ✨ AI draft the words.">
+          <EditorSection n={1} id="details" title="Details" hint="What it is and what it costs. Let AI draft the words.">
             <Field label="Title"><Input required value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} placeholder="Indigo wrap dress" /></Field>
             <div className="grid grid-cols-2 gap-3">
               <Field label="Category">
@@ -153,8 +154,11 @@ export default function NewProduct() {
             </fieldset>
             <Field group label="Sizes"><TogglePills all={["XS", "S", "M", "L", "XL", "XXL"]} on={sizes} toggle={(v) => toggle(sizes, setSizes, v)} /></Field>
             <div className="space-y-3 rounded-2xl bg-paper p-3.5 ring-1 ring-inset ring-hairline">
-              <Switch checked={f.madeToOrder} onChange={(v) => setF({ ...f, madeToOrder: v })} label="Made to order" description="Sewn to the shopper's twin size after they pay." />
-              <Field label="Lead time (days)"><Input type="number" min={0} max={90} value={f.leadTimeDays} onChange={(e) => setF({ ...f, leadTimeDays: Number(e.target.value) })} className="w-28" /></Field>
+              <Switch checked={f.madeToOrder} onChange={(v) => setF({ ...f, madeToOrder: v })} label="Made to order" description="Sewn after payment" />
+              <div className="flex min-h-11 items-center justify-between gap-3">
+                <span className="text-[15px] font-semibold text-cocoa">Lead time</span>
+                <Stepper label="Lead time days" value={Number(f.leadTimeDays)} onChange={(v) => setF({ ...f, leadTimeDays: v })} min={0} max={90} unit="d" />
+              </div>
             </div>
           </EditorSection>
 
@@ -181,11 +185,11 @@ export default function NewProduct() {
           <SButton disabled={busy} className="min-h-12 w-full text-base">
             {busy ? "Saving…" : "Save and add photos"} {!busy && <Icon name="chevron" className="size-4" />}
           </SButton>
-          <p className="text-center text-xs text-cocoa-2">Saved as a draft. Nothing is public until you publish.</p>
+          <p className="flex items-center justify-center gap-1.5 text-xs font-semibold text-cocoa-2"><Icon name="lock" className="size-3.5" />Saved as draft · not public</p>
         </form>
         <aside className="sticky top-28 hidden space-y-3 lg:block" aria-label="Live preview">
           {preview}
-          <p className="px-1 text-xs leading-relaxed text-cocoa-2">This is how your piece appears on your Maker Space. Shoppers tap it to see it on their own twin.</p>
+          <p className="px-1 text-xs font-semibold text-cocoa-2">How shoppers see it</p>
         </aside>
       </div>
     </div>

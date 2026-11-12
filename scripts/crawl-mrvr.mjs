@@ -82,7 +82,7 @@ try {
   await page.waitForTimeout(1500);
   await shot("mr-preview-synthetic-body");
   assert(await page.getByText("Experimental", { exact: true }).first().isVisible(), "labelled experimental");
-  assert(await page.getByText(/never receives camera images/).isVisible(), "privacy note: camera frames never reach the page");
+  assert(await page.getByText(/never receives camera images/).first().isVisible(), "privacy note: camera frames never reach the page");
   assert(await page.getByRole("button", { name: /Use a virtual room instead/ }).isVisible(), "VR fallback offered when immersive-vr is also supported");
   const swatches = page.locator('fieldset:has(legend:text-matches("Colour")) button');
   if ((await swatches.count()) > 1) {
@@ -165,8 +165,8 @@ try {
   await host.snap("host-sees-two-avatars");
   await g1.snap("guest1-view");
 
-  await g1.p.getByRole("button", { name: "React 🔥" }).click();
-  await host.p.getByText(/reacted 🔥/).waitFor({ timeout: 8000 });
+  await g1.p.getByRole("button", { name: "React: Fire" }).click();
+  await host.p.getByText(/reacted: Fire/).waitFor({ timeout: 8000 });
   await host.p.waitForTimeout(400);
   await host.snap("host-sees-spatial-reaction-caption");
   assert(true, "reaction reaches the host with a caption");
@@ -177,7 +177,7 @@ try {
   await g1.p.getByRole("button", { name: `Report ${nick2}` }).click();
   await g1.snap("guest1-report-reasons");
   await g1.p.getByRole("button", { name: "Harassment or following me" }).click();
-  await g1.p.getByText(/A moderator will look at it/).waitFor({ timeout: 8000 });
+  await g1.p.getByText(/a moderator will look/i).waitFor({ timeout: 8000 });
   await g1.snap("guest1-report-sent");
   const reportsAfter = Number(sql(`select count(*) from "ModerationItem" where kind='VR_PRESENCE_REPORT'`));
   assert(reportsAfter === reportsBefore + 1, `report landed in the moderation queue (${reportsBefore} → ${reportsAfter})`);
@@ -190,7 +190,7 @@ try {
   await host.p.getByRole("button", { name: `Mute ${nick2}` }).click();
   await host.p.getByRole("button", { name: `Unmute ${nick2}` }).waitFor();
   await g2.p.getByText(/The host paused your reactions/).waitFor({ timeout: 8000 });
-  assert(await g2.p.getByRole("button", { name: "React 🔥" }).isDisabled(), "muted guest's reaction buttons are paused");
+  assert(await g2.p.getByRole("button", { name: "React: Fire" }).isDisabled(), "muted guest's reaction buttons are paused");
   await g2.snap("guest2-muted");
   await host.p.getByRole("button", { name: `Remove ${nick2}` }).click();
   await g2.p.getByText(/The host removed you/).waitFor({ timeout: 8000 });

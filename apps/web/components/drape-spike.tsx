@@ -4,6 +4,7 @@ import { isExpectedText, LimitState } from "@/components/limit-state";
 import { useEffect, useState } from "react";
 import { Twin3dViewer } from "@/components/twin3d-viewer";
 import { api } from "@/lib/api";
+import { Icon } from "@/components/icons";
 
 /**
  * R4 spike (not committed): physics drape + fit heatmap + tailor pattern-to-3D.
@@ -12,9 +13,9 @@ import { api } from "@/lib/api";
  */
 
 export const GARMENTS = [
-  { key: "a_line_dress", label: "A-line dress", icon: "👗" },
-  { key: "wrap_skirt", label: "Wrap skirt", icon: "🌀" },
-  { key: "shirt", label: "Shirt", icon: "👕" },
+  { key: "a_line_dress", label: "A-line dress" },
+  { key: "wrap_skirt", label: "Wrap skirt" },
+  { key: "shirt", label: "Shirt" },
 ] as const;
 export const FABRICS = [
   { key: "cotton", label: "Cotton" },
@@ -105,7 +106,7 @@ const rgbCss = (rgb: number[]) => `rgb(${rgb.map((c) => Math.round(c * 255)).joi
 export function ExperimentalBadge({ tone = "dark" }: { tone?: "dark" | "light" }) {
   return (
     <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide ${tone === "dark" ? "bg-violet-400/20 text-violet-100 ring-1 ring-violet-300/40" : "bg-violet-100 text-violet-900 ring-1 ring-violet-300"}`}>
-      🧪 Experimental
+      <Icon name="wand" className="size-3.5" /> Experimental
     </span>
   );
 }
@@ -174,7 +175,7 @@ export function DrapeStage({ r, alt, defaultMode = "heatmap", badge, tone = "dar
               onClick={() => setMode(m)}
               className={`min-h-11 rounded-full px-4 text-sm font-semibold transition ${tone === "dark" ? (mode === m ? "bg-white/20 text-white" : "text-white/70") : mode === m ? "bg-stone-900 text-white" : "text-stone-700"}`}
             >
-              {m === "heatmap" ? "🌡️ Fit heatmap" : "🎨 Print"}
+              <span className="inline-flex items-center gap-1.5"><Icon name={m === "heatmap" ? "layers" : "palette"} className="size-4" />{m === "heatmap" ? "Fit heatmap" : "Print"}</span>
             </button>
           ))}
         </div>
@@ -238,7 +239,7 @@ export function TwinDrapePanel({ bodySize }: { bodySize: string | null }) {
       <div className="flex items-start justify-between gap-2">
         <div>
           <h2 id="drape-spike-title" className="font-display text-lg font-black">Physics fit preview</h2>
-          <p className="text-xs text-mut">Sewn from a real pattern and draped by a cloth simulation on your twin&apos;s body.</p>
+          <p className="text-xs text-mut">Real pattern · cloth simulation</p>
         </div>
         <ExperimentalBadge />
       </div>
@@ -246,16 +247,16 @@ export function TwinDrapePanel({ bodySize }: { bodySize: string | null }) {
       <Pills label="Size" options={SIZES.map((s) => ({ key: s, label: s }))} value={size} onChange={setSize} tone="dark" />
       <Pills label="Fabric" options={FABRICS} value={fabric} onChange={setFabric} tone="dark" />
       <button onClick={run} disabled={busy} className="grad-cta min-h-12 w-full rounded-2xl font-bold transition active:scale-[.98] disabled:opacity-60">
-        {busy ? "Sewing and draping…" : r ? "Drape again" : "🧵 Drape it on my twin"}
+        {busy ? "Sewing and draping…" : r ? "Drape again" : <><Icon name="needle" className="size-5" /> Drape it on my twin</>}
       </button>
       {error && (isExpectedText(error) ? <LimitState error={error} /> : <p role="alert" className="text-sm text-rose-300">{error}</p>)}
       {busy && !r && <div className="skeleton h-[min(64dvh,580px)] w-full rounded-[32px]" role="status" aria-label="Simulating drape" />}
       {r && (
         <div className="space-y-3">
-          <DrapeStage r={r} badge="🧊 Your 3D twin" alt={`Your 3D twin in a ${GARMENTS.find((g) => g.key === r.garment)?.label}, size ${r.size}, ${fabric}`} />
+          <DrapeStage r={r} badge="Your 3D twin" alt={`Your 3D twin in a ${GARMENTS.find((g) => g.key === r.garment)?.label}, size ${r.size}, ${fabric}`} />
           <FitReadings r={r} />
           <FitLegend legend={r.legend} share={r.fit.share} />
-          <p className="rounded-2xl bg-white/5 p-3 text-xs text-mut" role="note">⚠️ {r.disclaimer} Size {r.size} on your twin · draped in {r.metrics.runtime_s.toFixed(1)} s · not saved.</p>
+          <p className="rounded-2xl bg-white/5 p-3 text-xs text-mut" role="note">{r.disclaimer} Size {r.size} on your twin · draped in {r.metrics.runtime_s.toFixed(1)} s · not saved.</p>
         </div>
       )}
     </section>
@@ -305,13 +306,13 @@ export function PatternPreview3D({ orderId, shareActive, defaultGarment }: { ord
     <section aria-labelledby="pattern-3d-title" className="space-y-4 rounded-3xl bg-white p-4 shadow-sm ring-1 ring-stone-200" data-testid="pattern-preview-3d">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h3 id="pattern-3d-title" className="text-lg font-black">✂️ Preview pattern in 3D</h3>
-          <p className="text-sm text-stone-600">Adjust the pattern, then see it sewn and draped on a body sized from the shared measurements.</p>
+          <h3 id="pattern-3d-title" className="flex items-center gap-2 text-lg font-black"><Icon name="scissors" className="size-5" /> Preview pattern in 3D</h3>
+          <p className="text-sm text-stone-600">Sewn and draped on the shared measurements</p>
         </div>
         <ExperimentalBadge tone="light" />
       </div>
       {!shareActive ? (
-        <p className="rounded-2xl bg-stone-50 p-3 text-sm text-stone-700 ring-1 ring-stone-200">Available only while the customer&apos;s measurement share for this order is active.</p>
+        <p className="rounded-2xl bg-stone-50 p-3 text-sm text-stone-700 ring-1 ring-stone-200">Needs an active measurement share</p>
       ) : (
         <>
           <Pills label="Pattern" options={GARMENTS} value={g} onChange={(v) => { setGarment(v); setLength(null); setSleeve(null); }} tone="light" />
@@ -334,17 +335,17 @@ export function PatternPreview3D({ orderId, shareActive, defaultGarment }: { ord
           {g !== "wrap_skirt" && <Pills label="Sleeve" options={SLEEVES} value={sleeve ?? (g === "shirt" ? "short" : "none")} onChange={setSleeve} tone="light" />}
           <Pills label="Fabric" options={FABRICS} value={fabric} onChange={setFabric} tone="light" />
           <button type="button" onClick={run} disabled={busy} className="min-h-14 w-full rounded-2xl bg-stone-900 text-base font-bold text-white transition active:scale-[.98] disabled:opacity-60">
-            {busy ? "Sewing and draping…" : r ? "Update 3D preview" : "🧵 Preview in 3D"}
+            {busy ? "Sewing and draping…" : r ? "Update 3D preview" : <><Icon name="needle" className="size-5" /> Preview in 3D</>}
           </button>
           {error && (isExpectedText(error) ? <LimitState error={error} /> : <p role="alert" className="text-sm font-semibold text-rose-700">{error}</p>)}
           {busy && !r && <div className="h-80 animate-pulse rounded-[32px] bg-stone-200" role="status" aria-label="Simulating drape" />}
           {r && (
             <div className="space-y-3">
-              <DrapeStage r={r} tone="light" badge="🧍 Synthetic body" alt={`Pattern preview: ${GARMENTS.find((x) => x.key === r.garment)?.label} on a synthetic body sized from the shared measurements`} />
+              <DrapeStage r={r} tone="light" badge="Synthetic body" alt={`Pattern preview: ${GARMENTS.find((x) => x.key === r.garment)?.label} on a synthetic body sized from the shared measurements`} />
               <FitReadings r={r} tone="light" />
               <FitLegend legend={r.legend} share={r.fit.share} tone="light" />
               <p className="rounded-2xl bg-amber-50 p-3 text-xs text-amber-950 ring-1 ring-amber-200" role="note">
-                ⚠️ {r.disclaimer} Synthetic body from the shared measurements only, never the customer&apos;s photos or 3D twin. Nothing is saved; each preview is logged like a measurement view.
+                {r.disclaimer} Synthetic body from the shared measurements only, never the customer&apos;s photos or 3D twin. Nothing is saved; each preview is logged like a measurement view.
               </p>
             </div>
           )}

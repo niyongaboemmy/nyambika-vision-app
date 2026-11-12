@@ -1,6 +1,7 @@
 "use client";
 
 import { REACTIONS, type PresenceMember } from "@nyambika/contracts";
+import { vrReaction } from "@/lib/vr-reactions";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Sheet } from "@/components/ui";
@@ -9,6 +10,7 @@ import type { ShowroomEngine } from "@/components/vr-engine";
 import { api } from "@/lib/api";
 import { CLOSE_TEXT, PresenceClient, type PresenceEvent } from "@/lib/presence";
 import { prefersReducedMotion } from "@/lib/xr";
+import { Icon } from "@/components/icons";
 
 type Phase = "idle" | "joining" | "in" | "closed";
 const WHY = [
@@ -93,7 +95,7 @@ export function SharedRoom({ engine, room, signedIn, signInHref, seated, show }:
           return;
         case "react":
           L?.react(e.sid, e.e);
-          if (cc) caption(`${nicks.current.get(e.sid) ?? "Someone"} reacted ${e.e}`);
+          if (cc) caption(`${nicks.current.get(e.sid) ?? "Someone"} reacted: ${vrReaction(e.e).label}`);
           return;
         case "mute":
           setMembers((p) => {
@@ -112,7 +114,7 @@ export function SharedRoom({ engine, room, signedIn, signInHref, seated, show }:
           navigator.vibrate?.([12, 40, 12]);
           return;
         case "reported":
-          setNote("Thanks. A moderator will look at it. You can also hide them for yourself.");
+          setNote("Thanks · a moderator will look · you can also hide them");
           return;
         case "error":
           setNote(e.msg);
@@ -199,18 +201,18 @@ export function SharedRoom({ engine, room, signedIn, signInHref, seated, show }:
       <div className="absolute right-3 top-[84px] z-20 flex flex-col items-end gap-2">
         {phase === "in" ? (
           <button onClick={() => setPeople(true)} className="glass flex min-h-11 items-center gap-2 rounded-full px-4 text-sm font-bold" aria-label={`${count} people in this shared room. Open the people list`}>
-            <span className="size-2 rounded-full bg-mint shadow-[0_0_8px_#2dd4bf]" aria-hidden /> 👥 {count} here
+            <span className="size-2 rounded-full bg-mint shadow-[0_0_8px_#2dd4bf]" aria-hidden /> <Icon name="users" className="size-4" /> {count} here
           </button>
         ) : (
           <button onClick={() => setIntro(true)} disabled={phase === "joining"} className="glass flex min-h-11 items-center gap-2 rounded-full px-4 text-sm font-bold disabled:opacity-60">
-            👥 {phase === "joining" ? "Joining…" : "Shared room"} <span className="rounded-full bg-violet/30 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-txt/90">test</span>
+            <Icon name="users" className="size-4" /> {phase === "joining" ? "Joining…" : "Shared room"} <span className="rounded-full bg-violet/30 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-txt/90">test</span>
           </button>
         )}
         {phase === "in" && you?.seat === "avatar" && (
           <div role="group" aria-label="Send a reaction" className="glass flex flex-col gap-1 rounded-full p-1">
             {REACTIONS.map((e) => (
-              <button key={e} onClick={() => react(e)} disabled={you.muted} aria-label={`React ${e}`} className="grid size-11 place-items-center rounded-full text-xl transition active:scale-75 disabled:opacity-40">
-                {e}
+              <button key={e} onClick={() => react(e)} disabled={you.muted} aria-label={`React: ${vrReaction(e).label}`} className="press grid size-11 place-items-center rounded-full transition active:scale-75 disabled:opacity-40" style={{ color: vrReaction(e).color }}>
+                <Icon name={vrReaction(e).icon} filled className="size-5" />
               </button>
             ))}
           </div>
@@ -231,7 +233,7 @@ export function SharedRoom({ engine, room, signedIn, signInHref, seated, show }:
         <div className="absolute inset-x-3 top-[140px] z-20 mx-auto max-w-[420px] animate-rise" role="status">
           <div className="glass flex items-center gap-3 rounded-3xl p-3">
             <span className="text-2xl" aria-hidden>
-              💃
+              <Icon name="dress" className="size-6 text-gold" />
             </span>
             <p className="min-w-0 flex-1 text-sm font-bold">The runway is starting</p>
             {show && (
@@ -259,10 +261,10 @@ export function SharedRoom({ engine, room, signedIn, signInHref, seated, show }:
         <h2 className="font-display text-2xl font-black">Shared room</h2>
         <p className="mt-1 inline-block rounded-full bg-violet/25 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide">Experimental test</p>
         <ul className="mt-3 space-y-2 text-sm text-txt/90">
-          <li>🎭 You appear as a simple synthetic avatar with a made-up name. Nobody sees your name, number, photo, twin or measurements.</li>
-          <li>👏 No voice and no chat: only emoji reactions.</li>
-          <li>🫧 A personal-space bubble fades anyone who comes too close. You can hide or report anyone.</li>
-          <li>★ The maker hosts the room and can pause reactions or remove people.</li>
+          <li>Synthetic avatar, made-up name · nothing personal shown</li>
+          <li>No voice, no chat · reactions only</li>
+          <li>Personal-space bubble · hide or report anyone</li>
+          <li>★ Hosted by the maker</li>
         </ul>
         {signedIn ? (
           <>
@@ -287,7 +289,7 @@ export function SharedRoom({ engine, room, signedIn, signInHref, seated, show }:
         {reporting ? (
           <fieldset>
             <legend className="font-display text-xl font-black">Report {reporting.nick}</legend>
-            <p className="mt-1 text-xs text-mut">Goes to Nyambika moderators with what just happened in the room. They won&apos;t know it was you.</p>
+            <p className="mt-1 text-xs text-mut">Sent to moderators · anonymous</p>
             <div className="mt-3 grid gap-2">
               {WHY.map((w) => (
                 <button
@@ -318,7 +320,7 @@ export function SharedRoom({ engine, room, signedIn, signInHref, seated, show }:
             {note && <p className="mt-2 rounded-2xl bg-white/5 p-2 text-xs" role="status">{note}</p>}
             {host && show && (
               <button onClick={() => client.current?.send({ t: "h", a: "runway", show: show.id })} className="grad-cta mt-3 flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl font-bold">
-                ▶ Start the runway · {show.title}
+                <Icon name="play" className="mr-1 inline size-4 align-[-3px]" filled />Start the runway · {show.title}
               </button>
             )}
             <ul className="mt-3 max-h-[42dvh] space-y-2 overflow-y-auto" aria-label="People">
@@ -382,13 +384,13 @@ export function SharedRoom({ engine, room, signedIn, signInHref, seated, show }:
             <fieldset className="mt-3 flex flex-wrap gap-2">
               <legend className="sr-only">Comfort</legend>
               <button aria-pressed={bubble} onClick={() => setBubble(!bubble)} className={`min-h-10 rounded-full px-3 text-xs font-bold ${bubble ? "bg-gold text-ink" : "bg-white/10"}`}>
-                🫧 Personal space
+                Personal space
               </button>
               <button aria-pressed={cc} onClick={() => setCc(!cc)} className={`min-h-10 rounded-full px-3 text-xs font-bold ${cc ? "bg-gold text-ink" : "bg-white/10"}`}>
                 CC Captions
               </button>
             </fieldset>
-            <p className="mt-3 text-[11px] text-mut">Experimental shared room. Everyone is a synthetic avatar with a made-up name. No voice, no chat.</p>
+            <p className="mt-3 text-[11px] text-mut">Experimental shared room · synthetic avatars · no voice or chat</p>
           </>
         )}
       </Sheet>

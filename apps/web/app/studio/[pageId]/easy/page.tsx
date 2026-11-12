@@ -3,7 +3,7 @@
 import { isExpectedText, LimitState } from "@/components/limit-state";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
-import { ScreenSkeleton } from "@/components/studio";
+import { Icon, ScreenSkeleton, type IconName } from "@/components/studio";
 import { api, rwf } from "@/lib/api";
 import { speak, type CoopMe, type Statement } from "@/lib/growth";
 import { useManagedPage } from "../layout";
@@ -136,7 +136,7 @@ function Easy() {
     <div className="mx-auto max-w-xl space-y-5 pb-6">
       {assist && (
         <p className="flex items-center gap-2 rounded-2xl bg-violet-50 p-3 text-sm font-bold text-violet-ink ring-1 ring-inset ring-violet-200">
-          <span aria-hidden>🤝</span> Helping {data.maker.name} with their consent{data.grant ? ` · until ${new Date(data.grant.expiresAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}` : ""} · every step is logged
+          <Icon name="hand" className="size-5 shrink-0" /> Helping {data.maker.name} with their consent{data.grant ? ` · until ${new Date(data.grant.expiresAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}` : ""} · logged
         </p>
       )}
       {screen === "home" && (
@@ -148,15 +148,15 @@ function Easy() {
           </header>
           {data.pendingAssist && !assist && <ConsentAsk pageId={page.id} ask={data.pendingAssist} l={l} say={say} onDone={load} />}
           <div className="grid grid-cols-2 gap-4">
-            <Tile shape="circle" color="#E0703F" emoji="📷" label={S.add[l]} onClick={() => go("add", S.add[l])} />
-            <Tile shape="square" color="#159A66" emoji="💰" label={S.money[l]} onClick={() => go("money", S.money[l])} />
-            <Tile shape="diamond" color="#6239C9" emoji="📦" label={S.orders[l]} badge={data.orders.length} onClick={() => go("orders", S.orders[l])} />
-            <Tile shape="pill" color="#C48A10" emoji="🔊" label={S.help[l]} onClick={() => go("help", S.helpText[l])} />
+            <Tile shape="circle" color="#C0562B" icon="camera" label={S.add[l]} onClick={() => go("add", S.add[l])} />
+            <Tile shape="square" color="#14825A" icon="cash" label={S.money[l]} onClick={() => go("money", S.money[l])} />
+            <Tile shape="diamond" color="#6239C9" icon="box" label={S.orders[l]} badge={data.orders.length} onClick={() => go("orders", S.orders[l])} />
+            <Tile shape="pill" color="#A8700C" icon="volume" label={S.help[l]} onClick={() => go("help", S.helpText[l])} />
           </div>
           {!assist && (
             <button
               type="button"
-              className="mx-auto block text-sm font-bold text-cocoa-2 underline"
+              className="mx-auto flex min-h-11 items-center px-4 text-sm font-bold text-cocoa-2 underline underline-offset-4"
               onClick={() => {
                 try {
                   sessionStorage.setItem("nya_easy_off", "1");
@@ -177,7 +177,7 @@ function Easy() {
       {screen === "orders" && <Orders pageId={page.id} data={data} assist={assist} l={l} say={say} onDone={load} />}
       {screen === "help" && (
         <section className="space-y-4 rounded-[28px] bg-amber-50 p-6 text-center ring-1 ring-inset ring-amber-200">
-          <p className="text-6xl" aria-hidden>🔊</p>
+          <span aria-hidden className="mx-auto grid size-20 place-items-center rounded-[24px] bg-[#A8700C] text-[#fff]"><Icon name="volume" className="size-10" /></span>
           <p className="text-xl font-bold leading-relaxed text-cocoa">{S.helpText[l]}</p>
           <p className="font-mono text-4xl font-black tracking-widest text-cocoa">*775#</p>
           <SpeakButton big onClick={() => say(S.helpText[l])} label={S.listen[l]} />
@@ -189,8 +189,8 @@ function Easy() {
 
 function SpeakButton({ onClick, label, big }: { onClick: () => void; label: string; big?: boolean }) {
   return (
-    <button type="button" onClick={onClick} aria-label={label} className={`st-press grid shrink-0 place-items-center rounded-full bg-cocoa text-white shadow-lg ${big ? "mx-auto size-20 text-3xl" : "size-14 text-2xl"}`}>
-      <span aria-hidden>🔊</span>
+    <button type="button" onClick={onClick} aria-label={label} className={`st-press grid shrink-0 place-items-center rounded-full bg-cocoa text-white shadow-lg ${big ? "mx-auto size-20" : "size-14"}`}>
+      <Icon name="volume" className={big ? "size-9" : "size-7"} />
     </button>
   );
 }
@@ -198,7 +198,7 @@ function SpeakButton({ onClick, label, big }: { onClick: () => void; label: stri
 function BackBar({ label, onBack }: { label: string; onBack: () => void }) {
   return (
     <button type="button" onClick={onBack} className="st-press flex min-h-14 items-center gap-3 rounded-2xl bg-white px-4 text-lg font-extrabold text-cocoa ring-1 ring-inset ring-hairline">
-      <span aria-hidden className="text-2xl">⬅️</span> {label}
+      <Icon name="back" className="size-6" /> {label}
     </button>
   );
 }
@@ -211,11 +211,11 @@ const SHAPE: Record<string, string> = {
 };
 
 /** Big home tile: colour + shape coding so makers recognise it without reading. */
-function Tile({ emoji, label, color, shape, badge, onClick }: { emoji: string; label: string; color: string; shape: keyof typeof SHAPE; badge?: number; onClick: () => void }) {
+function Tile({ icon, label, color, shape, badge, onClick }: { icon: IconName; label: string; color: string; shape: keyof typeof SHAPE; badge?: number; onClick: () => void }) {
   return (
     <button type="button" onClick={onClick} className="st-press st-card relative flex aspect-square flex-col items-center justify-center gap-3 rounded-[32px] p-3 text-center" style={{ boxShadow: `inset 0 -6px 0 ${color}22` }}>
-      <span className={`grid size-[74px] place-items-center ${SHAPE[shape]}`} style={{ background: color }}>
-        <span className={`text-4xl ${shape === "diamond" ? "-rotate-45" : ""}`} aria-hidden>{emoji}</span>
+      <span className={`grid size-[74px] place-items-center text-[#fff] shadow-[0_8px_18px_-8px_rgba(0,0,0,.45)] ${SHAPE[shape]}`} style={{ background: color }}>
+        <span className={`grid place-items-center ${shape === "diamond" ? "-rotate-45" : ""}`} aria-hidden><Icon name={icon} className="size-9" /></span>
       </span>
       <span className="font-display text-xl font-black leading-tight text-cocoa">{label}</span>
       {badge ? <span className="absolute right-4 top-4 grid size-9 place-items-center rounded-full bg-terra-ink text-lg font-black text-white ring-4 ring-white" aria-label={`${badge}`}>{badge}</span> : null}
@@ -231,14 +231,14 @@ function ConsentAsk({ pageId, ask, l, say, onDone }: { pageId: string; ask: NonN
   return (
     <section className="space-y-3 rounded-[28px] bg-violet-50 p-5 ring-2 ring-inset ring-violet-200">
       <div className="flex items-center gap-3">
-        <span className="text-4xl" aria-hidden>🤝</span>
+        <span aria-hidden className="grid size-12 shrink-0 place-items-center rounded-2xl bg-violet-ink text-[#fff]"><Icon name="hand" className="size-7" /></span>
         <p className="flex-1 text-lg font-extrabold text-cocoa">{ask.adminName} {S.askHelp[l]}</p>
         <SpeakButton onClick={() => say(ask.consentText)} label={S.listen[l]} />
       </div>
       <p className="text-sm leading-relaxed text-violet-ink">{ask.consentText}</p>
       <div className="grid grid-cols-2 gap-3">
-        <button type="button" onClick={() => answer(true)} className="st-press min-h-16 rounded-2xl bg-emerald-600 text-xl font-black text-white">👍 {S.yes[l]}</button>
-        <button type="button" onClick={() => answer(false)} className="st-press min-h-16 rounded-2xl bg-white text-xl font-black text-cocoa ring-2 ring-inset ring-hairline">👎 {S.no[l]}</button>
+        <button type="button" onClick={() => answer(true)} className="st-press flex min-h-16 items-center justify-center gap-2 rounded-2xl bg-emerald-700 text-xl font-black text-white"><Icon name="thumbsUp" className="size-6" /> {S.yes[l]}</button>
+        <button type="button" onClick={() => answer(false)} className="st-press flex min-h-16 items-center justify-center gap-2 rounded-2xl bg-white text-xl font-black text-cocoa ring-2 ring-inset ring-hairline"><Icon name="thumbsDown" className="size-6" /> {S.no[l]}</button>
       </div>
     </section>
   );
@@ -298,9 +298,9 @@ function AddFlow({ pageId, makerId, assist, l, say, onDone }: { pageId: string; 
   if (state === "sent" || state === "bad")
     return (
       <section className={`space-y-5 rounded-[32px] p-8 text-center ${state === "sent" ? "bg-emerald-50" : "bg-amber-50"}`}>
-        <p className="text-7xl" aria-hidden>{state === "sent" ? "🎉" : "💡"}</p>
+        <span aria-hidden className={`spring-pop mx-auto grid size-24 place-items-center rounded-full text-[#fff] ${state === "sent" ? "bg-emerald-700" : "bg-[#A8700C]"}`}><Icon name={state === "sent" ? "checkCircle" : "bulb"} className="size-12" /></span>
         <p className="font-display text-2xl font-black text-cocoa">{state === "sent" ? S.sent[l] : S.badPhoto[l]}</p>
-        <button type="button" onClick={onDone} className="st-press mx-auto grid size-24 place-items-center rounded-full bg-emerald-600 text-5xl text-white shadow-lg" aria-label={S.good[l]}>✓</button>
+        <button type="button" onClick={onDone} className="st-press mx-auto grid size-24 place-items-center rounded-full bg-emerald-700 text-white shadow-lg" aria-label={S.good[l]}><Icon name="check" className="size-12" /></button>
       </section>
     );
 
@@ -332,7 +332,7 @@ function AddFlow({ pageId, makerId, assist, l, say, onDone }: { pageId: string; 
           {COLOURS.map((c) => (
             <button key={c.hex} type="button" aria-pressed={colour?.hex === c.hex} aria-label={c.name[l]} onClick={() => { setColour(c); say(c.name[l]); setTimeout(() => setStep(3), 450); }} className="st-press flex flex-col items-center gap-1.5">
               <span className={`grid size-[68px] place-items-center rounded-full ring-4 ${colour?.hex === c.hex ? "ring-cocoa" : "ring-white"} shadow-md`} style={{ background: c.hex }}>
-                {colour?.hex === c.hex && <span className="text-2xl" style={{ color: c.hex === "#F4F1EA" ? "#1d1814" : "#fff" }}>✓</span>}
+                {colour?.hex === c.hex && <span style={{ color: c.hex === "#F4F1EA" ? "#1d1814" : "#fff" }}><Icon name="check" className="size-7" /></span>}
               </span>
               <span className="text-sm font-bold text-cocoa">{c.name[l]}</span>
             </button>
@@ -354,13 +354,13 @@ function AddFlow({ pageId, makerId, assist, l, say, onDone }: { pageId: string; 
           </div>
           {err && (isExpectedText(err) ? <LimitState error={err} tone="light" /> : <p className="rounded-2xl bg-red-50 p-3 font-bold text-red-800">{err}</p>)}
           <button type="button" onClick={send} disabled={state === "sending"} className="st-press st-cta flex min-h-20 w-full items-center justify-center gap-3 rounded-[28px] font-display text-2xl font-black text-white disabled:opacity-60">
-            <span aria-hidden>📤</span> {state === "sending" ? S.sending[l] : S.send[l]}
+            <Icon name="send" className="size-7" /> {state === "sending" ? S.sending[l] : S.send[l]}
           </button>
         </div>
       )}
 
       {step > 0 && step < 4 && (
-        <button type="button" onClick={() => setStep(step - 1)} className="mx-auto block min-h-12 px-4 text-base font-bold text-cocoa-2 underline">⬅️ {S.back[l]}</button>
+        <button type="button" onClick={() => setStep(step - 1)} className="st-press mx-auto flex min-h-12 items-center gap-2 px-4 text-base font-bold text-cocoa-2"><Icon name="back" className="size-5" /> {S.back[l]}</button>
       )}
     </section>
   );
@@ -413,21 +413,26 @@ function Capture({ preview, onShot, onNext, l }: { preview: string | null; onSho
             {[["M8 18V8h10"], ["M82 8h10v10"], ["M8 107v10h10"], ["M82 117h10v-10"]].map(([d]) => <path key={d} d={d} fill="none" stroke="#F2B84B" strokeWidth="2.5" strokeLinecap="round" />)}
           </svg>
         )}
-        {!preview && !live && <p className="absolute inset-x-0 bottom-6 text-center text-5xl" aria-hidden>👗☀️</p>}
+        {!preview && !live && (
+          <p className="absolute inset-x-0 bottom-6 flex justify-center gap-3 text-[#fff]" aria-hidden>
+            <Icon name="dress" className="size-12" />
+            <Icon name="sun" className="size-12 text-[#F2B84B]" />
+          </p>
+        )}
       </div>
       {preview ? (
         <div className="grid grid-cols-2 gap-3">
           <label className="st-press flex min-h-16 cursor-pointer items-center justify-center gap-2 rounded-2xl bg-white text-xl font-black text-cocoa ring-2 ring-inset ring-hairline">
-            🔄 {S.retake[l]}
+            <Icon name="refresh" className="size-6" /> {S.retake[l]}
             <input type="file" accept="image/*" capture="environment" className="sr-only" onChange={(e) => e.target.files?.[0] && onShot(e.target.files[0])} />
           </label>
-          <button type="button" onClick={onNext} className="st-press min-h-16 rounded-2xl bg-emerald-600 text-xl font-black text-white">✓ {S.good[l]}</button>
+          <button type="button" onClick={onNext} className="st-press flex min-h-16 items-center justify-center gap-2 rounded-2xl bg-emerald-700 text-xl font-black text-white"><Icon name="check" className="size-6" /> {S.good[l]}</button>
         </div>
       ) : live ? (
-        <button type="button" onClick={snap} aria-label={S.takePhoto[l]} className="st-press mx-auto grid size-24 place-items-center rounded-full bg-white text-4xl shadow-xl ring-8 ring-terra-ink/40">📷</button>
+        <button type="button" onClick={snap} aria-label={S.takePhoto[l]} className="st-press mx-auto grid size-24 place-items-center rounded-full bg-white text-cocoa shadow-xl ring-8 ring-terra-ink/40"><Icon name="camera" className="size-10" /></button>
       ) : (
         <label className="st-press st-cta flex min-h-20 cursor-pointer items-center justify-center gap-3 rounded-[28px] font-display text-2xl font-black text-white">
-          📷 {S.takePhoto[l]}
+          <Icon name="camera" className="size-8" /> {S.takePhoto[l]}
           <input type="file" accept="image/*" capture="environment" className="sr-only" aria-label={S.takePhoto[l]} onChange={(e) => e.target.files?.[0] && onShot(e.target.files[0])} />
         </label>
       )}
@@ -454,7 +459,7 @@ function NumberPad({ value, onChange, onDone, l }: { value: string; onChange: (v
           </button>
         ))}
       </div>
-      <button type="button" disabled={!value || Number(value) < 500} onClick={onDone} className="st-press flex min-h-16 w-full items-center justify-center gap-2 rounded-[24px] bg-emerald-600 text-2xl font-black text-white disabled:opacity-40">✓ {S.good[l]}</button>
+      <button type="button" disabled={!value || Number(value) < 500} onClick={onDone} className="st-press flex min-h-16 w-full items-center justify-center gap-2 rounded-[24px] bg-emerald-700 text-2xl font-black text-white disabled:opacity-40"><Icon name="check" className="size-7" /> {S.good[l]}</button>
     </div>
   );
 }
@@ -477,13 +482,13 @@ function Money({ pageId, makerId, data, l, say }: { pageId: string; makerId: str
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div className="st-card rounded-[26px] p-4 text-center">
-          <p className="text-4xl" aria-hidden>📅</p>
+          <span aria-hidden className="mx-auto grid size-12 place-items-center rounded-2xl bg-violet-ink text-[#fff]"><Icon name="calendar" className="size-7" /></span>
           <p className="mt-1 text-sm font-bold text-cocoa-2">{S.coopPays[l]}</p>
           <p className="font-display text-2xl font-black text-cocoa">{data.payout.nextRwf.toLocaleString("en-US")}</p>
           <p className="text-sm font-bold text-violet-ink">{next}</p>
         </div>
         <div className="st-card rounded-[26px] p-4 text-center">
-          <p className="text-4xl" aria-hidden>📱</p>
+          <span aria-hidden className="mx-auto grid size-12 place-items-center rounded-2xl bg-[#14825A] text-[#fff]"><Icon name="phone" className="size-7" /></span>
           <p className="mt-1 text-sm font-bold text-cocoa-2">{S.direct[l]}</p>
           <p className="font-display text-2xl font-black text-cocoa">{data.payout.directRwf.toLocaleString("en-US")}</p>
           <p className="text-sm font-bold text-mint-ink">MoMo</p>
@@ -493,7 +498,7 @@ function Money({ pageId, makerId, data, l, say }: { pageId: string; makerId: str
         <ul className="space-y-2">
           {st.lines.slice(-6).reverse().map((x) => (
             <li key={x.code + x.title} className="st-card flex items-center gap-3 rounded-2xl p-3">
-              <span className="text-2xl" aria-hidden>{x.route === "DIRECT" ? "📱" : "🏠"}</span>
+              <span aria-hidden className={`grid size-10 shrink-0 place-items-center rounded-xl text-[#fff] ${x.route === "DIRECT" ? "bg-[#14825A]" : "bg-violet-ink"}`}><Icon name={x.route === "DIRECT" ? "phone" : "home"} className="size-5" /></span>
               <span className="min-w-0 flex-1 truncate font-bold text-cocoa">{x.title}</span>
               <span className="font-black tabular-nums text-cocoa">{x.amountRwf.toLocaleString("en-US")}</span>
             </li>
@@ -515,7 +520,7 @@ function Orders({ pageId, data, assist, l, say, onDone }: { pageId: string; data
   if (!data.orders.length)
     return (
       <section className="rounded-[32px] bg-paper-2 p-8 text-center">
-        <p className="text-6xl" aria-hidden>📭</p>
+        <span aria-hidden className="mx-auto grid size-20 place-items-center rounded-[24px] bg-paper-3 text-cocoa-2"><Icon name="inbox" className="size-10" /></span>
         <p className="mt-3 text-xl font-black text-cocoa">{done ? S.accepted[l] : S.noOrders[l]}</p>
       </section>
     );
@@ -524,7 +529,7 @@ function Orders({ pageId, data, assist, l, say, onDone }: { pageId: string; data
       {data.orders.map((o) => (
         <li key={o.id} className="st-card space-y-3 rounded-[28px] p-5">
           <div className="flex items-center gap-3">
-            <span className="text-4xl" aria-hidden>📦</span>
+            <span aria-hidden className="grid size-12 shrink-0 place-items-center rounded-[16px] bg-[#6239C9] text-[#fff]"><Icon name="box" className="size-7" /></span>
             <div className="min-w-0 flex-1">
               <p className="truncate text-xl font-black text-cocoa">{o.title}</p>
               <p className="text-base font-bold text-cocoa-2">{o.colour} · {o.size} · {o.code}</p>
@@ -532,7 +537,7 @@ function Orders({ pageId, data, assist, l, say, onDone }: { pageId: string; data
             <SpeakButton onClick={() => say(`${o.title}, ${o.size}, ${o.totalRwf} RWF`)} label={S.listen[l]} />
           </div>
           <p className="font-display text-3xl font-black text-cocoa">{rwf(o.totalRwf)}</p>
-          <button type="button" onClick={() => accept(o.id)} className="st-press flex min-h-16 w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 text-2xl font-black text-white">👍 {S.accept[l]}</button>
+          <button type="button" onClick={() => accept(o.id)} className="st-press flex min-h-16 w-full items-center justify-center gap-2 rounded-2xl bg-emerald-700 text-2xl font-black text-white"><Icon name="thumbsUp" className="size-7" /> {S.accept[l]}</button>
         </li>
       ))}
     </ul>
