@@ -102,7 +102,9 @@ def landmarks(mask: np.ndarray, box) -> Body:
 # Where each canonical garment class should sit, as fractions of body height measured from the top of the head.
 # collar: top edge of the garment; hem: allowed band for its lower edge. Used by the guard and the eval.
 PLACEMENT = {
-    "top": {"anchor": "neck", "hem": (0.40, 0.66)},
+    # Tops: up to the upper thigh. Long shirts and tunics land at 0.66–0.68 after warp and per-body measurement;
+    # a top stretched into a dress box reaches ~0.72+, which still fails.
+    "top": {"anchor": "neck", "hem": (0.40, 0.70)},
     "dress": {"anchor": "neck", "hem": (0.55, 1.02)},
     "skirt": {"anchor": "waist", "hem": (0.55, 1.02)},
 }

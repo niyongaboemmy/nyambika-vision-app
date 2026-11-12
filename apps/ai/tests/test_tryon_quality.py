@@ -184,3 +184,13 @@ def test_tryon_endpoint_reports_placement(client, assets):
                                        "garment_category": "Kitenge Shirt"}).json()
     assert r["status"] == "DELIVERED", r["guard"]
     assert r["guard"]["placement"]["class"] == "top"
+
+
+def test_top_hem_band_allows_long_shirts_but_not_dress_length():
+    # Regression: wardrobe outfits with a long shirt (hem 0.66–0.68 of body height) were withheld as
+    # placement_implausible. Tunic length is plausible; a top stretched into a dress box (~0.72+) is not.
+    from app.landmarks import PLACEMENT
+
+    lo, hi = PLACEMENT["top"]["hem"]
+    assert lo <= 0.676 <= hi
+    assert not (lo <= 0.72 <= hi)
