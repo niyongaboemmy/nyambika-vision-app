@@ -45,7 +45,7 @@ export default function RegionsAdmin() {
   const { me, loading } = useSession();
   const router = useRouter();
   useEffect(() => {
-    if (!loading && !me?.isHost) router.replace("/signin?next=/admin/regions");
+    if (!loading && !me?.isHost) router.replace(`/signin?next=${encodeURIComponent(window.location.pathname + window.location.search)}`);
   }, [loading, me, router]);
   const { data, reload } = useApi<Overview>(me?.isHost ? "/admin/regions" : null);
   const [code, setCode] = useState("KE");

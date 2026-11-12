@@ -1,5 +1,6 @@
 "use client";
 
+import { BackButton } from "@/components/back-link";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
@@ -57,9 +58,7 @@ function ProductDetail() {
   return (
     <div className="space-y-5">
       <div className="flex items-center gap-3">
-        <Link href={`/studio/${page.id}/products`} aria-label="Back to products" className="st-press grid size-11 shrink-0 place-items-center rounded-full bg-white text-cocoa">
-          <Icon name="back" className="size-5" />
-        </Link>
+        <BackButton fallback={`/studio/${page.id}/products`} label="Back to products" className="st-press grid size-11 shrink-0 place-items-center rounded-full bg-white text-cocoa" />
         <div className="min-w-0 flex-1">
           <Steps steps={EDITOR_STEPS} current={step} label="Product steps" />
         </div>

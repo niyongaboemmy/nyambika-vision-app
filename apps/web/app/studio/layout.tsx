@@ -11,7 +11,7 @@ export default function StudioLayout({ children }: { children: React.ReactNode }
   const router = useRouter();
   const path = usePathname();
   useEffect(() => {
-    if (!loading && !me) router.replace(`/signin?next=${encodeURIComponent(path)}`);
+    if (!loading && !me) router.replace(`/signin?next=${encodeURIComponent(path + window.location.search)}`); // keep ?filter / ?tab
   }, [loading, me, router, path]);
   return (
     <div className="theme-light st-app min-h-dvh overflow-x-clip text-cocoa">

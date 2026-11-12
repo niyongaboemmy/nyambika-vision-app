@@ -8,6 +8,7 @@ import dynamic from "next/dynamic";
 import { recallFriendly } from "@/lib/api-errors";
 import { Icon } from "@/components/icons";
 import { useSheetDrag } from "@/lib/sheet-drag";
+import { BackLink } from "./back-link";
 
 // The limit card only renders after a failed call, so it loads on demand (keeps core routes' first-load JS down).
 const LimitState = dynamic(() => import("./limit-state").then((m) => m.LimitState), { ssr: false });
@@ -73,23 +74,7 @@ export function TopBar({ title, back, right, large = false, onBack }: { title?: 
   );
 }
 
-/** A back control: plain link semantics (modifier clicks open the href), smart back on a normal click. */
-export function BackLink({ href, onBack, className, label = "Back", children }: { href: string; onBack: () => void; className?: string; label?: string; children?: ReactNode }) {
-  return (
-    <a
-      href={href}
-      aria-label={label}
-      className={className}
-      onClick={(e) => {
-        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
-        e.preventDefault();
-        onBack();
-      }}
-    >
-      {children ?? <Icon name="back" className="size-5" />}
-    </a>
-  );
-}
+export { BackButton, BackLink } from "./back-link";
 
 // Button lives in button.tsx (no client code: pages can import it without the rest of this kit, JS budget pass).
 export { Button } from "./button";

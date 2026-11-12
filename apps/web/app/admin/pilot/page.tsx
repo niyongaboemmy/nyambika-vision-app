@@ -98,7 +98,7 @@ export default function PilotAdmin() {
   const { me, loading } = useSession();
   const router = useRouter();
   useEffect(() => {
-    if (!loading && !me?.isHost) router.replace("/signin?next=/admin/pilot");
+    if (!loading && !me?.isHost) router.replace(`/signin?next=${encodeURIComponent(window.location.pathname + window.location.search)}`);
   }, [loading, me, router]);
   const { data, reload, error } = useApi<Summary>(me?.isHost ? "/admin/pilot" : null);
   if (!me?.isHost) return null;
