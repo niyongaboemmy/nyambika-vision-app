@@ -1,6 +1,6 @@
 // Try-on quality pass: the seeded plain tee (dark colourway) on synthetic personas 3 and 5, from the maker page.
 // Usage: BASE_URL=http://localhost:3102 node scripts/crawl-tryonq.mjs
-import { BASE, signIn, start } from "./crawl-lib.mjs";
+import { BASE, openMakerPiece, signIn, start } from "./crawl-lib.mjs";
 
 const { page, shot, finish } = await start("tryonq");
 
@@ -14,20 +14,7 @@ for (const persona of [3, 5]) {
   await page.getByText(/your twin is ready/i).waitFor({ timeout: 20000 });
 
   await page.goto(`${BASE}/m/kanombe-kitenge-corner`);
-  // The collection is a 3D carousel (+-2 cards rendered): step right until the tee is centred, then tap it.
-  for (let step = 0; step < 15; step++) {
-    const tee = page.getByRole("option", { name: /Plain cotton tee/ });
-    if (await tee.count()) {
-      if ((await tee.getAttribute("aria-selected")) === "true") {
-        await tee.click();
-        break;
-      }
-      await tee.click();
-    } else {
-      await page.getByRole("option").last().click();
-    }
-    await page.waitForTimeout(350);
-  }
+  await openMakerPiece(page, /Plain cotton tee/); // hero "N pieces" sheet
   await page.getByRole("button", { name: /try on me/i }).waitFor();
   if (persona === 3) await shot("tee-product-sheet");
   await page.getByRole("button", { name: /try on me/i }).click();

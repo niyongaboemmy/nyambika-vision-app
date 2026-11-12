@@ -804,3 +804,60 @@ Global text rules (`globals.css`, polish block):
 - The other crawls (s1–s5, studio-ui, …) were not re-run here. The change is class-only, and accessible names are
   unchanged apart from the order action "Ready" (s4 clicks Accept / Start making / Send out / Mark delivered, not
   Ready). The dock keeps its full labels as accessible names, so s1's "My products" still resolves.
+
+## 9. Maker Space redesign: showroom-first, one 3D representation (Nov 2026)
+
+The user asked, in their words: "now, redesign this page, and make it more modern, and guiding to 3D VR". After a
+first pass they added: "seems to be duplicated content. make sure have one modern 3d vr representation to orient a
+user to go in the showroom. thus, make it short page not too long. thus, keep it modern." UI only (web), no API or
+schema change. Branch `worktree-agent-aa85d1173a41e98ee` (slot 3, `makerspace`, seed: 8 fictional Kigali makers).
+
+Contact sheets: `docs/design/screens/makerspace-before.jpg` (light and dark at 390, desktop 1280) and
+`makerspace-after-{phone,desktop,flows}.jpg`.
+
+### What was wrong (before)
+
+- The maker name wrapped over two lines next to a 96 px monogram ring.
+- A loud diagonal-lattice banner in the theme colours took the top 300 px and said nothing.
+- The coverflow overlapped its cards and clipped the side labels ("Plain c…tton tee").
+- "The 3D shelf" listed the same pieces a second time, below the fold, so the way into 3D/VR was buried.
+- The Follow/Chat bar was fixed over the content and covered the shelf heading.
+
+### What it is now
+
+| Area | After |
+|---|---|
+| **Hero (the one 3D representation)** | The maker's real showroom, rendered by the same `ShowroomEngine` in a new **preview mode** (no input, no XR, a slow ±24° look-around, pausable). It is poster-first: a composed stage of the top three pieces, 3D first, as fanned rounded cards, in the page palette. The live room fades in over it only when the hero is on screen, after `load` and on idle. It stops rendering off screen or in a hidden tab. Tapping the stage enters the showroom. |
+| **Guided path** | One primary action, **Enter showroom**. **View in VR** appears beside it only when `navigator.xr.isSessionSupported("immersive-vr")`; it opens `/showroom?vr=1`, where the Enter VR button takes focus (WebXR still needs that tap). |
+| **Collection** | No second section. The hero chip **"7 pieces · 3D ›"** opens a sheet: an image-first 2-column grid (3 from 640 px), equal 4:5 cards, one-line titles, tabular prices, a **3D** badge on pieces with a model. A piece opens the existing product sheet, and closing it returns to the grid. This is also the list for keyboards, screen readers and devices without WebGL. |
+| **Product sheet** | Order changed to: **View in 3D** card, then **Buy**, then Try on me + WhatsApp. The 3D card was dark text on a dark card in light mode; it is now pinned to `theme-media`. |
+| **Identity** | Monogram tile (palette gradient, no ring) beside compact chips: type, pin + sector, star icon + rating (count), **Managed by the maker** (trust tint). The name is always one line: its size scales to the column with container units (`(100cqi − 2rem) / (0.6 × length)`, 20–36 px), and truncation (full name in `title`) is only the safety net. Verified is an icon tick. The story is one line with **more** to expand in place (native `<details>`, no script). |
+| **Fashion show** | One slim dark row: cover, LIVE or "Fashion show", title, Kigali time and a ticking `d hh:mm:ss` countdown (`role="timer"`). **RSVP** works in place (sign in first if needed) and flips to **Going**; when live it says **Watch**. |
+| **Follow / Chat** | In the identity block. A compact floating material bar (Enter showroom + Follow and Chat icons) slides in only once the hero CTA has scrolled away. It is `inert` while hidden, and the page pads its bottom so it never covers content. The page is now about 1.2–1.5 phone screens, so on most phones the bar never needs to show. |
+| **Removed** | The coverflow, the 3D shelf (`components/vr-shelf.tsx`), the lattice banner and the reviews list (the rating chip carries it; the JSON-LD keeps the aggregate rating). |
+
+### Design decisions (my recommendations, applied)
+
+1. **The live preview is the real engine, not a video or a GIF.** It reuses the showroom code and its GLB streaming,
+   so what the shopper sees is what they walk into, and the files are warm in the HTTP cache when they enter.
+   Bytes stay small: the seeded rooms are 0.5–2 MB of GLB, under the room's 25 MB budget.
+2. **Poster-first, then lazy.** No live preview on data saver, with `deviceMemory ≤ 2`, or without WebGL2. These keep
+   the composed poster. Low-end devices get the engine's `lowEnd` settings (no shadows, lower pixel ratio). Under
+   reduced motion the room holds still and stops rendering 2.5 s after the pieces are in.
+3. **One accent, calm.** The page theme gives a palette (from the showroom, or a fallback per theme). It tints the
+   hero background with radial glows and colours the monogram, and nothing else. No pattern.
+4. **The hero stays dark in both themes** (`theme-media`, like every 3D stage). The rest of the page follows the
+   light or dark theme on borderless fills (`bg-fill`, `material`).
+5. **Desktop:** the hero (7 of 12 columns, 520 px) sits beside the identity block (5 columns); the show row and the
+   tailor's services follow at full width. Max width 1120 px.
+
+### Crawls
+
+- New `scripts/crawl-makerspace.mjs`: hero + live preview, one-line name, no listbox left, pieces sheet (all
+  pieces, 3D badge), product sheet with View in 3D and Try on me, the floating bar (hidden at the top, shown after
+  scrolling at a 600 px tall viewport, not covering Follow/Chat), Enter showroom from the bar, the show row
+  countdown and RSVP → sign in → Going → RSVP, Follow/Following, View in VR → showroom with Enter VR (mocked
+  WebXR), data saver keeps the poster, and 360 px with no overflow and one-line names for the longest seeded name.
+- `crawl-lib.mjs` gained `openMakerPiece(page, name?)`. s1, s2, e05, xr, region, s5, tryonq and reseed open
+  pieces through it instead of stepping the coverflow. mig waits for the heading. vr checks the hero (live
+  preview, View in VR, show row) and enters the showroom from it instead of the shelf. growth needed no change.

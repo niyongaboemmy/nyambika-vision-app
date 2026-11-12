@@ -1,7 +1,7 @@
 // Realistic seed data: makers directory, Maker Spaces on real (credited) garment photos, the image-credit sheet,
 // the umushanana illustration, /credits, Kinyarwanda titles, a look on a seeded garment and the studio products.
 // Usage: BASE_URL=http://localhost:3103 node scripts/crawl-reseed.mjs
-import { BASE, signIn, start } from "./crawl-lib.mjs";
+import { BASE, openMakerPiece, signIn, start } from "./crawl-lib.mjs";
 
 const { page, shot, finish, issues } = await start("reseed");
 const assert = (ok, msg) => {
@@ -9,22 +9,9 @@ const assert = (ok, msg) => {
   console.log(`${ok ? "✓" : "✗"} ${msg}`);
 };
 
-/** Step the 3D carousel until the product is centred, then open its sheet. */
+/** Open the product's sheet through the hero's "N pieces" sheet. */
 async function open(title) {
-  for (let step = 0; step < 15; step++) {
-    const list = page.getByRole("listbox", { name: "Collection" });
-    const card = list.getByRole("option", { name: new RegExp(title) });
-    if (await card.count()) {
-      if ((await card.getAttribute("aria-selected")) === "true") {
-        await card.click();
-        break;
-      }
-      await card.click();
-    } else {
-      await list.getByRole("option").last().click();
-    }
-    await page.waitForTimeout(350);
-  }
+  await openMakerPiece(page, new RegExp(title));
   await page.getByRole("button", { name: /try on me/i }).waitFor();
 }
 

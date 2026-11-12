@@ -4,7 +4,7 @@
 // card checkout through the mock Stripe Payment Element → paid. Coop admin: DPP editor → new version → public
 // passport with QR + history. Kenyan maker: region & export studio. Host: country launch checklist.
 import { createRequire } from "node:module";
-import { BASE, isCrawlArtifact, signIn, start } from "./crawl-lib.mjs";
+import { BASE, isCrawlArtifact, openMakerPiece, signIn, start } from "./crawl-lib.mjs";
 
 const { devices } = createRequire(new URL("../apps/web/package.json", import.meta.url))("@playwright/test");
 const { browser, finish, issues } = await start("region");
@@ -35,8 +35,7 @@ async function ctx(label) {
   return { c, p, snap };
 }
 const openFirstProduct = async (p) => {
-  await p.locator('[role="option"][aria-selected="true"]').first().click();
-  await p.getByRole("dialog").waitFor();
+  await openMakerPiece(p); // hero "N pieces" sheet → first piece
 };
 
 // ── Kenyan shopper · KES + M-Pesa ─────────────────────────────────────────────

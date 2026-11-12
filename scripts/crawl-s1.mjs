@@ -1,5 +1,5 @@
 import { readdirSync } from "node:fs";
-import { BASE, signIn, start } from "./crawl-lib.mjs";
+import { BASE, openMakerPiece, signIn, start } from "./crawl-lib.mjs";
 
 const seedDir = new URL("../apps/api/storage/seed/", import.meta.url).pathname;
 const photo = seedDir + readdirSync(seedDir).find((f) => f.startsWith("wrap-dress-teal"));
@@ -12,9 +12,9 @@ await page.getByText("Umurage Wear").first().waitFor();
 await shot("directory");
 await page.getByText("Umurage Wear").first().click();
 await page.waitForURL(/\/m\/umurage-wear/);
-await page.getByRole("listbox", { name: "Collection" }).waitFor();
+await page.getByRole("link", { name: "Enter showroom" }).waitFor(); // showroom-first hero
 await shot("maker-space");
-await page.getByRole("listbox", { name: "Collection" }).getByRole("option", { selected: true }).click(); // the 3D shelf is a second listbox
+await openMakerPiece(page); // hero "N pieces" sheet → first piece
 await page.getByText(/order on whatsapp/i).waitFor();
 await shot("maker-product-sheet");
 

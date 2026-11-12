@@ -1,5 +1,5 @@
-// E35 Maker Space 3D shelf + VR showroom + virtual fashion shows crawl (Pixel 7, SwiftShader WebGL).
-// Maker Space 3D shelf (swipe/keys, focused GLB, open 3D viewer) → showroom inline fallback (walk, select, hold to buy
+// E35 Maker Space showroom hero + VR showroom + virtual fashion shows crawl (Pixel 7, SwiftShader WebGL).
+// Maker Space showroom hero (live preview, View in VR, show row) → showroom inline fallback (walk, select, hold to buy
 // sheet, XR hold-to-buy hand-off) with a mocked navigator.xr (Enter VR button) → studio: booth + schedule a show
 // "now" → live show watched by two viewers with live count + reactions → RSVP on the seeded show → replay.
 // Run: BASE_URL=http://localhost:3102 node scripts/crawl-vr.mjs
@@ -32,42 +32,20 @@ const mockXr = () => {
 };
 await context.addInitScript(mockXr);
 
-// ── Shopper: Maker Space 3D shelf ─────────────────────────────────────────────────────────────────────────
+// ── Shopper: Maker Space showroom-first hero (the 3D shelf was merged into it) ─────────────────────────────
 const phone = `07887${String(Date.now()).slice(-5)}`;
 await signIn(page, phone);
 await page.goto(`${BASE}/m/umurage-wear`);
-const shelf = page.getByRole("listbox", { name: /pieces in 3D/i });
-await shelf.scrollIntoViewIfNeeded();
-await page.waitForFunction(() => document.querySelector("#shelf3d-title") && document.querySelector("model-viewer")?.loaded === true, null, { timeout: 45000 });
+const heroRoom = page.getByRole("region", { name: /showroom$/ });
+// The live room preview (same engine, preview mode) fades in over the composed poster once seen.
+await page.waitForFunction(() => document.querySelector("section canvas")?.classList.contains("opacity-100"), null, { timeout: 45000 });
 await page.waitForTimeout(800);
-await shelf.screenshot({ path: new URL("./crawl-output/vr/00-shelf-close.png", import.meta.url).pathname });
-await shot("maker-space-3d-shelf");
-assert((await page.locator("model-viewer").count()) === 1, "only the focused shelf piece loads its GLB");
-const first = await page.locator('[role="option"][aria-selected="true"][id^="shelf-"]').getAttribute("aria-label");
-await shelf.focus();
-await page.keyboard.press("ArrowRight");
-await page.waitForTimeout(600);
-const second = await page.locator('[role="option"][aria-selected="true"][id^="shelf-"]').getAttribute("aria-label");
-assert(first !== second, `arrow key moves along the shelf (${second})`);
-// Swipe back with a drag.
-const box = await shelf.boundingBox();
-await page.mouse.move(box.x + box.width * 0.3, box.y + box.height * 0.45);
-await page.mouse.down();
-await page.mouse.move(box.x + box.width * 0.85, box.y + box.height * 0.45, { steps: 8 });
-await page.mouse.up();
-await page.waitForTimeout(600);
-assert((await page.locator('[role="option"][aria-selected="true"][id^="shelf-"]').getAttribute("aria-label")) === first, "swipe moves back along the shelf");
-await page.keyboard.press("Enter");
-await page.getByRole("dialog", { name: /in 3D/ }).waitFor();
-await page.waitForFunction(() => [...document.querySelectorAll("model-viewer")].some((m) => m.loaded && m.closest('[role="dialog"]')), null, { timeout: 30000 });
-await page.waitForTimeout(600);
-await shot("shelf-opens-3d-viewer");
-await page.getByRole("button", { name: "Close 3D view" }).click();
-await page.getByRole("link", { name: /Enter the 3D showroom/ }).scrollIntoViewIfNeeded();
-await shot("shelf-showroom-entry-and-show");
+await shot("maker-space-showroom-hero");
+assert(await heroRoom.getByRole("link", { name: "View in VR" }).isVisible(), "View in VR offered beside Enter showroom (mocked immersive-vr)");
+assert(await page.getByRole("region", { name: /Fashion show:/ }).isVisible(), "upcoming show row under the identity block");
 
 // ── Showroom: inline 3D fallback ──────────────────────────────────────────────────────────────────────────
-await page.getByRole("link", { name: /Enter the 3D showroom/ }).click();
+await heroRoom.getByRole("link", { name: "Enter showroom" }).click();
 await page.waitForURL(/\/showroom/);
 await page.locator("canvas").waitFor();
 await page.getByText(/Bringing in pieces/).waitFor({ timeout: 10000 }).catch(() => undefined);

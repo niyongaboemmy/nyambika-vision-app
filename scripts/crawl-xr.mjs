@@ -2,7 +2,7 @@
 // Tailor builds + approves 3D in the studio → shopper opens 3D from a look (AR button) → See it move
 // (confirm with price, progress, inline loop) → Maker Space product sheet 3D section.
 import { createRequire } from "node:module";
-import { BASE, signIn, start } from "./crawl-lib.mjs";
+import { BASE, openMakerPiece, signIn, start } from "./crawl-lib.mjs";
 
 const { devices } = createRequire(new URL("../apps/web/package.json", import.meta.url))("@playwright/test");
 
@@ -112,13 +112,7 @@ assert(tampered.status() === 403, "tampered motion link is refused");
 
 // ── Maker Space: 3D section in the product sheet ─────────────────────────────
 await page.goto(`${BASE}/m/umurage-wear`);
-const option = page.getByRole("listbox", { name: "Collection" }).getByRole("option", { name: new RegExp(seeded.title) }); // not the 3D shelf
-await option.waitFor();
-for (let i = 0; i < 8 && (await option.getAttribute("aria-selected")) !== "true"; i++) {
-  await option.click();
-  await page.waitForTimeout(350);
-}
-await option.click();
+await openMakerPiece(page, new RegExp(seeded.title)); // hero "N pieces" sheet
 const pSheet = page.getByRole("dialog");
 await pSheet.getByRole("button", { name: /view in 3d/i }).waitFor({ timeout: 10000 });
 await page.waitForTimeout(400);

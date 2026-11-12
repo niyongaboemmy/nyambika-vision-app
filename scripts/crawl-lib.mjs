@@ -65,3 +65,15 @@ export async function signIn(page, phone) {
   await page.getByRole("button", { name: /continue|komeza|continuer/i }).click();
   await page.waitForURL((u) => !u.pathname.startsWith("/signin"));
 }
+
+/**
+ * Maker Space (showroom-first redesign): open a piece's product sheet through the hero's "N pieces" sheet.
+ * `name` (string or RegExp) picks a piece by its accessible name; without it, the first piece (products[0]).
+ */
+export async function openMakerPiece(page, name) {
+  await page.getByRole("button", { name: /See all \d+ pieces/ }).click();
+  const list = page.getByRole("list", { name: "Collection" });
+  await list.waitFor();
+  await (name ? list.getByRole("button", { name }).first() : list.getByRole("button").first()).click();
+  await page.getByRole("dialog").waitFor();
+}
