@@ -23,7 +23,7 @@ from PIL import Image, ImageFilter
 
 from ..config import TIER_HEIGHT
 from ..garment import resolve_category, shape_profile
-from ..imaging import bbox, dilate, erode
+from ..imaging import background_stats, bbox, dilate, erode
 from ..landmarks import Body, landmarks, run_at
 from ..twin import subject
 from .base import VTONProvider, VTONResult
@@ -31,7 +31,7 @@ from .base import VTONProvider, VTONResult
 WRAP = 0.78        # worn (front-projected) width / flat-lay width of a garment around a torso
 EASE = 1.18        # worn chest width / body torso width
 SLEEVE_K = 0.9     # horizontal scale of the parts outside the torso (sleeves, flare)
-HEM_BAND = {"top": (0.49, 0.64), "dress": (0.62, 0.86), "skirt": (0.58, 0.92)}
+HEM_BAND = {"top": (0.49, 0.64), "dress": (0.62, 0.86), "skirt": (0.58, 0.86)}
 MAX_FY = 0.2       # vertical correction allowed by the hem clamp
 MAX_HEM = 0.98     # nothing ends below the ankles
 
@@ -128,7 +128,7 @@ def clothing_region(rgb: np.ndarray, mask: np.ndarray, body: Body) -> tuple[np.n
     region = dil(up, 2 * f + 1) & cand  # recover thin parts lost by the downsampled fill
     # Include the anti-aliased / resampling-ringing rim between clothing and background/skin.
     near = np.abs(rgb - cloth).max(axis=-1) <= 2 * tol
-    rim = dil(region, 5 if h >= 700 else 3)
+    rim = dil(region, 7 if h >= 700 else 3)
     rim2 = dil(region, 9 if h >= 700 else 5) & near
     region = (region | ((rim | rim2) & mask & ~skin_mask)) & band
     return region, skin_mask
@@ -358,12 +358,16 @@ class LocalCompositor(VTONProvider):
                 arms = _arm_capsules(skin, cloth, body)
                 hgt = body.height
                 yy, xx = np.mgrid[0:mask.shape[0], 0:mask.shape[1]]
-                trunk = (np.abs(xx - body.cx) <= body.chest_w / 2) & (yy >= body.neck_y - 0.01 * hgt)
-                neck = (np.abs(xx - body.cx) <= body.neck_w * 0.6) & (yy < body.neck_y + 0.04 * hgt)
+                trunk = (np.abs(xx - body.cx) <= body.chest_w / 2) & (yy >= body.neck_y + 0.06 * hgt)  # below the shoulder line
+                neck = (np.abs(xx - body.cx) <= body.neck_w * 0.5) & (yy < body.neck_y + 0.04 * hgt)
                 to_skin = exposed & (trunk | arms | neck)
                 skin_est = _fill_field(rgb, skin if skin.any() else mask, 0.05 * hgt)
                 clean_bg = erode(~mask, 3)
-                bg_est = _fill_field(rgb, clean_bg if clean_bg.any() else ~mask, 0.06 * hgt)
+                bg_col, bg_spread = background_stats(rgb.astype(np.uint8))
+                if bg_spread < 6:  # plain backdrop: exact colour, no smoothing drift
+                    bg_est = np.broadcast_to(bg_col.astype(np.float32), rgb.shape)
+                else:
+                    bg_est = _fill_field(rgb, clean_bg if clean_bg.any() else ~mask, 0.06 * hgt)
                 fill = np.where(to_skin[..., None], skin_est, bg_est)
                 soft = np.asarray(Image.fromarray(exposed.astype(np.uint8) * 255).filter(ImageFilter.GaussianBlur(0.8)),
                                   dtype=np.float32)[..., None] / 255

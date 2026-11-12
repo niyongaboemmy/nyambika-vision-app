@@ -50,7 +50,7 @@ export async function seedTee(prisma: PrismaClient) {
   mkdirSync(dir, { recursive: true });
   for (const c of COLOURS) {
     if (!existsSync(join(dir, `${c.slug}.png`))) {
-      execFileSync(join(AI_DIR, ".venv/bin/python"), [join(AI_DIR, "scripts/make_seed_assets.py"), dir, "--tee", c.hex, c.slug]);
+      execFileSync(process.env.AI_PYTHON ?? join(AI_DIR, ".venv/bin/python"), [join(AI_DIR, "scripts/make_seed_assets.py"), dir, "--tee", c.hex, c.slug]);
     }
   }
   writeFileSync(join(dir, "SOURCE.json"), JSON.stringify({ source: TEE_SOURCE, licence: "repository licence (in-house generated)", colours: COLOURS }, null, 2));
