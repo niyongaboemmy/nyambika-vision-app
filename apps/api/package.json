@@ -17,6 +17,7 @@
     "db:seed:agents": "tsx prisma/seed-agents.ts",
     "db:seed:region": "tsx prisma/seed-region.ts",
     "db:seed:personas": "tsx prisma/seed-personas.ts",
+    "db:seed:tee": "tsx prisma/seed-tee.ts",
     "db:reset": "prisma migrate reset --force"
   },
   "prisma": {

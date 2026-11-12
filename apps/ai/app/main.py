@@ -107,7 +107,8 @@ def tryon(body: TryOnIn):
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     labelled, label_box = _label(result.image)
     verdict = guard.evaluate(result.twin_resized, labelled, garment_img, result.garment_alpha,
-                             result.subject_box, exclude_box=label_box)
+                             result.subject_box, exclude_box=label_box, category=body.garment_category,
+                             edit_mask=getattr(result, "edit_mask", None))
     latency = int((time.perf_counter() - started) * 1000)
     if not verdict["passed"]:
         return {"status": "WITHHELD", "image_b64": None, "guard": verdict, "c2pa": None,
