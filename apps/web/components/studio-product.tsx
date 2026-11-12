@@ -86,4 +86,4 @@ export function ProductPreview({
   );
 }
 
-export const EDITOR_STEPS = ["Details", "Colours & sizes", "Photos", "Publish"];
+export const EDITOR_STEPS = ["Details", "Colours", "Photos", "Publish"];

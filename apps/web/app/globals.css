@@ -667,8 +667,8 @@ body {
 }
 
 /* Text: titles balance, short body lines avoid orphans; numbers never break and use tabular figures. */
-:where(h1, h2, h3, h4, legend, figcaption) { text-wrap: balance; }
-:where(p, li, dd, blockquote, small) { text-wrap: pretty; }
+:where(h1, h2, h3, h4, legend, figcaption) { text-wrap-style: balance; }
+:where(p, li, dd, blockquote, small) { text-wrap-style: pretty; }
 .tabular, :is(span, b, strong, small, dd, data, time, td).tabular-nums { white-space: nowrap; }
 /* Separators inside grouped lists and under bars are 0.5 px hairlines. */
 .material.border-b, .material.border-t { border-width: 0; }
