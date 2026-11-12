@@ -283,11 +283,8 @@ function Room({ room, commerce }: { room: Showroom; commerce: Commerce | null })
               <button onClick={() => (offTwin(), pick(null))} aria-label="Close piece details" className="grid size-9 shrink-0 self-start place-items-center rounded-full bg-white/10"><Icon name="x" className="size-4" /></button>
             </div>
             <div className="mt-3">
-              {me ? (
-                <HoldToBuy key={`buy-${item.productId}-${handoff}`} look={look} autoOpen={handoff > 0} />
-              ) : (
-                <button onClick={() => router.push(`/signin?next=${encodeURIComponent(`/m/${room.page.handle}/showroom?item=${item.productId}`)}`)} className="grad-cta flex min-h-11 w-full items-center justify-center gap-1.5 whitespace-nowrap rounded-2xl px-4 text-sm font-bold"><Icon name="hand" className="size-4" /> Sign in to buy</button>
-              )}
+              {/* Signed out, Buy signs in on a sheet and opens the buy sheet on this piece (navigation pass). */}
+              <HoldToBuy key={`buy-${item.productId}-${handoff}`} look={look} autoOpen={handoff > 0} />
             </div>
             <div className="no-scrollbar mt-3 flex gap-2 overflow-x-auto">
               {item.glb && <Pill onClick={() => void view3d(item)}><Icon name="cube" className="size-4" /> View in 3D</Pill>}

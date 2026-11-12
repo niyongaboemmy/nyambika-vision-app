@@ -13,6 +13,8 @@ import { Icon, type IconName } from "@/components/icons";
 import { api } from "@/lib/api";
 import { describeError, formatCountdown, recallFriendly, type Described } from "@/lib/api-errors";
 import { useSession } from "@/lib/session";
+import { askSignIn } from "@/lib/auth-ask";
+import { DetourLink } from "@/components/detour-link";
 
 type Tone = "dark" | "light";
 
@@ -126,7 +128,6 @@ export function LimitState({
     }
   }
 
-  const next = typeof window === "undefined" ? "/" : window.location.pathname;
   const retryable = ["resting", "offline", "payment", "rate"].includes(d.kind) || (d.kind === "daily-cap" && left === 0);
 
   return (
@@ -159,11 +160,12 @@ export function LimitState({
         {d.kind === "consent" && (
           <>
             {d.purpose && <button type="button" onClick={() => void grant()} disabled={granting} className={`${btn} ${primary}`}>{t("err.consent.enable")}</button>}
-            <Link href="/trust" className={`${btn} ${secondary}`}>{t("err.consent.manage")}</Link>
+            <DetourLink href="/trust" className={`${btn} ${secondary}`}>{t("err.consent.manage")}</DetourLink>
           </>
         )}
         {d.kind === "pilot" && <Link href="/join" className={`${btn} ${primary}`}>{t("err.pilot.join")}</Link>}
-        {d.kind === "auth" && <Link href={`/signin?next=${encodeURIComponent(next)}`} className={`${btn} ${primary}`}>{t("err.auth.signin")}</Link>}
+        {/* Navigation pass: sign in on a sheet over this screen, then retry what failed. */}
+        {d.kind === "auth" && <button type="button" onClick={async () => { if (await askSignIn()) onRetry?.(); }} className={`${btn} ${primary}`}>{t("err.auth.signin")}</button>}
         {retryable && (onRetry || d.kind === "resting") && (
           <button
             type="button"

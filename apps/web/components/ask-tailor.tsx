@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { Button, Chip, ErrorNote, Sheet } from "@/components/ui";
 import { api, rwf } from "@/lib/api";
 import { useSession } from "@/lib/session";
+import { SignInFlow } from "@/components/signin-flow";
 import { MEASUREMENT_LABEL, specChips, type CustomOrderView, type MeasurementsView } from "@/lib/tailor";
 import { Icon } from "@/components/icons";
 
@@ -61,8 +62,9 @@ export function AskTailorSheet({ open, onClose, request }: { open: boolean; onCl
   if (!me) {
     return (
       <Sheet open={open} onClose={onClose}>
-        <p className="text-center">Sign in to ask {request.makerName} for a custom piece.</p>
-        <Button className="mt-4 w-full" onClick={() => router.push(`/signin?next=${encodeURIComponent(location.pathname)}`)}>Sign in</Button>
+        <p className="mb-4 font-display text-xl font-black">Sign in to ask {request.makerName}</p>
+        {/* Navigation pass: sign in right here; the ask form takes its place once the session loads. */}
+        <SignInFlow allowInvite={false} onDone={() => {}} />
       </Sheet>
     );
   }

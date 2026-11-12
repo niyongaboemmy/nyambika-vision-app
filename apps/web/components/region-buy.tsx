@@ -10,6 +10,7 @@ import { api } from "@/lib/api";
 import type { MakerProduct, MakerSpace } from "@/lib/maker";
 import { COUNTRY_NAMES, useRegion, type Commerce, type OrderMoney } from "@/lib/region";
 import { useSession } from "@/lib/session";
+import { askSignIn } from "@/lib/auth-ask";
 import { Icon } from "@/components/icons";
 import { track } from "@/lib/track";
 
@@ -76,8 +77,9 @@ export function RegionBuy({ maker, product, variantIndex, commerce }: { maker: M
     <>
       <Button
         className="col-span-2"
-        onClick={() => {
-          if (!me) return router.push(`/signin?next=/m/${maker.handle}`);
+        onClick={async () => {
+          // Navigation pass: sign in on a sheet, then this buy sheet opens on the same piece and colour.
+          if (!me && !(await askSignIn("Sign in to buy"))) return;
           // Defaults follow the shopper's country at open time (prefs load after mount).
           setDelivery(home ? "DELIVERY" : shipCountries.length ? "SHIP" : "PICKUP");
           setMethod(home ? methods[0] : commerce.card.enabled ? "CARD" : methods[0]);
