@@ -45,7 +45,7 @@ await handset.close();
 await page.getByText(/paid directly to/i).first().waitFor({ timeout: 15000 });
 await shot("paid-to-maker");
 const makerName = (await page.locator('a[href^="/m/"]').first().textContent()).replace(" →", "").trim();
-const orderUrl = page.url().replace("?fresh=1", "");
+const orderUrl = page.url().split("?")[0]; // the order URL may also carry ?next= (navigation pass)
 console.log(`order for ${makerName}`);
 
 // Maker fulfils from the Page Manager

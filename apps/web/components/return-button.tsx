@@ -9,13 +9,16 @@ import { useReturn } from "@/lib/use-nav";
 
 /**
  * On a terminal screen (order placed, request sent, poll live): when it was opened with `?next=`, a way back to
- * where the shopper was. Renders nothing otherwise (or for a `next` pointing at this same screen).
+ * where the shopper was (a look, a Maker Space, the Muse). Renders nothing otherwise.
  */
 export function NextReturn({ className = "" }: { className?: string }) {
   const [to, setTo] = useState<string | null>(null);
   useEffect(() => {
     const n = returnTarget();
-    setTo(n && n.split("?")[0] !== window.location.pathname ? n : null);
+    // Only for a return across contexts (a look, a Maker Space / showroom / show, the Muse): Back already covers a
+    // list → detail step, so a second button there would only repeat it.
+    const cross = n && (/^\/(looks|m)\//.test(n) || n === "/" || n.startsWith("/?"));
+    setTo(n && cross && n.split("?")[0] !== window.location.pathname ? n : null);
   }, []);
   if (!to) return null;
   return <div className={className}><ReturnButton to={to} quiet /></div>;

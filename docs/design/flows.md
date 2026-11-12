@@ -15,7 +15,7 @@ current screen, and the original action continues when they're done. No terminal
 | Tab trail | `lib/use-nav.ts` `installNavTrail()`, started by `DeferredGlobals` | Keeps a per-tab list of screens in sessionStorage. It wraps `history.pushState` / `replaceState` and listens to `popstate`, so it follows the real history, including guards that use `router.replace` and `?i=` updates. It composes with Next's own history patch. |
 | Smart Back | `useBack(fallback)`; `TopBar back=…`, `BackButton`, the Looks back button | Goes to the previous screen when that history entry is ours (`router.back()`, so state and scroll survive). Otherwise it uses `?next=`. Otherwise it uses `fallback` / `parentOf(route)` for deep links, so it never dead-ends. `TopBar`'s public props are unchanged; `onBack` is an optional addition for in-screen steps. |
 | `next` | `lib/nav.ts` `withReturn`, `returnTarget`, `safeReturn`; `DetourLink` | A detour link carries `?next=<this screen with its query>`. It is read at click time, so `?i=3` is included, and it is hydration-safe. Only same-site paths are accepted. `/signin` now validates `next` too: it used to accept `//evil.example`. |
-| Finish a detour | `useReturn()`, `ReturnButton` (`auto` = 3 s countdown with "Stay here"), `NextReturn` on terminal screens | Returns through history when the origin is the previous entry, otherwise replaces the screen with the origin. |
+| Finish a detour | `useReturn()`, `ReturnButton` (`auto` = 3 s countdown with "Stay here"), `NextReturn` on terminal screens (only when the origin is another context: a look, a Maker Space / showroom / show, the Muse; a list → detail step already has Back) | Returns through history when the origin is the previous entry, otherwise replaces the screen with the origin. |
 | Sign-in sheet | `lib/auth-ask.ts` `askSignIn()` / `useNeedSignIn()`; `components/auth-sheet.tsx` (lazy); `components/signin-flow.tsx` (shared with `/signin`) | Opens the same phone → code → passkey steps on a sheet and resolves `true` once signed in, so the caller resumes. The code step gained "change number" (back to the phone step). |
 | Resume after a detour | `stashResume(kind, key)` / `takeResume` | Example: "Add measurements" from the buy sheet stashes `buy` + look/variant, and the buy sheet reopens on return. |
 | State in the URL / per tab | `?i=` (Looks), `?item=` (showroom), `?tab=` (admin), `?filter=` (studio, already there), `remember` / `recall` (Maker Space coverflow card) | Written with `replaceState` (paging isn't a history step), so `next` and history entries carry it. |
@@ -53,7 +53,7 @@ current screen, and the original action continues when they're done. No terminal
 | **Morph** | Looks rail | `MorphSheet` → `AskTailorSheet` (sheets) | ✓ | unchanged; sign in now happens in the sheet |
 | **Ask a tailor → custom order** | Morph, Maker Space services | sheet → `/custom/[id]?fresh=1` | ✗ only `/custom` → `/` | `?next=` + "Back to the Maker Space / your looks" |
 | **Circle poll create** | Looks "Ask" | `CircleAsk` sheet → "Live results" `/circle/[id]` | ✗ Back → `/circle` → `/wardrobe` | "Live results" carries `next`; Back and "Back to your looks" return to the look |
-| **Wardrobe restyle** | wardrobe, item, Muse ambient card | `RestyleSheet` → `/wardrobe/events/[id]` | ✗ Back always `/wardrobe` (the item and the Muse were lost) | History first; `?next=` + return button |
+| **Wardrobe restyle** | wardrobe, item, Muse ambient card | `RestyleSheet` → `/wardrobe/events/[id]` | ✗ Back always `/wardrobe` (the item and the Muse were lost) | History first (the item, the wardrobe or the Muse card); `?next=` carried for deep links |
 | **Maker Space** | Looks, makers, shows | `/m/[handle]` | ✗ Back went to `/` ("Back to Muse"); coverflow reset | Back returns to the look / list; the coverflow card is remembered per tab |
 | **Looks stream** | Muse, snap, try | `/looks/[id]` | ✗ always look 1 after any detour; Back always `/` | `?i=` restores the look before first paint; Back goes to the origin |
 | **Studio product editor** | Products list (with `?filter`) | `/products/new`, `/products/[id]` (no sub-routes; steps are on one page) | ✗ Back hard-wired to the list without the filter; after "Save" the history held the blank form | Back keeps the filter; the new product replaces the form in history |
@@ -65,9 +65,9 @@ current screen, and the original action continues when they're done. No terminal
 | Screen | Way back |
 |---|---|
 | Order | Back, plus "Back to your looks / the showroom" when opened from a flow |
-| Custom request | Back, plus a return button |
-| Poll results | Back, plus a return button |
-| Restyle event | Back, plus a return button |
+| Custom request | Back, plus "Back to the Maker Space / your looks" when asked from there |
+| Poll results | Back, plus "Back to your looks" when opened from the stream |
+| Restyle event | Back (to the item, the wardrobe or the Muse card that opened it) |
 | Twin ready | Auto-return (3 s) or the button |
 | Measurements saved | Auto-return or the button |
 | Deep links | Back falls back to the parent (`parentOf`): `/orders/x` → `/orders`, `/m/h/showroom` → `/m/h`, `/m/h` → `/makers`, `/mirror/mr` → `/mirror/ar`, `/studio/p/products/x` → the list, … |
