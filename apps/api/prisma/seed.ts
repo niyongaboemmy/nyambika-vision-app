@@ -24,7 +24,8 @@ const STORAGE = resolve(process.env.STORAGE_DIR ?? "./storage");
 const REAL_DIR = join(STORAGE, "seed", "real");
 const AI_PY = process.env.AI_PYTHON ?? resolve(__dirname, "../../ai/.venv/bin/python");
 const ASSETS = resolve(__dirname, "../../../scripts/seed-assets");
-const NO_TRYON = new Set(["fabric", "accessories"]);
+/** Not try-on items: fabric by the metre, accessories, and flat wrappers (worn draped; no garment shape to place). */
+const NO_TRYON = new Set(["fabric", "accessories", "wrap"]);
 
 interface IndexItem {
   photo: string;
@@ -46,6 +47,16 @@ async function ai<T>(path: string, body: object): Promise<T> {
   const res = await fetch(`${AI}${path}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
   if (!res.ok) throw new Error(`${path}: ${res.status} ${await res.text()}`);
   return res.json() as Promise<T>;
+}
+
+/** Try the cut-out on synthetic personas 2 and 5 through the real gateway; true only if both looks are delivered. */
+async function tryOnPreflight(cutoutB64: string, category: string) {
+  for (const n of [2, 5]) {
+    const twin = readFileSync(join(STORAGE, "personas", `persona-${n}.png`)).toString("base64");
+    const r = await ai<{ status: string }>("/v1/tryon", { twin_b64: twin, garment_b64: cutoutB64, garment_category: category, tier: "PREVIEW", request_id: `seed-preflight-${n}` });
+    if (r.status !== "DELIVERED") return false;
+  }
+  return true;
 }
 
 /** Seed photos: download (cached) + build through the garment pipeline once; reused afterwards. */
@@ -194,6 +205,7 @@ async function main() {
 
       // Real readiness pipeline for each colour photo, credits on every stored file.
       let ready = true;
+      let guardNote: string | null = null;
       for (const [vi, v] of product.variants.entries()) {
         const asset = p.colours[vi].asset;
         const item = index[asset];
@@ -222,11 +234,18 @@ async function main() {
         await prisma.$executeRawUnsafe(`UPDATE "Variant" SET embedding = $1::vector WHERE id = $2`, `[${a.embedding.join(",")}]`, v.id);
         ready &&= a.readiness === "READY";
         if (vi === 0) await prisma.product.update({ where: { id: product.id }, data: { qualityScore: a.quality_score, readinessNotes: a.notes } });
+        // Preflight: a READY photo must also pass the try-on quality guard on two synthetic personas, else shoppers
+        // would get withheld looks (e.g. floor-length gowns and ankle-length skirts fail the hem placement check today).
+        if (a.readiness === "READY" && !(await tryOnPreflight(a.cutout_b64, product.category))) {
+          ready = false;
+          guardNote = "Try-on preview is withheld by the quality guard for this length or shape; shown as a catalogue photo only.";
+        }
       }
       const readiness = NO_TRYON.has(p.category) ? "NOT_SUPPORTED" : ready ? "READY" : "NEEDS_BETTER_PHOTO";
+      if (guardNote) await prisma.product.update({ where: { id: product.id }, data: { readinessNotes: [guardNote] } });
       await prisma.product.update({
         where: { id: product.id },
-        data: { readiness, ...(NO_TRYON.has(p.category) ? { readinessNotes: [p.category === "fabric" ? "Fabric by the metre: no try-on." : "Try-on does not support accessories yet."] } : {}) },
+        data: { readiness, ...(NO_TRYON.has(p.category) ? { readinessNotes: [p.category === "fabric" ? "Fabric by the metre: no try-on." : p.category === "wrap" ? "Wrappers are worn draped: try-on is not available yet." : "Try-on does not support accessories yet."] } : {}) },
       });
     }
     console.log(`✓ ${def.name}: ${defs.length} products`);

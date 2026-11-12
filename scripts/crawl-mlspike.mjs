@@ -80,7 +80,7 @@ const piece = async (title, want) => {
   await maker.getByText(want === "private" ? `${title} is private again.` : `${title} is shared.`).waitFor();
 };
 await piece("Ineza A-line dress", "shared");
-await piece("Teal Ikiyaga wrap", "private");
+await piece("Gisenyi shirt dress", "private"); // seeded (crawl-s1's "Teal Ikiyaga wrap" does not exist on a fresh DB)
 await maker.waitForTimeout(300);
 await shot("training-one-piece-private");
 

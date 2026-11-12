@@ -14,7 +14,7 @@ const AI = process.env.AI_GATEWAY_URL ?? "http://localhost:8100";
 const STORAGE = resolve(process.env.STORAGE_DIR ?? "./storage");
 const SHOW_TITLE = "Imigongo Nights · launch show";
 /** The pieces seeded by seed.ts for Umurage Wear (seed-catalogue.ts; duplicates from manual tests are ignored). */
-const PIECES = ["Ineza A-line dress", "Gisenyi shirt dress", "Akagera tiered lace dress", "Adire wrapper, 2 m"];
+const PIECES = ["Ineza A-line dress", "Gisenyi shirt dress", "Akagera tiered lace dress"];
 
 async function post<T>(path: string, body: object): Promise<T> {
   const res = await fetch(`${AI}${path}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
@@ -86,7 +86,7 @@ export async function seedVr(prisma: PrismaClient) {
       data: {
         pageId: page.id,
         title: SHOW_TITLE,
-        description: "Four new pieces walk the runway in 3D. RSVP for a WhatsApp reminder, react live, replay any time.",
+        description: "Three new dresses walk the runway in 3D. RSVP for a WhatsApp reminder, react live, replay any time.",
         startsAt: eveningIn(2),
         modelSkin: "#825C43",
         modelSize: "M",

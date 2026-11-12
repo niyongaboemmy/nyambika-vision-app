@@ -25,7 +25,7 @@
     { "key": "g21", "source": "g21", "category": "top", "pad": 0.03, "backdrop": "#3a3836" },
     { "key": "g38", "source": "g38", "category": "top", "pad": 0.03 },
     { "key": "g10", "source": "g10", "category": "accessories", "studio": 0, "pad": 0.03 },
-    { "key": "g36", "source": "g36", "category": "dress", "pad": 0.03, "recolours": [{ "key": "g36-rose", "tint": "#C98B8B", "name": "Dusty rose" }] },
+    { "key": "g36", "source": "g36", "category": "dress", "crop": [0.08, 0.10, 0.94, 0.955], "studio": 20, "pad": 0.03, "recolours": [{ "key": "g36-rose", "tint": "#C98B8B", "name": "Dusty rose" }] },
 
     { "key": "g22", "source": "g22", "category": "shirt", "pad": 0.03, "recolours": [{ "key": "g22-petrol", "tint": "#1E5B66", "name": "Petrol blue" }, { "key": "g22-wine", "hue": -25, "name": "Wine" }] },
     { "key": "g39", "source": "g39", "category": "top", "pad": 0.03, "backdrop": "#3a3836" },
@@ -36,8 +36,8 @@
     { "key": "g05", "source": "g05", "category": "dress", "studio": 0 },
     { "key": "g03", "source": "g03", "category": "dress", "studio": 0 },
 
-    { "key": "g18-imigongo", "kind": "print", "category": "top", "base": "g18", "pad": 0.03, "print": "s57", "printCrop": [0.15, 0.06, 0.85, 0.66], "box": [0.40, 0.42, 0.60, 0.62], "ink": "#EFE6D2" },
-    { "key": "g18", "source": "g18", "category": "top", "pad": 0.03 },
+    { "key": "g18-imigongo", "kind": "print", "category": "top", "base": "g18", "crop": [0.0, 0.305, 1.0, 0.85], "studio": 45, "pad": 0.03, "print": "s57", "printCrop": [0.15, 0.06, 0.85, 0.66], "box": [0.42, 0.24, 0.58, 0.42], "ink": "#EFE6D2" },
+    { "key": "g18", "source": "g18", "category": "top", "crop": [0.0, 0.305, 1.0, 0.85], "studio": 45, "pad": 0.03 },
     { "key": "g20", "source": "g20", "category": "top", "crop": [0.0, 0.0, 0.93, 1.0], "mask": [[0.51, 0.25, 0.67, 0.43]], "pad": 0.04, "studio": 70, "recolours": [{ "key": "g20-sage", "tint": "#8A9A6B", "name": "Sage" }] },
     { "key": "g13", "source": "g13", "category": "jacket", "blur": [[0.42, 0.02, 0.64, 0.14]], "pad": 0.02, "recolours": [{ "key": "g13-indigo", "hue": 25, "name": "Deep indigo" }] },
     { "key": "g17", "source": "g17", "category": "shirt", "studio": 0 }

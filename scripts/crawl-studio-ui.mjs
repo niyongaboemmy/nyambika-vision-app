@@ -159,7 +159,7 @@ for (const vp of ["phone", "desk"]) {
     await page.goto(`${BASE}/studio`);
     await shot(page, "new-empty", vp);
     await page.getByRole("button", { name: "Create my page" }).click();
-    await page.getByPlaceholder("Umurage Wear").fill("Rubavu Threads");
+    await page.getByPlaceholder("Uwase Couture").fill("Rubavu Threads");
     await shot(page, "new-wizard-1", vp);
     const next = page.getByRole("button", { name: /^continue/i });
     if (await next.count()) {

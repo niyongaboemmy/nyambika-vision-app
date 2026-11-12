@@ -86,7 +86,7 @@ const fresh = await c4.newPage();
 await signIn(fresh, `07885${String(Date.now()).slice(-5)}`);
 await fresh.goto(`${BASE}/studio`);
 await fresh.getByRole("button", { name: "Create my page" }).click();
-await fresh.getByPlaceholder("Umurage Wear").fill(`Gisenyi Threads ${String(Date.now()).slice(-4)}`);
+await fresh.getByPlaceholder("Uwase Couture").fill(`Gisenyi Threads ${String(Date.now()).slice(-4)}`);
 await fresh.getByRole("button", { name: /^continue/i }).click();
 await fresh.getByRole("button", { name: /^continue/i }).click();
 await fresh.getByRole("button", { name: "Create page" }).click();

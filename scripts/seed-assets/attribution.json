@@ -841,13 +841,14 @@
   "licenceUrl": "https://creativecommons.org/licenses/by/4.0",
   "shareAlike": false,
   "changes": [
+   "cropped",
    "studio margin added",
    "backdrop evened to studio grey",
    "resized",
    "background removed (cut-out)"
   ],
   "illustration": false,
-  "credit": "\"Dress (AM 11988-1).jpg\" by Auckland Museum, CC BY 4.0, via Wikimedia Commons; modified (studio margin added, backdrop evened to studio grey, resized, background removed (cut-out)). This image: CC BY 4.0."
+  "credit": "\"Dress (AM 11988-1).jpg\" by Auckland Museum, CC BY 4.0, via Wikimedia Commons; modified (cropped, studio margin added, backdrop evened to studio grey, resized, background removed (cut-out)). This image: CC BY 4.0."
  },
  {
   "key": "g36-rose",
@@ -866,6 +867,7 @@
   "licenceUrl": "https://creativecommons.org/licenses/by/4.0",
   "shareAlike": false,
   "changes": [
+   "cropped",
    "studio margin added",
    "backdrop evened to studio grey",
    "resized",
@@ -873,7 +875,7 @@
    "recoloured (tinted)"
   ],
   "illustration": false,
-  "credit": "\"Dress (AM 11988-1).jpg\" by Auckland Museum, CC BY 4.0, via Wikimedia Commons; modified (studio margin added, backdrop evened to studio grey, resized, background removed (cut-out), recoloured (tinted)). This image: CC BY 4.0."
+  "credit": "\"Dress (AM 11988-1).jpg\" by Auckland Museum, CC BY 4.0, via Wikimedia Commons; modified (cropped, studio margin added, backdrop evened to studio grey, resized, background removed (cut-out), recoloured (tinted)). This image: CC BY 4.0."
  },
  {
   "key": "g22",
@@ -1148,13 +1150,14 @@
   "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0",
   "shareAlike": true,
   "changes": [
+   "cropped",
    "studio margin added",
    "backdrop evened to studio grey",
    "resized",
    "background removed (cut-out)"
   ],
   "illustration": false,
-  "credit": "\"Clean-blank-shirt-hanger.jpg\" by Pajju12, CC BY-SA 4.0, via Wikimedia Commons; modified (studio margin added, backdrop evened to studio grey, resized, background removed (cut-out)). This image: CC BY-SA 4.0."
+  "credit": "\"Clean-blank-shirt-hanger.jpg\" by Pajju12, CC BY-SA 4.0, via Wikimedia Commons; modified (cropped, studio margin added, backdrop evened to studio grey, resized, background removed (cut-out)). This image: CC BY-SA 4.0."
  },
  {
   "key": "g20",
