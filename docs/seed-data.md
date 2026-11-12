@@ -19,7 +19,7 @@ Research behind all of this: the seed research report (Commons licence verificat
 | `scripts/seed-assets/build.py` | Runs each image through the **real garment pipeline**: AI gateway `/v1/garment/assess` for the readiness checks and background removal. Writes `apps/api/storage/seed/real/<key>-photo.jpg`, `<key>-cutout.png` and `index.json`, plus the committed `scripts/seed-assets/attribution.json`. |
 | `scripts/seed-assets/attribution.json` | One credit per seed image: sources (title, author, page, licence), the licence of the derived file, share-alike flag, changes made, illustration flag |
 
-The build produced 34 recipes and 50 images (originals plus recolours). Of these, 41 come out READY. The 6 busy shop photos come out NEEDS_BETTER_PHOTO on purpose: Isimbi Tailoring's market stall, the Kanombe sundress, Akeza's burgundy dress and Gikondo's vintage shirt. They exercise the "needs a better photo" studio flow honestly. Three are not try-on items: two fabric swatches and a stole.
+The build produced 38 recipes and 56 images (originals plus recolours). Of these, 47 pass the assess readiness checks. The 6 busy shop photos come out NEEDS_BETTER_PHOTO on purpose: Isimbi Tailoring's market stall, the Kanombe sundress, Akeza's burgundy dress and Gikondo's vintage shirt. They exercise the "needs a better photo" studio flow honestly. Three are not try-on items: two fabric swatches and a stole.
 
 **Changes made to photos** (also listed in each credit):
 - crop
@@ -38,6 +38,21 @@ The build produced 34 recipes and 50 images (originals plus recolours). Of these
 - g23: pale shirt on white.
 - g06: it carries a round badge.
 - g26, g29, g30, g34 and g37 were never used: side view, a form with a head, busy floors, overexposure.
+
+**Try-on preflight in the seed.** A READY photo must also pass the try-on quality guard on synthetic personas 2 and 5 (`/v1/tryon`). Otherwise the product is seeded as NEEDS_BETTER_PHOTO with a note, so shoppers never get withheld looks.
+
+Today the guard withholds:
+- the three long skirts (ankle pencil, A-line midi, grey wool midi);
+- the floor-length sprig gown;
+- the navy aloha shirt on persona 5.
+
+The cause is the local compositor's hem placement check (`placement_implausible`), not the photos. This finding is for the try-on owner. Flat wrappers are not try-on items.
+
+**Skirt illustrations.** Two skirt products are procedural knee-length A-line illustrations, like the umushanana, marked `illustration` and textured with swatch photos:
+- Urudodo's kitenge skirt: Rwandan igitenge (BY-SA) and adire (CC0);
+- Isimbi's kente skirt: two CC0 kente cloths.
+
+They keep office outfits (wardrobe restyle) possible while the long-skirt photos are guard-withheld.
 
 ### Licences
 
@@ -88,11 +103,11 @@ Defined in `apps/api/prisma/seed-catalogue.ts`.
 | Maker (handle) | Type, place | Login | Products |
 |---|---|---|---|
 | Umurage Wear (`umurage-wear`) | Tailor, Kimihurura, Gasabo | 0788100001 | 4: anchor "Ineza A-line dress", morph templates, VR showroom and show |
-| Urudodo Stitch Collective (`urudodo-collective`) | Cooperative, Nyamirambo, Nyarugenge | admin 0788100002, member 0788100004 | 4 (maker attribution, passport) |
+| Urudodo Stitch Collective (`urudodo-collective`) | Cooperative, Nyamirambo, Nyarugenge | admin 0788100002, member 0788100004 | 5 (maker attribution, passport) |
 | Kanombe Kitenge Corner (`kanombe-kitenge-corner`) | Seller, Kanombe, Kicukiro | 0788100003 | 6 + plain cotton tee (export settings; the KE page copies its first three) |
 | Inkindi Studio (`inkindi-studio`) | Tailor, Kiyovu, Nyarugenge | 0788100005 | 5: umushanana illustration, umushanana service |
 | Akeza Couture (`akeza-couture`) | Seller, Kacyiru, Gasabo | 0788100006 | 4 |
-| Isimbi Tailoring (`isimbi-tailoring`) | Tailor (market stall), Kimironko, Gasabo | 0788100008 | 3 (shop photos, needs better photo) |
+| Isimbi Tailoring (`isimbi-tailoring`) | Tailor (market stall), Kimironko, Gasabo | 0788100008 | 4 (3 shop photos that need a better photo, 1 kente skirt illustration) |
 | Rebero Threads (`rebero-threads`) | Seller, Kigarama (Rebero), Kicukiro | 0788100009 | 4 tees, including an imigongo chevron print |
 | Gikondo Makers Coop (`gikondo-makers-coop`) | Cooperative, Gikondo, Kicukiro | 0788100010 | 3 |
 | Nairobi Kikoi Studio (`nairobi-kikoi-studio`) | Seller, Kariokor, Nairobi (KES) | +254711000001 | 3 (region seed) |

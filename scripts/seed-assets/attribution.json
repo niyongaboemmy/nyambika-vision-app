@@ -739,6 +739,106 @@
   "credit": "\"Dresses of kitengi.JPG\" by Faintsmoke, CC BY-SA 4.0, via Wikimedia Commons; modified (cropped, resized, background removed (cut-out)). This image: CC BY-SA 4.0."
  },
  {
+  "key": "skirt-igitenge",
+  "of": null,
+  "sources": [
+   {
+    "id": "s21",
+    "title": "Igitenge, African Print (Rwanda).jpg",
+    "author": "Ines diva",
+    "licence": "CC BY-SA 4.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Igitenge,_African_Print_(Rwanda).jpg"
+   }
+  ],
+  "licence": "CC BY-SA 4.0",
+  "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+  "shareAlike": true,
+  "changes": [
+   "procedural illustration: A-line skirt silhouette textured with a cropped fabric photo",
+   "cropped",
+   "resized",
+   "background removed (cut-out)"
+  ],
+  "illustration": true,
+  "credit": "\"Igitenge, African Print (Rwanda).jpg\" by Ines diva, CC BY-SA 4.0, via Wikimedia Commons; modified (procedural illustration: A-line skirt silhouette textured with a cropped fabric photo, cropped, resized, background removed (cut-out)). This image: CC BY-SA 4.0."
+ },
+ {
+  "key": "skirt-adire",
+  "of": null,
+  "sources": [
+   {
+    "id": "s46",
+    "title": "Adire, Kampala.jpg",
+    "author": "Fola01",
+    "licence": "CC0",
+    "licenceUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "page": "https://commons.wikimedia.org/wiki/File:Adire,_Kampala.jpg"
+   }
+  ],
+  "licence": "CC0 1.0",
+  "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "shareAlike": false,
+  "changes": [
+   "procedural illustration: A-line skirt silhouette textured with a cropped fabric photo",
+   "cropped",
+   "resized",
+   "background removed (cut-out)"
+  ],
+  "illustration": true,
+  "credit": "\"Adire, Kampala.jpg\" by Fola01, CC0, via Wikimedia Commons; modified (procedural illustration: A-line skirt silhouette textured with a cropped fabric photo, cropped, resized, background removed (cut-out)). This image: CC0 1.0."
+ },
+ {
+  "key": "skirt-kente",
+  "of": null,
+  "sources": [
+   {
+    "id": "s48",
+    "title": "Kente cloth gh.jpg",
+    "author": "Jemmies02",
+    "licence": "CC0",
+    "licenceUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "page": "https://commons.wikimedia.org/wiki/File:Kente_cloth_gh.jpg"
+   }
+  ],
+  "licence": "CC0 1.0",
+  "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "shareAlike": false,
+  "changes": [
+   "procedural illustration: A-line skirt silhouette textured with a cropped fabric photo",
+   "cropped",
+   "resized",
+   "background removed (cut-out)"
+  ],
+  "illustration": true,
+  "credit": "\"Kente cloth gh.jpg\" by Jemmies02, CC0, via Wikimedia Commons; modified (procedural illustration: A-line skirt silhouette textured with a cropped fabric photo, cropped, resized, background removed (cut-out)). This image: CC0 1.0."
+ },
+ {
+  "key": "skirt-kente-volta",
+  "of": null,
+  "sources": [
+   {
+    "id": "s49",
+    "title": "Traditional Kente of Volta region.jpg",
+    "author": "Warmglow",
+    "licence": "CC0",
+    "licenceUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "page": "https://commons.wikimedia.org/wiki/File:Traditional_Kente_of_Volta_region.jpg"
+   }
+  ],
+  "licence": "CC0 1.0",
+  "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "shareAlike": false,
+  "changes": [
+   "procedural illustration: A-line skirt silhouette textured with a cropped fabric photo",
+   "cropped",
+   "resized",
+   "background removed (cut-out)"
+  ],
+  "illustration": true,
+  "credit": "\"Traditional Kente of Volta region.jpg\" by Warmglow, CC0, via Wikimedia Commons; modified (procedural illustration: A-line skirt silhouette textured with a cropped fabric photo, cropped, resized, background removed (cut-out)). This image: CC0 1.0."
+ },
+ {
   "key": "umushanana-kente",
   "of": null,
   "sources": [

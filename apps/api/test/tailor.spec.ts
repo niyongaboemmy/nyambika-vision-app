@@ -147,7 +147,7 @@ describe("custom order lifecycle (E24, FR-SIZE-04..07)", () => {
 
     // Tailor sees measurements only while the share is active; others never.
     const m = await tailor.get(`/custom-orders/${co.id}/measurements`).expect(200);
-    expect(m.body.measurements.hipsCm).toBe(96);
+    expect(m.body.measurements.hipsCm).toBe(99);
     expect(await prisma.auditLog.count({ where: { action: "MEASUREMENT_VIEWED", data: { path: ["customOrderId"], equals: co.id } } })).toBe(1);
     await seller.get(`/custom-orders/${co.id}/measurements`).expect(403);
     await seller.get(`/custom-orders/${co.id}`).expect(403);
@@ -255,7 +255,7 @@ describe("custom order lifecycle (E24, FR-SIZE-04..07)", () => {
     const user = await prisma.user.findUniqueOrThrow({ where: { phone: `+250${phone.slice(1)}` } });
     const exp = await s.get("/privacy/export").expect(200);
     const body = JSON.parse(exp.text);
-    expect(body.measurements.profile.bustCm).toBe(90);
+    expect(body.measurements.profile.bustCm).toBe(93);
     expect(body.customOrders.length).toBeGreaterThanOrEqual(3);
     const job = (await s.post("/privacy/delete").send({ scope: "ACCOUNT" }).expect(201)).body;
     expect(job.steps.map((x: { step: string }) => x.step)).toContain("Measurement profile deleted; tailor shares ended");

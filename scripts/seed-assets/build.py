@@ -181,6 +181,25 @@ def drape(tex: Image.Image, freq: float = 26.0) -> Image.Image:
     return Image.fromarray(np.clip(rgb, 0, 255).astype(np.uint8))
 
 
+def skirt(spec: dict) -> Image.Image:
+    """Procedural knee-length A-line skirt (waistband + panels) textured with a fabric photo. An illustration."""
+    w, h = 800, 1000
+    cx = w // 2
+    body = [(cx - 130, 250), (cx + 130, 250), (cx + 225, 800), (cx - 225, 800)]
+    band = [(cx - 130, 250), (cx + 130, 250), (cx + 133, 292), (cx - 133, 292)]
+    img = Image.new("RGB", (w, h), STUDIO_BG)
+    src = load_source(spec["body"])
+    tex = drape(tile(src.crop(px_box(src, spec["bodyCrop"])), (w, h), spec.get("bodyScale", 300)), 34.0)
+    m = Image.new("L", (w, h), 0)
+    ImageDraw.Draw(m).polygon(body, fill=255)
+    img.paste(tex, (0, 0), m.filter(ImageFilter.GaussianBlur(0.8)))
+    d = ImageDraw.Draw(img)
+    mean = tuple(int(c * 0.55) for c in np.asarray(tex.resize((32, 32))).reshape(-1, 3).mean(axis=0))
+    d.polygon(band, fill=mean, outline=(60, 44, 36), width=3)
+    d.polygon(body, outline=(60, 44, 36), width=3)
+    return img
+
+
 def umushanana(spec: dict) -> Image.Image:
     """Procedural umushanana (draped dress + shoulder sash) textured with fabric photos. An illustration."""
     w, h = 800, 1000
@@ -278,12 +297,15 @@ def main() -> int:
             if kind == "umushanana":
                 sids = [rc["body"], rc["sash"]]
                 changes = ["procedural illustration: umushanana silhouette textured with cropped fabric photos"]
+            elif kind == "skirt":
+                sids = [rc["body"]]
+                changes = ["procedural illustration: A-line skirt silhouette textured with a cropped fabric photo"]
             elif kind == "print":
                 sids = [rc["base"], rc["print"]]
                 changes = ["imigongo motif printed on the garment (illustration)"]
             else:
                 sids = [rc["source"]]
-            if "crop" in rc or kind in ("umushanana", "print"):
+            if "crop" in rc or kind in ("umushanana", "print", "skirt"):
                 changes.append("cropped")
             if rc.get("blur"):
                 changes.append("brand label blurred")
@@ -309,7 +331,7 @@ def main() -> int:
                     "of": rc["key"] if rspec else None,
                     "sources": [{k: s[k] for k in ("id", "title", "author", "licence", "licenceUrl", "page")} for s in srcs],
                     "licence": lic, "licenceUrl": lic_url, "shareAlike": sa,
-                    "changes": ch, "illustration": kind in ("umushanana", "print"),
+                    "changes": ch, "illustration": kind in ("umushanana", "print", "skirt"),
                 }
                 entry["credit"] = credit_line(entry)
                 attribution.append(entry)
@@ -319,6 +341,8 @@ def main() -> int:
             # --- build the base image
             if kind == "umushanana":
                 base = umushanana(rc)
+            elif kind == "skirt":
+                base = skirt(rc)
             else:
                 base = load_source(rc["base"] if kind == "print" else rc["source"])
                 if "crop" in rc:

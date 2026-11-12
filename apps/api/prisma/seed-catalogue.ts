@@ -221,6 +221,13 @@ export const PRODUCTS: ProductDef[] = [
     priceRwf: 19500, madeToOrder: true, leadTimeDays: 3, styles: ["elegant", "minimal"], occasions: ["office", "church"], fabric: "Crepe",
   },
 
+  {
+    handle: "urudodo-collective", kind: "skirt", category: "skirt",
+    title: { rw: "Ijipo y'igitenge ya A-line", en: "Kitenge A-line skirt", fr: "Jupe trapèze en kitenge" },
+    colours: [c("skirt-igitenge", "Igitenge cy'icyatsi", "Lime igitenge", "Igitenge citron vert"), c("skirt-adire", "Icunga n'ubururu", "Orange adire", "Adire orange")],
+    priceRwf: 17500, madeToOrder: true, leadTimeDays: 3, styles: ["traditional", "casual"], occasions: ["office", "church", "casual"], fabric: "Cotton kitenge",
+  },
+
   // ---- Kanombe Kitenge Corner (ready to wear + fabric; the first three READY products seed the Kenyan region page)
   {
     handle: "kanombe-kitenge-corner", kind: "dress", category: "dress", featured: true,
@@ -337,6 +344,13 @@ export const PRODUCTS: ProductDef[] = [
     priceRwf: 21000, madeToOrder: true, leadTimeDays: 2, styles: ["casual", "bold"], occasions: ["casual", "party"], fabric: "Tie-dyed cotton",
   },
 
+
+  {
+    handle: "isimbi-tailoring", kind: "skirt", category: "skirt",
+    title: { rw: "Ijipo ya kente", en: "Kente panel skirt", fr: "Jupe à panneaux kente" },
+    colours: [c("skirt-kente", "Umuhondo n'icyatsi", "Gold and green kente", "Kente or et vert"), c("skirt-kente-volta", "Ubururu n'umutuku", "Blue and red kente", "Kente bleu et rouge")],
+    priceRwf: 15000, madeToOrder: true, leadTimeDays: 2, styles: ["traditional", "bold"], occasions: ["office", "church", "party"], fabric: "Woven cotton (kente-style)",
+  },
 
   // ---- Rebero Threads (printed tees)
   {
