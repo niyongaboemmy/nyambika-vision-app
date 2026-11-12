@@ -21,3 +21,4 @@ scripts/crawl-output/
 .pytest_cache/
 apps/web/.next-build/
 .claude/worktrees/
+.refact/
