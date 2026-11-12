@@ -10,6 +10,7 @@ from .imaging import (
     bbox,
     border_connected,
     colour_distance,
+    dilate,
     downsample_mask,
     luminance,
 )
@@ -110,17 +111,32 @@ def resolve_category(category: str | None, cut: Image.Image | None = None) -> tu
 
 
 def cutout(img: Image.Image) -> Image.Image:
-    """Remove a uniform studio background: border flood fill + soft threshold + feather."""
+    """Remove a uniform studio background: border flood fill + soft threshold + feather.
+
+    Soft drop shadows (the background colour scaled down, same chroma) count as background, so the
+    shadow under sleeves and in the armpit wedges is removed with it.
+    """
     rgb = np.asarray(img.convert("RGB"))
     bg, spread = background_stats(rgb)
     t0 = max(12.0, 2 * spread + 6)
     t1 = t0 + 22
     dist = colour_distance(rgb, bg)
+    k = luminance(rgb.astype(np.float32)) / max(1.0, float(luminance(bg.astype(np.float32))))
+    chroma = np.abs(rgb.astype(np.float32) - k[..., None] * bg[None, None, :]).max(axis=-1)
+    shadow = (k > 0.8) & (k < 1.03) & (chroma <= t0)
+    dist = np.where(shadow, np.minimum(dist, chroma), dist)
     small, _ = downsample_mask(dist <= t1, 400)
     region = border_connected(small)
     region = np.asarray(
         Image.fromarray(region.astype(np.uint8) * 255).resize((rgb.shape[1], rgb.shape[0]), Image.BILINEAR)
     ) > 127
+    # The flood fill runs downsampled, so tight wedges (armpits) can be missed: grow it at full resolution.
+    bg_like = dist <= t1
+    for _ in range(5):
+        grown = dilate(region, 1) & bg_like
+        if (grown == region).all():
+            break
+        region = region | grown
     soft = np.clip((dist - t0) / (t1 - t0), 0, 1)
     alpha = np.where(region, soft, 1.0)
     alpha_img = Image.fromarray((alpha * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(0.8))

@@ -164,6 +164,7 @@ def tee(base_hex: str, out_path: str | Path, size=(800, 800), seed: int = 7) -> 
     shadow = np.asarray(Image.fromarray((m * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(18)), dtype=np.float32) / 255
     shadow = np.roll(np.roll(shadow, 10, axis=0), 6, axis=1)
     canvas = bg[None, None, :] * (1 - 0.16 * shadow[..., None])
+    backdrop = Image.fromarray(canvas.astype(np.uint8))
     canvas = canvas * (1 - m[..., None]) + fabric * m[..., None]
     img = Image.fromarray(canvas.astype(np.uint8))
 
@@ -182,6 +183,8 @@ def tee(base_hex: str, out_path: str | Path, size=(800, 800), seed: int = 7) -> 
                    fill=stitch, width=2)  # parallel to the sleeve hem, inset toward the body
     for s in (-1, 1):                                                  # shoulder seams
         d.line([(cx + s * 64, 112), (cx + s * 160, 138)], fill=stitch, width=2)
+    ImageDraw.Draw(mask).polygon(inner_back, fill=255)
+    img = Image.composite(img, backdrop, mask)  # details never spill outside the garment
     img = img.filter(ImageFilter.GaussianBlur(0.6))
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)

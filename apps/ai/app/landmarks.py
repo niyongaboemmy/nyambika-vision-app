@@ -85,10 +85,14 @@ def landmarks(mask: np.ndarray, box) -> Body:
     shoulder_w = int(np.clip(shoulder_w, 0.17 * hgt, 0.36 * hgt))
     chest_y = neck_y + int(0.10 * hgt)
     waist_y, hip_y = y0 + int(WAIST_FRAC * hgt), y0 + int(HIP_FRAC * hgt)
+    # Torso width: the narrowest run between chest and waist, so arms hanging close to the body are excluded
+    # wherever there is any gap between them and the torso.
+    trunk = [width(y) for y in range(chest_y - int(0.02 * hgt), waist_y + 1, max(1, hgt // 200))]
+    chest_w = int(np.clip(min(trunk) if trunk else 0.15 * hgt, 0.10 * hgt, shoulder_w))
     return Body(
         box=(x0, y0, x1, y1), top=y0, height=hgt, cx=cx, head_y1=y0 + int(HEAD_FRAC * hgt),
         neck_y=neck_y, neck_w=neck_w, shoulder_w=shoulder_w,
-        chest_y=chest_y, chest_w=int(np.clip(width(chest_y), 0.10 * hgt, shoulder_w)),
+        chest_y=chest_y, chest_w=chest_w,
         waist_y=waist_y, waist_w=int(np.clip(width(waist_y), 0.09 * hgt, shoulder_w)),
         hip_y=hip_y, hip_w=int(np.clip(width(hip_y), 0.10 * hgt, 1.2 * shoulder_w)),
         knee_y=y0 + int(KNEE_FRAC * hgt), calf_y=y0 + int(CALF_FRAC * hgt),

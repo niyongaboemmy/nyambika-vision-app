@@ -105,7 +105,7 @@ def render_frames(twin: Image.Image, garment: Image.Image, category: str, tier: 
     provider = get_provider(config.VTON_PROVIDER)
     garment = garment.convert("RGBA")
     r = provider.generate(twin, garment, category, tier, frame)
-    base = np.asarray(r.twin_resized.convert("RGB"), dtype=np.float32)
+    base = np.asarray((r.base_image or r.twin_resized).convert("RGB"), dtype=np.float32)  # old clothing hidden
     comp = np.asarray(r.image.convert("RGB"), dtype=np.float32)
     h, w = base.shape[:2]
     box = r.subject_box
