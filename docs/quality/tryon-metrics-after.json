@@ -1,6 +1,6 @@
 {
  "label": "after",
- "provider": "local-compositor@1.1-preview",
+ "provider": "local-compositor@1.0-preview",
  "rows": [
   {
    "garment": "tee-brown",
@@ -16,7 +16,7 @@
    "reasons": [],
    "identity": 1.0,
    "fidelity": 0.808,
-   "latency_ms": 139
+   "latency_ms": 131
   },
   {
    "garment": "tee-brown",
@@ -32,7 +32,7 @@
    "reasons": [],
    "identity": 1.0,
    "fidelity": 0.8049,
-   "latency_ms": 167
+   "latency_ms": 124
   },
   {
    "garment": "tee-brown",
@@ -48,7 +48,7 @@
    "reasons": [],
    "identity": 1.0,
    "fidelity": 0.8093,
-   "latency_ms": 153
+   "latency_ms": 123
   },
   {
    "garment": "tee-brown",
@@ -64,7 +64,7 @@
    "reasons": [],
    "identity": 1.0,
    "fidelity": 0.8103,
-   "latency_ms": 129
+   "latency_ms": 123
   },
   {
    "garment": "tee-brown",
@@ -80,7 +80,7 @@
    "reasons": [],
    "identity": 1.0,
    "fidelity": 0.8098,
-   "latency_ms": 128
+   "latency_ms": 125
   },
   {
    "garment": "kitenge-dress",
@@ -96,7 +96,7 @@
    "reasons": [],
    "identity": 1.0,
    "fidelity": 0.8665,
-   "latency_ms": 144
+   "latency_ms": 131
   },
   {
    "garment": "kitenge-dress",
@@ -104,15 +104,15 @@
    "class": "dress",
    "persona": 2,
    "placement_err_pct": 0.91,
-   "hem_frac": 0.9,
+   "hem_frac": 0.862,
    "hem_target": 0.84,
-   "aspect_dist_pct": 18.3,
+   "aspect_dist_pct": 11.9,
    "leakage_pct": 0.0,
    "guard_passed": true,
    "reasons": [],
    "identity": 1.0,
-   "fidelity": 0.8828,
-   "latency_ms": 141
+   "fidelity": 0.8827,
+   "latency_ms": 132
   },
   {
    "garment": "kitenge-dress",
@@ -120,15 +120,15 @@
    "class": "dress",
    "persona": 3,
    "placement_err_pct": 0.91,
-   "hem_frac": 0.9,
+   "hem_frac": 0.862,
    "hem_target": 0.84,
-   "aspect_dist_pct": 8.1,
+   "aspect_dist_pct": 2.3,
    "leakage_pct": 0.0,
    "guard_passed": true,
    "reasons": [],
    "identity": 1.0,
-   "fidelity": 0.8848,
-   "latency_ms": 146
+   "fidelity": 0.8855,
+   "latency_ms": 135
   },
   {
    "garment": "kitenge-dress",
@@ -136,15 +136,15 @@
    "class": "dress",
    "persona": 4,
    "placement_err_pct": 0.91,
-   "hem_frac": 0.9,
+   "hem_frac": 0.862,
    "hem_target": 0.84,
-   "aspect_dist_pct": 0.4,
+   "aspect_dist_pct": 4.9,
    "leakage_pct": 0.0,
    "guard_passed": true,
    "reasons": [],
    "identity": 1.0,
-   "fidelity": 0.8923,
-   "latency_ms": 138
+   "fidelity": 0.8902,
+   "latency_ms": 136
   },
   {
    "garment": "kitenge-dress",
@@ -152,15 +152,15 @@
    "class": "dress",
    "persona": 5,
    "placement_err_pct": 0.91,
-   "hem_frac": 0.93,
+   "hem_frac": 0.862,
    "hem_target": 0.84,
-   "aspect_dist_pct": 4.8,
+   "aspect_dist_pct": 4.9,
    "leakage_pct": 0.0,
    "guard_passed": true,
    "reasons": [],
    "identity": 1.0,
-   "fidelity": 0.9007,
-   "latency_ms": 142
+   "fidelity": 0.8909,
+   "latency_ms": 138
   },
   {
    "garment": "skirt",
@@ -176,7 +176,7 @@
    "reasons": [],
    "identity": 1.0,
    "fidelity": 0.7338,
-   "latency_ms": 89
+   "latency_ms": 87
   },
   {
    "garment": "skirt",
@@ -192,7 +192,7 @@
    "reasons": [],
    "identity": 1.0,
    "fidelity": 0.7475,
-   "latency_ms": 88
+   "latency_ms": 86
   },
   {
    "garment": "skirt",
@@ -208,7 +208,7 @@
    "reasons": [],
    "identity": 1.0,
    "fidelity": 0.7576,
-   "latency_ms": 89
+   "latency_ms": 88
   },
   {
    "garment": "skirt",
@@ -216,14 +216,14 @@
    "class": "skirt",
    "persona": 4,
    "placement_err_pct": 0.91,
-   "hem_frac": 0.884,
+   "hem_frac": 0.862,
    "hem_target": 0.72,
-   "aspect_dist_pct": 20.6,
+   "aspect_dist_pct": 15.1,
    "leakage_pct": null,
    "guard_passed": true,
    "reasons": [],
    "identity": 1.0,
-   "fidelity": 0.763,
+   "fidelity": 0.7623,
    "latency_ms": 88
   },
   {
@@ -232,15 +232,15 @@
    "class": "skirt",
    "persona": 5,
    "placement_err_pct": 0.91,
-   "hem_frac": 0.921,
+   "hem_frac": 0.862,
    "hem_target": 0.72,
-   "aspect_dist_pct": 18.0,
+   "aspect_dist_pct": 4.9,
    "leakage_pct": null,
    "guard_passed": true,
    "reasons": [],
    "identity": 1.0,
-   "fidelity": 0.7733,
-   "latency_ms": 91
+   "fidelity": 0.7646,
+   "latency_ms": 88
   },
   {
    "garment": "shirt",
@@ -256,7 +256,7 @@
    "reasons": [],
    "identity": 1.0,
    "fidelity": 0.9112,
-   "latency_ms": 124
+   "latency_ms": 119
   },
   {
    "garment": "shirt",
@@ -272,7 +272,7 @@
    "reasons": [],
    "identity": 1.0,
    "fidelity": 0.9169,
-   "latency_ms": 127
+   "latency_ms": 124
   },
   {
    "garment": "shirt",
@@ -288,39 +288,39 @@
    "reasons": [],
    "identity": 1.0,
    "fidelity": 0.917,
-   "latency_ms": 128
+   "latency_ms": 122
   },
   {
    "garment": "shirt",
    "category": "shirt",
    "class": "top",
    "persona": 4,
-   "placement_err_pct": 0.91,
-   "hem_frac": 0.655,
+   "placement_err_pct": 1.13,
+   "hem_frac": 0.642,
    "hem_target": 0.55,
-   "aspect_dist_pct": 2.5,
+   "aspect_dist_pct": 1.7,
    "leakage_pct": 0.0,
    "guard_passed": true,
    "reasons": [],
    "identity": 1.0,
-   "fidelity": 0.9116,
-   "latency_ms": 126
+   "fidelity": 0.9166,
+   "latency_ms": 127
   },
   {
    "garment": "shirt",
    "category": "shirt",
    "class": "top",
    "persona": 5,
-   "placement_err_pct": 4.75,
-   "hem_frac": 0.698,
+   "placement_err_pct": 1.13,
+   "hem_frac": 0.642,
    "hem_target": 0.55,
-   "aspect_dist_pct": 3.1,
+   "aspect_dist_pct": 1.7,
    "leakage_pct": 0.0,
    "guard_passed": true,
    "reasons": [],
    "identity": 1.0,
-   "fidelity": 0.9253,
-   "latency_ms": 124
+   "fidelity": 0.9165,
+   "latency_ms": 131
   },
   {
    "garment": "tee-dark",
@@ -336,7 +336,7 @@
    "reasons": [],
    "identity": 1.0,
    "fidelity": 0.9908,
-   "latency_ms": 123
+   "latency_ms": 122
   },
   {
    "garment": "tee-dark",
@@ -352,7 +352,7 @@
    "reasons": [],
    "identity": 1.0,
    "fidelity": 0.9912,
-   "latency_ms": 123
+   "latency_ms": 127
   },
   {
    "garment": "tee-dark",
@@ -368,7 +368,7 @@
    "reasons": [],
    "identity": 1.0,
    "fidelity": 0.9946,
-   "latency_ms": 129
+   "latency_ms": 128
   },
   {
    "garment": "tee-dark",
@@ -384,7 +384,7 @@
    "reasons": [],
    "identity": 1.0,
    "fidelity": 0.994,
-   "latency_ms": 123
+   "latency_ms": 133
   },
   {
    "garment": "tee-dark",
@@ -400,7 +400,7 @@
    "reasons": [],
    "identity": 1.0,
    "fidelity": 0.9972,
-   "latency_ms": 134
+   "latency_ms": 126
   },
   {
    "garment": "tee-light",
@@ -416,7 +416,7 @@
    "reasons": [],
    "identity": 1.0,
    "fidelity": 0.9946,
-   "latency_ms": 122
+   "latency_ms": 124
   },
   {
    "garment": "tee-light",
@@ -432,7 +432,7 @@
    "reasons": [],
    "identity": 1.0,
    "fidelity": 0.9921,
-   "latency_ms": 126
+   "latency_ms": 132
   },
   {
    "garment": "tee-light",
@@ -448,7 +448,7 @@
    "reasons": [],
    "identity": 1.0,
    "fidelity": 0.9924,
-   "latency_ms": 124
+   "latency_ms": 139
   },
   {
    "garment": "tee-light",
@@ -464,7 +464,7 @@
    "reasons": [],
    "identity": 1.0,
    "fidelity": 0.992,
-   "latency_ms": 127
+   "latency_ms": 144
   },
   {
    "garment": "tee-light",
@@ -480,7 +480,7 @@
    "reasons": [],
    "identity": 1.0,
    "fidelity": 0.9921,
-   "latency_ms": 125
+   "latency_ms": 127
   },
   {
    "garment": "tee-mid",
@@ -496,7 +496,7 @@
    "reasons": [],
    "identity": 1.0,
    "fidelity": 0.9093,
-   "latency_ms": 125
+   "latency_ms": 122
   },
   {
    "garment": "tee-mid",
@@ -512,7 +512,7 @@
    "reasons": [],
    "identity": 1.0,
    "fidelity": 0.9006,
-   "latency_ms": 133
+   "latency_ms": 136
   },
   {
    "garment": "tee-mid",
@@ -528,7 +528,7 @@
    "reasons": [],
    "identity": 1.0,
    "fidelity": 0.9023,
-   "latency_ms": 134
+   "latency_ms": 139
   },
   {
    "garment": "tee-mid",
@@ -544,7 +544,7 @@
    "reasons": [],
    "identity": 1.0,
    "fidelity": 0.9063,
-   "latency_ms": 128
+   "latency_ms": 129
   },
   {
    "garment": "tee-mid",
@@ -560,7 +560,7 @@
    "reasons": [],
    "identity": 1.0,
    "fidelity": 0.9087,
-   "latency_ms": 128
+   "latency_ms": 125
   },
   {
    "garment": "real-tee",
@@ -575,8 +575,8 @@
    "guard_passed": true,
    "reasons": [],
    "identity": 1.0,
-   "fidelity": 0.928,
-   "latency_ms": 167
+   "fidelity": 0.9279,
+   "latency_ms": 152
   },
   {
    "garment": "real-tee",
@@ -592,7 +592,7 @@
    "reasons": [],
    "identity": 1.0,
    "fidelity": 0.9287,
-   "latency_ms": 162
+   "latency_ms": 155
   },
   {
    "garment": "real-tee",
@@ -608,7 +608,7 @@
    "reasons": [],
    "identity": 1.0,
    "fidelity": 0.9279,
-   "latency_ms": 160
+   "latency_ms": 154
   },
   {
    "garment": "real-tee",
@@ -624,7 +624,7 @@
    "reasons": [],
    "identity": 1.0,
    "fidelity": 0.9266,
-   "latency_ms": 197
+   "latency_ms": 157
   },
   {
    "garment": "real-tee",
@@ -640,7 +640,7 @@
    "reasons": [],
    "identity": 1.0,
    "fidelity": 0.9289,
-   "latency_ms": 172
+   "latency_ms": 155
   }
  ],
  "readiness": {
@@ -717,5 +717,5 @@
    }
   }
  },
- "hd_latency_ms_mean": 301.6
+ "hd_latency_ms_mean": 300.6
 }
