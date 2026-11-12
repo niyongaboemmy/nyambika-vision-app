@@ -51,7 +51,7 @@ export function AttrSuggest({ productId, canEdit, onApplied }: { productId: stri
   }
 
   return (
-    <section aria-labelledby="attr-suggest-t" className="rounded-[24px] bg-gradient-to-br from-violet-50 via-white to-amber-50 p-4 ring-1 ring-inset ring-violet-200 sm:p-5">
+    <section aria-labelledby="attr-suggest-t" className="rounded-[24px] bg-gradient-to-br from-violet-50 via-white to-amber-50 p-4 sm:p-5">
       <div className="flex items-start gap-3">
         <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-violet-ink text-white shadow-[0_8px_18px_-8px_rgba(98,57,201,.8)]"><Icon name="sparkle" className="size-5" /></span>
         <div className="min-w-0">
@@ -63,7 +63,7 @@ export function AttrSuggest({ productId, canEdit, onApplied }: { productId: stri
         {data.suggestions.map((s) => {
           const ok = s.matches || done.includes(s.field);
           return (
-            <li key={s.field} className="flex items-center gap-3 rounded-2xl bg-white/85 p-3 ring-1 ring-inset ring-hairline">
+            <li key={s.field} className="flex items-center gap-3 rounded-2xl bg-white/85 p-3">
               <span className="min-w-0 flex-1">
                 <span className="block text-[11px] font-black uppercase tracking-wider text-cocoa-2">{FIELD[s.field]}</span>
                 <span className="block text-[15px] font-extrabold text-cocoa">{s.label}</span>

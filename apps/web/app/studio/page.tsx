@@ -31,10 +31,10 @@ export default function StudioHome() {
   const [creating, setCreating] = useState(false);
   return (
     <div className="min-h-dvh">
-      <header className="st-glass-light sticky top-0 z-30 border-b border-hairline/70">
+      <header className="st-glass-light hairline-b sticky top-0 z-30">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 pb-3 pt-[max(env(safe-area-inset-top),12px)]">
           <Brand label={t("studio.title")} />
-          <a href="/" className="st-press inline-flex min-h-11 items-center gap-2 rounded-2xl bg-white px-3.5 text-sm font-bold text-cocoa ring-1 ring-inset ring-hairline hover:ring-cocoa-3">
+          <a href="/" className="st-press inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-2xl bg-white px-3.5 text-sm font-bold text-cocoa">
             <Icon name="eye" className="size-4" /> Shopper view
           </a>
         </div>
@@ -141,7 +141,7 @@ function CreatePage({ onDone, onCancel }: { onDone: () => void; onCancel: () => 
           type="button"
           onClick={() => (step === 0 ? onCancel() : setStep(step - 1))}
           aria-label={step === 0 ? "Cancel" : "Back"}
-          className="st-press grid size-11 shrink-0 place-items-center rounded-full bg-white text-cocoa ring-1 ring-inset ring-hairline"
+          className="st-press grid size-11 shrink-0 place-items-center rounded-full bg-white text-cocoa"
         >
           <Icon name="back" className="size-5" />
         </button>
@@ -160,7 +160,7 @@ function CreatePage({ onDone, onCancel }: { onDone: () => void; onCancel: () => 
               {TYPES.map((tp) => {
                 const on = f.memberType === tp.value;
                 return (
-                  <label key={tp.value} className={`st-press flex cursor-pointer items-center gap-3 rounded-2xl p-3 ring-inset sm:flex-col sm:items-start ${on ? "bg-cocoa text-white ring-2 ring-cocoa" : "bg-white ring-1 ring-hairline hover:ring-cocoa-3"}`}>
+                  <label key={tp.value} className={`st-press flex cursor-pointer items-center gap-3 rounded-2xl p-3 ring-inset sm:flex-col sm:items-start ${on ? "bg-cocoa text-white ring-2 ring-cocoa" : "bg-white"}`}>
                     <input type="radio" name="memberType" value={tp.value} checked={on} onChange={set("memberType")} className="sr-only" />
                     <span className={`grid size-10 place-items-center rounded-xl ${on ? "bg-white/15" : "bg-paper-2"}`}><Icon name={tp.icon} className="size-5" /></span>
                     <span>
@@ -195,7 +195,7 @@ function CreatePage({ onDone, onCancel }: { onDone: () => void; onCancel: () => 
       {step === 2 && (
         <div key="s2" className="animate-slide-in space-y-4">
           <Card className="space-y-4">
-            <div className="flex items-center gap-3 rounded-2xl bg-emerald-50 p-3.5 ring-1 ring-inset ring-emerald-200">
+            <div className="flex items-center gap-3 rounded-2xl bg-emerald-50 p-3.5">
               <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white text-mint-ink"><Icon name="wallet" className="size-5" /></span>
               <p className="text-sm text-mint-ink">
                 <strong className="block text-[15px]">Paid directly to you</strong>

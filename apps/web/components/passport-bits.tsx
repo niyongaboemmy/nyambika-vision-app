@@ -29,7 +29,7 @@ export function HostVerify({ productId, verified }: { productId: string; verifie
     }
   }
   return (
-    <button type="button" disabled={busy} onClick={toggle} className="inline-flex min-h-11 items-center rounded-full px-4 text-sm font-bold text-violet-ink ring-1 ring-inset ring-violet-ink/40 hover:bg-violet-50 print:hidden">
+    <button type="button" disabled={busy} onClick={toggle} className="inline-flex min-h-11 items-center rounded-full px-4 text-sm font-bold bg-violet-50 text-violet-ink hover:bg-violet-100 print:hidden">
       {on ? "Host: withdraw claim verification" : "Host: verify these claims"}
     </button>
   );

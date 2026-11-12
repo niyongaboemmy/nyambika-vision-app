@@ -120,7 +120,7 @@ export default function UssdSimulator() {
           <p className="mt-3 text-center text-[11px] text-white/50">{open ? "Session open · reply with a number · 0 = back" : "No session"}</p>
         </section>
 
-        <section aria-labelledby="sms-title" className="rounded-[26px] bg-white/8 p-4 ring-1 ring-white/10">
+        <section aria-labelledby="sms-title" className="rounded-[26px] bg-white/8 p-4">
           <h2 id="sms-title" className="text-sm font-black uppercase tracking-widest text-amber-300">SMS inbox</h2>
           {sms.length === 0 ? (
             <p className="mt-2 text-sm text-white/60">No messages for this SIM yet.</p>

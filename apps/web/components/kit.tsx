@@ -26,7 +26,7 @@ const THEME_OPTS: { value: ThemePref; label: string; icon: IconName }[] = [
 export function ThemeToggle({ compact = false, className = "" }: { compact?: boolean; className?: string }) {
   const { pref, setPref } = useTheme();
   return (
-    <div role="group" aria-label="Theme" className={`inline-flex gap-1 rounded-2xl border border-border bg-surface-3/70 p-1 ${className}`}>
+    <div role="group" aria-label="Theme" className={`inline-flex gap-1 rounded-2xl bg-fill p-1 ${className}`}>
       {THEME_OPTS.map((o) => {
         const on = o.value === pref;
         return (
@@ -40,7 +40,7 @@ export function ThemeToggle({ compact = false, className = "" }: { compact?: boo
               haptic("light");
               setPref(o.value);
             }}
-            className={`hit press inline-flex min-h-9 items-center justify-center gap-1.5 rounded-xl px-2.5 text-[13px] font-bold ${on ? "bg-surface-2 text-fg shadow-e1" : "text-fg-muted hover:text-fg"}`}
+            className={`hit press inline-flex min-h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-xl px-2.5 text-[13px] font-bold ${on ? "bg-surface-2 text-fg shadow-e1" : "text-fg-muted hover:text-fg"}`}
           >
             <Icon name={o.icon} className="size-4" />
             {!compact && <span>{o.label}</span>}
@@ -85,7 +85,7 @@ export function InfoTip({ label, children, className = "" }: { label: string; ch
         <span
           id={id}
           role="note"
-          className="absolute left-1/2 top-full z-40 mt-1.5 w-64 max-w-[78vw] -translate-x-1/2 animate-pop rounded-2xl border border-border bg-surface-2 p-3 text-left text-[13px] font-medium leading-relaxed text-fg shadow-e3"
+          className="absolute left-1/2 top-full z-40 mt-1.5 w-64 max-w-[78vw] -translate-x-1/2 animate-pop rounded-2xl bg-surface-2 p-3 text-left text-[13px] font-medium leading-relaxed text-fg shadow-e3"
         >
           {children}
         </span>

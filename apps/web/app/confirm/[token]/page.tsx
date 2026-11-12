@@ -175,7 +175,7 @@ export default function ConfirmMandate() {
           </div>
         </section>
 
-        <section className="rounded-3xl border border-gold/30 bg-gold/10 p-4 text-sm leading-relaxed" role="note">
+        <section className="rounded-3xl bg-gold/10 p-4 text-sm leading-relaxed" role="note">
           <p><Icon name="lock" className="mr-1 inline size-4 align-[-3px]" />{t("mandate.paidTo")} <b className="text-white">{m.paidTo}</b>. Nyambika never holds your money.</p>
           <p className="mt-1 text-txt/85">{t("mandate.nothingYet")}</p>
           {m.state === "open" && clock && !expired && <p className="mt-2 text-xs text-mut"><Icon name="clock" className="mr-1 inline size-3.5 align-[-2px]" />{t("mandate.expires")} {clock.label}</p>}

@@ -659,3 +659,148 @@ What moved, and what was cut:
   many reruns it needs a fresh copy of the slot DB, `createdb -T nyambika_tpl`.
 - **Screenshot review:** light, dark and desktop contact sheets for every screen. Looks was checked at 360, 390
   and 430 in both themes.
+
+## 8. Polish pass: wrapping, alignment, light surfaces (Nov 2026)
+
+The user asked, in their words: "For some texts, they wrap themselves and make it not professionally aligned … go
+through the whole app and enhance proper alignment and spacing … do not use much border style because they look more
+solid, while i need it to be light and professional." UI only, no API or schema changes. Branch
+`worktree-agent-ae727930387ee6321` (slot 1, label `polish`).
+
+### How it was measured
+
+`scripts/crawl-uiux.mjs` gained two per-screen metrics (in `metrics.json`, written after every screen so an interrupted
+run keeps them) and one new failure:
+
+- **Wraps (fails the crawl, at 360 and 390 px, both themes).** An element that should sit on one line but whose text
+  breaks over two or more line boxes (`Range.getClientRects()`). It checks pill-shaped filled controls and chips (radius
+  about half the height), tabs and options, `.tabular` / `tabular-nums` numbers, `[data-nowrap]`, and buttons or links of
+  up to three words. Stacked title + subtitle buttons are skipped because only one-run text counts.
+  `[data-allow-wrap]` opts a subtree out, and `WRAP=warn` reports wraps without failing.
+- **Outlines (reported).** Visible boxes with a border on all four sides or a ring (`0 0 0 Npx` shadow, N ≥ 1) in a
+  non-transparent colour. One-sided separators and 0.5 px hairlines don't count. Media stages (`.theme-media`) are
+  excluded.
+- **`LOCALE=rw|fr|sw`** renders every screen in that locale, as a stored choice. The Muse typing action now matches the
+  RW/FR/SW button names.
+
+| | Before (light / dark) | After (light / dark) |
+|---|---:|---:|
+| Outlines, 49 screens at 390 px | 683 / 911 | **19 / 19** |
+| One-line elements that wrap, 390 px | 14 / 14 | **0 / 0** |
+| One-line elements that wrap, 360 px | 33 / 33 | **0 / 0** |
+| RW locale, light, 390 + 360 | 3 | **0** |
+
+The 19 outlines left are deliberate:
+
+- selected states: `ring-2` on the chosen piece, plan, staff role or picker;
+- colour swatches, which need an edge so white and cream read on white;
+- dashed drop zones for upload;
+- the maker monogram ring on Maker Space.
+
+Contact sheets: `docs/design/screens/polish-{before,after}-{shopper,studio,desktop}-{light,dark}.jpg`. Phone sheets are
+390 px in crawl order. Desktop sheets are 1280 px: sign in, menu, makers, trust, studio home/orders/settings and admin
+regions.
+
+### Wraps found and fixed
+
+| Where | Before | After |
+|---|---|---|
+| Studio orders, "Making" lane | "Ready for pickup" next to "Send out" broke onto two lines in every card | Action label "Ready"; `SButton` / `SLink` / shopper `Button` are `whitespace-nowrap` |
+| Custom orders bento | "RWF 1,023,000" split after "RWF" | `rwfCompact()` (moved to `lib/api.ts`): "RWF 1.02M", exact amount in `title`; bento values `truncate` |
+| Host admin hero (360) | "RWF 10,449,198" wrapped | One line with `clamp()` sizing |
+| Studio product grid (360) | Prices wrapped | Inline `tabular-nums` / `.tabular` numbers never wrap (global rule) |
+| Looks rendering pill (360) | "Rendering on you…" on 3 lines (shrink-to-fit on an absolutely centred pill) | `whitespace-nowrap` |
+| Product 3D card (360) | "Preview in 3D" on 3 lines | Button nowrap |
+| Tailor services | "on your page" status pill wrapped | "Live" / "Hidden", nowrap |
+| Admin pilot arms | "51.8% n=276 · 5.7 gens/user" wrapped | "…/user", shrink-0 |
+| Studio dock | "Custom orders" truncated at 360 | Optional `short` label on `StudioNavItem` ("Custom", "Products"). The full label stays the accessible name (label-in-name holds) |
+| Studio home to-do | "Try-on allowance used / up" | "Try-ons used up"; to-do titles `truncate` |
+| Product editor steps | "2. Colours & …" | "Colours" (the section title keeps "Colours & sizes") |
+| Sign in | "Sign in with your / phone" orphan; language chips 3 + 1 | Titles balance globally; languages in an equal 2 × 2 grid |
+| RW: 3D / AR mirror mode pill (360) | "Impanga ya 3D · Indorerwamo ya AR" wrapped | Pill capped at the gutter, labels nowrap + truncate |
+| RW: Page manager header | "Shopper view" on 3 lines next to the RW title | Brand title truncates; action nowrap, shrink-0 |
+
+Global text rules (`globals.css`, polish block):
+
+- `h1–h4, legend, figcaption` use `text-wrap-style: balance`.
+- `p, li, dd, blockquote, small` use `text-wrap-style: pretty`.
+- Inline `tabular-nums` and `.tabular` are `nowrap`.
+- **The longhand matters.** The `text-wrap` shorthand resets `text-wrap-mode` and silently undid Tailwind's `truncate`
+  on paragraphs. This was caught on Browse makers, where descriptions grew to three lines.
+
+### Light surfaces (my recommendations, applied)
+
+1. **Hierarchy by fill, not by line.** There are three levels:
+   - grouped background (`--surface`; studio `paper` is now #f6f1eb, a touch deeper);
+   - elevated card (`--surface-2` / `st-card`: white, or lifted charcoal in dark);
+   - filled control (`--fill` / `--fill-2`, new `bg-fill` / `bg-fill-2` utilities: ink at 5.5–6 % on light, white at
+     6–8 % on dark).
+   Cards carry `--elev-1`, now very soft (`0 0.5px 1px` + `0 4px 14px -8px` at 10 %), plus `--edge`, a 0.5 px inner
+   hairline that keeps white-on-cream cards crisp without reading as a border.
+2. **Outlines removed systemically.**
+   - `.glass`, `.st-card` and `.st-dock` lost their 1 px borders. Glass on the dark aurora keeps a 0.5 px top sheen.
+   - `--border`, `--color-line` and `--color-hairline` are now low-alpha inks (8–10 %), so any line left is soft.
+   - A codemod removed 1 px neutral or tint borders and rings (`ring-hairline`, `ring-stone-200`, `ring-amber-200`,
+     `border-white/15`, …) from 245 class strings in about 80 files when the element already had a fill. Where the
+     width lived in another ternary branch it substituted `*-transparent`. Swatches and selected states were left alone.
+   - The primitives were redone by hand (below).
+3. **Inputs are filled fields (iOS).** `Input` / `Textarea` / `Select` use `bg-fill`, with no border and no inset shadow.
+   On focus the field lifts to the card colour with a 2 px violet ring. The fill is the affordance; it shows on white
+   and on paper in both themes. The Stripe-mock card inputs use a focus-visible gold ring instead of a border.
+4. **Chips and filters.**
+   - Unselected is `bg-fill`.
+   - Selected inverts (`bg-fg text-surface`) in both themes. The gold borders are gone from the shopper `Chip`, the
+     makers filter, the drape options and sign in.
+   - Where an inverted pill would hurt a coloured inline label, the selected state is a gold tint plus a 0.5 px inner
+     edge instead: the 3D size picker ("your size" in mint) and the pilot survey tiles.
+   - Status `Badge`, `Chip` and `Fact` are fills only, `whitespace-nowrap`.
+5. **Grouped lists and sheets (iOS).**
+   - Shopper sheets use `--sheet-bg`: cream in light, #15131b in dark.
+   - `Group` rows sit on `--group-bg`: white in light, a lifted #221f2a in dark. Before, a white group sat on a white
+     sheet with a border.
+   - Rows keep only 0.5 px hairline separators.
+   - Action sheets, the stepper and the theme toggle lost their borders.
+   - Material headers trade `border-b` for a 0.5 px inset hairline, and `divide-hairline` lists are 0.5 px.
+6. **Kept on purpose:**
+   - Focus rings: `:focus-visible` outline 2.5 px; inputs get a ring on focus.
+   - Dashed drop zones for upload, where the dash is the affordance.
+   - Capture guides (face oval, scan ring) and the media stages.
+   - One-sided separators (passport section rules, timeline rails, desktop sidebar edge), now on the softer hairline
+     token.
+
+### Alignment and spacing
+
+- **One leading edge.** The 16 px gutter is unchanged. Chips, inputs and cards no longer add a 1 px border, so a filled
+  chip, an input and a borderless card share the same edge.
+- **Equal heights.**
+  - The language grid is 2 × 2 with equal cells.
+  - Bento and KPI values stay on one line, so tiles in a row keep one height.
+  - Dock labels are one line.
+- **Two-part rows** (label + price, name + count) were already `justify-between` on a baseline. The fixes above keep the
+  value on one line (`shrink-0`, nowrap), so it stays right-aligned on the shared baseline.
+
+### Verification
+
+- **crawl-uiux, label `polish`:** 49 screens × light/dark × 390/1280, plus the 360 overflow and wrap pass, with axe.
+  Results: 0 console errors, 0 5xx, 0 overflow, 0 theme flashes, 0 serious/critical axe violations, 0 emoji and 0
+  wraps. RW run (light, 390 + 360): 0 wraps after the fixes.
+- **Typechecks:** `apps/web` and `apps/api` are clean.
+- **Tests:** web 19/19; API 33 files, 383 tests.
+- **JS budget:** production build, `perf-uiux` label `polish`, JS at load in KB gz including headers. Every core route
+  is ≤ 170 and within ±0.2 of pass 2:
+
+  | Muse | Looks | Try | Maker Space | Bag | Orders | Wardrobe | Circle | Trust | Mirror | Sign in |
+  |---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+  | 166.1 | 159.0 | 157.7 | 163.9 | 161.8 | 157.5 | 161.2 | 157.7 | 165.6 | 161.0 | 163.2 |
+
+  The pass was CSS-first. The only new JS is `rwfCompact` (moved to `lib/api.ts`) and the dock's `short` label.
+
+### Known gaps
+
+- The wrap check covers one-line elements, not every paragraph. Ragged body copy is handled by `pretty` / `balance` and
+  was reviewed by eye on the contact sheets.
+- The parallel reseed branch's credits ⓘ sheet and `/credits` page were not on this branch. They should use the same
+  primitives (`Group`, `bg-fill`, no outlines) when they merge.
+- The other crawls (s1–s5, studio-ui, …) were not re-run here. The change is class-only, and accessible names are
+  unchanged apart from the order action "Ready" (s4 clicks Accept / Start making / Send out / Mark delivered, not
+  Ready). The dock keeps its full labels as accessible names, so s1's "My products" still resolves.

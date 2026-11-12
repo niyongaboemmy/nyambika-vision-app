@@ -82,7 +82,7 @@ export function CircleAsk({ look, open, onClose, intentLabel }: { look: Look; op
                       aria-pressed={on}
                       aria-label={`${c.product.title}, ${c.variant.colourName}`}
                       onClick={() => toggle(c.id)}
-                      className={`relative aspect-[9/14] overflow-hidden rounded-2xl border-2 bg-ink-3 transition duration-200 ${on ? "scale-[.97] border-gold shadow-[0_0_24px_rgba(242,184,75,.35)]" : "border-white/10"}`}
+                      className={`relative aspect-[9/14] overflow-hidden rounded-2xl border-2 bg-ink-3 transition duration-200 ${on ? "scale-[.97] border-gold shadow-[0_0_24px_rgba(242,184,75,.35)]" : "border-transparent"}`}
                     >
                       {c.image && <img src={c.image} alt="" className="h-full w-full object-cover" />}
                       <span className={`absolute right-1.5 top-1.5 grid size-6 place-items-center rounded-full text-xs font-black ${on ? "bg-gold text-ink" : "border border-white/50 bg-black/40"}`}>

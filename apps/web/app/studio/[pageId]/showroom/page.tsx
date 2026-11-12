@@ -147,7 +147,7 @@ function Tile({ c, on, order, onClick, note }: { c: Candidate; on: boolean; orde
       type="button"
       aria-pressed={on}
       onClick={onClick}
-      className={`st-press relative w-[104px] shrink-0 overflow-hidden rounded-2xl bg-white text-left ring-2 ring-inset transition ${on ? "ring-violet-ink shadow-[0_8px_20px_-10px_rgba(98,57,201,.6)]" : "ring-hairline"}`}
+      className={`st-press relative w-[104px] shrink-0 overflow-hidden rounded-2xl bg-white text-left ring-2 ring-inset transition ${on ? "ring-violet-ink shadow-[0_8px_20px_-10px_rgba(98,57,201,.6)]" : "ring-transparent"}`}
     >
       <span className="block aspect-[4/5] bg-paper-2">{c.photo ? <img loading="lazy" decoding="async" src={c.photo} alt="" className="size-full object-cover" /> : <Icon name="hanger" className="m-auto mt-8 size-6 text-cocoa-3" />}</span>
       <span className="block truncate px-2 pt-1.5 text-xs font-bold text-cocoa">{c.title}</span>
@@ -188,7 +188,7 @@ function ShowsCard({ data, onNew, onChanged }: { data: VrStudio; onNew: () => vo
             const [tone, label] = PHASE_LABEL[s.phase];
             const upcoming = s.phase === "UPCOMING" || s.phase === "DOORS_OPEN";
             return (
-              <li key={s.id} className="flex gap-3 rounded-2xl bg-white p-2.5 ring-1 ring-inset ring-hairline">
+              <li key={s.id} className="flex gap-3 rounded-2xl bg-white p-2.5">
                 {s.cover ? <img loading="lazy" decoding="async" src={s.cover} alt="" className="h-24 w-20 shrink-0 rounded-xl object-cover" /> : <span className="h-24 w-20 shrink-0 rounded-xl bg-paper-2" />}
                 <div className="min-w-0 flex-1 space-y-1">
                   <div className="flex items-start gap-1.5">

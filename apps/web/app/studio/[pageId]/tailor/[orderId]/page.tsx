@@ -93,12 +93,12 @@ export default function TailorOrder() {
           </div>
           <div className="flex flex-wrap gap-1.5">
             {specChips(o.spec, o.colour?.name).map((c) => (
-              <span key={c} className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-sm font-semibold ring-1 ring-stone-300">
+              <span key={c} className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-sm font-semibold">
                 {c.startsWith("Custom colour") && <span className="size-3.5 rounded-full" style={{ background: `hsl(${o.spec.hue} 72% 50%)` }} />}
                 {c}
               </span>
             ))}
-            {o.size && <span className="rounded-full bg-white px-3 py-1 text-sm font-semibold ring-1 ring-stone-300">Usual size {o.size}</span>}
+            {o.size && <span className="rounded-full bg-white px-3 py-1 text-sm font-semibold">Usual size {o.size}</span>}
           </div>
           <Card className="space-y-1 text-sm">
             <p><b>{o.buyer?.name ?? "Customer"}</b> · {o.buyer?.phone ? <a className="underline" href={`tel:${o.buyer.phone}`}>{o.buyer.phone}</a> : <span className="text-cocoa-2">no phone</span>}</p>
@@ -203,13 +203,13 @@ function QuoteComposer({ order, busy, onSend }: { order: CustomOrderView; busy: 
   const n = Number(price) || 0;
   const split = depositSplit(n, pct);
   return (
-    <Card className="space-y-4 ring-2 ring-amber-300">
+    <Card className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-black">{order.quote ? "Update your quote" : "Send a quote"}</h3>
         {order.quote && <span className="text-xs text-stone-500">sent {kigaliTime(order.quote.at, { day: "numeric", month: "short" })}</span>}
       </div>
       <div className="flex items-center gap-1">
-        <button type="button" onClick={() => setPrice(String(Math.round(order.estimateRwf / 500) * 500))} className="st-press min-h-11 flex-1 rounded-2xl bg-amber-50 px-3 text-left text-sm ring-1 ring-amber-200">
+        <button type="button" onClick={() => setPrice(String(Math.round(order.estimateRwf / 500) * 500))} className="st-press min-h-11 flex-1 rounded-2xl bg-amber-50 px-3 text-left text-sm">
           <Icon name="sparkle" className="mr-1 inline size-4 align-[-3px] text-gold-ink" />Use suggested <b>{rwf(Math.round(order.estimateRwf / 500) * 500)}</b>
         </button>
         <InfoTip label="How this price is worked out">Your base price plus the morph options you set.</InfoTip>
@@ -220,7 +220,7 @@ function QuoteComposer({ order, busy, onSend }: { order: CustomOrderView; busy: 
       <Field label="Deposit" group>
         <div className="grid grid-cols-4 gap-2">
           {[30, 50, 70, 100].map((p) => (
-            <button key={p} type="button" aria-pressed={pct === p} onClick={() => setPct(p)} className={`min-h-12 rounded-xl text-sm font-bold ${pct === p ? "bg-stone-900 text-white" : "bg-white ring-1 ring-stone-300"}`}>{p}%</button>
+            <button key={p} type="button" aria-pressed={pct === p} onClick={() => setPct(p)} className={`min-h-12 rounded-xl text-sm font-bold ${pct === p ? "bg-stone-900 text-white" : "bg-white"}`}>{p}%</button>
           ))}
         </div>
         <span className="block text-sm text-stone-600">Now {rwf(split.depositRwf)} · at pickup {rwf(split.balanceRwf)}</span>
@@ -271,7 +271,7 @@ function MeasurementsCard({ order }: { order: CustomOrderView }) {
       {m && (
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {Object.entries(m.measurements).map(([k, v]) => (
-            <div key={k} className="rounded-2xl bg-stone-50 p-3 ring-1 ring-stone-200">
+            <div key={k} className="rounded-2xl bg-stone-50 p-3">
               <p className="text-xs font-semibold text-stone-500">{MEASUREMENT_LABEL[k]?.label ?? k}</p>
               <p className="text-2xl font-black">{v}<span className="text-sm font-semibold text-stone-500"> cm</span></p>
             </div>

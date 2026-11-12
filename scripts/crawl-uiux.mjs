@@ -6,6 +6,9 @@
 //   THEMES=light,dark   (default both)     VIEWPORTS=390,1280 (default; add 360 to also screenshot 360)
 //   ONLY=muse,bag       (substring filter on screen names)   AXE=0 to skip axe (quick visual runs)
 //   FULL=1 full-page screenshots (review)   STRICT_TARGETS=1 fail on tap targets under 44 px
+//   LOCALE=rw|fr|sw     render in that locale (stored choice, as after a switch)   WRAP=warn report wraps, don't fail
+// Polish pass: one-line elements (pills, chips, badges, tabs, short buttons, prices/counts) that wrap fail the crawl
+// at 360 and 390 px; outlines (visible borders / rings) per screen are counted at 390 for the before/after table.
 // Screenshots: scripts/crawl-output/uiux/<label>/<theme>-<vp>/<nn>-<screen>.png
 import { mkdirSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
@@ -23,11 +26,14 @@ const AXE = process.env.AXE !== "0";
 const root = new URL(`./crawl-output/uiux/${label}/`, import.meta.url).pathname;
 const browser = await chromium.launch({ args: ["--enable-unsafe-swiftshader", "--use-gl=angle", "--use-angle=swiftshader", "--use-fake-ui-for-media-stream", "--use-fake-device-for-media-stream"] });
 const issues = [];
+const warnings = [];
 const axeSummary = [];
 // Copy & alignment pass: per-screen words, paragraphs taller than 2 lines and small tap targets at 390 px.
 // STRICT_TARGETS=1 turns tap targets under 44 px into failures.
 const metrics = {};
 const STRICT = process.env.STRICT_TARGETS === "1";
+const LOCALE = process.env.LOCALE;
+const WRAP_FAIL = process.env.WRAP !== "warn";
 
 const vpOpts = (w) =>
   w >= 1000
@@ -83,7 +89,7 @@ const S = [
   ["signin", "anon", "/signin"],
   ["muse", "shopper", "/"],
   ["muse-menu", "shopper", "/", async (p) => { await p.getByRole("button", { name: "Menu" }).click(); await p.getByRole("dialog").waitFor(); }],
-  ["muse-typing", "shopper", "/", async (p) => { await p.getByRole("button", { name: /type/i }).last().click(); }],
+  ["muse-typing", "shopper", "/", async (p) => { await p.getByRole("button", { name: /type|andika|écri|tape|chapa/i }).last().click(); }],
   look && ["looks", "fresh", `/looks/${look.sessionId}`],
   variant && ["look-try", "fresh", `/looks/try?variant=${variant}`],
   ["maker-space", "anon", "/m/umurage-wear"],
@@ -189,6 +195,79 @@ async function copyMetrics(page) {
   });
 }
 
+/** Polish pass. Wraps: elements meant to sit on one line whose text breaks over 2+ line boxes: pill-shaped controls
+ *  and chips (radius about half their height), tabs/options, `.tabular` numbers, `[data-nowrap]`, and short buttons
+ *  (up to 3 words). An element counts only if its text flows as one run (no block/column children), so stacked
+ *  title + subtitle buttons are not flagged; `[data-allow-wrap]` opts a subtree out. Outlines: visible boxes with a
+ *  border on all four sides or a ring (0 0 0 Npx shadow) in a non-transparent colour; 0.5 px hairline separators
+ *  (one side, or inset 0.5 px shadows) are not outlines. */
+async function polishMetrics(page) {
+  return page.evaluate(() => {
+    const vis = (el) => {
+      const r = el.getBoundingClientRect();
+      const cs = getComputedStyle(el);
+      return r.width > 0 && r.height > 0 && cs.visibility !== "hidden" && cs.display !== "none" && !el.closest("[aria-hidden=true],.sr-only,[data-allow-wrap]");
+    };
+    const column = (cs) => cs.display.includes("grid") || (cs.display.includes("flex") && cs.flexDirection.startsWith("column"));
+    const oneRun = (el) => {
+      if (column(getComputedStyle(el))) return false;
+      for (const d of el.querySelectorAll("*")) {
+        if (!d.textContent.trim()) continue;
+        const cs = getComputedStyle(d);
+        if (cs.display === "block" || cs.display === "list-item" || column(cs)) return false;
+      }
+      return true;
+    };
+    const lines = (el) => {
+      const r = document.createRange();
+      r.selectNodeContents(el);
+      const mids = [];
+      for (const b of r.getClientRects()) {
+        if (b.width < 1 || b.height < 1) continue;
+        const mid = b.top + b.height / 2;
+        if (!mids.some((t) => Math.abs(t - mid) < Math.max(6, b.height / 2))) mids.push(mid);
+      }
+      return mids.length;
+    };
+    const wraps = [];
+    const flagged = [];
+    for (const el of document.querySelectorAll("button,a,[role=tab],[role=option],[role=button],span,div,p,dd,dt,small,strong,b,label,summary")) {
+      const text = el.innerText?.trim();
+      if (!text || text.length > 60 || !vis(el) || el.closest("input,textarea,select,[role=log],[data-allow-prose]")) continue;
+      const cs = getComputedStyle(el);
+      const h = el.getBoundingClientRect().height;
+      const filled = cs.backgroundColor !== "rgba(0, 0, 0, 0)" || parseFloat(cs.borderTopWidth) > 0;
+      const pill = h <= 64 && filled && parseFloat(cs.borderTopLeftRadius) >= Math.min(h, 40) / 2 - 2;
+      const role = el.getAttribute("role") ?? "";
+      const control = /^(BUTTON|A)$/.test(el.tagName) || /tab|option|button/.test(role);
+      const short = text.split(/\s+/).length <= 3;
+      const num = el.classList.contains("tabular") || el.classList.contains("tabular-nums") || el.hasAttribute("data-nowrap");
+      if (!(pill || (control && short) || num || role === "tab")) continue;
+      if (flagged.some((f) => f.contains(el)) || !oneRun(el)) continue;
+      const n = lines(el);
+      if (n > 1) { flagged.push(el); wraps.push(`${el.tagName.toLowerCase()} "${text.replace(/\s+/g, " ").slice(0, 40)}" ${n} lines`); }
+    }
+    const alpha = (c) => { const m = c.match(/rgba?\(([^)]+)\)/); if (!m) return c.includes("color(") || c.includes("oklab") ? 1 : 0; const p = m[1].split(/[ ,/]+/).filter(Boolean); return p.length > 3 ? parseFloat(p[3]) : 1; };
+    let outlines = 0;
+    const outlineEx = [];
+    for (const el of document.querySelectorAll("body *")) {
+      if (el.closest(".theme-media,[aria-hidden=true],svg,canvas") || el.matches(":focus-visible")) continue;
+      const cs = getComputedStyle(el);
+      if (cs.display === "none" || cs.visibility === "hidden") continue;
+      const r = el.getBoundingClientRect();
+      if (r.width < 24 || r.height < 16 || r.bottom < 0 || r.top > innerHeight * 3) continue;
+      const sides = ["Top", "Right", "Bottom", "Left"].filter((s) => parseFloat(cs[`border${s}Width`]) >= 1 && cs[`border${s}Style`] !== "none" && alpha(cs[`border${s}Color`]) > 0.04);
+      // Rings: a "0px 0px 0px Npx" shadow layer (N >= 1) whose colour is visible.
+      const ring = cs.boxShadow.split(/,(?![^(]*\))/).some((layer) => /0px 0px 0px (?:[1-9][\d.]*)px/.test(layer) && alpha(layer) > 0.04);
+      if (sides.length === 4 || ring) {
+        outlines += 1;
+        if (outlineEx.length < 6) outlineEx.push(`${el.tagName.toLowerCase()}.${String(el.className?.baseVal ?? el.className).split(" ").slice(0, 4).join(".")}`);
+      }
+    }
+    return { wraps: wraps.slice(0, 12), wrapCount: wraps.length, outlines, outlineEx };
+  });
+}
+
 async function overflow(page, name) {
   const w = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   if (w > 1) issues.push(`[360] horizontal overflow ${w}px on ${name}`);
@@ -205,6 +284,7 @@ for (const theme of THEMES) {
       const ctx = await browser.newContext({ ...vpOpts(vp), locale: "en-US", colorScheme: theme, storageState: roles[role].state });
       // An explicit choice beats the system preference; the crawl exercises the cookie path.
       await ctx.addCookies([{ name: "nv-theme", value: theme, url: BASE }]);
+      if (LOCALE) await ctx.addInitScript((l) => { try { localStorage.setItem("nya_locale", l); } catch {} }, LOCALE);
       return (contexts[role] = ctx);
     };
     let n = 0;
@@ -224,6 +304,12 @@ for (const theme of THEMES) {
         await settle(page);
         if (action) { await action(page); await page.waitForTimeout(500); }
         if (vp === 360) await overflow(page, name);
+        if (vp === 360 || vp === 390) {
+          const pm = await polishMetrics(page);
+          if (vp === 390) (metrics[name] ??= {})[`${theme}-polish`] = pm;
+          if (vp === 360) (metrics[name] ??= {})[`${theme}-360-wraps`] = pm.wraps;
+          if (pm.wrapCount) (WRAP_FAIL ? issues : warnings).push(`${tag} ${pm.wrapCount} one-line element(s) wrap: ${pm.wraps.slice(0, 4).join(", ")}`);
+        }
         if (vp === 390) {
           const m = await copyMetrics(page);
           (metrics[name] ??= {})[theme] = m;
@@ -241,6 +327,7 @@ for (const theme of THEMES) {
           axeSummary.push(`${theme} ${name}: ${bad.length} serious/critical, ${res.violations.length - bad.length} minor`);
         }
         console.log(`✓ ${tag}`);
+        if (vp !== 1280) { mkdirSync(root, { recursive: true }); writeFileSync(`${root}metrics.json`, JSON.stringify(metrics, null, 1)); } // incremental (survives an interrupted run)
       } catch (e) {
         issues.push(`${tag} failed: ${e.message.split("\n")[0]}`);
       }
@@ -253,11 +340,13 @@ for (const theme of THEMES) {
 await browser.close();
 mkdirSync(root, { recursive: true });
 writeFileSync(`${root}metrics.json`, JSON.stringify(metrics, null, 1));
-console.log(`\ncopy metrics (390, ${THEMES[0]}): screen · words · paragraphs >2 lines · tap targets <44px`);
+console.log(`\ncopy metrics (390, ${THEMES[0]}): screen · words · paragraphs >2 lines · tap targets <44px · wraps · outlines`);
 for (const [name, m] of Object.entries(metrics)) {
   const x = m[THEMES[0]];
-  if (x) console.log(` - ${name.padEnd(24)} ${String(x.words).padStart(4)} · ${x.longParas} · ${x.smallTargets}`);
+  const pm = m[`${THEMES[0]}-polish`];
+  if (x) console.log(` - ${name.padEnd(24)} ${String(x.words).padStart(4)} · ${x.longParas} · ${x.smallTargets} · ${pm?.wrapCount ?? "-"} · ${pm?.outlines ?? "-"}`);
 }
+if (warnings.length) console.log(`\nwarnings (WRAP=warn):\n` + warnings.map((w) => ` - ${w}`).join("\n"));
 if (AXE) console.log(`\naxe (390px):\n${axeSummary.map((s) => ` - ${s}`).join("\n")}`);
 console.log(`\nscreens: ${S.length} · themes: ${THEMES.join("/")} · viewports: ${VPS.join("/")} (+360 overflow) · output ${root}`);
 if (issues.length) {

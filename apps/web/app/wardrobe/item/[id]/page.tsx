@@ -26,7 +26,7 @@ export default function WardrobeItem() {
         !error && <div className="mx-5 skeleton h-[52vh] rounded-[32px]" />
       ) : (
         <>
-          <div className="relative mx-5 grid h-[46vh] place-items-center overflow-hidden rounded-[32px] border border-white/12" style={{ background: `radial-gradient(70% 60% at 50% 40%, ${item.colourHex}55, transparent 70%), rgba(255,255,255,.04)` }}>
+          <div className="relative mx-5 grid h-[46vh] place-items-center overflow-hidden rounded-[32px]" style={{ background: `radial-gradient(70% 60% at 50% 40%, ${item.colourHex}55, transparent 70%), rgba(255,255,255,.04)` }}>
             {item.image && <img src={item.image} alt={item.title} className="h-full w-full animate-rise object-contain p-6" />}
             <span className="absolute left-3 top-3 rounded-full bg-mint/90 px-2.5 py-1 text-xs font-bold text-ink">Owned</span>
           </div>

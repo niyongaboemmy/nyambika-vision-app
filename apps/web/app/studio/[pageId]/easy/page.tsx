@@ -135,7 +135,7 @@ function Easy() {
   return (
     <div className="mx-auto max-w-xl space-y-5 pb-6">
       {assist && (
-        <p className="flex items-center gap-2 rounded-2xl bg-violet-50 p-3 text-sm font-bold text-violet-ink ring-1 ring-inset ring-violet-200">
+        <p className="flex items-center gap-2 rounded-2xl bg-violet-50 p-3 text-sm font-bold text-violet-ink">
           <Icon name="hand" className="size-5 shrink-0" /> Helping {data.maker.name} with their consent{data.grant ? ` · until ${new Date(data.grant.expiresAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}` : ""} · logged
         </p>
       )}
@@ -176,7 +176,7 @@ function Easy() {
       {screen === "money" && <Money pageId={page.id} makerId={data.maker.id} data={data} l={l} say={say} />}
       {screen === "orders" && <Orders pageId={page.id} data={data} assist={assist} l={l} say={say} onDone={load} />}
       {screen === "help" && (
-        <section className="space-y-4 rounded-[28px] bg-amber-50 p-6 text-center ring-1 ring-inset ring-amber-200">
+        <section className="space-y-4 rounded-[28px] bg-amber-50 p-6 text-center">
           <span aria-hidden className="mx-auto grid size-20 place-items-center rounded-[24px] bg-[#A8700C] text-[#fff]"><Icon name="volume" className="size-10" /></span>
           <p className="text-xl font-bold leading-relaxed text-cocoa">{S.helpText[l]}</p>
           <p className="font-mono text-4xl font-black tracking-widest text-cocoa">*775#</p>
@@ -197,7 +197,7 @@ function SpeakButton({ onClick, label, big }: { onClick: () => void; label: stri
 
 function BackBar({ label, onBack }: { label: string; onBack: () => void }) {
   return (
-    <button type="button" onClick={onBack} className="st-press flex min-h-14 items-center gap-3 rounded-2xl bg-white px-4 text-lg font-extrabold text-cocoa ring-1 ring-inset ring-hairline">
+    <button type="button" onClick={onBack} className="st-press flex min-h-14 items-center gap-3 rounded-2xl bg-white px-4 text-lg font-extrabold text-cocoa">
       <Icon name="back" className="size-6" /> {label}
     </button>
   );
@@ -229,7 +229,7 @@ function ConsentAsk({ pageId, ask, l, say, onDone }: { pageId: string; ask: NonN
     await onDone();
   };
   return (
-    <section className="space-y-3 rounded-[28px] bg-violet-50 p-5 ring-2 ring-inset ring-violet-200">
+    <section className="space-y-3 rounded-[28px] bg-violet-50 p-5">
       <div className="flex items-center gap-3">
         <span aria-hidden className="grid size-12 shrink-0 place-items-center rounded-2xl bg-violet-ink text-[#fff]"><Icon name="hand" className="size-7" /></span>
         <p className="flex-1 text-lg font-extrabold text-cocoa">{ask.adminName} {S.askHelp[l]}</p>
@@ -238,7 +238,7 @@ function ConsentAsk({ pageId, ask, l, say, onDone }: { pageId: string; ask: NonN
       <p className="text-sm leading-relaxed text-violet-ink">{ask.consentText}</p>
       <div className="grid grid-cols-2 gap-3">
         <button type="button" onClick={() => answer(true)} className="st-press flex min-h-16 items-center justify-center gap-2 rounded-2xl bg-emerald-700 text-xl font-black text-white"><Icon name="thumbsUp" className="size-6" /> {S.yes[l]}</button>
-        <button type="button" onClick={() => answer(false)} className="st-press flex min-h-16 items-center justify-center gap-2 rounded-2xl bg-white text-xl font-black text-cocoa ring-2 ring-inset ring-hairline"><Icon name="thumbsDown" className="size-6" /> {S.no[l]}</button>
+        <button type="button" onClick={() => answer(false)} className="st-press flex min-h-16 items-center justify-center gap-2 rounded-2xl bg-white text-xl font-black text-cocoa"><Icon name="thumbsDown" className="size-6" /> {S.no[l]}</button>
       </div>
     </section>
   );
@@ -422,7 +422,7 @@ function Capture({ preview, onShot, onNext, l }: { preview: string | null; onSho
       </div>
       {preview ? (
         <div className="grid grid-cols-2 gap-3">
-          <label className="st-press flex min-h-16 cursor-pointer items-center justify-center gap-2 rounded-2xl bg-white text-xl font-black text-cocoa ring-2 ring-inset ring-hairline">
+          <label className="st-press flex min-h-16 cursor-pointer items-center justify-center gap-2 rounded-2xl bg-white text-xl font-black text-cocoa">
             <Icon name="refresh" className="size-6" /> {S.retake[l]}
             <input type="file" accept="image/*" capture="environment" className="sr-only" onChange={(e) => e.target.files?.[0] && onShot(e.target.files[0])} />
           </label>
@@ -448,7 +448,7 @@ function NumberPad({ value, onChange, onDone, l }: { value: string; onChange: (v
   };
   return (
     <div className="space-y-4">
-      <p className="rounded-[24px] bg-white py-5 text-center font-display text-4xl font-black tabular-nums text-cocoa ring-2 ring-inset ring-hairline" aria-live="polite">{value ? Number(value).toLocaleString("en-US") : "0"} <span className="text-2xl text-cocoa-2">RWF</span></p>
+      <p className="rounded-[24px] bg-white py-5 text-center font-display text-4xl font-black tabular-nums text-cocoa" aria-live="polite">{value ? Number(value).toLocaleString("en-US") : "0"} <span className="text-2xl text-cocoa-2">RWF</span></p>
       <div className="flex flex-wrap justify-center gap-2">
         {[10000, 15000, 20000, 30000].map((v) => <button key={v} type="button" onClick={() => onChange(String(v))} className="st-press rounded-full bg-amber-100 px-4 py-2 text-base font-black text-gold-ink">{v / 1000}k</button>)}
       </div>
@@ -474,7 +474,7 @@ function Money({ pageId, makerId, data, l, say }: { pageId: string; makerId: str
   const next = new Date(data.payout.nextDate).toLocaleDateString(l === "fr" ? "fr-FR" : "en-GB", { day: "numeric", month: "long" });
   return (
     <section className="space-y-4">
-      <div className="rounded-[32px] bg-gradient-to-br from-emerald-100 to-white p-6 text-center ring-1 ring-inset ring-emerald-200">
+      <div className="rounded-[32px] bg-gradient-to-br from-emerald-100 to-white p-6 text-center">
         <p className="text-lg font-bold text-mint-ink">{S.month[l]}</p>
         <p className="font-display text-5xl font-black tabular-nums text-cocoa">{data.sales.monthRwf.toLocaleString("en-US")}</p>
         <p className="text-lg font-bold text-cocoa-2">RWF · {data.sales.monthCount} {S.pieces[l]}</p>

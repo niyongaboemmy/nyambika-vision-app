@@ -27,7 +27,7 @@ export function Group({ header, footer, children, className = "" }: { header?: R
           {header}
         </h3>
       )}
-      <ul className="overflow-hidden rounded-[var(--radius-md)] border border-border bg-surface-2 shadow-e1 [&>li+li]:hairline-t">{children}</ul>
+      <ul className="overflow-hidden rounded-[var(--radius-md)] bg-[var(--group-bg)] shadow-e1 [&>li+li]:hairline-t">{children}</ul>
       {footer && <p className="mt-1.5 px-4 text-[13px] leading-snug text-fg-muted">{footer}</p>}
     </section>
   );
@@ -148,7 +148,7 @@ export function ActionSheet({ open, onClose, title, actions, cancelLabel = "Canc
     <div role="dialog" aria-modal="true" aria-labelledby={title ? titleId : undefined} aria-label={title ? undefined : "Actions"} className="fixed inset-0 z-[70] flex items-end justify-center px-2 pb-[max(env(safe-area-inset-bottom),8px)]">
       <button type="button" aria-label="Close" tabIndex={-1} onClick={onClose} className="absolute inset-0 animate-fade bg-black/40" />
       <div ref={panel} className="relative w-full max-w-[460px] animate-rise space-y-2">
-        <div className="material overflow-hidden rounded-[14px] border text-fg [&>*+*]:hairline-t">
+        <div className="material overflow-hidden rounded-[14px] text-fg [&>*+*]:hairline-t">
           {title && (
             <p id={titleId} className="px-4 py-3 text-center text-[13px] font-semibold text-fg-muted">
               {title}
@@ -171,7 +171,7 @@ export function ActionSheet({ open, onClose, title, actions, cancelLabel = "Canc
             </button>
           ))}
         </div>
-        <button type="button" onClick={onClose} className={`${btn} material rounded-[14px] border font-semibold text-[color:var(--focus)]`}>
+        <button type="button" onClick={onClose} className={`${btn} material rounded-[14px] font-semibold text-[color:var(--focus)]`}>
           {cancelLabel}
         </button>
       </div>
@@ -229,7 +229,7 @@ export function Stepper({ label, value, onChange, min = 0, max = 99, step = 1, u
         if (e.key === "Home") (e.preventDefault(), set(min));
         if (e.key === "End") (e.preventDefault(), set(max));
       }}
-      className={`inline-flex items-center gap-1 rounded-full border border-border bg-surface-3/70 p-1 ${className}`}
+      className={`inline-flex items-center gap-1 rounded-full bg-fill p-1 ${className}`}
     >
       <button type="button" tabIndex={-1} aria-label={`Fewer ${label}`} disabled={value <= min} onClick={() => set(value - step)} className={btn}>
         <Icon name="minus" className="size-4" />

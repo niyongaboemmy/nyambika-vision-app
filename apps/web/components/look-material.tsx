@@ -10,7 +10,7 @@ export const SPRING =
   "linear(0, 0.013 0.6%, 0.05 1.2%, 0.2 2.6%, 0.588 5.6%, 0.8 7.6%, 0.944 9.7%, 1.034 11.9%, 1.08 14.3%, 1.092 16.4%, 1.084 19.2%, 1.043 25.1%, 1.016 30.7%, 0.999 37.5%, 0.995 46.2%, 1.001 63.1%, 1)";
 
 /** Dark material for chrome floating over photos (stays legible on any garment, both themes: media is dark). */
-export const MAT_BASE = "border border-white/15 backdrop-blur-xl backdrop-saturate-150 shadow-[0_8px_24px_-12px_rgba(0,0,0,.6)]";
+export const MAT_BASE = "backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_0.5px_0_rgb(255_255_255/.18),0_8px_24px_-12px_rgba(0,0,0,.6)]";
 export const MATERIAL = `${MAT_BASE} bg-black/35`;
 
 /** Full-bleed loading state for the stream and try-on (same anatomy as the final screen). */

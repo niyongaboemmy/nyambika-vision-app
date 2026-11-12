@@ -91,7 +91,7 @@ export function LimitState({
   const dark = tone === "dark";
   if (!d.expected) {
     return (
-      <div role="alert" className={`${dark ? "rounded-xl border border-red-400/40 bg-red-500/15 text-red-100" : "rounded-2xl bg-red-50 text-red-800 ring-1 ring-inset ring-red-200"} px-3 py-2 text-sm ${className}`}>
+      <div role="alert" className={`${dark ? "rounded-xl bg-red-500/15 text-red-100" : "rounded-2xl bg-red-50 text-red-800"} px-3 py-2 text-sm ${className}`}>
         <p>
           <span className="font-semibold">{d.title}</span>
           {d.body && <> {d.body}</>}
@@ -106,10 +106,10 @@ export function LimitState({
     );
   }
 
-  const card = dark ? "glass rounded-3xl text-white" : "rounded-[22px] bg-amber-50/80 text-cocoa ring-1 ring-inset ring-amber-200";
+  const card = dark ? "glass rounded-3xl text-white" : "rounded-[22px] bg-amber-50/80 text-cocoa";
   const sub = dark ? "text-mut" : "text-cocoa-2";
   const primary = dark ? "grad-cta text-white" : "bg-terra text-white";
-  const secondary = dark ? "glass text-white" : "bg-white text-cocoa ring-1 ring-inset ring-paper-3";
+  const secondary = dark ? "glass text-white" : "bg-white text-cocoa shadow-e1";
   const btn = "inline-flex min-h-11 items-center justify-center rounded-2xl px-4 text-sm font-semibold transition active:scale-[.98] disabled:opacity-50";
 
   async function grant() {

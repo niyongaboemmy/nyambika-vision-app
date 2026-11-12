@@ -68,8 +68,8 @@ await shot("maker-space-isimbi-market-photos");
 // ── Credits page
 await page.goto(`${BASE}/credits`);
 await page.getByRole("heading", { name: "Image credits" }).waitFor();
-assert((await page.locator("ol > li").count()) >= 30, "credits page lists every source");
-assert((await page.getByText("CC BY-SA 4.0").count()) > 0, "share-alike sources are listed");
+assert((await page.locator("main li").count()) >= 30, "credits page lists every source");
+assert((await page.getByText(/CC BY-SA 4.0/).count()) > 0, "share-alike sources are listed");
 await shot("credits-page");
 
 // ── Kinyarwanda title

@@ -50,9 +50,35 @@ describe("3D shelf data shaping (E35)", () => {
   it("empty when nothing has approved 3D", () => {
     expect(shapeShelf(src({ assets: new Map() }))).toEqual([]);
   });
+
+  it("showroom mode keeps every piece with a photo: 3D where approved, the cut-out on a stand otherwise", () => {
+    const withPhoto = src({ products: [product("p1", ["a", "b"]), { ...product("p2", ["c"]), variants: [{ id: "c", colourName: "c", colourHex: "#000", imagePath: "m/c.png" }] }, product("p3", ["d"]), product("p4", ["e", "f"])] });
+    const out = shapeShelf(withPhoto, 36, SHOWROOM_BUDGET.totalBytes, true);
+    const flat = out.filter((i) => i.glbPath === null);
+    expect(out.map((i) => i.productId)).toEqual(["p1", "p2", "p3", "p4"]);
+    expect(flat.length).toBeGreaterThan(0);
+    for (const f of flat) {
+      expect(f.posterPath).toBe(f.photoPath);
+      expect(f.bytes).toBe(0);
+      expect(f.colours.every((c) => c.glbPath === null)).toBe(true);
+    }
+  });
 });
 
 describe("room layout", () => {
+  it("fits a full room of 36 pieces on the rails without wrapping behind the visitor", () => {
+    const l = roomLayout(36);
+    const rails = l.filter((p) => p.kind === "rail");
+    expect(rails).toHaveLength(31);
+    // Every rail piece stays in front of the back wall arc (angle from the entrance axis ≤ 165°).
+    for (const p of rails) expect(Math.abs((Math.atan2(p.x, -(p.z - 0.4)) * 180) / Math.PI)).toBeLessThanOrEqual(165.5);
+    // and pieces on the same side are at least ~0.55 m apart.
+    for (const side of [-1, 1]) {
+      const pts = rails.filter((p) => Math.sign(p.x) === side);
+      for (let i = 1; i < pts.length; i++) expect(Math.hypot(pts[i].x - pts[i - 1].x, pts[i].z - pts[i - 1].z)).toBeGreaterThan(0.55);
+    }
+  });
+
   it("puts up to five pieces on mannequins and the rest on side rails, all facing the centre", () => {
     const l = roomLayout(9);
     expect(l.filter((p) => p.kind === "mannequin")).toHaveLength(5);

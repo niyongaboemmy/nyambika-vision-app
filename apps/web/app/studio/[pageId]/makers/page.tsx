@@ -92,11 +92,11 @@ export default function Makers() {
               )}
             </div>
             <dl className="grid grid-cols-2 gap-2">
-              <div className="rounded-2xl bg-paper p-2.5 ring-1 ring-inset ring-hairline">
+              <div className="rounded-2xl bg-paper p-2.5">
                 <dt className="text-[11px] font-bold text-cocoa-2">Products</dt>
                 <dd className="font-display text-lg font-black tabular-nums text-cocoa">{m.productCount}</dd>
               </div>
-              <div className="rounded-2xl bg-paper p-2.5 ring-1 ring-inset ring-hairline">
+              <div className="rounded-2xl bg-paper p-2.5">
                 <dt className="text-[11px] font-bold text-cocoa-2">Sales</dt>
                 <dd className="truncate font-display text-lg font-black tabular-nums text-cocoa">{rwf(m.salesRwf)}</dd>
               </div>

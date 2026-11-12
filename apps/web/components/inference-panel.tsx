@@ -205,7 +205,7 @@ export function InferencePanel() {
                   <span>Served by pool</span>
                   <span className="tabular-nums">{Math.round(r.poolShare * 100)}%</span>
                 </div>
-                <div className="mt-1 h-2 overflow-hidden rounded-full bg-paper-2 ring-1 ring-inset ring-hairline" role="img" aria-label={`${Math.round(r.poolShare * 100)}% of calls served by the pool`}>
+                <div className="mt-1 h-2 overflow-hidden rounded-full bg-paper-2" role="img" aria-label={`${Math.round(r.poolShare * 100)}% of calls served by the pool`}>
                   <div className="h-full rounded-full bg-violet-ink transition-[width] duration-500" style={{ width: `${r.poolShare * 100}%` }} />
                 </div>
               </div>
@@ -213,7 +213,7 @@ export function InferencePanel() {
             {(["pool", "hosted"] as const).map((b) => {
               const s = r.backends[b];
               return (
-                <div key={b} className="rounded-2xl bg-paper px-3 py-2.5 ring-1 ring-inset ring-hairline" data-backend={b}>
+                <div key={b} className="rounded-2xl bg-paper px-3 py-2.5" data-backend={b}>
                   <div className="flex flex-wrap items-center justify-between gap-1.5">
                     <p className="text-sm font-bold text-cocoa">
                       {b === "pool" ? "Self-hosted pool" : "Hosted"} <span className="font-semibold text-cocoa-2">· {s.region}</span>
@@ -281,7 +281,7 @@ function VideoModels({ models, busy, run }: { models: VideoModel[]; busy: string
                 </div>
               </div>
               {m.licence && <p className="text-xs text-cocoa-2">Licence: {m.licence}</p>}
-              <div className="rounded-2xl bg-paper px-3 py-2 text-xs ring-1 ring-inset ring-hairline">
+              <div className="rounded-2xl bg-paper px-3 py-2 text-xs">
                 {m.lastEval ? (
                   <>
                     <p className="font-bold text-cocoa">
@@ -354,7 +354,7 @@ function PolicyEditor({ view, breaker, onClose, onSaved }: { view: RouteView; br
         <Switch checked={p.residency === "in-region"} onChange={(v) => setP({ ...p, residency: v ? "in-region" : "any" })} label="Keep data in the shopper's country" description="In-region backends only; else the call fails" />
         <Switch checked={video ? false : p.fallback} disabled={video} onChange={(v) => setP({ ...p, fallback: v })} label="Fall back to the next backend on failure" description={video ? "Off for video: each backend needs its own NLB pass" : "Retry on the other backend"} />
         {(["pool", "hosted"] as const).map((k) => (
-          <fieldset key={k} className="space-y-2 rounded-2xl bg-paper-2 p-3 ring-1 ring-inset ring-hairline">
+          <fieldset key={k} className="space-y-2 rounded-2xl bg-paper-2 p-3">
             <legend className="sr-only">{k === "pool" ? "Self-hosted pool" : "Hosted provider"}</legend>
             <Switch checked={p[k].enabled} onChange={(v) => setP({ ...p, [k]: { ...p[k], enabled: v } })} label={k === "pool" ? "Self-hosted pool" : "Hosted provider"} />
             <Field label="Cost per call (RWF)">

@@ -105,7 +105,7 @@ function CustomOrder() {
         )}
 
         {o.quote && o.status === "QUOTED" && (
-          <section className="animate-rise rounded-3xl border border-gold/40 bg-gold/10 p-4">
+          <section className="animate-rise rounded-3xl bg-gold/10 p-4">
             <p className="text-xs font-semibold uppercase tracking-widest text-gold">Quote from {first}</p>
             <p className="mt-1 font-display text-3xl font-black">{rwf(o.quote.priceRwf)}</p>
             <p className="text-sm text-txt/85">Ready {o.quote.leadTimeDays} days after deposit{o.quote.note ? ` · “${o.quote.note}”` : ""}</p>
@@ -144,7 +144,7 @@ function CustomOrder() {
               )}
             </div>
             {o.measurementShare.active && (
-              <button disabled={busy} className="min-h-11 shrink-0 rounded-xl border border-white/20 px-3 font-semibold" onClick={async () => { await api(`/measurements/shares/${o.measurementShare!.id}/revoke`, { method: "POST" }); await reload(); }}>Stop sharing</button>
+              <button disabled={busy} className="min-h-11 shrink-0 rounded-xl px-3 font-semibold" onClick={async () => { await api(`/measurements/shares/${o.measurementShare!.id}/revoke`, { method: "POST" }); await reload(); }}>Stop sharing</button>
             )}
           </section>
         )}

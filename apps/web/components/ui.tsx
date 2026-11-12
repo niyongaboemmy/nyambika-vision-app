@@ -21,7 +21,7 @@ export { Fact, InfoTip, LearnMore, ShopperSkeleton, Skel, ThemeToggle, toast } f
 /** Mobile-first frame: full-bleed on phones, a centred phone-width column on larger screens. */
 export function Screen({ children, className = "", aurora = true }: { children: ReactNode; className?: string; aurora?: boolean }) {
   return (
-    <div className={`relative mx-auto min-h-dvh w-full max-w-[480px] overflow-hidden sm:border-x sm:border-line sm:shadow-e3 ${aurora ? "aurora" : "bg-ink"} ${className}`}>
+    <div className={`relative mx-auto min-h-dvh w-full max-w-[480px] overflow-hidden sm:shadow-e3 ${aurora ? "aurora" : "bg-ink"} ${className}`}>
       {children}
     </div>
   );
@@ -80,8 +80,9 @@ export { Button } from "./button";
 
 /** Toggle chip when it has an action; a plain (non-interactive) label chip otherwise — never a decorative button. */
 export function Chip({ children, active, onClick }: { children: ReactNode; active?: boolean; onClick?: () => void }) {
-  const cls = `inline-flex min-h-10 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-2xl border px-3.5 text-sm font-semibold ${
-    active ? "border-gold/70 bg-gold/20 text-txt" : "border-white/20 bg-white/10 text-txt/90"
+  // iOS filter pill: filled, no outline; the selected one inverts (foreground fill) in both themes.
+  const cls = `inline-flex min-h-10 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-4 text-sm font-semibold ${
+    active ? "bg-fg text-surface" : "bg-fill text-txt"
   }`;
   if (!onClick) return <span className={cls}>{children}</span>;
   return (
@@ -132,13 +133,13 @@ export function Sheet({ open, onClose, children, title, detent = "large" }: { op
       <div
         ref={panel}
         tabIndex={-1}
-        className={`relative w-full max-w-[480px] animate-rise overflow-y-auto overscroll-contain rounded-t-[28px] border border-line bg-ink-2 px-5 pb-[max(env(safe-area-inset-bottom),20px)] text-txt shadow-e3 outline-none transition-[max-height] duration-300 ${expanded ? "max-h-[92dvh]" : "max-h-[56dvh]"}`}
+        className={`relative w-full max-w-[480px] animate-rise overflow-y-auto overscroll-contain rounded-t-[28px] bg-[var(--sheet-bg)] px-5 pb-[max(env(safe-area-inset-bottom),20px)] text-txt shadow-e3 outline-none transition-[max-height] duration-300 ${expanded ? "max-h-[92dvh]" : "max-h-[56dvh]"}`}
       >
-        <div {...handle} className="sticky top-0 z-10 -mx-5 mb-2 cursor-grab bg-ink-2 px-5 pt-2 active:cursor-grabbing">
+        <div {...handle} className="sticky top-0 z-10 -mx-5 mb-2 cursor-grab bg-[var(--sheet-bg)] px-5 pt-2 active:cursor-grabbing">
           <div aria-hidden className="mx-auto mb-3 h-[5px] w-9 rounded-full bg-txt/25" />
           {title && (
             <div className="flex items-center justify-between gap-3 pb-2">
-              <h2 id={titleId} className="font-display text-[20px] font-bold tracking-[-0.01em]">{title}</h2>
+              <h2 id={titleId} className="min-w-0 truncate font-display text-[20px] font-bold tracking-[-0.01em]">{title}</h2>
               <button type="button" onClick={onClose} aria-label="Close" className="hit glass press grid size-8 place-items-center rounded-full"><Icon name="x" className="size-4" /></button>
             </div>
           )}
@@ -176,7 +177,7 @@ export function ErrorNote({ error, onRetry }: { error: unknown; onRetry?: () => 
   if (!error) return null;
   if (typeof error !== "string" || recallFriendly(error)?.expected) return <LimitState error={error} onRetry={onRetry} />;
   return (
-    <p role="alert" className="flex items-start gap-2 rounded-2xl border border-red-400/40 bg-red-500/15 px-3.5 py-2.5 text-left text-sm font-medium text-red-100">
+    <p role="alert" className="flex items-start gap-2 rounded-2xl bg-red-500/15 px-3.5 py-2.5 text-left text-sm font-medium text-red-100">
       <Icon name="alert" className="mt-0.5 size-4 shrink-0" />
       <span>{error}</span>
     </p>
@@ -188,8 +189,8 @@ export function EmptyState({ icon, title, children, action }: { icon: Parameters
   return (
     <div className="glass flex flex-col items-center gap-2.5 rounded-[28px] px-6 py-9 text-center">
       <span className="grid size-14 place-items-center rounded-2xl bg-gold/15 text-gold"><Icon name={icon} className="size-6" /></span>
-      <p className="font-display text-lg font-black">{title}</p>
-      {children && <div className="max-w-[30ch] text-sm leading-relaxed text-mut">{children}</div>}
+      <p className="text-balance font-display text-lg font-black">{title}</p>
+      {children && <div className="max-w-[30ch] text-pretty text-sm leading-relaxed text-mut">{children}</div>}
       {action && <div className="mt-1.5">{action}</div>}
     </div>
   );

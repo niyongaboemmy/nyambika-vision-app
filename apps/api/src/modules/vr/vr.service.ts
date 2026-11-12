@@ -82,7 +82,7 @@ export class VrService implements OnModuleInit, OnModuleDestroy {
   }
 
   /** Approved, ready 3D pieces of a page shaped for the shelf / room (featured first, ≤ 25 MB). */
-  async lineup(pageId: string, featured: string[] = [], max: number = SHOWROOM_BUDGET.maxItems): Promise<ShelfItem[]> {
+  async lineup(pageId: string, featured: string[] = [], max: number = SHOWROOM_BUDGET.maxItems, includeFlat = false): Promise<ShelfItem[]> {
     const [products, assets] = await Promise.all([
       this.prisma.product.findMany({
         where: { pageId, status: "PUBLISHED" },
@@ -98,6 +98,8 @@ export class VrService implements OnModuleInit, OnModuleDestroy {
         featured,
       },
       max,
+      SHOWROOM_BUDGET.totalBytes,
+      includeFlat,
     );
   }
 
@@ -109,14 +111,14 @@ export class VrService implements OnModuleInit, OnModuleDestroy {
       category: i.category,
       variantId: i.variantId,
       colourName: i.colourName,
-      glb: this.storage.publicUrl(i.glbPath)!,
+      glb: i.glbPath ? this.storage.publicUrl(i.glbPath)! : null,
       poster: this.storage.publicUrl(i.posterPath),
       photo: this.storage.publicUrl(i.photoPath),
       heightM: i.heightM,
       bytes: i.bytes,
       size: i.size,
       featured: i.featured,
-      colours: i.colours.map((c) => ({ variantId: c.variantId, colourName: c.colourName, colourHex: c.colourHex, glb: this.storage.publicUrl(c.glbPath)!, poster: this.storage.publicUrl(c.posterPath) })),
+      colours: i.colours.map((c) => ({ variantId: c.variantId, colourName: c.colourName, colourHex: c.colourHex, glb: c.glbPath ? this.storage.publicUrl(c.glbPath)! : null, poster: this.storage.publicUrl(c.posterPath) })),
     };
   }
 
@@ -142,7 +144,8 @@ export class VrService implements OnModuleInit, OnModuleDestroy {
     const page = await this.publishedPage(handle);
     const booth = await this.booth(page.id);
     if (!booth.enabled) throw new NotFoundException("This maker's showroom is closed right now");
-    const lineup = await this.lineup(page.id, booth.featured);
+    // Every published piece with a photo: 3D models where approved, the cut-out on a stand otherwise.
+    const lineup = await this.lineup(page.id, booth.featured, SHOWROOM_BUDGET.roomItems, true);
     const variants = await this.prisma.variant.findMany({ where: { productId: { in: lineup.map((i) => i.productId) } }, include: { product: true } });
     const byId = new Map(variants.map((v) => [v.id, v]));
     const items = lineup.map((i) => {

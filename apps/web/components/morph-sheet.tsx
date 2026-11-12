@@ -118,7 +118,7 @@ function MorphSheet({ look, tpl, onClose }: { look: Look; tpl: MorphTemplateView
       <div className="mt-1 flex items-center justify-center gap-2 text-xs text-mut" aria-live="polite">
         {busy ? <span className="inline-flex items-center gap-1.5"><span className="size-1.5 animate-ping rounded-full bg-gold" /> Rendering on {look.onTwin ? "your twin" : "the AI model"}…</span> : <span>{t("morph.colourHint")}</span>}
         {hue !== null && (
-          <button onClick={() => setHue(null)} className="rounded-full border border-white/20 px-2 py-0.5 font-semibold text-txt">Original colour</button>
+          <button onClick={() => setHue(null)} className="rounded-full px-2 py-0.5 font-semibold text-txt">Original colour</button>
         )}
       </div>
       {error && (isExpectedText(error) ? <LimitState error={error} /> : <p role="alert" className="mt-1 text-center text-xs text-red-200">{error}</p>)}
@@ -128,7 +128,7 @@ function MorphSheet({ look, tpl, onClose }: { look: Look; tpl: MorphTemplateView
         {(tpl.sleeves?.length ?? 0) > 1 && <Segmented legend={t("morph.sleeves")} value={sleeve} options={tpl.sleeves!} onChange={(v) => setSleeve(v as MorphSleeve)} delta={(k) => o.sleeves[k as MorphSleeve] ?? 0} />}
       </div>
 
-      <button onClick={() => setAsk(true)} className="mt-3 flex w-full items-center gap-3 rounded-3xl border border-white/15 bg-[linear-gradient(120deg,rgba(224,112,63,.28),rgba(139,92,246,.22))] p-3.5 text-left transition active:scale-[.99]">
+      <button onClick={() => setAsk(true)} className="mt-3 flex w-full items-center gap-3 rounded-3xl bg-[linear-gradient(120deg,rgba(224,112,63,.28),rgba(139,92,246,.22))] p-3.5 text-left transition active:scale-[.99]">
         <span className="grid size-10 shrink-0 place-items-center rounded-full bg-white/10" aria-hidden><Icon name="needle" className="size-5" /></span>
         <span className="min-w-0 flex-1">
           <span className="block font-display text-base font-black">{t("morph.ask").replace("{maker}", tpl.maker?.name.split(" ")[0] ?? "the tailor")}</span>

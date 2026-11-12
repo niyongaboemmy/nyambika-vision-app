@@ -298,7 +298,7 @@ export function SharedRoom({ engine, room, signedIn, signInHref, seated, show }:
                     client.current?.send({ t: "rep", sid: reporting.sid, why: w.id });
                     setReporting(null);
                   }}
-                  className="min-h-12 rounded-2xl bg-white/8 px-4 text-left text-sm font-semibold ring-1 ring-inset ring-white/10"
+                  className="min-h-12 rounded-2xl bg-white/8 px-4 text-left text-sm font-semibold"
                 >
                   {w.label}
                 </button>

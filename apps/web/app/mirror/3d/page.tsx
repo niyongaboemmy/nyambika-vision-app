@@ -460,7 +460,7 @@ function Viewer({
           )}
           <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Size">
             {garment.sizes.map((s) => (
-              <button key={s} role="radio" aria-checked={s === fit.size} onClick={() => s !== fit.size && dress(fit.variantId, s)} className={`min-h-10 min-w-12 rounded-2xl border px-3 text-sm font-bold transition ${s === fit.size ? "border-gold/70 bg-gold/20" : "border-white/20 bg-white/10"}`}>
+              <button key={s} role="radio" aria-checked={s === fit.size} onClick={() => s !== fit.size && dress(fit.variantId, s)} className={`min-h-10 min-w-12 whitespace-nowrap rounded-full px-3.5 text-sm font-bold transition ${s === fit.size ? "bg-gold/25 shadow-[inset_0_0_0_0.5px_rgb(242_184_75/.6)]" : "bg-fill"}`}>
                 {s}
                 {s === garment.recommended && <span className="ml-1 text-[10px] font-semibold text-mint">your size</span>}
               </button>
@@ -492,10 +492,10 @@ function Viewer({
       <TwinDrapePanel bodySize={avatar.bodySize ?? null} />
 
       <nav aria-label="Mirror mode" className="fixed inset-x-0 bottom-[max(env(safe-area-inset-bottom),14px)] z-30 flex justify-center">
-        <div className="glass flex rounded-full p-1.5 shadow-[0_12px_40px_rgba(0,0,0,.45)]">
-          <span aria-current="page" className="flex min-h-11 items-center gap-1.5 rounded-full bg-white/20 px-5 text-sm font-bold"><Icon name="cube" className="size-4" /> {t("twin3d.title")}</span>
+        <div className="glass flex max-w-[calc(100%-32px)] rounded-full p-1.5 shadow-[0_12px_40px_rgba(0,0,0,.45)]">
+          <span aria-current="page" className="flex min-h-11 min-w-0 items-center gap-1.5 whitespace-nowrap rounded-full bg-white/20 px-4 text-sm font-bold"><Icon name="cube" className="size-4 shrink-0" /> <span className="truncate">{t("twin3d.title")}</span></span>
           {state.arMirrorPilot && (
-            <Link href={`/mirror/ar${fit ? `?variant=${fit.variantId}` : ""}`} className="flex min-h-11 items-center gap-1.5 rounded-full px-5 text-sm font-bold text-white/80"><Icon name="mirror" className="size-4" /> {t("twin3d.ar")}</Link>
+            <Link href={`/mirror/ar${fit ? `?variant=${fit.variantId}` : ""}`} className="flex min-h-11 min-w-0 items-center gap-1.5 whitespace-nowrap rounded-full px-4 text-sm font-bold text-white/80"><Icon name="mirror" className="size-4 shrink-0" /> <span className="truncate">{t("twin3d.ar")}</span></Link>
           )}
         </div>
       </nav>

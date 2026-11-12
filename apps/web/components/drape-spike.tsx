@@ -105,7 +105,7 @@ const rgbCss = (rgb: number[]) => `rgb(${rgb.map((c) => Math.round(c * 255)).joi
 
 export function ExperimentalBadge({ tone = "dark" }: { tone?: "dark" | "light" }) {
   return (
-    <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide ${tone === "dark" ? "bg-violet-400/20 text-violet-100 ring-1 ring-violet-300/40" : "bg-violet-100 text-violet-900 ring-1 ring-violet-300"}`}>
+    <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide ${tone === "dark" ? "bg-violet-400/20 text-violet-100 ring-1 ring-violet-300/40" : "bg-violet-100 text-violet-900"}`}>
       <Icon name="wand" className="size-3.5" /> Experimental
     </span>
   );
@@ -115,7 +115,7 @@ export function FitLegend({ legend, share, tone = "dark" }: { legend: DrapeResul
   return (
     <ul className="grid grid-cols-2 gap-2" aria-label="Fit heatmap legend">
       {legend.map((l) => (
-        <li key={l.band} className={`flex items-center gap-2 rounded-2xl px-3 py-2 text-xs ${tone === "dark" ? "bg-white/5 ring-1 ring-white/10" : "bg-stone-50 ring-1 ring-stone-200"}`}>
+        <li key={l.band} className={`flex items-center gap-2 rounded-2xl px-3 py-2 text-xs ${tone === "dark" ? "bg-white/5" : "bg-stone-50"}`}>
           <span aria-hidden className="size-4 shrink-0 rounded-full ring-1 ring-black/10" style={{ background: rgbCss(l.rgb) }} />
           <span className="min-w-0">
             <b className="block text-sm">
@@ -135,11 +135,11 @@ export function FitReadings({ r, tone = "dark" }: { r: DrapeResultView; tone?: "
   if (!lines.length) return null;
   const chip = (reading: string) =>
     reading === "tight" ? "bg-rose-500/20 text-rose-100 ring-rose-300/40" : reading === "loose" ? "bg-amber-400/20 text-amber-100 ring-amber-300/40" : "bg-teal-400/20 text-teal-100 ring-teal-300/40";
-  const chipLight = (reading: string) => (reading === "tight" ? "bg-rose-100 text-rose-900 ring-rose-300" : reading === "loose" ? "bg-amber-100 text-amber-900 ring-amber-300" : "bg-teal-100 text-teal-900 ring-teal-300");
+  const chipLight = (reading: string) => (reading === "tight" ? "bg-rose-100 text-rose-900 ring-rose-300" : reading === "loose" ? "bg-amber-100 text-amber-900" : "bg-teal-100 text-teal-900 ring-teal-300");
   return (
     <dl className="grid grid-cols-3 gap-2 text-center">
       {lines.map(([line, v]) => (
-        <div key={line} className={`rounded-2xl p-2 ${tone === "dark" ? "bg-white/5" : "bg-stone-50 ring-1 ring-stone-200"}`}>
+        <div key={line} className={`rounded-2xl p-2 ${tone === "dark" ? "bg-white/5" : "bg-stone-50"}`}>
           <dt className={`text-[11px] font-semibold uppercase ${tone === "dark" ? "text-mut" : "text-stone-500"}`}>{line}</dt>
           <dd className={`mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-bold ring-1 ${tone === "dark" ? chip(v.reading) : chipLight(v.reading)}`}>{BAND_LABEL[v.reading] ?? v.reading}</dd>
           {v.measured_ease_cm !== null && <dd className={`mt-0.5 text-[11px] ${tone === "dark" ? "text-mut" : "text-stone-500"}`}>{v.measured_ease_cm > 0 ? "+" : ""}{v.measured_ease_cm} cm ease</dd>}
@@ -165,7 +165,7 @@ export function DrapeStage({ r, alt, defaultMode = "heatmap", badge, tone = "dar
         )}
       </div>
       <div className="flex justify-center">
-        <div className={`flex rounded-full p-1 ${tone === "dark" ? "glass" : "bg-stone-100 ring-1 ring-stone-300"}`} role="radiogroup" aria-label="Show">
+        <div className={`flex rounded-full p-1 ${tone === "dark" ? "glass" : "bg-stone-100"}`} role="radiogroup" aria-label="Show">
           {(["heatmap", "print"] as const).map((m) => (
             <button
               key={m}
@@ -198,8 +198,8 @@ function Pills<T extends string>({ label, options, value, onChange, tone }: { la
             onClick={() => onChange(o.key)}
             className={
               tone === "dark"
-                ? `min-h-11 rounded-2xl border px-3.5 text-sm font-bold transition active:scale-95 ${value === o.key ? "border-gold/70 bg-gold/20" : "border-white/20 bg-white/10"}`
-                : `min-h-12 rounded-2xl px-4 text-sm font-bold transition active:scale-95 ${value === o.key ? "bg-stone-900 text-white" : "bg-white ring-1 ring-stone-300"}`
+                ? `min-h-11 whitespace-nowrap rounded-full px-4 text-sm font-bold transition active:scale-95 ${value === o.key ? "bg-fg text-surface" : "bg-fill"}`
+                : `min-h-12 rounded-2xl px-4 text-sm font-bold transition active:scale-95 ${value === o.key ? "bg-stone-900 text-white" : "bg-white"}`
             }
           >
             {o.label}
@@ -303,7 +303,7 @@ export function PatternPreview3D({ orderId, shareActive, defaultGarment }: { ord
   const g = garment ?? "a_line_dress";
   const lenRange = g === "wrap_skirt" ? [35, 100] : g === "shirt" ? [50, 85] : [70, 140];
   return (
-    <section aria-labelledby="pattern-3d-title" className="space-y-4 rounded-3xl bg-white p-4 shadow-sm ring-1 ring-stone-200" data-testid="pattern-preview-3d">
+    <section aria-labelledby="pattern-3d-title" className="space-y-4 rounded-3xl bg-white p-4 shadow-sm" data-testid="pattern-preview-3d">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <h3 id="pattern-3d-title" className="flex items-center gap-2 text-lg font-black"><Icon name="scissors" className="size-5" /> Preview pattern in 3D</h3>
@@ -312,7 +312,7 @@ export function PatternPreview3D({ orderId, shareActive, defaultGarment }: { ord
         <ExperimentalBadge tone="light" />
       </div>
       {!shareActive ? (
-        <p className="rounded-2xl bg-stone-50 p-3 text-sm text-stone-700 ring-1 ring-stone-200">Needs an active measurement share</p>
+        <p className="rounded-2xl bg-stone-50 p-3 text-sm text-stone-700">Needs an active measurement share</p>
       ) : (
         <>
           <Pills label="Pattern" options={GARMENTS} value={g} onChange={(v) => { setGarment(v); setLength(null); setSleeve(null); }} tone="light" />
@@ -326,9 +326,9 @@ export function PatternPreview3D({ orderId, shareActive, defaultGarment }: { ord
             <fieldset>
               <legend className="mb-1.5 text-sm font-semibold text-stone-800">Ease (added to the standard ease)</legend>
               <div className="flex items-center gap-3">
-                <button type="button" aria-label="Less ease" onClick={() => setEase((e) => Math.max(-6, e - 1))} className="size-12 rounded-xl bg-white text-xl font-bold ring-1 ring-stone-300">−</button>
+                <button type="button" aria-label="Less ease" onClick={() => setEase((e) => Math.max(-6, e - 1))} className="size-12 rounded-xl bg-white text-xl font-bold">−</button>
                 <span className="min-w-20 text-center text-xl font-black" aria-live="polite">{ease > 0 ? "+" : ""}{ease} cm</span>
-                <button type="button" aria-label="More ease" onClick={() => setEase((e) => Math.min(20, e + 1))} className="size-12 rounded-xl bg-white text-xl font-bold ring-1 ring-stone-300">+</button>
+                <button type="button" aria-label="More ease" onClick={() => setEase((e) => Math.min(20, e + 1))} className="size-12 rounded-xl bg-white text-xl font-bold">+</button>
               </div>
             </fieldset>
           </div>
@@ -344,7 +344,7 @@ export function PatternPreview3D({ orderId, shareActive, defaultGarment }: { ord
               <DrapeStage r={r} tone="light" badge="Synthetic body" alt={`Pattern preview: ${GARMENTS.find((x) => x.key === r.garment)?.label} on a synthetic body sized from the shared measurements`} />
               <FitReadings r={r} tone="light" />
               <FitLegend legend={r.legend} share={r.fit.share} tone="light" />
-              <p className="rounded-2xl bg-amber-50 p-3 text-xs text-amber-950 ring-1 ring-amber-200" role="note">
+              <p className="rounded-2xl bg-amber-50 p-3 text-xs text-amber-950" role="note">
                 {r.disclaimer} Synthetic body from the shared measurements only, never the customer&apos;s photos or 3D twin. Nothing is saved; each preview is logged like a measurement view.
               </p>
             </div>

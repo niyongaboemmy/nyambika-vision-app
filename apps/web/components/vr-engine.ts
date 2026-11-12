@@ -161,7 +161,8 @@ export interface RoomPiece {
   id: string;
   title: string;
   price: string;
-  glb: string;
+  /** Null: the piece stays as its photo on a stand (no approved 3D model yet). */
+  glb: string | null;
   poster: string | null;
   heightM: number;
   place: Placement;
@@ -435,9 +436,15 @@ export class ShowroomEngine {
       anchor.add(label);
       let poster: THREE.Mesh | null = null;
       if (piece.poster) {
-        const tex = new THREE.TextureLoader().load(piece.poster);
+        const plane = new THREE.PlaneGeometry(piece.heightM * 0.8, piece.heightM);
+        const tex = new THREE.TextureLoader().load(piece.poster, (t) => {
+          // Photo stand-ins keep the garment's own proportions (wide shirts, tall dresses).
+          const img = t.image as { width: number; height: number } | undefined;
+          if (img?.width && img.height) mesh.scale.x = img.width / img.height / 0.8;
+        });
         tex.colorSpace = THREE.SRGBColorSpace;
-        poster = new THREE.Mesh(new THREE.PlaneGeometry(piece.heightM * 0.8, piece.heightM), new THREE.MeshBasicMaterial({ map: tex, transparent: true, alphaTest: 0.1 }));
+        const mesh = new THREE.Mesh(plane, new THREE.MeshBasicMaterial({ map: tex, transparent: true, alphaTest: 0.1, side: THREE.DoubleSide }));
+        poster = mesh;
         poster.position.y = top - piece.heightM / 2;
         anchor.add(poster);
       }
@@ -471,9 +478,9 @@ export class ShowroomEngine {
     const order = [...this.nodes].sort((a, b) => a.anchor.position.distanceTo(START) - b.anchor.position.distanceTo(START));
     await Promise.all(
       order.map(async (n) => {
-        const g = await this.streamer.load(n.piece.glb, (b) => {
+        const g = n.piece.glb ? await this.streamer.load(n.piece.glb, (b) => {
           this.bytes += b;
-        });
+        }) : null;
         if (this.disposed) return;
         this.loaded += 1;
         if (g) this.place(n, g.scene);

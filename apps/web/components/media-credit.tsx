@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Icon } from "@/components/icons";
+import { Group } from "@/components/ios";
 import { Sheet } from "@/components/ui";
 import { api } from "@/lib/api";
 
@@ -17,31 +18,31 @@ export interface Credit {
   illustration: boolean;
 }
 
-/** Credit line in the CC "TASL" form: title, author, source, licence, plus what was changed. */
+/** Credit in the CC "TASL" form (title, author, source, licence) plus what was changed, as an iOS grouped list. */
 export function CreditBody({ c }: { c: Credit }) {
+  const row = "flex min-h-11 flex-col justify-center gap-0.5 px-4 py-2.5";
+  const label = "text-[13px] text-fg-muted";
   return (
-    <dl className="space-y-2 text-[14px]">
-      <div>
-        <dt className="text-xs font-semibold uppercase tracking-[.14em] text-mut">Source</dt>
-        <dd>
-          <a href={c.sourceUrl} target="_blank" rel="noreferrer" className="font-semibold underline underline-offset-2">{c.title}</a>
-          <span className="text-mut"> · {c.author}</span>
-        </dd>
-      </div>
-      <div>
-        <dt className="text-xs font-semibold uppercase tracking-[.14em] text-mut">Licence</dt>
-        <dd>
+    <Group>
+      <li className={row}>
+        <span className={label}>Source</span>
+        <a href={c.sourceUrl} target="_blank" rel="noreferrer" className="text-[15px] font-medium text-fg underline underline-offset-2 [overflow-wrap:anywhere]">{c.title}</a>
+        <span className="text-[13px] text-fg-muted">{c.author}</span>
+      </li>
+      <li className={row}>
+        <span className={label}>Licence</span>
+        <span className="text-[15px] text-fg">
           {c.licenceUrl ? <a href={c.licenceUrl} target="_blank" rel="noreferrer" className="underline underline-offset-2">{c.licence}</a> : c.licence}
-          {c.shareAlike && <span className="text-mut"> · share-alike</span>}
-        </dd>
-      </div>
+          {c.shareAlike && <span className="text-fg-muted"> · share-alike</span>}
+        </span>
+      </li>
       {c.changes.length > 0 && (
-        <div>
-          <dt className="text-xs font-semibold uppercase tracking-[.14em] text-mut">Modified</dt>
-          <dd className="text-mut">{c.changes.join(" · ")}</dd>
-        </div>
+        <li className={row}>
+          <span className={label}>Modified</span>
+          <span className="text-[15px] text-fg">{c.changes.join(" · ")}</span>
+        </li>
       )}
-    </dl>
+    </Group>
   );
 }
 
@@ -69,16 +70,16 @@ export function MediaCreditButton({ src, className = "absolute bottom-1.5 right-
       </button>
       <Sheet open={open} onClose={() => setOpen(false)} title="Image credit">
         {credit === undefined ? (
-          <div className="h-24 animate-pulse rounded-2xl bg-white/10" />
+          <div className="h-24 animate-pulse rounded-[var(--radius-md)] bg-fill" />
         ) : credit ? (
           <div className="space-y-3">
-            {credit.illustration && <p className="inline-block rounded-full bg-gold/20 px-2.5 py-0.5 text-xs font-semibold text-gold">Illustration</p>}
+            {credit.illustration && <p className="inline-block rounded-full bg-fill px-2.5 py-0.5 text-[13px] font-semibold text-fg">Illustration</p>}
             <CreditBody c={credit} />
           </div>
         ) : (
-          <p className="text-[14px] text-mut">Photo by the maker.</p>
+          <p className="text-[15px] text-fg-muted">Photo by the maker.</p>
         )}
-        <Link href="/credits" className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-gold underline underline-offset-2">All image credits</Link>
+        <Link href="/credits" className="mt-3 inline-flex min-h-11 items-center px-4 text-[15px] font-semibold text-accent">All image credits</Link>
       </Sheet>
     </>
   );

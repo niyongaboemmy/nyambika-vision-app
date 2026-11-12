@@ -77,7 +77,7 @@ function Products() {
       {member && page.memberType === "COOPERATIVE" && <MakerTrainingLink pageId={page.id} />}
 
       {pending.length > 0 && (
-        <section aria-labelledby="pending-title" className="rounded-[26px] bg-amber-50 p-4 ring-1 ring-inset ring-amber-200">
+        <section aria-labelledby="pending-title" className="rounded-[26px] bg-amber-50 p-4">
           <h3 id="pending-title" className="flex items-center gap-2 text-sm font-extrabold text-gold-ink">
             <Icon name="clock" className="size-4" /> Waiting for approval ({pending.length})
           </h3>
@@ -116,7 +116,7 @@ function Products() {
         />
       )}
       {filter === "improve" && shown.length > 0 && (
-        <p className="flex items-center gap-2 rounded-2xl bg-violet-50 px-3 py-2.5 text-sm font-semibold text-violet-ink ring-1 ring-inset ring-violet-200">
+        <p className="flex items-center gap-2 rounded-2xl bg-violet-50 px-3 py-2.5 text-sm font-semibold text-violet-ink">
           <Icon name="sparkle" className="size-4 shrink-0" />
           Short descriptions · open one → “Write it for me”
         </p>

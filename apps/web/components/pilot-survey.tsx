@@ -108,7 +108,7 @@ export function PilotSurvey() {
                     type="button"
                     aria-pressed={helped === o.v}
                     onClick={() => setHelped(o.v)}
-                    className={`flex min-h-20 flex-col items-center justify-center gap-1 rounded-2xl border text-sm font-bold transition motion-safe:active:scale-95 ${helped === o.v ? "border-gold/80 bg-gold/20 text-white shadow-[0_0_24px_rgba(242,184,75,.25)]" : "border-white/15 bg-white/[.06] text-white/90"}`}
+                    className={`flex min-h-20 flex-col items-center justify-center gap-1 rounded-2xl text-sm font-bold transition motion-safe:active:scale-95 ${helped === o.v ? "bg-gold/25 text-white shadow-[inset_0_0_0_0.5px_rgb(242_184_75/.6)]" : "bg-white/[.06] text-white/90"}`}
                   >
                     <Icon name={o.icon} className="size-6" />
                     {o.label}

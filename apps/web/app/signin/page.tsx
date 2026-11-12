@@ -98,7 +98,7 @@ function SignIn() {
 
         <div>
           <p className="mb-2 text-xs font-semibold uppercase tracking-[.2em] text-gold">{t("lang.pick")}</p>
-          <div role="group" aria-label={t("lang.pick")} className="flex flex-wrap gap-2">
+          <div role="group" aria-label={t("lang.pick")} className="grid grid-cols-2 gap-2 [&>*]:w-full [&>*]:justify-center">
             {LOCALES.map((l) => (
               <Chip key={l} active={l === locale} onClick={() => setLocale(l)}>{LABELS[l]}</Chip>
             ))}

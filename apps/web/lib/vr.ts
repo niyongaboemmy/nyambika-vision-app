@@ -9,7 +9,8 @@ export interface ShelfColour {
   variantId: string;
   colourName: string;
   colourHex: string;
-  glb: string;
+  /** Null when the colour has no approved 3D model (shown as its photo). */
+  glb: string | null;
   poster: string | null;
 }
 
@@ -20,7 +21,8 @@ export interface ShelfItemView {
   category: string;
   variantId: string;
   colourName: string;
-  glb: string;
+  /** Null in the showroom for pieces shown as their photo on a stand (no approved 3D model yet). */
+  glb: string | null;
   poster: string | null;
   photo: string | null;
   heightM: number;

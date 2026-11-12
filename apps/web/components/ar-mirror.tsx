@@ -226,7 +226,7 @@ export function ArMirror({ items, initial }: { items: WardrobeItem[]; initial: s
         )}
       </div>
 
-      {why && <p className="mt-3 rounded-2xl border border-white/15 bg-white/5 px-3 py-2 text-sm text-mut" role="status">{why}</p>}
+      {why && <p className="mt-3 rounded-2xl bg-white/5 px-3 py-2 text-sm text-mut" role="status">{why}</p>}
       {mode !== "live" && mode !== "starting" && (
         <Button className="mt-3 w-full" onClick={start}><Icon name="camera" className="size-5" /> {why ? "Try live mirror anyway" : "Start live mirror"}</Button>
       )}

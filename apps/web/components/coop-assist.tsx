@@ -121,10 +121,10 @@ function ConsentSheet({ open, onClose, pageId, maker, pending, onDone }: { open:
             ["send", `We text ${first} a 6-digit code (or *775# → 4)`],
             ["key", `${first} reads it to you · consent for 30 days`],
           ].map(([e, t]) => (
-            <li key={t} className="flex items-start gap-3 rounded-2xl bg-paper p-3 ring-1 ring-inset ring-hairline"><span aria-hidden className="grid size-8 shrink-0 place-items-center rounded-xl bg-violet-100 text-violet-ink"><Icon name={e as IconName} className="size-4" /></span><span className="self-center">{t}</span></li>
+            <li key={t} className="flex items-start gap-3 rounded-2xl bg-paper p-3"><span aria-hidden className="grid size-8 shrink-0 place-items-center rounded-xl bg-violet-100 text-violet-ink"><Icon name={e as IconName} className="size-4" /></span><span className="self-center">{t}</span></li>
           ))}
         </ol>
-        {grant && <p className="rounded-2xl bg-violet-50 p-3 text-sm italic leading-relaxed text-violet-ink ring-1 ring-inset ring-violet-200">“{grant.consentText}”</p>}
+        {grant && <p className="rounded-2xl bg-violet-50 p-3 text-sm italic leading-relaxed text-violet-ink">“{grant.consentText}”</p>}
         {!grant && !pending ? (
           <SButton className="min-h-12 w-full" onClick={ask}>Send {first} the code</SButton>
         ) : (
@@ -157,7 +157,7 @@ export function StatementSheet({ open, onClose, pageId, makerId, locale = "rw" }
       <div className="space-y-4">
         <div className="flex gap-2">
           <Input type="month" value={month} onChange={(e) => setMonth(e.target.value)} aria-label="Month" />
-          <select value={lang} onChange={(e) => setLang(e.target.value as typeof lang)} aria-label="Language" className="rounded-2xl border border-hairline bg-white px-3 text-sm font-bold text-cocoa">
+          <select value={lang} onChange={(e) => setLang(e.target.value as typeof lang)} aria-label="Language" className="rounded-2xl bg-white px-3 text-sm font-bold text-cocoa">
             <option value="rw">RW</option>
             <option value="en">EN</option>
             <option value="fr">FR</option>
@@ -166,9 +166,9 @@ export function StatementSheet({ open, onClose, pageId, makerId, locale = "rw" }
         {s && (
           <>
             <div className="grid grid-cols-3 gap-2 text-center">
-              <div className="rounded-2xl bg-paper p-2.5 ring-1 ring-inset ring-hairline"><p className="text-[11px] font-bold text-cocoa-2">Pieces</p><p className="font-display text-xl font-black text-cocoa">{s.totals.count}</p></div>
-              <div className="rounded-2xl bg-emerald-50 p-2.5 ring-1 ring-inset ring-emerald-200"><p className="text-[11px] font-bold text-mint-ink">Direct to MoMo</p><p className="truncate font-display text-base font-black text-cocoa">{rwf(s.totals.directRwf)}</p></div>
-              <div className="rounded-2xl bg-violet-50 p-2.5 ring-1 ring-inset ring-violet-200"><p className="text-[11px] font-bold text-violet-ink">Coop pays</p><p className="truncate font-display text-base font-black text-cocoa">{rwf(s.totals.cooperativeRwf)}</p></div>
+              <div className="rounded-2xl bg-paper p-2.5"><p className="text-[11px] font-bold text-cocoa-2">Pieces</p><p className="font-display text-xl font-black text-cocoa">{s.totals.count}</p></div>
+              <div className="rounded-2xl bg-emerald-50 p-2.5"><p className="text-[11px] font-bold text-mint-ink">Direct to MoMo</p><p className="truncate font-display text-base font-black text-cocoa">{rwf(s.totals.directRwf)}</p></div>
+              <div className="rounded-2xl bg-violet-50 p-2.5"><p className="text-[11px] font-bold text-violet-ink">Coop pays</p><p className="truncate font-display text-base font-black text-cocoa">{rwf(s.totals.cooperativeRwf)}</p></div>
             </div>
             <SButton className="min-h-12 w-full" onClick={() => speak(s.spoken, s.locale)}><Icon name="volume" className="size-4" /> Read it aloud</SButton>
             <p className="rounded-2xl bg-paper p-3 text-sm leading-relaxed text-cocoa-2">{s.spoken}</p>

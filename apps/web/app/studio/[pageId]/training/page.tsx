@@ -12,7 +12,7 @@ export default function TrainingPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
-        <Link href={`/studio/${page.id}/settings`} aria-label="Back to settings" className="st-press grid size-11 shrink-0 place-items-center rounded-full bg-white text-cocoa ring-1 ring-inset ring-hairline">
+        <Link href={`/studio/${page.id}/settings`} aria-label="Back to settings" className="st-press grid size-11 shrink-0 place-items-center rounded-full bg-white text-cocoa">
           <Icon name="back" className="size-5" />
         </Link>
         <SectionTitle title="Training data" eyebrow="Settings" as="h1" />

@@ -226,25 +226,25 @@ function CardStep({ result, payee, onDone }: { result: CheckoutResult; payee: st
       </div>
       <p className="mt-1 text-sm text-mut">{result.money.total}{result.money.display ? ` · ${result.money.display.text}` : ""} to <b className="text-white">{payee}</b>. Your bank sets the final rate if your card isn&apos;t in {result.money.currency}.</p>
       {s.mode === "mock" ? (
-        <div className="relative mt-4 overflow-hidden rounded-3xl border border-white/15 bg-gradient-to-br from-ink-3 to-ink-2 p-4">
+        <div className="relative mt-4 overflow-hidden rounded-3xl bg-gradient-to-br from-ink-3 to-ink-2 p-4">
           <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 size-44 rounded-full bg-[conic-gradient(from_180deg,rgba(242,184,75,.35),rgba(139,92,246,.35),transparent_70%)] blur-2xl" />
           <div className="relative space-y-3">
             <label className="block text-xs font-semibold text-mut">Card number
-              <input inputMode="numeric" autoComplete="cc-number" value={cardNo} onChange={(e) => setCardNo(e.target.value)} className="mt-1 h-12 w-full rounded-xl border border-white/15 bg-black/30 px-3 font-mono text-base tracking-wider text-white outline-none focus:border-gold" />
+              <input inputMode="numeric" autoComplete="cc-number" value={cardNo} onChange={(e) => setCardNo(e.target.value)} className="mt-1 h-12 w-full rounded-xl bg-black/30 px-3 font-mono text-base tracking-wider text-white outline-none focus-visible:ring-2 focus-visible:ring-gold" />
             </label>
             <div className="grid grid-cols-2 gap-3">
               <label className="block text-xs font-semibold text-mut">Expiry
-                <input autoComplete="cc-exp" value={exp} onChange={(e) => setExp(e.target.value)} className="mt-1 h-12 w-full rounded-xl border border-white/15 bg-black/30 px-3 font-mono text-white outline-none focus:border-gold" />
+                <input autoComplete="cc-exp" value={exp} onChange={(e) => setExp(e.target.value)} className="mt-1 h-12 w-full rounded-xl bg-black/30 px-3 font-mono text-white outline-none focus-visible:ring-2 focus-visible:ring-gold" />
               </label>
               <label className="block text-xs font-semibold text-mut">CVC
-                <input inputMode="numeric" autoComplete="cc-csc" value={cvc} onChange={(e) => setCvc(e.target.value)} className="mt-1 h-12 w-full rounded-xl border border-white/15 bg-black/30 px-3 font-mono text-white outline-none focus:border-gold" />
+                <input inputMode="numeric" autoComplete="cc-csc" value={cvc} onChange={(e) => setCvc(e.target.value)} className="mt-1 h-12 w-full rounded-xl bg-black/30 px-3 font-mono text-white outline-none focus-visible:ring-2 focus-visible:ring-gold" />
               </label>
             </div>
             <p className="text-[11px] text-mut">Test cards: 4242 4242 4242 4242 succeeds · 4000 0000 0000 0002 is declined. No real card is charged.</p>
           </div>
         </div>
       ) : (
-        <div ref={mountRef} className="mt-4 min-h-40 rounded-3xl border border-white/15 bg-ink-3 p-3" />
+        <div ref={mountRef} className="mt-4 min-h-40 rounded-3xl bg-ink-3 p-3" />
       )}
       <ErrorNote error={error} />
       <Button className="mt-4 w-full text-lg" disabled={busy} onClick={confirm}>{busy ? <Spinner /> : `Pay ${result.money.total}`}</Button>
