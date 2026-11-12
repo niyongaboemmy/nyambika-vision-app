@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Nunito } from "next/font/google";
 import { ErrorToaster } from "@/components/error-toaster";
-import { Toaster } from "@/components/kit";
+import { Toaster } from "@/components/toast";
 import { DeferredGlobals } from "@/components/deferred-globals";
 import { ThemeScript } from "@/components/theme-script";
 import { SessionProvider } from "@/lib/session";

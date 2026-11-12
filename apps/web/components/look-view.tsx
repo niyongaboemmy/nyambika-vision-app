@@ -1,11 +1,12 @@
 "use client";
 
 import { useDrag } from "@/lib/drag";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { CircleAsk } from "@/components/circle-ask";
-import { animate, MAT_BASE, MATERIAL, RailButton, SPRING } from "@/components/look-rail";
+import { MAT_BASE, MATERIAL, preloadLookExtras, RailButton, SPRING } from "@/components/look-rail";
 import { MorphRail } from "@/components/morph-sheet";
 import { XrRail } from "@/components/xr-rail";
 import { VideoRail } from "@/components/video-tryon";
@@ -31,6 +32,9 @@ interface Props {
   active?: boolean;
   children?: ReactNode;
 }
+
+// Coach mark / swipe peek and the heart burst never paint on first load: a post-load chunk (JS budget pass 2).
+const CoachHint = dynamic(() => preloadLookExtras().then((m) => m.CoachHint), { ssr: false });
 
 const COACH_KEY = "nv-looks-coach-v1";
 const MEMBER: Record<string, [IconName, string]> = { TAILOR: ["scissors", "Tailor"], COOPERATIVE: ["users", "Cooperative"], SELLER: ["bag", "Seller"] };
@@ -70,6 +74,16 @@ export function LookView({ look, index, total, intentLabel, onSave, onVariant, p
   // Chrome comes back whenever the look changes or leaves the screen.
   useEffect(() => { if (!active) setChrome(true); }, [active]);
   useEffect(() => () => { if (single.current) clearTimeout(single.current); }, []);
+  // Gesture extras are fetched once the card is up and the main thread is idle, before the first long-press/drag.
+  useEffect(() => {
+    const go = () => void preloadLookExtras();
+    if ("requestIdleCallback" in window) {
+      const h = window.requestIdleCallback(go, { timeout: 2000 });
+      return () => window.cancelIdleCallback(h);
+    }
+    const h = setTimeout(go, 600);
+    return () => clearTimeout(h);
+  }, []);
 
   // One-time coach mark (swipe to the maker, scroll for the next look), then nothing.
   useEffect(() => {
@@ -98,17 +112,9 @@ export function LookView({ look, index, total, intentLabel, onSave, onVariant, p
       const el = heart.current;
       const box = root.current?.getBoundingClientRect();
       if (el && box) {
-        el.style.left = `${e.clientX - box.left}px`;
-        el.style.top = `${e.clientY - box.top}px`;
-        el.style.opacity = "1";
-        const a = animate(el, [
-          { transform: "translate(-50%,-50%) scale(.3) rotate(-12deg)", opacity: 0 },
-          { transform: "translate(-50%,-50%) scale(1.15) rotate(0deg)", opacity: 1, offset: 0.35 },
-          { transform: "translate(-50%,-50%) scale(1)", opacity: 1, offset: 0.6 },
-          { transform: "translate(-50%,-120%) scale(.9)", opacity: 0 },
-        ], { duration: 900, easing: "cubic-bezier(.2,.8,.2,1)" });
-        if (a) a.onfinish = () => (el.style.opacity = "0");
-        else setTimeout(() => (el.style.opacity = "0"), 600);
+        const x = e.clientX - box.left;
+        const y = e.clientY - box.top;
+        void preloadLookExtras().then((m) => m.burstHeart(el, x, y));
       }
       return;
     }
@@ -341,38 +347,6 @@ function PageCapsule({ label, icon, index, total }: { label: string | null; icon
           <span aria-hidden>{pos}</span>
         </span>
       )}
-    </span>
-  );
-}
-
-/** Coach capsule: "Next · Maker Space" once (softly animated chevrons), and "Maker Space" as the drag peek. */
-function CoachHint({ next, pull, dragging }: { next: boolean; pull: number; dragging: boolean }) {
-  const left = useRef<HTMLSpanElement>(null);
-  const up = useRef<HTMLSpanElement>(null);
-  useEffect(() => {
-    if (dragging) return;
-    const a = animate(left.current, [{ transform: "translateX(3px)" }, { transform: "translateX(-4px)" }, { transform: "translateX(3px)" }], { duration: 1300, iterations: Infinity, easing: "ease-in-out" });
-    const b = animate(up.current, [{ transform: "translateY(2px)" }, { transform: "translateY(-3px)" }, { transform: "translateY(2px)" }], { duration: 1300, iterations: Infinity, easing: "ease-in-out" });
-    return () => {
-      a?.cancel();
-      b?.cancel();
-    };
-  }, [dragging]);
-  return (
-    <span
-      aria-hidden
-      className={`pointer-events-none absolute left-4 z-10 inline-flex animate-fade items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold text-white bottom-[calc(max(13dvh,128px)+max(env(safe-area-inset-bottom),14px)+4px)] ${MATERIAL}`}
-      style={{ opacity: dragging ? 0.4 + pull * 0.6 : 1 }}
-    >
-      {next && !dragging && (
-        <>
-          <span ref={up} className="inline-flex"><Icon name="chevron" className="size-3.5 -rotate-90" /></span>
-          Next
-          <span className="text-white/50">·</span>
-        </>
-      )}
-      <span ref={left} className="inline-flex"><Icon name="back" className="size-3.5" /></span>
-      Maker Space
     </span>
   );
 }

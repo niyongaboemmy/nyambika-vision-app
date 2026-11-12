@@ -1,4 +1,4 @@
-import { Skel } from "@/components/kit";
+import { Skel } from "@/components/kit-static";
 
 /** Maker Space: banner, identity row, product rail — same boxes as the page so nothing jumps. */
 export default function Loading() {
