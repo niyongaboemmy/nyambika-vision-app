@@ -31,9 +31,9 @@ export const pageStatusLabel = (s: string) => STATUS_LABEL[s] ?? s.replace(/_/g,
 
 export function Brand({ label }: { label: string }) {
   return (
-    <span className="flex items-center gap-2.5">
-      <span className="orb size-8 rounded-full shadow-[0_6px_18px_-4px_rgba(224,112,63,.6)]" />
-      <span className="font-display text-lg font-black tracking-tight text-cocoa">{label}</span>
+    <span className="flex min-w-0 items-center gap-2.5">
+      <span className="orb size-8 shrink-0 rounded-full shadow-[0_6px_18px_-4px_rgba(224,112,63,.6)]" />
+      <span className="truncate font-display text-lg font-black tracking-tight text-cocoa">{label}</span>
     </span>
   );
 }

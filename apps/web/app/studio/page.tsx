@@ -31,10 +31,10 @@ export default function StudioHome() {
   const [creating, setCreating] = useState(false);
   return (
     <div className="min-h-dvh">
-      <header className="st-glass-light sticky top-0 z-30 border-b border-hairline/70">
+      <header className="st-glass-light hairline-b sticky top-0 z-30">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 pb-3 pt-[max(env(safe-area-inset-top),12px)]">
           <Brand label={t("studio.title")} />
-          <a href="/" className="st-press inline-flex min-h-11 items-center gap-2 rounded-2xl bg-white px-3.5 text-sm font-bold text-cocoa">
+          <a href="/" className="st-press inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-2xl bg-white px-3.5 text-sm font-bold text-cocoa">
             <Icon name="eye" className="size-4" /> Shopper view
           </a>
         </div>

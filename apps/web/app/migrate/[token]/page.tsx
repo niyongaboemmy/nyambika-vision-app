@@ -54,7 +54,7 @@ export default function MigrationReview() {
 
   return (
     <div className="theme-light st-app min-h-dvh overflow-x-clip text-cocoa">
-      <header className="st-glass-light sticky top-0 z-30 border-b border-hairline/70">
+      <header className="st-glass-light hairline-b sticky top-0 z-30">
         <div className="mx-auto flex max-w-3xl items-center justify-between px-4 pb-3 pt-[max(env(safe-area-inset-top),12px)]">
           <Brand label="Nyambika" />
           {r && <Badge value={r.status} label={r.status.replace(/_/g, " ").toLowerCase()} />}

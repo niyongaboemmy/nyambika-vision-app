@@ -89,7 +89,7 @@ const S = [
   ["signin", "anon", "/signin"],
   ["muse", "shopper", "/"],
   ["muse-menu", "shopper", "/", async (p) => { await p.getByRole("button", { name: "Menu" }).click(); await p.getByRole("dialog").waitFor(); }],
-  ["muse-typing", "shopper", "/", async (p) => { await p.getByRole("button", { name: /type/i }).last().click(); }],
+  ["muse-typing", "shopper", "/", async (p) => { await p.getByRole("button", { name: /type|andika|écri|tape|chapa/i }).last().click(); }],
   look && ["looks", "fresh", `/looks/${look.sessionId}`],
   variant && ["look-try", "fresh", `/looks/try?variant=${variant}`],
   ["maker-space", "anon", "/m/uwase-couture"],
