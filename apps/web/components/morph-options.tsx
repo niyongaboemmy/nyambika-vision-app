@@ -2,7 +2,8 @@
 
 import { MORPH_LENGTHS, MORPH_SLEEVES, morphPrice, type MorphTemplateInput } from "@nyambika/contracts/tailor-data";
 import { useEffect, useState } from "react";
-import { Card, Field, Input, Note, SButton, Select } from "@/components/studio";
+import { InfoTip } from "@/components/kit";
+import { Card, Chip, Field, Icon, Input, Note, SButton, Select } from "@/components/studio";
 import { api, rwf } from "@/lib/api";
 
 const DEFAULTS: MorphTemplateInput = {
@@ -57,8 +58,8 @@ export function MorphOptions({ productId }: { productId: string }) {
     return (
       <Card className="flex flex-wrap items-center justify-between gap-3 bg-gradient-to-br from-amber-50 to-violet-50">
         <div>
-          <h3 className="font-bold">🎨 Live morph</h3>
-          <p className="text-sm text-stone-600">Let shoppers recolour this piece and change length or sleeves on their twin, then ask you to sew it.</p>
+          <h3 className="flex items-center gap-1.5 font-bold"><Icon name="palette" className="size-4 text-terra-ink" />Live morph</h3>
+          <p className="mt-1 flex flex-wrap items-center gap-1.5"><Chip>Colour</Chip><Chip>Length</Chip><Chip>Sleeves</Chip><InfoTip label="About live morph">Let shoppers recolour this piece and change length or sleeves on their twin, then ask you to sew it.</InfoTip></p>
         </div>
         <SButton onClick={() => setO(DEFAULTS)}>Make customizable</SButton>
       </Card>
@@ -71,7 +72,7 @@ export function MorphOptions({ productId }: { productId: string }) {
     const on = isBase || (table[key] !== null && table[key] !== undefined);
     return (
       <div key={key} className={`flex items-center gap-2 rounded-2xl p-2 ring-1 ${on ? "bg-white ring-stone-300" : "bg-stone-50 ring-stone-200"}`}>
-        <label className="flex flex-1 items-center gap-2 text-sm font-semibold">
+        <label className="flex min-h-11 flex-1 items-center gap-2 text-sm font-semibold">
           <input type="checkbox" className="size-5 accent-stone-900" checked={on} disabled={isBase} onChange={() => setO({ ...o, [kind]: { ...table, [key]: on ? null : 0 } })} />
           {cap(key)}{isBase ? " (as photographed)" : ""}
         </label>
@@ -99,13 +100,13 @@ export function MorphOptions({ productId }: { productId: string }) {
     <Card className="space-y-4">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <h3 className="font-bold">🎨 Live morph options</h3>
-          <p className="text-sm text-stone-600">Base {rwf(base.basePriceRwf)} · fully customised up to {rwf(max)}. Money goes straight to you.</p>
+          <h3 className="flex items-center gap-1.5 font-bold"><Icon name="palette" className="size-4 text-terra-ink" />Live morph options</h3>
+          <p className="text-sm text-stone-600">{rwf(base.basePriceRwf)} → up to {rwf(max)} · paid to you</p>
         </div>
         <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${saved ? "bg-emerald-100 text-emerald-900" : "bg-amber-100 text-amber-900"}`}>{saved ? "live" : "not saved"}</span>
       </div>
       <div className="flex items-center gap-2 rounded-2xl bg-stone-50 p-3 ring-1 ring-stone-200">
-        <label className="flex flex-1 items-center gap-2 text-sm font-semibold">
+        <label className="flex min-h-11 flex-1 items-center gap-2 text-sm font-semibold">
           <input type="checkbox" className="size-5 accent-stone-900" checked={o.colourEnabled} onChange={(e) => setO({ ...o, colourEnabled: e.target.checked })} />
           <span className="size-5 rounded-full bg-[conic-gradient(red,yellow,lime,cyan,blue,magenta,red)]" aria-hidden />
           Any colour (same print)

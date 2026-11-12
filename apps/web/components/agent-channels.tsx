@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Card, Note, Switch } from "@/components/studio";
+import { InfoTip } from "@/components/kit";
+import { Group, GroupRow } from "@/components/ios";
+import { Card, Chip, Note, Switch } from "@/components/studio";
 import { api } from "@/lib/api";
 import { useApi } from "@/lib/use-api";
 
@@ -28,12 +30,13 @@ export function AgentChannels({ pageId }: { pageId: string }) {
   return (
     <Card className="space-y-3">
       <h2 id="agents" className="scroll-mt-28 font-display text-lg font-black tracking-tight text-cocoa">AI assistants & marketplaces</h2>
-      <p className="text-sm text-cocoa-2">Let AI shopping assistants find your products and send shoppers to you. Every order is still confirmed by the shopper in Nyambika and paid straight to you.</p>
+      <p className="flex flex-wrap items-center gap-1.5"><Chip tone="violet">Shopper confirms</Chip><Chip tone="mint">Paid directly to you</Chip><InfoTip label="About AI assistants">Let AI shopping assistants find your products and send shoppers to you. Every order is still confirmed by the shopper in Nyambika and paid straight to you.</InfoTip></p>
       {data ? (
         <>
-          <Switch checked={data.agentsEnabled} onChange={(v) => save({ agentsEnabled: v, marketplacesEnabled: data.marketplacesEnabled })} label="Show my page to AI assistants" description="Public catalogue API, MCP and agent checkout." />
-          <Switch checked={data.marketplacesEnabled} onChange={(v) => save({ agentsEnabled: data.agentsEnabled, marketplacesEnabled: v })} label="List me on external marketplaces" description="Product feeds for partner catalogues." />
-          <p className="text-xs font-semibold text-cocoa-2">Last 30 days: {data.last30d.agentCheckouts} assistant checkouts · {data.last30d.confirmed} confirmed by shoppers</p>
+          <Group footer={`30 days: ${data.last30d.agentCheckouts} checkouts · ${data.last30d.confirmed} confirmed`}>
+            <GroupRow icon="sparkle" tone="violet" title="AI assistants" subtitle="Catalogue API · MCP · checkout" accessory={<Switch checked={data.agentsEnabled} onChange={(v) => save({ agentsEnabled: v, marketplacesEnabled: data.marketplacesEnabled })} ariaLabel="Show my page to AI assistants" />} />
+            <GroupRow icon="store" tone="sky" title="Marketplaces" subtitle="Partner catalogue feeds" accessory={<Switch checked={data.marketplacesEnabled} onChange={(v) => save({ agentsEnabled: data.agentsEnabled, marketplacesEnabled: v })} ariaLabel="List me on external marketplaces" />} />
+          </Group>
         </>
       ) : (
         <div data-skeleton className="st-skel h-20 rounded-2xl" />

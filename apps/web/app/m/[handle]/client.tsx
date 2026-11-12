@@ -11,6 +11,7 @@ import { waLink, type MakerProduct, type MakerSpace } from "@/lib/maker";
 import type { Commerce } from "@/lib/region";
 import { useSession } from "@/lib/session";
 import { track, trackOnce } from "@/lib/track";
+import { Icon } from "@/components/icons";
 
 // The product sheet (try-on, WhatsApp, checkout, 3D) draws only after a tap, so it loads after hydration (JS budget pass).
 const ProductSheet = dynamic(() => import("./product-sheet").then((m) => m.ProductSheet), { ssr: false });
@@ -60,9 +61,12 @@ export function Collection({ maker, commerce }: { maker: MakerSpace; commerce?: 
           );
         })}
       </div>
-      <p className="mt-2 text-center text-xs text-mut">
-        {i + 1} / {items.length} · swipe to browse · tap to try on your twin
-      </p>
+      {/* Pager: buttons mirror the swipe; tapping the centre card opens it. */}
+      <div className="mt-2 flex items-center justify-center gap-3 text-xs text-mut">
+        <button type="button" aria-label="Previous in collection" disabled={i === 0} onClick={() => setI((x) => Math.max(0, x - 1))} className="hit press grid size-8 place-items-center rounded-full border border-white/15 bg-white/5 text-base disabled:opacity-35">‹</button>
+        <span className="min-w-12 text-center tabular-nums" aria-live="polite">{i + 1} / {items.length}</span>
+        <button type="button" aria-label="Next in collection" disabled={i === items.length - 1} onClick={() => setI((x) => Math.min(items.length - 1, x + 1))} className="hit press grid size-8 place-items-center rounded-full border border-white/15 bg-white/5 text-base disabled:opacity-35">›</button>
+      </div>
       <ProductSheet maker={maker} product={open} commerce={commerce} onClose={() => setOpen(null)} />
     </section>
   );
@@ -80,7 +84,7 @@ export function MakerActions({ maker }: { maker: MakerSpace }) {
   return (
     <div className="fixed inset-x-0 bottom-0 z-30 mx-auto grid w-full max-w-[480px] grid-cols-2 gap-2 bg-gradient-to-t from-ink via-ink/95 to-transparent px-4 pt-6 pb-[max(env(safe-area-inset-bottom),16px)]">
       <Button onClick={follow} variant={following ? "glass" : "primary"}>{following ? `✓ ${t("maker.following")}` : `+ ${t("maker.follow")}`}</Button>
-      <a href={waLink(maker.whatsapp, `Muraho ${maker.name}!`)} target="_blank" rel="noreferrer" onClick={() => track("maker_contacted", { pageId: maker.id, channel: "whatsapp" })} className="glass inline-flex min-h-12 items-center justify-center rounded-2xl font-semibold">💬 {t("maker.chat")}</a>
+      <a href={waLink(maker.whatsapp, `Muraho ${maker.name}!`)} target="_blank" rel="noreferrer" onClick={() => track("maker_contacted", { pageId: maker.id, channel: "whatsapp" })} className="glass inline-flex min-h-12 items-center justify-center rounded-2xl gap-2 font-semibold"><Icon name="chat" className="size-5" /> {t("maker.chat")}</a>
     </div>
   );
 }

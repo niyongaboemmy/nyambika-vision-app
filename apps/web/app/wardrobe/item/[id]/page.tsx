@@ -8,6 +8,7 @@ import { RestyleSheet } from "@/components/wardrobe-restyle";
 import { rwf } from "@/lib/api";
 import { nice, type OwnedItem } from "@/lib/social";
 import { useApi } from "@/lib/use-api";
+import { Icon } from "@/components/icons";
 
 type Item = OwnedItem & { outfits: { id: string; eventId: string; event: string; image: string }[] };
 
@@ -38,8 +39,11 @@ export default function WardrobeItem() {
             <div className="mt-3 flex flex-wrap gap-2 text-xs">
               {item.occasions.map((o) => <span key={o} className="rounded-full bg-white/10 px-2.5 py-1">{nice(o)}</span>)}
             </div>
-            <Link href={`/m/${item.maker.handle}`} className="glass mt-4 flex items-center justify-between rounded-2xl px-4 py-3 text-sm">
-              <span>Made by <b>{item.maker.name}</b> · {rwf(item.priceRwf)} · order {item.orderCode}</span>
+            <Link href={`/m/${item.maker.handle}`} className="glass mt-4 flex min-h-14 items-center justify-between gap-3 rounded-2xl px-4 py-2.5 text-sm">
+              <span className="min-w-0">
+                <span className="block truncate font-bold">{item.maker.name}</span>
+                <span className="block truncate text-xs text-mut">{rwf(item.priceRwf)} · {item.orderCode}</span>
+              </span>
               <span aria-hidden>→</span>
             </Link>
           </section>
@@ -55,11 +59,11 @@ export default function WardrobeItem() {
                 ))}
               </div>
             ) : (
-              <p className="mt-1 text-sm text-mut">No outfits with this piece yet. Restyle it for your next event.</p>
+              <p className="mt-1 text-sm text-mut">No outfits yet</p>
             )}
           </section>
           <div className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-[480px] px-5 pb-[max(env(safe-area-inset-bottom),16px)] pt-6 fade-bottom">
-            <button onClick={() => setRestyle(true)} className="grad-cta min-h-14 w-full rounded-2xl font-display text-lg font-black">✨ Restyle for an event</button>
+            <button onClick={() => setRestyle(true)} className="grad-cta press flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl font-display text-lg font-black"><Icon name="sparkle" className="size-5" /> Restyle for an event</button>
           </div>
           <RestyleSheet open={restyle} onClose={() => setRestyle(false)} />
         </>

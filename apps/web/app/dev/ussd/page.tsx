@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
+import { Icon } from "@/components/icons";
 
 interface Sms {
   id: string;
@@ -93,7 +94,7 @@ export default function UssdSimulator() {
           <p className="mb-2 text-center text-[11px] font-black tracking-[.3em] text-white/50">NYAMBIKA</p>
           <div className="rounded-2xl bg-[#c9dcb0] p-3 font-mono text-[13px] leading-snug text-[#1f2a14] shadow-[inset_0_2px_8px_rgba(0,0,0,.35)]" role="log" aria-live="polite" aria-label="Phone screen">
             <div className="flex justify-between text-[10px] opacity-70"><span>▂▄▆ MTN RW</span><span>{new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}</span></div>
-            <pre className="mt-2 min-h-[150px] whitespace-pre-wrap break-words font-mono text-[13px]">{busy ? "USSD code running…" : screen || "Dial *775# and press 📞"}</pre>
+            <pre className="mt-2 min-h-[150px] whitespace-pre-wrap break-words font-mono text-[13px]">{busy ? "USSD code running…" : screen || "Dial *775# and press Call"}</pre>
             <input
               ref={inputRef}
               value={input}
@@ -106,10 +107,10 @@ export default function UssdSimulator() {
           </div>
           <div className="mt-4 grid grid-cols-3 gap-2">
             <button type="button" onClick={() => (session ? reply() : dial())} disabled={busy} className="col-span-1 min-h-12 rounded-2xl bg-emerald-600 text-lg font-black shadow-[inset_0_-3px_0_rgba(0,0,0,.25)]" aria-label={session ? "Send reply" : "Call"}>
-              {session ? "Send" : "📞"}
+              {session ? "Send" : <Icon name="call" className="mx-auto size-6" />}
             </button>
             <button type="button" onClick={() => setInput((v) => v.slice(0, -1))} className="min-h-12 rounded-2xl bg-white/15 text-lg font-black" aria-label="Clear one">⌫</button>
-            <button type="button" onClick={() => { setSession(null); setOpen(false); setScreen(""); setPath([]); setInput(""); }} className="min-h-12 rounded-2xl bg-red-600 text-lg font-black shadow-[inset_0_-3px_0_rgba(0,0,0,.25)]" aria-label="End call">✕</button>
+            <button type="button" onClick={() => { setSession(null); setOpen(false); setScreen(""); setPath([]); setInput(""); }} className="min-h-12 rounded-2xl bg-red-600 text-lg font-black shadow-[inset_0_-3px_0_rgba(0,0,0,.25)]" aria-label="End call"><Icon name="x" className="mx-auto size-6" /></button>
             {["1", "2", "3", "4", "5", "6", "7", "8", "9", "*", "0", "#"].map((k) => (
               <button key={k} type="button" onClick={() => key(k)} className="min-h-12 rounded-2xl bg-gradient-to-b from-[#55555f] to-[#3a3a42] text-xl font-black shadow-[inset_0_-3px_0_rgba(0,0,0,.35)] active:translate-y-0.5" aria-label={`Key ${k}`}>
                 {k}

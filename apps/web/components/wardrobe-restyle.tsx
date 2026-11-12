@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Button, Chip, ErrorNote, Sheet } from "@/components/ui";
 import { api, rwf } from "@/lib/api";
 import { nice, OCCASIONS, type WardrobeEventView } from "@/lib/social";
+import { Icon } from "@/components/icons";
 
 interface MuseIntent {
   id: string;
@@ -63,14 +64,14 @@ export function RestyleSheet({ open, onClose }: { open: boolean; onClose: () => 
 
   return (
     <Sheet open={open} onClose={() => !busy && onClose()}>
-      <h2 className="font-display text-2xl font-black">Restyle for an event ✨</h2>
-      <p className="text-sm text-mut">The Muse mixes what you own with 1–2 new pieces from makers, on your twin.</p>
+      <h2 className="flex items-center gap-2 font-display text-2xl font-black">Restyle for an event <Icon name="sparkle" className="size-6 text-gold" /></h2>
+      <p className="text-sm text-mut">Your pieces + 1–2 new · on your twin</p>
       <div className="mt-4 max-h-[62vh] space-y-4 overflow-y-auto no-scrollbar pb-1">
         {intents && intents.length > 0 && (
           <fieldset>
             <legend className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-mut">From your Muse</legend>
             <div className="flex flex-wrap gap-2">
-              {intents.map((i) => <Chip key={i.id} active={intentId === i.id} onClick={() => fromMuse(i)}>🎙️ “{i.input.length > 28 ? `${i.input.slice(0, 28)}…` : i.input}”</Chip>)}
+              {intents.map((i) => <Chip key={i.id} active={intentId === i.id} onClick={() => fromMuse(i)}><Icon name="mic" className="size-4" /> “{i.input.length > 28 ? `${i.input.slice(0, 28)}…` : i.input}”</Chip>)}
             </div>
           </fieldset>
         )}
@@ -102,8 +103,8 @@ export function RestyleSheet({ open, onClose }: { open: boolean; onClose: () => 
         </fieldset>
       </div>
       <ErrorNote error={error} />
-      <Button className="mt-4 w-full" disabled={busy} onClick={submit}>{busy ? "Styling your wardrobe…" : "✨ Style 3 outfits"}</Button>
-      <p className="mt-2 text-center text-xs text-mut">Counts as looks on your daily allowance · AI previews, C2PA signed</p>
+      <Button className="mt-4 w-full" disabled={busy} onClick={submit}>{busy ? "Styling your wardrobe…" : <><Icon name="sparkle" className="size-5" /> Style 3 outfits</>}</Button>
+      <p className="mt-2 text-center text-xs text-mut">Uses daily looks · AI label · C2PA</p>
     </Sheet>
   );
 }

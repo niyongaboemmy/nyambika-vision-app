@@ -57,7 +57,7 @@ await page.goto(BASE);
 await page.locator("footer button[title]").click();
 await page.getByPlaceholder(/type|andika|écrivez/i).fill("blue shirt for the office");
 await page.keyboard.press("Enter");
-await page.getByRole("button", { name: /💍/ }).click();
+await page.getByRole("button", { name: /office|any occasion/i }).first().click();
 await page.getByRole("button", { name: "party" }).waitFor();
 await shot("muse-edit-occasion");
 await page.getByRole("button", { name: "party" }).click();

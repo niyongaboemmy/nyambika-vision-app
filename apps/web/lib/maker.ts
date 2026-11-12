@@ -50,7 +50,7 @@ export const THEMES: Record<string, string> = {
   violet: "linear-gradient(160deg,#6D28D9 0%,#C084FC 55%,#22163a 100%)",
 };
 
-export const TYPE_LABEL = { TAILOR: "✂️ Tailor", COOPERATIVE: "🧵 Cooperative", SELLER: "🛍️ Seller" } as const;
+export const TYPE_LABEL = { TAILOR: "Tailor", COOPERATIVE: "Cooperative", SELLER: "Seller" } as const;
 
 export function waLink(phone: string, text: string) {
   return `https://wa.me/${phone.replace(/\D/g, "")}?text=${encodeURIComponent(text)}`;

@@ -36,7 +36,7 @@ async function ctx(label) {
 const nav = async (p, name) => {
   const link = p.getByRole("navigation", { name: "Studio" }).last().getByRole("link", { name, exact: true });
   if (await link.count()) return link.click();
-  await p.getByRole("button", { name: "More" }).click();
+  await p.getByRole("button", { name: "More", exact: true }).click();
   await p.getByRole("dialog").getByRole("link", { name: new RegExp(`^${name}`) }).click();
 };
 
@@ -81,7 +81,7 @@ await signIn(S.p, shopperPhone);
 await api(S.p, "/twin/persona", { persona: 2, consent: true });
 await S.p.goto(`${BASE}/m/uwase-couture?src=wa_status&utm_source=whatsapp`);
 await S.p.getByRole("switch", { name: /whatsapp updates/i }).click();
-await S.p.getByText(/you'll hear when they post/i).waitFor();
+await S.p.getByText(/reply STOP any ?time/i).waitFor();
 await S.snap("maker-space-optin", true);
 const product = uwase.products.find((p) => p.readiness === "READY" && (p.madeToOrder || p.variants.some((v) => v.inStock)));
 const variant = product.variants.find((v) => product.madeToOrder || v.inStock);
@@ -116,7 +116,7 @@ let broadcastSent = false;
 if (await sendBtn.isEnabled().catch(() => false)) {
   broadcastSent = true;
   await sendBtn.click();
-  await T.p.getByText(/sent to \d+ follower/i).waitFor();
+  await T.p.getByText(/sent to \d+ (follower|on whatsapp)/i).waitFor();
 } else console.log("ℹ broadcast already sent today (rate limit) — showing the blocked state");
 await T.snap("broadcast-sent", true);
 await T.p.getByRole("button", { name: "Insights" }).click();
@@ -276,7 +276,8 @@ for (const it of items) {
   await owner.p.getByText(/thank you/i).first().waitFor();
   await owner.c.close();
 }
-await H.p.getByRole("button", { name: /rehearse cadence/i }).click();
+await H.p.getByRole("button", { name: "More outreach actions" }).click(); // iOS pass: secondary outreach actions live in an action sheet
+await H.p.getByRole("dialog", { name: "Owner outreach" }).getByRole("button", { name: /rehearse cadence/i }).click();
 await H.p.getByText(/rehearsal reminders: 198/i).waitFor({ timeout: 60000 });
 await H.p.getByRole("button", { name: /go live: all signed off \(2\)/i }).click();
 await H.p.getByText(/went live: 2/i).waitFor({ timeout: 30000 });

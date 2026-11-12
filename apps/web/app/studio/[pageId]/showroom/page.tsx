@@ -2,6 +2,8 @@
 
 import { RUNWAY_SKINS, SHOW, SHOWROOM_BUDGET } from "@nyambika/contracts";
 import { useEffect, useState } from "react";
+import { MoreActions } from "@/components/ios";
+import { Fact, InfoTip, toast } from "@/components/kit";
 import { Badge, Card, Chip, Empty, Field, Icon, Input, Kpi, Meter, Note, ScreenSkeleton, SButton, SectionTitle, SLink, StudioSheet, Switch, Textarea } from "@/components/studio";
 import { api, rwf } from "@/lib/api";
 import { fmtWhen } from "@/lib/vr";
@@ -60,7 +62,7 @@ export default function ShowroomStudioPage() {
   if (!data) return <ScreenSkeleton />;
   return (
     <div className="space-y-5">
-      <SectionTitle as="h1" title="Showroom & shows" eyebrow={page.name} action={<SButton onClick={() => setCreating(true)}><Icon name="plus" className="size-4" /> Schedule a show</SButton>} />
+      <SectionTitle as="h1" title="Showroom" eyebrow={page.name} action={<SButton onClick={() => setCreating(true)}><Icon name="plus" className="size-4" /> Schedule a show</SButton>} />
       <div className="grid min-w-0 grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
         <BoothCard data={data} onSaved={reload} />
         <ShowsCard data={data} onNew={() => setCreating(true)} onChanged={reload} />
@@ -102,24 +104,27 @@ function BoothCard({ data, onSaved }: { data: VrStudio; onSaved: () => void }) {
       </div>
       <div className="grid grid-cols-2 gap-3 [&>*]:min-w-0">
         <Kpi label="Pieces in the room" value={data.showroom.pieces} hint={`${Math.min(data.showroom.pieces, SHOWROOM_BUDGET.mannequins)} on mannequins`} />
-        <div className="st-card rounded-[18px] p-3">
-          <p className="mb-2 text-[13px] font-bold text-cocoa">Room size · {fmtMB(data.showroom.bytes)} <span className="font-semibold text-cocoa-2">of {fmtMB(data.showroom.limitBytes)}</span></p>
-          <Meter value={data.showroom.bytes} max={data.showroom.limitBytes} label={`Room size ${fmtMB(data.showroom.bytes)} of ${fmtMB(data.showroom.limitBytes)}`} />
-          <p className="mt-1 text-[11px] text-cocoa-2">Loads in seconds on Wi-Fi</p>
+        <div className="st-card flex min-w-0 flex-col gap-1.5 rounded-[22px] p-4">
+          <p className="text-xs font-bold text-cocoa-2">Room size</p>
+          <p className="whitespace-nowrap font-display text-[clamp(1.25rem,5.5vw,1.5rem)] font-black leading-tight tracking-tight text-cocoa tabular-nums">{fmtMB(data.showroom.bytes)}</p>
+          <div className="mt-auto space-y-1">
+            <Meter value={data.showroom.bytes} max={data.showroom.limitBytes} label={`Room size ${fmtMB(data.showroom.bytes)} of ${fmtMB(data.showroom.limitBytes)}`} />
+            <p className="text-xs text-cocoa-2">of {fmtMB(data.showroom.limitBytes)}</p>
+          </div>
         </div>
       </div>
       {with3d.length === 0 ? (
         <Empty icon="layers" title="No 3D pieces yet" action={<SLink href={`/studio/${data.page.id}/products`} variant="outline">Open my products</SLink>}>
-          Build and approve a 3D model on a product page; it then appears in your showroom and on the 3D shelf.
+          Approve a 3D model on a product first.
         </Empty>
       ) : (
         <>
-          <Switch checked={enabled} onChange={setEnabled} label="Showroom open" description="Shoppers can walk your room on a phone or enter it with a VR headset." />
-          <Field label="Welcome line" hint="Shown on the banner above your mannequins (80 characters).">
+          <Switch checked={enabled} onChange={setEnabled} label="Showroom open" description="Phone · VR headset" />
+          <Field label="Welcome line" hint={`${banner.length}/80 · on the banner`}>
             <Input value={banner} maxLength={80} onChange={(e) => setBanner(e.target.value)} placeholder="Murakaza neza · Welcome to my atelier" />
           </Field>
-          <Field label={`On the mannequins (${featured.length}/${SHOWROOM_BUDGET.mannequins})`} hint="The rest hang on the rails. Pick none to use your page order." group>
-            <div className="no-scrollbar -mx-4 flex gap-2.5 overflow-x-auto px-4 pb-1">
+          <Field label={`On the mannequins (${featured.length}/${SHOWROOM_BUDGET.mannequins})`} hint="Others hang on the rails. None picked = your page order." group>
+            <div className="no-scrollbar -mx-4 flex gap-2.5 overflow-x-auto px-4 pb-1 sm:-mx-5 sm:px-5">
               {with3d.map((c) => (
                 <Tile key={c.productId} c={c} on={featured.includes(c.productId)} order={featured.indexOf(c.productId) + 1} onClick={() => toggle(c.productId)} />
               ))}
@@ -154,7 +159,6 @@ function Tile({ c, on, order, onClick, note }: { c: Candidate; on: boolean; orde
 
 function ShowsCard({ data, onNew, onChanged }: { data: VrStudio; onNew: () => void; onChanged: () => void }) {
   const [err, setErr] = useState<string | null>(null);
-  const [copied, setCopied] = useState<string | null>(null);
   const url = (id: string) => `${window.location.origin}/m/${data.page.handle}/shows/${id}`;
   async function cancel(id: string) {
     if (!confirm("Cancel this show? People who RSVP'd get no reminder.")) return;
@@ -170,10 +174,14 @@ function ShowsCard({ data, onNew, onChanged }: { data: VrStudio; onNew: () => vo
       <div>
         <p className="text-xs font-bold uppercase tracking-widest text-cocoa-2">Virtual fashion shows</p>
         <h2 className="font-display text-xl font-black text-cocoa">A runway for your collection</h2>
-        <p className="mt-1 text-sm text-cocoa-2">Your pieces walk in 3D on an AI runway model (never a real shopper). Shoppers RSVP for a WhatsApp reminder, react live and buy with one hold.</p>
+        <div className="mt-2 flex flex-wrap items-center gap-1.5">
+          <Fact icon="sparkle">AI model</Fact>
+          <Fact icon="mail">WhatsApp RSVP</Fact>
+          <InfoTip label="About fashion shows">Your pieces walk in 3D on an AI runway model (never a real shopper). Shoppers RSVP for a WhatsApp reminder, react live and buy with one hold.</InfoTip>
+        </div>
       </div>
       {data.shows.length === 0 ? (
-        <Empty icon="sparkle" title="No shows yet" action={<SButton onClick={onNew}>Schedule your first show</SButton>}>Pick a date and up to {SHOW.maxItems} pieces. We build the runway for you.</Empty>
+        <Empty icon="sparkle" title="No shows yet" action={<SButton onClick={onNew}>Schedule your first show</SButton>}>Up to {SHOW.maxItems} pieces · we build the runway.</Empty>
       ) : (
         <ul className="space-y-3">
           {data.shows.map((s) => {
@@ -183,19 +191,30 @@ function ShowsCard({ data, onNew, onChanged }: { data: VrStudio; onNew: () => vo
               <li key={s.id} className="flex gap-3 rounded-2xl bg-white p-2.5 ring-1 ring-inset ring-hairline">
                 {s.cover ? <img loading="lazy" decoding="async" src={s.cover} alt="" className="h-24 w-20 shrink-0 rounded-xl object-cover" /> : <span className="h-24 w-20 shrink-0 rounded-xl bg-paper-2" />}
                 <div className="min-w-0 flex-1 space-y-1">
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    <Badge value={tone} label={label} />
-                    {s.status !== "CANCELLED" && s.runwayStatus !== "READY" && <Chip tone={s.runwayStatus === "FAILED" ? "red" : "gold"}>Runway {s.runwayStatus.toLowerCase()}</Chip>}
+                  <div className="flex items-start gap-1.5">
+                    <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
+                      <Badge value={tone} label={label} />
+                      {s.status !== "CANCELLED" && s.runwayStatus !== "READY" && <Chip tone={s.runwayStatus === "FAILED" ? "red" : "gold"}>Runway {s.runwayStatus.toLowerCase()}</Chip>}
+                    </div>
+                    <MoreActions
+                      label={`More for ${s.title}`}
+                      title={s.title}
+                      actions={[
+                        { label: "Copy link", icon: "link", onSelect: () => void navigator.clipboard?.writeText(url(s.id)).then(() => toast("Link copied")) },
+                        ...(upcoming ? [{ label: "Cancel show", icon: "x" as const, destructive: true, onSelect: () => void cancel(s.id) }] : []),
+                      ]}
+                      className="-mr-1 -mt-1"
+                    />
                   </div>
                   <p className="truncate font-bold text-cocoa">{s.title}</p>
                   <p className="text-xs text-cocoa-2">{fmtWhen(s.startsAt)} · {s.items.length} looks · {Math.ceil(s.durationSec / 60)} min</p>
-                  <p className="text-xs font-semibold text-cocoa">{s.rsvps} RSVP · {s.peakViewers} peak viewers · {s.reactions} reactions</p>
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    <SLink href={`/m/${data.page.handle}/shows/${s.id}`} variant="soft" className="min-h-9 px-3 text-xs" target="_blank" rel="noreferrer">Open</SLink>
-                    <SButton variant="soft" className="min-h-9 px-3 text-xs" onClick={() => void navigator.clipboard?.writeText(url(s.id)).then(() => setCopied(s.id))}>
-                      <Icon name="copy" className="size-3.5" /> {copied === s.id ? "Copied" : "Copy link"}
-                    </SButton>
-                    {upcoming && <SButton variant="ghost" className="min-h-9 px-3 text-xs" onClick={() => void cancel(s.id)}>Cancel show</SButton>}
+                  <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-semibold tabular-nums text-cocoa">
+                    <span className="inline-flex items-center gap-1"><Icon name="ticket" className="size-3.5 text-cocoa-2" />{s.rsvps}<span className="sr-only"> RSVP</span></span>
+                    <span className="inline-flex items-center gap-1"><Icon name="eye" className="size-3.5 text-cocoa-2" />{s.peakViewers}<span className="sr-only"> peak viewers</span></span>
+                    <span className="inline-flex items-center gap-1"><Icon name="fire" className="size-3.5 text-cocoa-2" />{s.reactions}<span className="sr-only"> reactions</span></span>
+                  </p>
+                  <div className="pt-1">
+                    <SLink href={`/m/${data.page.handle}/shows/${s.id}`} variant="soft" className="px-4 text-xs" target="_blank" rel="noreferrer"><Icon name="play" className="size-3.5" /> Open</SLink>
                   </div>
                 </div>
               </li>
@@ -278,13 +297,13 @@ function ShowSheet({ open, onClose, data, onDone }: { open: boolean; onClose: ()
         <Field label="Show name">
           <Input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={80} placeholder="Imigongo Nights · launch show" />
         </Field>
-        <Field label="Date and time" hint="Kigali time on your phone. Pick “Now” to go live straight away.">
+        <Field label="Date and time" hint="Kigali time · “Now” goes live">
           <Input type="datetime-local" value={when} onChange={(e) => (setWhen(e.target.value), setExact(null))} />
         </Field>
         <Field label="Quick times" group>
           <div className="flex flex-wrap gap-2">
             {quick.map(([label, at]) => (
-              <SButton key={label} type="button" variant="soft" className="min-h-9 px-3 text-xs" onClick={() => {
+              <SButton key={label} type="button" variant="soft" className="px-3 text-xs" onClick={() => {
                 const d = at();
                 setWhen(localInput(d));
                 setExact(d);
@@ -300,13 +319,13 @@ function ShowSheet({ open, onClose, data, onDone }: { open: boolean; onClose: ()
               ))}
             </div>
           ) : (
-            <p className="text-sm text-cocoa-2">Add a photo with a clean cut-out to a product first.</p>
+            <p className="text-sm text-cocoa-2">Needs a product photo with a clean cut-out</p>
           )}
         </Field>
         <Field label="Runway model skin tone" hint="A synthetic AI model, never a real person or a shopper's twin." group>
           <div className="flex gap-2" role="radiogroup" aria-label="Runway model skin tone">
             {RUNWAY_SKINS.map((s) => (
-              <button key={s} type="button" role="radio" aria-checked={skin === s} aria-label={`Skin tone ${s}`} onClick={() => setSkin(s)} className={`size-10 rounded-full ring-2 ring-offset-2 ${skin === s ? "ring-violet-ink" : "ring-transparent"}`} style={{ background: s }} />
+              <button key={s} type="button" role="radio" aria-checked={skin === s} aria-label={`Skin tone ${s}`} onClick={() => setSkin(s)} className={`hit size-10 rounded-full ring-2 ring-offset-2 ${skin === s ? "ring-violet-ink" : "ring-transparent"}`} style={{ background: s }} />
             ))}
           </div>
         </Field>

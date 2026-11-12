@@ -7,6 +7,7 @@ import { Button, Sheet } from "@/components/ui";
 import { api } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { track } from "@/lib/track";
+import { Icon } from "@/components/icons";
 
 const HIDDEN = /^\/(admin|studio|migrate|c\/|dev|signin|join)/;
 
@@ -84,7 +85,7 @@ export function PilotSurvey() {
         <span aria-hidden className="orb pointer-events-none absolute -right-10 -top-12 size-32 rounded-full opacity-40 blur-2xl motion-safe:animate-orb" />
         {done ? (
           <div className="relative py-8 text-center">
-            <p className="text-4xl" aria-hidden>💛</p>
+            <p aria-hidden><Icon name="heart" className="mx-auto size-10 text-gold" filled /></p>
             <p className="mt-3 font-display text-xl font-black text-grad">{t("survey.thanks")}</p>
           </div>
         ) : (
@@ -99,8 +100,8 @@ export function PilotSurvey() {
               <legend className="font-display text-2xl font-black leading-tight text-grad">{t("survey.helped")}</legend>
               <div className="mt-4 grid grid-cols-2 gap-3">
                 {[
-                  { v: true, label: t("survey.yes"), icon: "👍" },
-                  { v: false, label: t("survey.no"), icon: "🤔" },
+                  { v: true, label: t("survey.yes"), icon: "thumbsUp" as const },
+                  { v: false, label: t("survey.no"), icon: "thumbsDown" as const },
                 ].map((o) => (
                   <button
                     key={String(o.v)}
@@ -109,7 +110,7 @@ export function PilotSurvey() {
                     onClick={() => setHelped(o.v)}
                     className={`flex min-h-20 flex-col items-center justify-center gap-1 rounded-2xl border text-sm font-bold transition motion-safe:active:scale-95 ${helped === o.v ? "border-gold/80 bg-gold/20 text-white shadow-[0_0_24px_rgba(242,184,75,.25)]" : "border-white/15 bg-white/[.06] text-white/90"}`}
                   >
-                    <span aria-hidden className="text-2xl">{o.icon}</span>
+                    <Icon name={o.icon} className="size-6" />
                     {o.label}
                   </button>
                 ))}
@@ -144,7 +145,7 @@ export function PilotSurvey() {
               <Button type="button" variant="ghost" className="flex-1" onClick={() => void send(true)}>{t("survey.later")}</Button>
               <Button className="flex-[2]" disabled={helped === null}>{t("survey.send")}</Button>
             </div>
-            <p className="text-center text-[11px] text-mut">Used only in pilot totals. Makers never see your answer.</p>
+            <p className="text-center text-[11px] text-mut">Pilot totals only · never shared with makers</p>
           </form>
         )}
       </div>

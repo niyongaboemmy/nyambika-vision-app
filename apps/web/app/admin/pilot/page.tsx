@@ -3,10 +3,14 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AdminShell } from "@/components/admin-shell";
+import { ADMIN_TABS, adminTabHref } from "../tabs";
 import { Card, Chip, Empty, Icon, Kpi, Meter, Note, ScreenSkeleton, SButton, Select, Switch } from "@/components/studio";
 import { api, rwf } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { useApi } from "@/lib/use-api";
+import { InfoTip } from "@/components/kit";
+import { Group, GroupRow } from "@/components/ios";
+import type { IconName } from "@/components/icons";
 
 type Rag = "green" | "amber" | "red" | "none";
 interface KpiRow {
@@ -67,12 +71,11 @@ interface Summary {
   recommendation: { decision: "Scale" | "Iterate" | "Pivot"; reasons: string[] };
 }
 
-const TABS = ["Overview", "Verify", "Moderation", "Migration", "Flags & models", "Outbox", "Audit", "Pilot", "Agents & partners"] as const;
-const RAG: Record<Rag, { tone: "mint" | "gold" | "red" | "stone"; label: string; icon: string }> = {
-  green: { tone: "mint", label: "On target", icon: "●" },
-  amber: { tone: "gold", label: "Near target", icon: "▲" },
-  red: { tone: "red", label: "Off target", icon: "■" },
-  none: { tone: "stone", label: "No data", icon: "○" },
+const RAG: Record<Rag, { tone: "mint" | "gold" | "red" | "stone"; label: string; icon: IconName }> = {
+  green: { tone: "mint", label: "On target", icon: "checkCircle" },
+  amber: { tone: "gold", label: "Near target", icon: "alert" },
+  red: { tone: "red", label: "Off target", icon: "x" },
+  none: { tone: "stone", label: "No data", icon: "minus" },
 };
 const STEP_LABEL: Record<string, string> = {
   muse_ask: "Asked the Muse",
@@ -100,7 +103,7 @@ export default function PilotAdmin() {
   const { data, reload, error } = useApi<Summary>(me?.isHost ? "/admin/pilot" : null);
   if (!me?.isHost) return null;
   return (
-    <AdminShell tabs={TABS} tab="Pilot" onTab={(t) => (t === "Agents & partners" ? router.push("/admin/agents") : t !== "Pilot" && router.push(`/admin?tab=${encodeURIComponent(t)}`))}>
+    <AdminShell tabs={ADMIN_TABS} tab="Pilot" onTab={(t) => t !== "Pilot" && router.push(adminTabHref(t))}>
       {error && <Note error={error} />}
       {!data ? <ScreenSkeleton /> : <Dashboard s={data} reload={reload} />}
     </AdminShell>
@@ -115,7 +118,7 @@ function Dashboard({ s, reload }: { s: Summary; reload: () => Promise<void> }) {
     <div className="space-y-6">
       {s.synthetic && (
         <p className="flex items-start gap-2 rounded-2xl bg-amber-50 p-3 text-sm font-semibold text-gold-ink ring-1 ring-inset ring-amber-300">
-          <Icon name="alert" className="mt-0.5 size-4 shrink-0" /> Synthetic pilot data (seed-pilot, phones +25078999xxxx). Use it to rehearse the Gate 3 review, not to decide.
+          <Icon name="alert" className="mt-0.5 size-4 shrink-0" /> <span className="flex-1">Synthetic data · rehearsal only</span><InfoTip label="About synthetic pilot data">Seeded by seed-pilot (phones +25078999xxxx). Use it to rehearse the Gate 3 review, not to decide.</InfoTip>
         </p>
       )}
 
@@ -133,7 +136,7 @@ function Dashboard({ s, reload }: { s: Summary; reload: () => Promise<void> }) {
           </div>
         </section>
         <Kpi label="Pilot day" value={`${dayOf} / 26`} hint={`${new Date(s.cohort.start).toLocaleDateString("en-GB", { day: "numeric", month: "short" })} → ${new Date(s.cohort.end).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}`} />
-        <Kpi label="KPIs on target" value={`${green} / ${measured}`} tone="mint" warn={measured > 0 && green / measured < 0.75} hint="Scale needs ≥ 75% and no red" />
+        <Kpi label="KPIs on target" value={`${green} / ${measured}`} tone="mint" warn={measured > 0 && green / measured < 0.75} hint="Scale: ≥ 75%, no red" />
         <Kpi label="Cohort" value={`${s.cohort.pages} pages`} hint={`${s.cohort.shoppers} shoppers`} tone="violet" />
         <AllowlistCard on={s.allowlist} reload={reload} />
       </div>
@@ -141,7 +144,7 @@ function Dashboard({ s, reload }: { s: Summary; reload: () => Promise<void> }) {
       <section aria-labelledby="kpis" className="space-y-3">
         <div>
           <h2 id="kpis" className="font-display text-xl font-black tracking-tight text-cocoa">Phase 2 KPIs (plan §21)</h2>
-          <p className="text-sm text-cocoa-2">Cohort shoppers and pages, pilot window. Status is written out, never colour alone.</p>
+          <p className="text-sm text-cocoa-2">Cohort · pilot window</p>
         </div>
         <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {s.kpis.map((k) => <KpiCard key={k.key} k={k} />)}
@@ -172,8 +175,8 @@ function KpiCard({ k }: { k: KpiRow }) {
   return (
     <li className={`st-card space-y-2 rounded-[22px] p-4 ${k.rag === "red" ? "!border-red-200" : k.rag === "amber" ? "!border-amber-300 !bg-amber-50/60" : ""}`}>
       <div className="flex items-start justify-between gap-2">
-        <p className="text-xs font-bold text-cocoa-2">{k.label}{k.critical && <span className="ml-1 text-violet-ink" title="Critical for unit economics or trust">★</span>}</p>
-        <Chip tone={r.tone}><span aria-hidden>{r.icon}</span> {r.label}</Chip>
+        <p className="text-xs font-bold text-cocoa-2">{k.label}{k.critical && <span className="ml-1 text-violet-ink" title="Critical for unit economics or trust"><Icon name="star" filled className="inline size-3.5 align-[-2px]" /><span className="sr-only">critical</span></span>}</p>
+        <Chip tone={r.tone}><Icon name={r.icon} className="size-3.5" />{r.label}</Chip>
       </div>
       <p className="font-display text-2xl font-black tabular-nums text-cocoa">{k.display}</p>
       {k.actual !== null &&
@@ -195,12 +198,13 @@ function KpiCard({ k }: { k: KpiRow }) {
 function AllowlistCard({ on, reload }: { on: boolean; reload: () => Promise<void> }) {
   const [busy, setBusy] = useState(false);
   return (
-    <div className="st-card flex min-w-0 flex-col gap-2 rounded-[22px] p-4">
+    <div className="st-card flex min-w-0 flex-col gap-1.5 rounded-[22px] p-4 [&>label]:min-h-11 [&>label]:items-center">
+      <p className="text-xs font-bold text-cocoa-2">Closed pilot allowlist</p>
+      <p className="text-sm font-bold text-cocoa">{on ? "On · cohort shoppers only" : "Off · everyone can ask"}</p>
       <Switch
         checked={on}
         disabled={busy}
-        label="Closed pilot allowlist"
-        description={on ? "Muse/Looks: cohort shoppers only. Ranking: cohort pages only." : "Off: everyone can ask the Muse."}
+        ariaLabel="Closed pilot allowlist"
         onChange={async (v) => {
           setBusy(true);
           await api("/admin/flags/pilot.allowlist", { method: "PATCH", json: { enabled: v } }).catch(() => {});
@@ -224,9 +228,9 @@ function Funnel({ steps, side }: { steps: Summary["funnel"]["steps"]; side: Summ
       <div className="flex items-baseline justify-between gap-2">
         <div>
           <h2 className="font-display text-xl font-black tracking-tight text-cocoa">Shopper funnel</h2>
-          <p className="text-sm text-cocoa-2">Distinct pseudonymous shoppers or devices per step · % of those who asked</p>
+          <p className="flex items-center gap-1 text-sm text-cocoa-2">Shoppers per step<InfoTip label="About the funnel">Distinct pseudonymous shoppers or devices per step · % of those who asked.</InfoTip></p>
         </div>
-        <SButton variant="ghost" className="!min-h-9 !px-3 text-xs" onClick={() => setTable((t) => !t)}>{table ? "Chart" : "Table"}</SButton>
+        <SButton variant="ghost" className="!px-3 text-xs" onClick={() => setTable((t) => !t)}>{table ? "Chart" : "Table"}</SButton>
       </div>
       {table ? (
         <table className="w-full text-sm">
@@ -280,9 +284,9 @@ function Economics({ e }: { e: Summary["economics"] }) {
       <div className="flex items-start justify-between gap-2">
         <div>
           <h2 className="font-display text-xl font-black tracking-tight text-cocoa">Unit economics</h2>
-          <p className="text-sm text-cocoa-2">Feasibility §10 recomputed with pilot actuals</p>
+          <p className="text-sm text-cocoa-2">Study vs pilot</p>
         </div>
-        <Chip tone={e.withinBreakEvenPath ? "mint" : "red"}>{e.withinBreakEvenPath ? "● On break-even path" : "■ Off break-even path"}</Chip>
+        <Chip tone={e.withinBreakEvenPath ? "mint" : "red"}><Icon name={e.withinBreakEvenPath ? "checkCircle" : "alert"} className="size-3.5" />{e.withinBreakEvenPath ? "On break-even path" : "Off break-even path"}</Chip>
       </div>
       <table className="w-full text-sm">
         <thead><tr className="text-left text-xs text-cocoa-2"><th className="py-1 font-bold">Contribution</th><th className="text-right font-bold">Study</th><th className="text-right font-bold">Pilot</th></tr></thead>
@@ -296,8 +300,11 @@ function Economics({ e }: { e: Summary["economics"] }) {
           ))}
         </tbody>
       </table>
-      <p className="text-[11px] text-cocoa-2">
-        Pilot inputs: RWF {Math.round(e.pilot.inputs.costPerGenRwf)}/generation · AOV {rwf(Math.round(e.pilot.inputs.aovRwf))} · {e.pilot.inputs.uncoveredTriesPerOrder.toFixed(1)} uncovered try-ons/order · paid pages ×{e.scale}. Commission 6% and MoMo fee stay study assumptions.
+      <p className="flex items-center gap-1 text-[11px] font-semibold text-cocoa-2">
+        Pilot inputs
+        <InfoTip label="Pilot inputs">
+          Feasibility §10 recomputed with pilot actuals: RWF {Math.round(e.pilot.inputs.costPerGenRwf)}/generation · AOV {rwf(Math.round(e.pilot.inputs.aovRwf))} · {e.pilot.inputs.uncoveredTriesPerOrder.toFixed(1)} uncovered try-ons/order · paid pages ×{e.scale}. Commission 6% and MoMo fee stay study assumptions.
+        </InfoTip>
       </p>
     </Card>
   );
@@ -329,7 +336,7 @@ function ExperimentCard({ e, reload }: { e: Experiment; reload: () => Promise<vo
         </div>
         <Chip tone={e.status === "RUNNING" ? "mint" : e.status === "DRAFT" ? "stone" : "gold"}>{e.status.toLowerCase()}</Chip>
       </div>
-      <p className="text-xs text-cocoa-2">{e.description}</p>
+      <p className="line-clamp-2 text-xs text-cocoa-2">{e.description}</p>
       <p className="text-xs font-bold text-cocoa">Primary metric: {METRIC_LABEL[e.primaryMetric] ?? e.primaryMetric} · {e.exposed} exposed</p>
       <ul className="space-y-2.5">
         {e.arms.map((a, i) => {
@@ -354,8 +361,8 @@ function ExperimentCard({ e, reload }: { e: Experiment; reload: () => Promise<vo
             {t.z !== null && <> · z = {t.z.toFixed(2)} · p = {t.p! < 0.001 ? "< 0.001" : t.p!.toFixed(3)}</>}
           </p>
           <p className="mt-0.5 text-cocoa-2">
-            {t.z === null ? "Not enough data for a z-test yet." : t.significant ? "Significant at 5% (two-proportion z-test)." : "Not significant at 5%: keep collecting or call it a tie."}
-            {t.ci && ` 95% CI ${(t.ci[0] * 100).toFixed(1)} to ${(t.ci[1] * 100).toFixed(1)} pts.`}
+            {t.z === null ? "Too little data" : t.significant ? "Significant (5%)" : "Not significant (5%)"}
+            {t.ci && ` · 95% CI ${(t.ci[0] * 100).toFixed(1)} to ${(t.ci[1] * 100).toFixed(1)} pts`}
           </p>
         </div>
       ))}
@@ -381,7 +388,7 @@ function Hypercare({ h, reload }: { h: Summary["hypercare"]; reload: () => Promi
     <section aria-labelledby="hyper" className="space-y-3">
       <div>
         <h2 id="hyper" className="font-display text-xl font-black tracking-tight text-cocoa">Hypercare · last 14 days</h2>
-        <p className="text-sm text-cocoa-2">Daily 9:00 triage (plan §8.2): AI cost and guard failures per Kigali day</p>
+        <p className="text-sm text-cocoa-2">Daily 9:00 triage · Kigali days</p>
       </div>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Kpi label="AI cost, 14 days" value={rwf(totalCost)} spark={h.days.map((d) => d.costRwf)} />
@@ -424,7 +431,7 @@ function Hypercare({ h, reload }: { h: Summary["hypercare"]; reload: () => Promi
                 <Chip tone={i.kind === "PRIVACY" ? "red" : "gold"}>{i.kind}</Chip>
                 <span className="min-w-0 flex-1 text-cocoa">{i.summary}</span>
                 {i.resolvedAt ? <Chip tone="mint">resolved</Chip> : (
-                  <SButton variant="outline" className="!min-h-9" onClick={async () => { await api(`/admin/pilot/incidents/${i.id}/resolve`, { method: "POST" }); await reload(); }}>Resolve</SButton>
+                  <SButton variant="outline" onClick={async () => { await api(`/admin/pilot/incidents/${i.id}/resolve`, { method: "POST" }); await reload(); }}>Resolve</SButton>
                 )}
               </li>
             ))}
@@ -482,8 +489,8 @@ function CohortPanel() {
       </div>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card className="space-y-3">
-          <h3 className="font-extrabold text-cocoa">Invite codes</h3>
-          <p className="text-xs text-cocoa-2">Shoppers redeem at <span className="font-mono">/join/&lt;code&gt;</span> or at sign-in. Member codes add the signer&apos;s own pages.</p>
+          <h3 className="flex items-center gap-1 font-extrabold text-cocoa">Invite codes<InfoTip label="About invite codes">Shoppers redeem at <span className="font-mono">/join/&lt;code&gt;</span> or at sign-in. Member codes add the signer&apos;s own pages.</InfoTip></h3>
+          
           <div className="flex flex-wrap items-center gap-2">
             <label className="sr-only" htmlFor="inv-kind">Invite for</label>
             <Select id="inv-kind" value={kind} onChange={(e) => setKind(e.target.value as "SHOPPER" | "PAGE")} className="w-40">
@@ -506,24 +513,29 @@ function CohortPanel() {
             {data.invites.map((i) => <li key={i.code}><Chip tone={i.uses >= i.maxUses ? "stone" : "sky"}><span className="font-mono">{i.code}</span> · {i.kind === "PAGE" ? "member" : "shopper"} · {i.uses}/{i.maxUses}</Chip></li>)}
           </ul>
         </Card>
-        <Card className="space-y-2">
-          <h3 className="font-extrabold text-cocoa">Member pages in the pilot</h3>
-          <ul className="max-h-80 divide-y divide-hairline overflow-y-auto">
+        <div role="region" aria-label="Member pages in the pilot" tabIndex={0} className="max-h-[26rem] overflow-y-auto rounded-[var(--radius-md)]">
+          <Group header={`Member pages · ${members} in`}>
             {data.pages.map((p) => (
-              <li key={p.id} className="py-1.5">
-                <Switch
-                  checked={p.member}
-                  label={<span className="font-bold">{p.name}</span>}
-                  description={`${p.memberType.toLowerCase()} · ${p.status.replace(/_/g, " ").toLowerCase()}`}
-                  onChange={async (v) => {
-                    await api("/admin/pilot/cohort/pages", { method: "POST", json: { pageId: p.id, member: v } });
-                    await reload();
-                  }}
-                />
-              </li>
+              <GroupRow
+                key={p.id}
+                icon={p.memberType === "COOPERATIVE" ? "users" : p.memberType === "TAILOR" ? "scissors" : "store"}
+                tone={p.member ? "mint" : "stone"}
+                title={p.name}
+                subtitle={`${p.memberType.toLowerCase()} · ${p.status.replace(/_/g, " ").toLowerCase()}`}
+                accessory={
+                  <Switch
+                    checked={p.member}
+                    ariaLabel={`${p.name} in the pilot`}
+                    onChange={async (v) => {
+                      await api("/admin/pilot/cohort/pages", { method: "POST", json: { pageId: p.id, member: v } });
+                      await reload();
+                    }}
+                  />
+                }
+              />
             ))}
-          </ul>
-        </Card>
+          </Group>
+        </div>
       </div>
     </section>
   );

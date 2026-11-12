@@ -901,7 +901,7 @@ export class ShowroomEngine {
       g.font = `900 64px ${this.o.font}`;
       g.textAlign = "center";
       g.textBaseline = "middle";
-      g.fillText(progress > 0 ? "Keep holding…" : "✋ Hold to buy", 310, 88);
+      g.fillText(progress > 0 ? "Keep holding…" : "Hold to buy", 310, 88);
     });
     mat.needsUpdate = true;
   }

@@ -307,15 +307,284 @@ move focus in and back and lock page scroll, `prefers-reduced-motion` disables m
   No blur placeholders: the API does not expose a low-res preview; skeleton tiles fill the box instead.
 - **Field data**: LCP/CLS/INP are lab numbers from Playwright on one machine with throttling; INP is a one-tap proxy.
   `web-vitals` field reporting (RUM) is not wired.
-- **Not every screen was rewritten for "fewer words"**: done for trust centre, 3D twin, measurements, AR/MR pilots,
+- ~~**Not every screen was rewritten for "fewer words"**~~ (done screen by screen in §7): done for trust centre, 3D twin, measurements, AR/MR pilots,
   share sheet, empty states and admin intros. Hold-to-buy, sign-in and region screens were kept as merged from the
   hardening branches apart from the pinned hold ring (visual only). Studio forms (product editor, settings) keep
   their helper text; it is short and task-relevant.
-- **Emoji** remain as expressive content (occasion chips, maker type, VR reactions) and in a few secondary controls
-  inside sheets owned by other epics (wallet chips, video rail); primary controls, the menu and empty states use the
-  SVG icon set.
+- ~~**Emoji** remain as expressive content~~ **Resolved by the copy & iOS pass (§7):** no emoji anywhere in the UI; a unit test and the crawl enforce it.
 - **Studio dark** is token-driven; one-off hard-coded light gradients inside a few spike components (drape heatmap
   legend, studio-3d preview tiles) read fine but are not re-tuned for dark.
 - Crawl robustness fixes in older crawls (s1, s2, e05, xr, tailor, growth, social, pilot, region) were needed because
   the E35 3D shelf added a second `listbox` with a selected `option` on Maker Space and because slot databases are
   reused between runs; `crawl-infer` needs its own gateway with the fake inference pool (documented in the crawl).
+
+## 7. Copy & alignment pass, no emoji, iOS design language (Nov 2026)
+
+The user asked for this, in their words: "do not use more words, summarize texts, and let interactive elements work, and work on proper alignment, spacing".
+They later added: "remove all available emojis … use modern icons … iphone ios style … make the UI style refer to modern IOS
+design" and asked for "the image [on Looks] should be full screen … tools continue to look floating over". This was a UI-only
+change: no API or schema changes. Branch `worktree-agent-af84dce4929f1829b` (slot 1). The work was split by area (shopper
+discover, shopper personal, studio core, studio craft, admin, Looks) on top of shared primitives landed first.
+
+### How it was measured
+
+`scripts/crawl-uiux.mjs` gained per-screen metrics at 390 px (written to `metrics.json`) and a hard emoji check:
+
+- **Visible words:** `innerText` word count.
+- **Paragraphs taller than 2 lines:** text blocks with ≥ 40 characters of their own text, counting content lines and
+  not padding. Closed `<details>` and `[data-allow-prose]` are excluded.
+- **Tap targets under 44 px:** a control's box, its wrapping `<label>`, or a `.hit` ::after expansion. Inline text
+  links are exempt, as in WCAG. `STRICT_TARGETS=1` makes these failures.
+- **Emoji:** rendered text, `aria-label`, `title`, `placeholder` and `alt` containing `\p{Extended_Pictographic}`, U+FE0F or
+  regional-indicator flags fail the crawl. © ® ™ are allowed.
+
+`apps/web/lib/no-emoji.test.ts` runs the same check over the source of `apps/web/{app,components,lib}` and
+`packages/i18n`. A counting note: three metric refinements landed after the "before" run (padding is not counted as
+lines, closed `<details>` are ignored, and a label's `.hit` counts). These make a few "before" paragraph and target
+counts slightly high. The large changes below do not depend on them.
+
+Contact sheets (390 px viewport, crawl order; desktop 1280) are in `docs/design/screens/`:
+`copy-before-{shopper,studio,desktop}-{light,dark}.jpg` and `copy-after-{shopper,studio,desktop}-{light,dark}.jpg`.
+
+### Result per screen (light, 390 px; dark identical in structure)
+
+| Screen | Words (light 390) | Paragraphs > 2 lines | Tap targets < 44 px | Emoji (after) |
+|---|---:|---:|---:|---:|
+| muse-signed-out | 13 → 13 | 0 → 0 | 1 → 0 | 0 |
+| signin | 39 → 43 | 0 → 0 | 6 → 0 | 0 |
+| muse | 13 → 13 | 0 → 0 | 3 → 0 | 0 |
+| muse-menu | 46 → 49 | 0 → 0 | 10 → 0 | 0 |
+| muse-typing | 20 → 20 | 0 → 0 | 4 → 0 | 0 |
+| looks | 336 → 186 | 0 → 0 | 68 → 0 | 0 |
+| look-try | 32 → 15 | 0 → 0 | 10 → 0 | 0 |
+| maker-space | 175 → 151 | 2 → 1 | 2 → 0 | 0 |
+| maker-showroom | 73 → 75 | 0 → 0 | 1 → 0 | 0 |
+| maker-show | 103 → 95 | 0 → 0 | 0 → 0 | 0 |
+| makers | 418 → 379 | 0 → 0 | 6 → 0 | 0 |
+| passport | 198 → 195 | 3 → 1 | 2 → 0 | 0 |
+| mirror | 37 → 29 | 0 → 0 | 3 → 0 | 0 |
+| mirror-3d | 44 → 31 | 2 → 0 | 2 → 0 | 0 |
+| mirror-ar | 32 → 23 | 0 → 0 | 2 → 0 | 0 |
+| mirror-mr | 25 → 17 | 0 → 0 | 1 → 0 | 0 |
+| measurements | 68 → 59 | 0 → 0 | 4 → 0 | 0 |
+| wardrobe | 49 → 39 | 0 → 0 | 10 → 0 | 0 |
+| wardrobe-item | 40 → 28 | 0 → 0 | 1 → 0 | 0 |
+| circle | 17 → 17 | 0 → 0 | 1 → 0 | 0 |
+| bag | 21 → 13 | 0 → 0 | 1 → 0 | 0 |
+| orders | 43 → 76 | 0 → 0 | 1 → 0 | 0 |
+| order | 130 → 123 | 1 → 0 | 2 → 0 | 0 |
+| saved | 18 → 18 | 0 → 0 | 1 → 0 | 0 |
+| custom | 15 → 15 | 0 → 0 | 1 → 0 | 0 |
+| trust | 201 → 162 | 1 → 0 | 3 → 0 | 0 |
+| join | 44 → 19 | 1 → 0 | 1 → 0 | 0 |
+| studio-pages | 18 → 18 | 0 → 0 | 0 → 0 | 0 |
+| studio-home | 262 → 247 | 3 → 0 | 5 → 0 | 0 |
+| studio-products | 146 → 194 | 0 → 0 | 5 → 0 | 0 |
+| studio-product-new | 172 → 117 | 0 → 0 | 23 → 0 | 0 |
+| studio-product | 340 → 182 | 5 → 0 | 8 → 0 | 0 |
+| studio-orders | 2372 → 2448 | 0 → 0 | 5 → 0 | 0 |
+| studio-tailor | 282 → 327 | 0 → 0 | 4 → 0 | 0 |
+| studio-tailor-order | 252 → 98 | 0 → 0 | 1 → 0 | 0 |
+| studio-tailor-services | 62 → 59 | 0 → 0 | 0 → 0 | 0 |
+| studio-tailor-slots | 265 → 130 | 0 → 0 | 0 → 0 | 0 |
+| studio-grow | 149 → 193 | 1 → 0 | 9 → 0 | 0 |
+| studio-showroom | 224 → 320 | 1 → 0 | 0 → 0 | 0 |
+| studio-settings | 284 → 191 | 2 → 0 | 11 → 0 | 0 |
+| studio-share-sheet | 289 → 274 | 3 → 0 | 6 → 0 | 0 |
+| coop-makers | 192 → 158 | 0 → 0 | 0 → 0 | 0 |
+| coop-easy | 25 → 25 | 0 → 0 | 1 → 0 | 0 |
+| admin | 105 → 100 | 0 → 0 | 13 → 0 | 0 |
+| admin-migration | 10142 → 8173 | 198 → 0 | 297 → 0 | 0 |
+| admin-agents | 2564 → 2653 | 1 → 0 | 25 → 0 | 0 |
+| admin-network | 341 → 302 | 1 → 0 | 18 → 0 | 0 |
+| admin-pilot | 2702 → 2842 | 5 → 0 | 401 → 0 | 0 |
+| admin-regions | 329 → 285 | 2 → 0 | 20 → 0 | 0 |
+| **Total** | 23767 → 21239 | 232 → 2 | 999 → 0 | |
+
+Words went **up** on six screens:
+
+- studio-products and studio-grow now show each piece's colour name and swatch, so identical "Umushanana" cards can
+  be told apart.
+- studio-tailor, studio-showroom, orders and admin-pilot/agents contain data that grew between runs: crawls add
+  orders, shows, calls and invites on the reused slot database.
+
+On data screens (orders, migration, agents, pilot) the word count is mostly data. The two paragraphs left are maker
+content: the Maker Space service description and the passport's origin line.
+
+### What became interactive (per area)
+
+| Area | Before (prose / decorative) | After (interaction) |
+|---|---|---|
+| Studio → Grow → Share kit | 3-line paragraph under "Make my card"; three identical truncated "Umushanana …" picker cards | Chips **Price · QR · Try it on you**, with the analytics hint in an ⓘ InfoTip. Picker cards are 128 px with a 2-line title, colour swatches + colour name, and **No. n** on same-title pieces. Tagged-links, offers and broadcast-limit prose became chips + ⓘ. Broadcast templates are 44 px chips. Suggestions clamp to 2 lines with an animated More/Less. |
+| Looks stream | Letterboxed render in a dark frame, "Look 1/9", "swipe for Maker Space · hold to buy" and "↑ swipe up" sentences, 64 px rail with captions | **Full-bleed** render under the status bar, shifted so the head clears the bar. One top line: back · capsule "Wedding · Sat · 1/9" · "AI · C2PA" chip (always visible). 44 px glass rail with a 12 px gap on the 16 px gutter, label on long-press. Glass maker sheet covers the gateway's baked AI tag. Snap paging with parallax, **double-tap heart**, press-scale + haptics. **Hold-to-buy progress pill**. Swipe-left to Maker Space with a live peek; a one-time coach mark replaces every sentence. |
+| Muse menu, trust centre, notifications, studio settings, admin flags / pilot | Chip walls, bullet lists, paragraphs | **iOS inset grouped lists** (`Group`/`GroupRow`): coloured icon tiles, value, chevron or switch accessory, hairline separators, footers of one line. |
+| Secondary actions (order cards, product archive, staff, tailor order, showroom shows, agent clients, migration roll-back, network outreach, coop makers) | Rows of 3–5 inline buttons | One primary button + **`MoreActions` → iOS action sheet** (destructive in red). |
+| Numbers (lead time, slot length, ready-in days) | Selects / free inputs | **Stepper** (− value +, spinbutton semantics, spring count, haptic). |
+| Lists (tailor slots, agent keys) | Inline delete buttons only | **Swipe left to reveal** Remove / Revoke (`lib/drag.ts`, spring snap, haptic). The visible button stays for keyboard and mouse. |
+| Circle + fashion-show + shared-room reactions | Emoji buttons, emoji counters, emoji 3D sprites | **Animated SF icon buttons** (spring pop, `aria-pressed`, names "React: Love", "React: Fire"). Counts read "Fire 3". The 3D room draws icon sprites (Path2D on a glass disc). Wire values are unchanged (`lib/social.ts`, `lib/vr-reactions.ts`). |
+| Field hints (studio forms) | 1–3 line helper text under inputs | Hints over 28 characters become an ⓘ beside the label (the `<label>` still wraps only the control); short hints stay inline. |
+| Consent / legal wording | Long switch descriptions | Short switch label; the exact wording is unchanged behind LearnMore / ⓘ next to it. |
+| Limit states, checkout, wallets, region pill | Emoji icons (sunrise, lock, phone, flags, coloured circles) | SF glyphs in a tinted disc; brand-colour dots for MTN / Airtel / M-Pesa; country code instead of flags. |
+
+### Interactive elements that work
+
+- Every chip, tab, toggle and popover now has a real action, keyboard focus and an accessible name.
+- The shopper `Chip` renders a plain `<span>` when it has no action, so it is never a decorative button.
+- `.hit` (globals.css, utilities layer) grows any control's hit area to ≥ 44×44 px without changing layout.
+- These are ≥ 44 px: Segmented, ThemeToggle, InfoTip, LearnMore, TopBar, Switch rows, inputs, TogglePills,
+  AdminShell tabs, RegionPill, and every fork's controls.
+- Result: **999 → 0** tap targets under 44 px across the 49 screens. 0 serious/critical axe violations in both themes.
+
+### Alignment and spacing
+
+- **One spacing scale:** Tailwind's 4-pt steps plus `--space-*`. Card padding is `p-4`; studio sections use `space-y-5`.
+- **Studio main area** pads for the dock and the safe area: `pb-[calc(env(safe-area-inset-bottom)+124px)]`.
+- **Dock and bars never cover content:**
+  - The unsaved-settings bar clears the dock.
+  - The Maker Space Follow/Chat bar no longer covers the "1/13" control or the 3D-shelf heading.
+  - KPI values wrap and scale instead of clipping. Studio home revenue shows compact "RWF 4.51M" with the full amount in a title.
+- **Titles on one rhythm:**
+  - Studio `SectionTitle` h1 is an iOS large title (28/34 px bold, -0.02em). Once it scrolls under the material
+    header, the header shows it in compact form.
+  - Shopper `TopBar large` does the same.
+- **Looks:** back, rail and Buy share the 16 px gutters.
+- **Desktop:** the showroom rail no longer spills out of its card (`Field group` is `min-w-0`).
+
+### iOS design language (my recommendations, applied)
+
+1. **One icon set, no dependency:**
+   - The existing SVG `Icon` (moved to `components/icons.tsx` by the JS budget pass) is redrawn SF Symbols-like:
+     rounded caps and joins, **1.75 px** stroke, `filled` ".fill" variants.
+   - 45 new glyphs replace every emoji (play, pause, phone, bell, chat, calendar, pin, key, hand, headset, dress,
+     trash, fire, star, clap, crown, sunrise, signal, moto, …).
+   - lucide-react was not adopted: it adds a second system and bytes on the 170 KB core routes.
+2. **Typography:**
+   - UI text uses the system SF stack (`-apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", Inter, "Segoe UI", Roboto…`),
+     with SF Pro Display for titles. Plus Jakarta is no longer downloaded.
+   - Nunito stays as `font-brand`, for the wordmark and the Muse hero only.
+3. **Materials:** `.material` is blur 24 px + saturate 1.8 over a token surface, with a hairline edge. It is used on the
+   studio and admin headers, collapsed TopBars, action sheets and the Looks chrome (fork-local material). Studio
+   dark gets a dark material.
+4. **Springs without a library:** `--spring` and `--spring-bouncy` are CSS `linear()` curves. They drive `.spring`
+   (segmented thumb, switch knob, sheet snap-back) and `.spring-pop` (reaction pops, stepper count, crown, heart).
+   All of it is off under `prefers-reduced-motion`.
+5. **Controls:**
+   - Switch: 51×31 track, 27 px knob on a spring, `--ios-green`, haptic tick. Shopper screens use the same geometry
+     in `components/shopper-switch.tsx`.
+   - Segmented: one sliding thumb measured from the DOM.
+   - Stepper and ActionSheet: described in the table above.
+6. **Sheets:**
+   - Grabber + title row are a drag handle (`lib/sheet-drag.ts`). Drag down to dismiss (past 96 px or a flick);
+     otherwise the sheet springs back.
+   - `Sheet detent="medium"` opens at about 56 dvh and a drag up of 56 px expands it to the large detent.
+   - Focus trap, Escape, scroll lock and safe-area padding are unchanged.
+7. **Module boundaries for the JS budget:**
+   - The iOS components live in `components/ios.tsx`. They are imported only by on-demand sheets, studio, admin,
+     makers and showroom; not by sign in, Maker Space or Looks.
+   - `lib/sheet-drag.ts` is about 0.6 KB.
+   - `kit.tsx`, which the root layout loads, did not grow.
+8. **Destructive red** is `#d70015` in light and `#ff6961` in dark (iOS system red, AA on both surfaces).
+
+### Interaction and motion inventory
+
+- Press-scale on every control (`press` / `st-press`).
+- Spring thumbs and knobs.
+- Pops on reactions, stepper counts, the double-tap heart and the poll crown.
+- Swipe actions on slots and keys; swipe-to-Maker-Space on Looks.
+- Long-press labels on the Looks rail.
+- Drag-to-dismiss sheets.
+- Haptics through `lib/native.ts` (`haptic`) on toggles, segment changes, steppers, sheet actions, rail buttons,
+  hold-to-buy ticks and swipe commits.
+- All motion respects `prefers-reduced-motion`; haptics are skipped under it except for success/error.
+
+### i18n
+
+Changed strings were shortened in RW, EN and FR together. Swahili falls back to English, apart from the one existing
+override, which was shortened. Examples:
+
+- `push.denied` → "Notifications off · WhatsApp still works"
+- `push.none`, `push.unsupported`, `push.circleBody`, `push.askBody`, `bag.emptyBody`, `bag.splitNote`, `passkey.otpFallback`
+- `err.consent.tryon`
+
+✨/✓/🌙 were removed from every locale.
+
+### Crawls updated (names followed, not weakened)
+
+- **voice:** `/audio (is )?never stored/`; send and buy names without emoji.
+- **social:** "No votes yet", "React: Yes".
+- **s5:** consent copy "paused|off".
+- **mig:** "Imported: handle".
+- **studio-ui and growth:** exact "More" (the expandable suggestion cards contain "More").
+- **growth:** opt-in line "reply STOP anytime".
+- **agentic:** `/nothing is (ordered or )?paid/`.
+- **harden-commerce:** `/^Buy$/`.
+- **tailor:** `/recommended/`, `/your measurements ·/`.
+- **mlspike:** fairness copy.
+- **vr / mrvr:** "React: Fire", "Fire 1", "reacted: Fire".
+- **s3:** occasion chip `/office|any occasion/` (emoji dropped from its name).
+- **growth:** Rehearse cadence via the "More outreach actions" sheet.
+- **mrvr:** `/a moderator will look/`, first privacy note.
+
+### Bugs found on the way
+
+- **Swipe-to-Maker-Space hijack.** React portals bubble synthetic events through the component tree. Dragging
+  the colour ring inside the portalled morph sheet therefore also drove the Looks swipe, which navigated to the
+  Maker Space mid-drag (caught by crawl-tailor). `look-view` now swipes only on real DOM descendants.
+- **Header contrast in dark.** The studio and admin material headers fell back to a light surface in dark mode.
+  The `.material` override now uses `--surface-2`.
+
+### JS budget (core routes)
+
+Measured with a production build (`NEXT_DIST_DIR=.next-build next build && next start`) and `scripts/perf-uiux.mjs`
+(Pixel 7, 4× CPU, slow 4G, cold, signed-in shopper). Values are JS at the load event, in KB gz including response
+headers. The main column is the same commit as `main` (460d0b9), built and measured **on the same machine in the
+same session**. It does not match §4.1's 168.3 / 169.5 / 164.4, which were measured in another session.
+
+| Route | main, same machine | this branch, first build | this branch, final |
+|---|---:|---:|---:|
+| Sign in | 171.4 | 174.1 | **173.0** (+1.6) |
+| Maker Space | 172.6 | 174.6 | **173.8** (+1.2) |
+| Looks | 167.5 | 173.6 | **171.9** (+4.4) |
+| Try one look | 166.4 | 176.8 | **170.5** (+4.1) |
+| Muse | 174.1 | 176.8 | 175.9 |
+
+What moved, and what was cut:
+
+- **New critical bytes:**
+  - The icon set grew 2.2 KB gz (45 glyphs).
+  - Sheet drag and large-title code added about 0.9 KB.
+  - The full-bleed Looks stream (gestures, rail, coach mark, hold pill) grew look-view's chunk from 3.1 to 7.9 KB.
+- **Cuts made:**
+  - **Icon split.** 32 glyphs that no core route draws at load moved to `components/icons-extra.ts`.
+    `<LazyIcon>` draws a same-size empty svg until they arrive, and `DeferredGlobals` prefetches them after
+    `load`.
+  - **LimitState on demand.** It now loads only when an error renders: in the root `ErrorToaster`, `ErrorNote`,
+    growth offer and the Looks pages. It used to sit in every route's first-load JS through the error toaster.
+  - **Icon imports.** `Icon` is now imported from `icons.tsx` instead of the studio kit. This cut 11 KB from
+    "until idle" on Looks.
+  - The i18n catalogue shrank 0.8 KB with the shorter strings.
+- **Gap:**
+  - The coordinator's "≤ 170 KB at load" is **not met on this machine** for sign in, Maker Space and Looks.
+  - Main itself measures 171.4 / 172.6 here, so the remaining real regression versus main is +1.2 to +1.6 KB on
+    sign in and Maker Space, and +4.4 KB on Looks.
+  - Next step: split the Looks chrome (coach mark, swipe peek, long-press bubble, double-tap heart) into a
+    post-load chunk, and load the sheet drag handler on the first pointerdown.
+  - I stopped there rather than restructure fork L's component late in the pass.
+
+### Verification
+
+- **Typechecks:** `apps/web` and `apps/api` `tsc --noEmit` are clean.
+- **Tests:**
+  - Web unit tests: 16/16, including `no-emoji.test.ts`.
+  - API: 33 files, 383 tests green.
+- **crawl-uiux:** 49 screens × light/dark × 390/1280, with a 360 overflow pass. 0 console errors, 0 5xx,
+  0 overflow, 0 theme flashes, 0 serious/critical axe violations and 0 emoji in both themes. Final run: label
+  `final`.
+- **Every other crawl on slot 1** (all except `crawl-infer`, which needs its own gateway with the fake pool):
+  all 25 green (23 on the first final run; crawl-growth after its broadcast assertion followed the shorter toast;
+  crawl-sweep after a transient proxy 500 and a pre-existing 3D-shelf countdown hydration race, fixed with
+  `suppressHydrationWarning` on that ticking text).
+- **mlspike** depends on database state: each run permanently withdraws a uniquely titled shared piece. After
+  many reruns it needs a fresh copy of the slot DB, `createdb -T nyambika_tpl`.
+- **Screenshot review:** light, dark and desktop contact sheets for every screen. Looks was checked at 360, 390
+  and 430 in both themes.

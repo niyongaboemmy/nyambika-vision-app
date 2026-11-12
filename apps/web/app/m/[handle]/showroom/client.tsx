@@ -15,6 +15,8 @@ import { useSession } from "@/lib/session";
 import type { FitView, Twin3dState } from "@/lib/twin3d";
 import { fmtWhen, lookFor, lowEnd, xrSupported, type RoomItem, type Showroom } from "@/lib/vr";
 import { fmtMB, hasWebGL2, load3d, prefersReducedMotion, type Garment3d } from "@/lib/xr";
+import { Icon } from "@/components/icons";
+import { MoreActions } from "@/components/ios";
 
 type Mode = "loading" | "3d" | "flat";
 
@@ -217,9 +219,9 @@ function Room({ room, commerce }: { room: Showroom; commerce: Commerce | null })
           <h1 className="truncate font-display text-lg font-black leading-tight">{room.page.name} {room.page.verified && <span className="text-mint" title="Verified member">✓</span>}</h1>
           <p className="truncate text-xs text-txt/75">3D showroom · {room.items.length} pieces</p>
         </div>
-        <Toggle on={sound} set={setSound} label="Ambient sound" icon={sound ? "🔊" : "🔈"} />
+        <Toggle on={sound} set={setSound} label="Ambient sound" icon={<Icon name={sound ? "volume" : "mute"} className="size-5" />} />
         <Toggle on={contrast} set={setContrast} label="High-contrast labels" icon="◐" />
-        <Toggle on={seated} set={setSeated} label="Seated mode" icon="🪑" />
+        <Toggle on={seated} set={setSeated} label="Seated mode" icon={<Icon name="person" className="size-5" />} />
       </header>
 
       {/* Streaming progress (FR-VR-08) */}
@@ -253,19 +255,27 @@ function Room({ room, commerce }: { room: Showroom; commerce: Commerce | null })
                 {me ? (
                   <HoldToBuy key={`buy-${item.productId}-${handoff}`} look={look} autoOpen={handoff > 0} />
                 ) : (
-                  <button onClick={() => router.push(`/signin?next=${encodeURIComponent(`/m/${room.page.handle}/showroom?item=${item.productId}`)}`)} className="grad-cta rounded-2xl px-4 py-2 text-sm font-bold">✋ Sign in to buy</button>
+                  <button onClick={() => router.push(`/signin?next=${encodeURIComponent(`/m/${room.page.handle}/showroom?item=${item.productId}`)}`)} className="grad-cta inline-flex items-center gap-1.5 rounded-2xl px-4 py-2 text-sm font-bold"><Icon name="hand" className="size-4" /> Sign in to buy</button>
                 )}
               </div>
             </div>
             <div className="no-scrollbar mt-3 flex gap-2 overflow-x-auto">
-              <Pill onClick={() => void view3d(item)}>🧊 View in 3D</Pill>
-              {me && mode === "3d" && (twin?.id === item.productId && twin.state === "on" ? <Pill onClick={offTwin}>↺ Back to mannequin</Pill> : <Pill onClick={() => void onMyTwin(item)} busy={twin?.id === item.productId && twin.state === "working"}>🪞 See it on my 3D twin</Pill>)}
-              <Pill href={`/looks/try?variant=${item.variantId}`}>✨ Try on me</Pill>
-              {me && mrMirror && <Pill href={`/mirror/mr?product=${item.productId}&variant=${item.variantId}`}>🥽 Mixed-reality mirror</Pill>}
-              <Pill href={`/m/${room.page.handle}`}>🏠 Maker Space</Pill>
+              <Pill onClick={() => void view3d(item)}><Icon name="cube" className="size-4" /> View in 3D</Pill>
+              {me && mode === "3d" && (twin?.id === item.productId && twin.state === "on" ? <Pill onClick={offTwin}><Icon name="rotate" className="size-4" /> Back to mannequin</Pill> : <Pill onClick={() => void onMyTwin(item)} busy={twin?.id === item.productId && twin.state === "working"}><Icon name="mirror" className="size-4" /> See it on my 3D twin</Pill>)}
+              <Pill href={`/looks/try?variant=${item.variantId}`}><Icon name="sparkle" className="size-4" /> Try on me</Pill>
+              {/* Secondary destinations live in an iOS action sheet instead of more pills. */}
+              <MoreActions
+                label="More for this piece"
+                title={item.title}
+                className="size-10 shrink-0 bg-white/10 ring-1 ring-inset ring-white/15"
+                actions={[
+                  ...(me && mrMirror ? [{ label: "Mixed-reality mirror", icon: "headset" as const, onSelect: () => router.push(`/mirror/mr?product=${item.productId}&variant=${item.variantId}`) }] : []),
+                  { label: "Maker Space", icon: "store" as const, onSelect: () => router.push(`/m/${room.page.handle}`) },
+                ]}
+              />
             </div>
-            {twin?.id === item.productId && twin.state === "on" && <p className="mt-2 text-[11px] text-mut">🔒 Only you see your 3D twin here. {twin.note}</p>}
-            {twin?.id === item.productId && twin.state === "none" && <p className="mt-2 text-xs text-mut">No 3D twin yet. <Link className="text-gold underline" href="/mirror/3d">Make one in 2 minutes</Link>.</p>}
+            {twin?.id === item.productId && twin.state === "on" && <p className="mt-2 text-[11px] text-mut"><Icon name="lock" className="mr-1 inline size-3 align-[-2px]" />Only you see your 3D twin · {twin.note}</p>}
+            {twin?.id === item.productId && twin.state === "none" && <p className="mt-2 text-xs text-mut"><Link className="text-gold underline" href="/mirror/3d">Make your 3D twin</Link> · 2 min</p>}
             {twin?.id === item.productId && twin.state === "error" && <p className="mt-2 text-xs text-terra">{twin.note}</p>}
           </section>
         ) : (
@@ -277,7 +287,7 @@ function Room({ room, commerce }: { room: Showroom; commerce: Commerce | null })
               <Ctl label="Turn right" onClick={() => engine.current?.turn(-Math.PI / 6)}>⟳</Ctl>
               <Ctl label="Next piece" onClick={() => engine.current?.step(1)}>›</Ctl>
             </div>
-            {mode === "3d" && <p className="mb-2 text-center text-[11px] text-txt/75">Drag to look · tap the floor or a ring to walk · tap a piece</p>}
+            {mode === "3d" && <p className="mb-2 text-center text-[11px] text-txt/75">Drag · tap floor to walk · tap a piece</p>}
             <nav aria-label="Pieces in this room" className="no-scrollbar -mx-3 flex gap-2 overflow-x-auto px-3 pb-1">
               {room.items.map((i) => (
                 <button key={i.productId} onClick={() => pick(i.productId)} className="glass flex shrink-0 items-center gap-2 rounded-2xl p-1.5 pr-3 text-left">
@@ -290,7 +300,7 @@ function Room({ room, commerce }: { room: Showroom; commerce: Commerce | null })
               ))}
             </nav>
             {room.shows[0] && (
-              <Link href={`/m/${room.page.handle}/shows/${room.shows[0].id}`} className="mt-2 flex items-center justify-center gap-2 text-xs font-semibold text-gold">
+              <Link href={`/m/${room.page.handle}/shows/${room.shows[0].id}`} className="mt-1 flex min-h-11 items-center justify-center gap-2 text-xs font-semibold text-gold">
                 {room.shows[0].phase === "LIVE" ? `● ${t("vr.live")}: ${room.shows[0].title}` : `${t("vr.fashionShow")} · ${fmtWhen(room.shows[0].startsAt)}`} ›
               </Link>
             )}
@@ -299,12 +309,12 @@ function Room({ room, commerce }: { room: Showroom; commerce: Commerce | null })
         {mode === "3d" && xrOk && !inXr && (
           <div className="mx-auto mt-2 max-w-[480px]">
             <button onClick={() => void enterVr()} className="grad-cta flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl font-bold shadow-[0_12px_32px_rgba(139,92,246,.4)]">
-              🥽 {t("vr.enterVr")}{seated ? " · seated" : ""}
+              <Icon name="headset" className="size-5" /> {t("vr.enterVr")}{seated ? " · seated" : ""}
             </button>
             {xrError && <p className="mt-1 text-center text-xs text-terra" role="alert">{xrError}</p>}
           </div>
         )}
-        <p className="mt-2 text-center text-[10px] text-txt/60">✨ {room.label} · shapes and drape are approximate</p>
+        <p className="mt-2 text-center text-[10px] text-txt/60"><Icon name="sparkle" className="mr-1 inline size-3 align-[-2px]" />{room.label} · approximate</p>
       </div>
 
       {/* R4 spike: shared presence (flag vr.multiuser_spike; renders nothing while off) */}
@@ -336,7 +346,7 @@ function FlatRoom({ room, onPick, price }: { room: Showroom; onPick: (id: string
   );
 }
 
-function Toggle({ on, set, label, icon }: { on: boolean; set: (v: boolean) => void; label: string; icon: string }) {
+function Toggle({ on, set, label, icon }: { on: boolean; set: (v: boolean) => void; label: string; icon: React.ReactNode }) {
   return (
     <button aria-pressed={on} aria-label={label} title={label} onClick={() => set(!on)} className={`grid size-11 shrink-0 place-items-center rounded-full text-base transition ${on ? "bg-gold text-ink" : "glass"}`}>
       {icon}

@@ -8,7 +8,11 @@
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ApiError } from "@/lib/api";
-import { LimitState } from "./limit-state";
+import dynamic from "next/dynamic";
+
+// Rendered only after an escaped API error: the card (and its describeError mapping) loads on demand, keeping it
+// out of every route's first-load JS (copy & iOS pass, JS budget).
+const LimitState = dynamic(() => import("./limit-state").then((m) => m.LimitState), { ssr: false });
 
 export function ErrorToaster() {
   const [error, setError] = useState<ApiError | null>(null);

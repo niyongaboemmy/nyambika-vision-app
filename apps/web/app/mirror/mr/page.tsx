@@ -9,6 +9,7 @@ import { api } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import type { Twin3dState, WardrobeItem } from "@/lib/twin3d";
 import { load3d } from "@/lib/xr";
+import { Icon } from "@/components/icons";
 
 export default function MrMirrorPage() {
   return (
@@ -64,15 +65,15 @@ function MrPage() {
           <div className="skeleton h-[60dvh] rounded-[32px]" />
         ) : !enabled ? (
           <section className="glass mt-6 space-y-3 rounded-3xl p-5 text-center">
-            <p className="text-4xl" aria-hidden>🥽</p>
+            <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-white/10 text-gold" aria-hidden><Icon name="headset" className="size-7" /></span>
             <p className="font-display text-xl font-black">Mixed-reality mirror is an experiment</p>
-            <p className="text-sm text-mut">A fitting mirror for your room, with a headset · not on for you yet.</p>
-            <Link href="/mirror/ar" className="grad-cta inline-flex min-h-12 items-center justify-center rounded-2xl px-5 font-semibold text-white">🪞 Open the AR mirror</Link>
+            <p className="text-sm text-mut">Headset · not on for you yet</p>
+            <Link href="/mirror/ar" className="grad-cta inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl px-5 font-semibold text-white"><Icon name="mirror" className="size-5" /> Open the AR mirror</Link>
           </section>
         ) : (
           <>
             {pieces.length === 0 && (
-              <p className="glass mb-4 rounded-2xl p-4 text-sm text-mut">None of your recent pieces have a 3D model yet. Open a maker&apos;s 3D showroom and choose &ldquo;Mixed-reality mirror&rdquo; on a piece.</p>
+              <p className="glass mb-4 rounded-2xl p-4 text-sm text-mut">No 3D pieces yet · pick one in a maker&apos;s 3D showroom</p>
             )}
             <MrMirror pieces={pieces} wardrobe={wardrobe} twin={twin} arPilot={Boolean(flags["ar.mirror_pilot"])} initial={initial} />
           </>

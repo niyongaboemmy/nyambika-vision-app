@@ -10,6 +10,7 @@ import type { Look } from "@/lib/looks";
 import { COLOUR_SWATCH, nice, OCCASIONS, whenLabel, type Wardrobe } from "@/lib/social";
 import { useApi } from "@/lib/use-api";
 import { useSession } from "@/lib/session";
+import { Icon } from "@/components/icons";
 
 // Opened from a saved look's sheet only: keep checkout (and its zod-backed money helpers) out of the first load.
 const HoldToBuy = dynamic(() => import("@/components/hold-to-buy").then((m) => m.HoldToBuy), { ssr: false });
@@ -42,17 +43,16 @@ export default function WardrobePage() {
 
   return (
     <Screen className="pb-28">
-      <TopBar back="/" right={<Link href="/circle" className="glass rounded-full px-3 py-2 text-sm font-semibold">👥 Polls</Link>} />
+      <TopBar back="/" right={<Link href="/circle" className="hit glass flex min-h-10 items-center gap-1.5 rounded-full px-3.5 text-sm font-semibold"><Icon name="users" className="size-4" /> Polls</Link>} />
       <header className="px-5">
         <h1 className="font-display text-[34px] font-black leading-tight text-grad">{t("wardrobe.title")}</h1>
-        <p className="text-sm text-txt/80">What you own + looks you saved · restyled by the Muse</p>
       </header>
 
       {data?.events.length ? (
         <section className="no-scrollbar mt-4 flex snap-x gap-3 overflow-x-auto px-5" aria-label="Upcoming events">
           {data.events.map((e) => (
             <Link key={e.id} href={`/wardrobe/events/${e.id}`} className="glass w-[78%] shrink-0 snap-start rounded-3xl p-4">
-              <p className="font-display text-lg font-black">👗 {e.title} {whenLabel(e.daysUntil)}</p>
+              <p className="flex items-center gap-2 font-display text-lg font-black"><Icon name="calendar" className="size-5 shrink-0 text-gold" /><span className="min-w-0 truncate">{e.title} {whenLabel(e.daysUntil)}</span></p>
               <p className="text-sm text-txt/80">{e.rendering ? "The Muse is styling…" : `${e.ready} outfit${e.ready === 1 ? "" : "s"} ready`}</p>
               <div className="mt-3 grid grid-cols-3 gap-2">
                 {Array.from({ length: 3 }).map((_, i) => (e.thumbs[i] ? <img loading="lazy" decoding="async" key={i} src={e.thumbs[i]} alt="" className="aspect-[3/4] w-full rounded-xl bg-white/5 object-cover" /> : <div key={i} className="skeleton aspect-[3/4] rounded-xl" />))}
@@ -69,7 +69,7 @@ export default function WardrobePage() {
         <div className="no-scrollbar mt-2 flex items-center gap-2 overflow-x-auto px-5 pb-1" role="group" aria-label="Filter by occasion and colour">
           {occasions.map((o) => <Chip key={o} active={occasion === o} onClick={() => setOccasion(occasion === o ? null : o)}>{nice(o)}</Chip>)}
           {colours.map((c) => (
-            <button key={c} type="button" aria-label={`Colour: ${c}`} aria-pressed={colour === c} onClick={() => setColour(colour === c ? null : c)} className={`size-9 shrink-0 rounded-full border-2 transition ${colour === c ? "scale-110 border-gold" : "border-white/25"}`} style={{ background: COLOUR_SWATCH[c] }} />
+            <button key={c} type="button" aria-label={`Colour: ${c}`} aria-pressed={colour === c} onClick={() => setColour(colour === c ? null : c)} className={`hit size-9 shrink-0 rounded-full border-2 transition ${colour === c ? "scale-110 border-gold" : "border-white/25"}`} style={{ background: COLOUR_SWATCH[c] }} />
           ))}
         </div>
       )}
@@ -82,7 +82,7 @@ export default function WardrobePage() {
           const inner = (
             <>
               {t.image ? <img loading="lazy" decoding="async" src={t.image} alt="" className={`w-full object-cover ${t.kind === "saved" ? "object-top" : "object-contain p-3"} ${i % 3 === 0 ? "h-72" : "h-40"}`} /> : <div className={`skeleton ${i % 3 === 0 ? "h-72" : "h-40"}`} />}
-              <span className={`absolute left-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-bold ${t.kind === "owned" ? "bg-mint/90 text-ink" : "bg-black/60"}`}>{t.kind === "owned" ? "Owned" : "♥ Saved · AI"}</span>
+              <span className={`absolute left-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-bold ${t.kind === "owned" ? "bg-mint/90 text-ink" : "bg-black/60"}`}>{t.kind === "owned" ? "Owned" : <span className="inline-flex items-center gap-1"><Icon name="heart" filled className="size-3" /> Saved · AI</span>}</span>
               <span className="block px-3 pb-3 pt-2 text-left">
                 <span className="block truncate text-sm font-bold">{t.title}</span>
                 <span className="block truncate text-xs text-mut">{t.sub}</span>
@@ -100,15 +100,15 @@ export default function WardrobePage() {
 
       {data && tiles.length === 0 && (
         <div className="glass mx-5 mt-2 rounded-3xl p-6 text-center">
-          <p className="text-3xl">🧺</p>
+          <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-white/10 text-gold" aria-hidden><Icon name="hanger" className="size-7" /></span>
           <p className="mt-2 font-display text-lg font-black">Your wardrobe fills itself</p>
-          <p className="mt-1 text-sm text-mut">Pieces you buy appear here once delivered, and looks you double-tap to save. The Muse can still style an event with new pieces.</p>
+          <p className="mt-1 text-sm text-mut">Delivered pieces + saved looks</p>
         </div>
       )}
       {data && tiles.length > 0 && shown.length === 0 && <p className="px-5 pt-4 text-center text-sm text-mut">Nothing matches those filters.</p>}
 
       <div className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-[480px] px-5 pb-[max(env(safe-area-inset-bottom),16px)] pt-6 fade-bottom">
-        <button onClick={() => setRestyle(true)} className="grad-cta flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl font-display text-lg font-black shadow-[0_10px_30px_rgba(139,92,246,.35)] transition active:scale-[.98]">✨ {t("wardrobe.restyle")}</button>
+        <button onClick={() => setRestyle(true)} className="grad-cta flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl font-display text-lg font-black shadow-[0_10px_30px_rgba(139,92,246,.35)] transition active:scale-[.98]"><Icon name="sparkle" className="size-5" /> {t("wardrobe.restyle")}</button>
       </div>
 
       <RestyleSheet open={restyle} onClose={() => setRestyle(false)} />
@@ -118,7 +118,7 @@ export default function WardrobePage() {
           <div>
             <div className="relative mx-auto h-[46vh] overflow-hidden rounded-3xl bg-ink-3">
               {peek.image && <img loading="lazy" decoding="async" src={peek.image} alt={`${peek.product.title}, AI preview`} className="h-full w-full object-contain" />}
-              <span className="absolute bottom-2 left-2 rounded-md bg-black/60 px-2 py-0.5 text-[10px] font-bold">✦ AI preview</span>
+              <span className="absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-md bg-black/60 px-2 py-0.5 text-[10px] font-bold text-[#fff]"><Icon name="sparkle" className="size-3" /> AI preview</span>
             </div>
             <div className="mt-3 flex items-center justify-between gap-3">
               <div className="min-w-0">

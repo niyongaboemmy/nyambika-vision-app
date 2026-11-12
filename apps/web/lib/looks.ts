@@ -18,4 +18,4 @@ export interface Look {
 
 export const isRendering = (s: Look["status"]) => s === "PENDING" || s === "QUEUED" || s === "GENERATING" || s === "GUARDING";
 
-export const TYPE_ICON: Record<string, string> = { TAILOR: "✂️ Tailor", COOPERATIVE: "🧵 Cooperative", SELLER: "🛍️ Seller" };
+export const TYPE_ICON: Record<string, string> = { TAILOR: "Tailor", COOPERATIVE: "Cooperative", SELLER: "Seller" };

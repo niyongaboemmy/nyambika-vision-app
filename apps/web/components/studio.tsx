@@ -14,8 +14,11 @@ import {
   type TextareaHTMLAttributes,
 } from "react";
 import { createPortal } from "react-dom";
+import { InfoTip } from "./kit";
 import { isExpectedText, LimitState } from "./limit-state";
 import { Icon, type IconName } from "./icons";
+import { haptic } from "@/lib/native";
+import { useSheetDrag } from "@/lib/sheet-drag";
 
 /* Light, warm primitives for the member Page Manager and host admin (brief §4 "Tailor / member studio").
  * Exported names and props of Card, SButton, Field, Input, Textarea, Select, Badge, PageTabs, Empty and Note
@@ -53,28 +56,55 @@ export function SLink({ href, variant = "primary", className = "", children, ...
   );
 }
 
-/** Single control: a wrapping <label>. Groups of buttons/checkboxes: pass `group` for <fieldset>/<legend>. */
+/** Hints up to this length stay inline under the control; longer ones become an ⓘ popover next to the label. */
+const SHORT_HINT = 28;
+
+/** Single control: a wrapping <label>. Groups of buttons/checkboxes: pass `group` for <fieldset>/<legend>.
+ *  Long hints render as an ⓘ InfoTip beside the label (outside the <label>, so it wraps only one control). */
 export function Field({ label, hint, children, group }: { label: string; hint?: string; children: ReactNode; group?: boolean }) {
+  const hintId = useId();
+  const long = Boolean(hint && hint.length > SHORT_HINT);
+  const inline = hint && !long ? <span className="block text-xs leading-relaxed text-cocoa-2">{hint}</span> : null;
+  const tip = long ? <InfoTip label="More info">{hint}</InfoTip> : null;
   if (group) {
     return (
-      <fieldset className="space-y-2">
-        <legend className="mb-2 text-[13px] font-bold text-cocoa">{label}</legend>
+      <fieldset className="min-w-0 space-y-2" aria-describedby={long ? hintId : undefined}>
+        <legend className="mb-2 flex items-center gap-1 text-[13px] font-bold text-cocoa">
+          {label}
+          {tip}
+        </legend>
+        {long && <span id={hintId} className="sr-only">{hint}</span>}
         {children}
-        {hint && <span className="block text-xs leading-relaxed text-cocoa-2">{hint}</span>}
+        {inline}
       </fieldset>
     );
   }
+  if (!long) {
+    return (
+      <label className="block space-y-1.5">
+        <span className="text-[13px] font-bold text-cocoa">{label}</span>
+        {children}
+        {inline}
+      </label>
+    );
+  }
+  // Visible label text + ⓘ in one row; the <label> keeps the accessible name (sr-only copy) and wraps one control.
   return (
-    <label className="block space-y-1.5">
-      <span className="text-[13px] font-bold text-cocoa">{label}</span>
-      {children}
-      {hint && <span className="block text-xs leading-relaxed text-cocoa-2">{hint}</span>}
-    </label>
+    <div className="space-y-1.5">
+      <span className="-my-1 flex items-center gap-0.5 text-[13px] font-bold text-cocoa">
+        <span aria-hidden>{label}</span>
+        {tip}
+      </span>
+      <label className="block">
+        <span className="sr-only">{label}</span>
+        {children}
+      </label>
+    </div>
   );
 }
 
 const inputCls =
-  "w-full rounded-2xl border border-hairline bg-white px-3.5 py-3 text-[15px] text-cocoa placeholder:text-cocoa-3 shadow-[inset_0_1px_2px_rgb(29_24_20/0.04)] outline-none transition focus:border-violet-ink focus:ring-4 focus:ring-violet-ink/15 disabled:bg-paper-2";
+  "min-h-11 w-full rounded-2xl border border-hairline bg-white px-3.5 py-3 text-[15px] text-cocoa placeholder:text-cocoa-3 shadow-[inset_0_1px_2px_rgb(29_24_20/0.04)] outline-none transition focus:border-violet-ink focus:ring-4 focus:ring-violet-ink/15 disabled:bg-paper-2";
 export const Input = (p: InputHTMLAttributes<HTMLInputElement>) => <input {...p} className={`${inputCls} ${p.className ?? ""}`} />;
 export const Textarea = (p: TextareaHTMLAttributes<HTMLTextAreaElement>) => <textarea {...p} className={`${inputCls} min-h-28 leading-relaxed ${p.className ?? ""}`} />;
 export const Select = (p: SelectHTMLAttributes<HTMLSelectElement>) => (
@@ -246,8 +276,9 @@ export function SectionTitle({ title, eyebrow, action, as: H = "h2", id }: { tit
   return (
     <div className="flex items-end justify-between gap-3">
       <div className="min-w-0">
-        {eyebrow && <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-terra-ink">{eyebrow}</p>}
-        <H id={id} className="truncate font-display text-xl font-black tracking-tight text-cocoa sm:text-2xl">{title}</H>
+        {eyebrow && <p className="text-[12px] font-semibold uppercase tracking-[0.06em] text-terra-ink">{eyebrow}</p>}
+        {/* h1 = iOS large title (34/28 pt bold, tight tracking); collapses into the shell header on scroll. */}
+        <H id={id} className={`truncate font-display font-bold text-cocoa ${H === "h1" ? "text-[28px] leading-[1.15] tracking-[-0.02em] sm:text-[34px]" : "text-[20px] tracking-[-0.01em] sm:text-[22px]"}`}>{title}</H>
       </div>
       {action && <div className="shrink-0">{action}</div>}
     </div>
@@ -256,8 +287,24 @@ export function SectionTitle({ title, eyebrow, action, as: H = "h2", id }: { tit
 
 /** Segmented control (single choice). Buttons expose aria-pressed; the group has a label. */
 export function Segmented<T extends string>({ label, options, value, onChange, className = "" }: { label: string; options: { value: T; label: string; count?: number }[]; value: T; onChange: (v: T) => void; className?: string }) {
+  // iOS segmented control: one thumb that slides (spring) to the selected segment; measured from the DOM.
+  const box = useRef<HTMLDivElement>(null);
+  const [thumb, setThumb] = useState<{ x: number; w: number } | null>(null);
+  useEffect(() => {
+    const root = box.current;
+    if (!root) return;
+    const place = () => {
+      const b = root.querySelector<HTMLElement>('button[aria-pressed="true"]');
+      if (b) setThumb({ x: b.offsetLeft, w: b.offsetWidth });
+    };
+    place();
+    const ro = new ResizeObserver(place);
+    ro.observe(root);
+    return () => ro.disconnect();
+  }, [value, options.length]);
   return (
-    <div role="group" aria-label={label} className={`no-scrollbar flex max-w-full gap-1 overflow-x-auto rounded-2xl bg-paper-2 p-1 ring-1 ring-inset ring-hairline ${className}`}>
+    <div ref={box} role="group" aria-label={label} className={`no-scrollbar relative flex max-w-full gap-1 overflow-x-auto rounded-2xl bg-paper-2 p-1 ring-1 ring-inset ring-hairline ${className}`}>
+      {thumb && <span aria-hidden className="spring pointer-events-none absolute bottom-1 top-1 left-0 rounded-xl bg-white shadow-[0_3px_8px_rgba(0,0,0,.12),0_1px_1px_rgba(0,0,0,.04)]" style={{ width: thumb.w, transform: `translateX(${thumb.x}px)` }} />}
       {options.map((o) => {
         const on = o.value === value;
         return (
@@ -265,8 +312,11 @@ export function Segmented<T extends string>({ label, options, value, onChange, c
             key={o.value}
             type="button"
             aria-pressed={on}
-            onClick={() => onChange(o.value)}
-            className={`st-press inline-flex min-h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl px-3 text-sm font-bold ${on ? "bg-white text-cocoa shadow-sm" : "text-cocoa-2 hover:text-cocoa"}`}
+            onClick={() => {
+              if (!on) haptic("light");
+              onChange(o.value);
+            }}
+            className={`hit st-press relative inline-flex min-h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl px-3 text-sm font-semibold transition-colors ${on ? `text-cocoa ${thumb ? "" : "bg-white shadow-sm"}` : "text-cocoa-2 hover:text-cocoa"}`}
           >
             {o.label}
             {o.count !== undefined && (
@@ -314,7 +364,7 @@ export function Kpi({ label, value, hint, spark, tone = "terra", warn, className
         {warn && <Icon name="alert" className="size-3.5 text-gold-ink" />}
         {label}
       </p>
-      <p className="font-display text-2xl font-black tracking-tight text-cocoa tabular-nums">{value}</p>
+      <p className="break-words font-display text-[clamp(1.25rem,5.5vw,1.5rem)] font-black leading-tight tracking-tight text-cocoa tabular-nums">{value}</p>
       {spark && spark.length > 1 && <Sparkline data={spark} tone={tone} className="mt-auto" />}
       {hint && <p className="text-xs text-cocoa-2">{hint}</p>}
     </div>
@@ -337,25 +387,29 @@ export function Meter({ value, max, label }: { value: number; max: number; label
 /** iOS-style switch on top of a real checkbox (works with getByLabel/check and keyboard). */
 export function Switch({ checked, onChange, label, description, ariaLabel, disabled }: { checked: boolean; onChange: (v: boolean) => void; label?: ReactNode; description?: ReactNode; ariaLabel?: string; disabled?: boolean }) {
   return (
-    <label className={`flex cursor-pointer items-start justify-between gap-4 ${disabled ? "opacity-50" : ""}`}>
+    // iOS geometry: 51×31 track, 27 px knob on a spring, row at least 44 px tall; haptic tick on change.
+    <label className={`flex min-h-11 cursor-pointer items-center justify-between gap-4 ${disabled ? "opacity-50" : ""}`}>
       {(label || description) && (
         <span className="min-w-0">
-          {label && <span className="block text-sm font-bold text-cocoa">{label}</span>}
-          {description && <span className="mt-0.5 block text-xs leading-relaxed text-cocoa-2">{description}</span>}
+          {label && <span className="block text-[15px] font-semibold text-cocoa">{label}</span>}
+          {description && <span className="mt-0.5 block text-xs leading-snug text-cocoa-2">{description}</span>}
         </span>
       )}
-      <span className="relative mt-0.5 inline-flex shrink-0">
+      <span className="relative inline-flex shrink-0">
         <input
           type="checkbox"
           role="switch"
           aria-label={ariaLabel}
           checked={checked}
           disabled={disabled}
-          onChange={(e) => onChange(e.target.checked)}
+          onChange={(e) => {
+            haptic("light");
+            onChange(e.target.checked);
+          }}
           className="peer absolute inset-0 z-10 size-full cursor-pointer opacity-0"
         />
-        <span aria-hidden className="h-7 w-12 rounded-full bg-paper-3 transition peer-checked:bg-mint-ink peer-focus-visible:outline peer-focus-visible:outline-[2.5px] peer-focus-visible:outline-offset-2 peer-focus-visible:outline-violet-ink" />
-        <span aria-hidden className="absolute left-0.5 top-0.5 size-6 rounded-full bg-white shadow transition-transform duration-200 peer-checked:translate-x-5" />
+        <span aria-hidden className="h-[31px] w-[51px] rounded-full bg-paper-3 transition-colors duration-200 peer-checked:bg-[var(--ios-green)] peer-focus-visible:outline peer-focus-visible:outline-[2.5px] peer-focus-visible:outline-offset-2 peer-focus-visible:outline-violet-ink" />
+        <span aria-hidden className="spring absolute left-0.5 top-0.5 size-[27px] rounded-full bg-[#fff] shadow-[0_3px_8px_rgba(0,0,0,.15),0_1px_1px_rgba(0,0,0,.16)] peer-checked:translate-x-5 peer-active:scale-x-110" />
       </span>
     </label>
   );
@@ -385,7 +439,7 @@ export function Steps({ steps, current, label = "Progress" }: { steps: string[];
 /** Light bottom sheet on phones, right-side drawer from 1024px. Portalled, Escape closes, focus moves in and back. */
 export function StudioSheet({ open, onClose, title, children, footer }: { open: boolean; onClose: () => void; title: string; children: ReactNode; footer?: ReactNode }) {
   const [mounted, setMounted] = useState(false);
-  const panel = useRef<HTMLDivElement>(null);
+  const { panel, handle } = useSheetDrag(onClose);
   const titleId = useId();
   useEffect(() => setMounted(true), []);
   useEffect(() => {
@@ -416,7 +470,7 @@ export function StudioSheet({ open, onClose, title, children, footer }: { open: 
       document.body.style.overflow = "";
       prev?.focus?.();
     };
-  }, [open, onClose]);
+  }, [open, onClose, panel]);
   if (!open || !mounted) return null;
   return createPortal(
     <div className="theme-light fixed inset-0 z-[60] flex items-end justify-center lg:items-stretch lg:justify-end" role="dialog" aria-modal="true" aria-labelledby={titleId}>
@@ -425,12 +479,15 @@ export function StudioSheet({ open, onClose, title, children, footer }: { open: 
         ref={panel}
         className="relative flex max-h-[92dvh] w-full max-w-[560px] animate-rise flex-col rounded-t-[30px] bg-paper shadow-2xl lg:h-full lg:max-h-none lg:max-w-[460px] lg:animate-slide-in lg:rounded-none lg:rounded-l-[30px]"
       >
-        <div className="mx-auto mt-2.5 h-1.5 w-11 shrink-0 rounded-full bg-paper-3 lg:hidden" />
-        <div className="flex items-center justify-between gap-3 px-5 pb-2 pt-3 lg:pt-6">
-          <h2 id={titleId} tabIndex={-1} className="font-display text-xl font-black tracking-tight text-cocoa outline-none">{title}</h2>
-          <button onClick={onClose} aria-label="Close" className="st-press grid size-10 place-items-center rounded-full bg-paper-2 text-cocoa-2 hover:text-cocoa">
-            <Icon name="x" className="size-5" />
-          </button>
+        {/* Grabber + title row are the drag handle (drag down to dismiss on phones). */}
+        <div {...handle} className="shrink-0 cursor-grab active:cursor-grabbing lg:cursor-auto">
+          <div aria-hidden className="mx-auto mt-2 h-[5px] w-9 rounded-full bg-paper-3 lg:hidden" />
+          <div className="flex items-center justify-between gap-3 px-5 pb-2 pt-3 lg:pt-6">
+            <h2 id={titleId} tabIndex={-1} className="font-display text-[20px] font-bold tracking-[-0.01em] text-cocoa outline-none">{title}</h2>
+            <button onClick={onClose} aria-label="Close" className="hit st-press grid size-8 place-items-center rounded-full bg-paper-2 text-cocoa-2 hover:text-cocoa">
+              <Icon name="x" className="size-4" />
+            </button>
+          </div>
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-5">{children}</div>
         {footer && <div className="border-t border-hairline px-5 pb-[max(env(safe-area-inset-bottom),16px)] pt-3">{footer}</div>}
@@ -453,7 +510,7 @@ export function TogglePills({ all, on, toggle, labels }: { all: string[]; on: st
             type="button"
             aria-pressed={sel}
             onClick={() => toggle(v)}
-            className={`st-press inline-flex min-h-10 items-center gap-1.5 rounded-full px-3.5 text-sm font-semibold ring-1 ring-inset ${sel ? "bg-cocoa text-white ring-cocoa" : "bg-white text-cocoa ring-hairline hover:ring-cocoa-3"}`}
+            className={`st-press inline-flex min-h-11 items-center gap-1.5 rounded-full px-3.5 text-sm font-semibold ring-1 ring-inset ${sel ? "bg-cocoa text-white ring-cocoa" : "bg-white text-cocoa ring-hairline hover:ring-cocoa-3"}`}
           >
             {sel && <Icon name="check" className="size-3.5" />}
             {labels?.[v] ?? v.replace(/-/g, " ")}

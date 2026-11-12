@@ -1,5 +1,6 @@
 "use client";
 
+import { InfoTip } from "@/components/kit";
 import { Chip, Icon } from "@/components/studio";
 import { useSession } from "@/lib/session";
 import { useApi } from "@/lib/use-api";
@@ -83,7 +84,7 @@ export function TrendsCard({ pageId }: { pageId: string }) {
         <Chip tone="violet">k ≥ {data.k} shoppers per number</Chip>
       </div>
       {empty ? (
-        <p className="st-card rounded-[22px] p-4 text-sm text-cocoa-2">Not enough shoppers yet to show a trend without risking anyone&apos;s privacy. Check back next week.</p>
+        <p className="st-card flex items-center gap-2 rounded-[22px] p-4 text-sm font-semibold text-cocoa-2"><Icon name="clock" className="size-4 shrink-0" />Not enough shoppers yet · next week</p>
       ) : (
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
           {data.rising.length > 0 && (
@@ -105,7 +106,7 @@ export function TrendsCard({ pageId }: { pageId: string }) {
                       <span className="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-black text-mint-ink">+{Math.round(r.growth * 100)}%</span>
                     </div>
                     <div className="mt-2"><WeekBars series={r.series} label={r.label} /></div>
-                    <p className="mt-2 text-xs leading-snug text-cocoa-2">{r.text}</p>
+                    <p className="mt-2 line-clamp-2 text-xs leading-snug text-cocoa-2" title={r.text}>{r.text}</p>
                   </li>
                 ))}
               </ul>
@@ -123,7 +124,7 @@ export function TrendsCard({ pageId }: { pageId: string }) {
                         {g.colour.replace("-", " ")} {g.category}{g.occasion ? ` · ${g.occasion}` : ""}
                       </p>
                       <p className="mt-0.5 text-[13px] leading-snug text-cocoa">{g.text}</p>
-                      {g.youMakeIt && <p className="mt-1 text-xs font-bold text-gold-ink">You already make {g.category}: an opportunity for you.</p>}
+                      {g.youMakeIt && <Chip tone="gold" className="mt-1">You make {g.category}</Chip>}
                     </li>
                   ))}
                 </ul>
@@ -133,15 +134,19 @@ export function TrendsCard({ pageId }: { pageId: string }) {
               <div className="rounded-[22px] bg-gradient-to-br from-sky-100 to-white p-4 ring-1 ring-inset ring-black/5">
                 <h3 className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider text-sky-800"><Icon name="wallet" className="size-3.5" /> Price sweet spot</h3>
                 {data.priceHints.map((h) => <p key={h.key} className="mt-2 text-[13px] font-semibold leading-snug text-cocoa">{h.text}</p>)}
-                <p className="mt-1.5 text-[11px] text-cocoa-2">A hint from try-on → order rates, not a promise.</p>
+                <p className="mt-1.5 text-[11px] text-cocoa-2">A hint, not a promise</p>
               </div>
             )}
           </div>
         </div>
       )}
-      <p className="text-[11px] leading-relaxed text-cocoa-2">
-        ✨ {data.writer.startsWith("llm") ? "Worded by AI from aggregates." : "From aggregates only."} Every number comes from at least {data.k} different shoppers, sales numbers from at least 3 makers with none dominating; small groups are hidden ({data.suppressed.rising + data.suppressed.gaps + data.suppressed.priceBands} hidden{data.unstableHidden ? `, ${data.unstableHidden} too unstable` : ""}).
-        {data.synthetic ? " Synthetic test data in this environment." : ""}
+      <p className="flex flex-wrap items-center gap-1.5 text-[11px] font-semibold text-cocoa-2">
+        <Chip tone="violet"><Icon name="sparkle" className="size-3.5" />{data.writer.startsWith("llm") ? "AI-worded · aggregates" : "Aggregates only"}</Chip>
+        <Chip>{data.suppressed.rising + data.suppressed.gaps + data.suppressed.priceBands} small groups hidden</Chip>
+        {data.synthetic && <Chip tone="gold">Synthetic data</Chip>}
+        <InfoTip label="How trends stay private">
+          Every number comes from at least {data.k} different shoppers, sales numbers from at least 3 makers with none dominating; small groups are hidden{data.unstableHidden ? ` (${data.unstableHidden} too unstable)` : ""}.
+        </InfoTip>
       </p>
     </section>
   );

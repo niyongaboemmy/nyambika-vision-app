@@ -57,7 +57,7 @@ await shopper.waitForTimeout(500);
 await shopper.goto(`${BASE}/m/kigali-kitenge-house`);
 await shopper.getByRole("listbox", { name: "Collection" }).getByRole("option", { selected: true }).click();
 await shopper.getByRole("button", { name: /try on me/i }).click();
-await shopper.getByText(/looks on your twin are paused/i).waitFor({ timeout: 15000 }); // CONSENT_WITHDRAWN → LimitState with inline "Turn on"
+await shopper.getByText(/looks on your twin are (paused|off)/i).waitFor({ timeout: 15000 }); // CONSENT_WITHDRAWN → LimitState with inline "Turn on"
 await shopper.getByRole("button", { name: "Turn on" }).waitFor();
 await shopper.screenshot({ path: new URL("./crawl-output/s5/92-consent-withdrawn-blocks.png", import.meta.url).pathname });
 const exp = await shopper.request.get(`${BASE}/api/privacy/export`);

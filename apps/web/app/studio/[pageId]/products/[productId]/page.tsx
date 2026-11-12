@@ -5,7 +5,9 @@ import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { AiWrite } from "@/components/ai-write";
-import { Badge, Card, Field, Icon, Input, Note, ScreenSkeleton, SButton, Skeleton, Steps, Textarea } from "@/components/studio";
+import { InfoTip } from "@/components/kit";
+import { Badge, Card, Chip, Field, Icon, Input, Note, ScreenSkeleton, SButton, Skeleton, Steps, Textarea } from "@/components/studio";
+import { MoreActions } from "@/components/ios";
 import { EDITOR_STEPS, EditorSection, ProductPreview } from "@/components/studio-product";
 import { MorphOptions } from "@/components/morph-options";
 import { AttrSuggest } from "@/components/mlspike-suggest";
@@ -73,7 +75,12 @@ function ProductDetail() {
                 <h2 className="font-display text-2xl font-black leading-tight tracking-tight text-cocoa">{p.title}</h2>
                 <p className="mt-0.5 text-sm text-cocoa-2">{rwf(p.priceRwf)} · {p.category}{p.madeToOrder ? ` · made to order (${p.leadTimeDays} days)` : ""}</p>
               </div>
-              <Badge value={p.status} label={p.status === "PUBLISHED" ? "live" : undefined} />
+              <div className="flex shrink-0 items-center gap-1">
+                <Badge value={p.status} label={p.status === "PUBLISHED" ? "live" : undefined} />
+                {canManage && p.status !== "ARCHIVED" && (
+                  <MoreActions label="More product actions" title={p.title} actions={[{ label: "Archive", icon: "box", destructive: true, disabled: busy, onSelect: () => act("archive") }]} />
+                )}
+              </div>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <Badge value={p.readiness} label={`try-on: ${p.readiness.replace(/_/g, " ").toLowerCase()}`} />
@@ -93,10 +100,9 @@ function ProductDetail() {
                 </SButton>
               )}
               {p.status === "PUBLISHED" && <SButton variant="outline" disabled={busy} onClick={() => act("unpublish")}>Unpublish</SButton>}
-              {canManage && p.status !== "ARCHIVED" && <SButton variant="ghost" disabled={busy} onClick={() => act("archive")}>Archive</SButton>}
             </div>
             {(p.status === "DRAFT" || p.status === "OUT_OF_STOCK") && !allPhotos && (
-              <p className="text-xs text-cocoa-2">Tip: add a photo for every colour first, so shoppers can try it on.</p>
+              <p className="flex items-center gap-1.5 text-xs font-semibold text-cocoa-2"><Icon name="camera" className="size-3.5" />Add a photo per colour first</p>
             )}
           </Card>
 
@@ -158,7 +164,7 @@ function Check({ ok, label }: { ok: boolean; label: string }) {
   );
 }
 
-/** Edit title, price and description after creation, with the ✨ AI writer (FR-PAGE-07). */
+/** Edit title, price and description after creation, with the AI writer (FR-PAGE-07). */
 function DetailsEditor({ p, pageId, pageName, onSaved }: { p: StudioProduct; pageId: string; pageName: string; onSaved: () => Promise<void> }) {
   const [f, setF] = useState({ title: p.title, description: p.description ?? "", priceRwf: String(p.priceRwf) });
   const [msg, setMsg] = useState<string | null>(null);
@@ -178,7 +184,7 @@ function DetailsEditor({ p, pageId, pageName, onSaved }: { p: StudioProduct; pag
   }
   return (
     <form onSubmit={save}>
-      <EditorSection n={1} id="details" title="Details" hint="Polish the words any time. ✨ drafts them from your details in RW, EN or FR.">
+      <EditorSection n={1} id="details" title="Details" hint="Polish the words any time. AI drafts them from your details in RW, EN or FR.">
         <Field label="Product title"><Input required value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} /></Field>
         <Field label="Price in RWF"><Input required type="number" min={0} value={f.priceRwf} onChange={(e) => setF({ ...f, priceRwf: e.target.value })} /></Field>
         <Field label="Product description"><Textarea value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} /></Field>
@@ -226,13 +232,13 @@ function StudioCard({ p, onChange }: { p: StudioProduct; onChange: () => Promise
         <div className="flex items-start gap-3">
           <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-violet-ink text-white shadow-[0_8px_18px_-8px_rgba(98,57,201,.8)]"><Icon name="sparkle" className="size-5" /></span>
           <div>
-            <h3 id="ai-studio-t" className="font-display text-lg font-black tracking-tight text-cocoa">✨ AI product studio</h3>
-            <p className="text-sm text-cocoa-2">Show this piece on AI models with different skin tones. Photos are labelled as AI and use your page allowance.</p>
+            <h3 id="ai-studio-t" className="font-display text-lg font-black tracking-tight text-cocoa">AI product studio</h3>
+            <p className="mt-1 flex flex-wrap gap-1.5"><Chip tone="violet">AI label · C2PA</Chip><Chip>Uses allowance</Chip><InfoTip label="About AI product studio">Show this piece on AI models with different skin tones. Photos are labelled as AI and use your page allowance.</InfoTip></p>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {ready.map((v) => (
-            <button key={v.id} type="button" aria-pressed={v.id === variantId} onClick={() => setVariantId(v.id)} className={`st-press inline-flex min-h-10 items-center gap-2 rounded-full px-3.5 text-sm font-semibold ring-1 ring-inset ${v.id === variantId ? "bg-cocoa text-white ring-cocoa" : "bg-white text-cocoa ring-hairline"}`}>
+            <button key={v.id} type="button" aria-pressed={v.id === variantId} onClick={() => setVariantId(v.id)} className={`st-press inline-flex min-h-11 items-center gap-2 rounded-full px-3.5 text-sm font-semibold ring-1 ring-inset ${v.id === variantId ? "bg-cocoa text-white ring-cocoa" : "bg-white text-cocoa ring-hairline"}`}>
               <span className="size-3.5 rounded-full ring-1 ring-white/60" style={{ background: v.colourHex }} />
               {v.colourName}
             </button>
@@ -276,7 +282,7 @@ function StudioCard({ p, onChange }: { p: StudioProduct; onChange: () => Promise
                     await api(`/products/${p.id}/media/${m.id}`, { method: "DELETE" });
                     await onChange();
                   }}
-                  className="st-press absolute right-1.5 top-1.5 grid size-8 place-items-center rounded-full bg-white/90 text-cocoa"
+                  className="hit st-press absolute right-1.5 top-1.5 grid size-8 place-items-center rounded-full bg-white/90 text-cocoa"
                   aria-label="Remove photo"
                 >
                   <Icon name="x" className="size-4" />

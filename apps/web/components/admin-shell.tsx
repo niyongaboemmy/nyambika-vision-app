@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { ThemeToggle } from "@/components/kit";
-import { Icon, type IconName } from "@/components/studio";
+import { Icon, type IconName } from "@/components/icons";
 import { Brand } from "@/components/studio-shell";
 
 const ICONS: Record<string, IconName> = {
@@ -61,7 +61,7 @@ export function AdminShell<T extends string>({ tabs, tab, onTab, counts = {}, ch
       </aside>
 
       <div className="min-w-0 flex-1">
-        <header className="st-glass-light sticky top-0 z-30 border-b border-hairline/70 lg:hidden">
+        <header className="material sticky top-0 z-30 border-b lg:hidden">
           <div className="flex items-center justify-between px-4 pb-2 pt-[max(env(safe-area-inset-top),10px)]">
             <Brand label="Host admin" />
             <span className="flex items-center gap-2">
@@ -80,7 +80,7 @@ export function AdminShell<T extends string>({ tabs, tab, onTab, counts = {}, ch
                   type="button"
                   onClick={() => pick(t)}
                   aria-current={on ? "page" : undefined}
-                  className={`st-press inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-sm font-bold ${on ? "bg-cocoa text-white" : "bg-white text-cocoa-2 ring-1 ring-inset ring-hairline"}`}
+                  className={`st-press inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-sm font-bold ${on ? "bg-cocoa text-white" : "bg-white text-cocoa-2 ring-1 ring-inset ring-hairline"}`}
                 >
                   <Icon name={ICONS[t] ?? "grid"} className="size-4" />
                   {t}

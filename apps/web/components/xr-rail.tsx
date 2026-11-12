@@ -1,8 +1,10 @@
 "use client";
 
 import { isExpectedText, LimitState } from "@/components/limit-state";
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { GlassControl, MATERIAL, RailButton } from "@/components/look-rail";
+import { Icon } from "@/components/icons";
 import { XrStage } from "@/components/xr-viewer";
 import { Button, Sheet } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
@@ -31,9 +33,9 @@ export function XrRail({ look }: { look: Look }) {
     <div ref={anchor} className="contents">
       {has3d && (
         <>
-          <Rail label={t("xr.view3d")} onClick={() => setStage(true)}>
-            <CubeIcon />
-          </Rail>
+          <RailButton label={t("xr.view3d")} onClick={() => setStage(true)}>
+            <Icon name="cube" className="size-[22px]" />
+          </RailButton>
           <XrStage
             open={stage}
             onClose={() => setStage(false)}
@@ -114,16 +116,16 @@ function MotionRail({ look, anchor }: { look: Look; anchor: React.RefObject<HTML
   const pct = clip?.progress ?? 0;
   return (
     <>
-      <Rail label={rendering ? `${pct}%` : t("xr.move")} onClick={open} active={playing} busy={rendering} progress={pct} ariaLabel={rendering ? `Motion preview ${pct}% ready` : t("xr.seeItMove")}>
-        {playing ? "❚❚" : "▶"}
-      </Rail>
+      <RailButton label={t("xr.move")} caption={rendering ? `${pct}%` : undefined} onClick={open} active={playing} activeClass="bg-violet/80" busy={rendering} progress={pct} ariaLabel={rendering ? `Motion preview ${pct}% ready` : t("xr.seeItMove")}>
+        <Icon name={playing ? "pause" : "play"} className="size-5" />
+      </RailButton>
 
       <Sheet open={confirm} onClose={() => setConfirm(false)}>
         <div className="flex items-start gap-3">
-          <span className="orb grid size-12 shrink-0 place-items-center rounded-2xl text-xl text-ink">▶</span>
+          <span className="orb grid size-12 shrink-0 place-items-center rounded-2xl text-ink"><Icon name="play" className="size-5" /></span>
           <div>
             <h3 className="font-display text-xl font-black">{t("xr.seeItMove")}</h3>
-            <p className="text-sm text-mut">A 4-second loop of this look on {look.onTwin ? "your twin" : "the AI model"}: a gentle sway so you can see how the fabric moves.</p>
+            <p className="text-sm text-mut">4 s loop · see the fabric move</p>
           </div>
         </div>
         <div className="mt-4 flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-3">
@@ -133,15 +135,15 @@ function MotionRail({ look, anchor }: { look: Look; anchor: React.RefObject<HTML
             {state && state.quote.source !== "CREDITS" && <span className="block text-[11px] text-mut">usually {state.quote.credits} credits</span>}
           </span>
         </div>
-        <ul className="mt-3 space-y-1.5 text-xs text-mut">
-          <li>✨ AI motion preview, labelled and signed with Content Credentials (C2PA).</li>
-          <li>🛡️ Your face is never changed; every clip is checked before you see it.</li>
-          <li>🔒 Private to you. Makers never receive it.</li>
+        <ul className="mt-3 flex flex-wrap gap-1.5 text-xs text-txt/90">
+          <li className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-2.5 py-1"><Icon name="sparkle" className="size-3.5 text-gold" />AI motion preview · C2PA</li>
+          <li className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-2.5 py-1"><Icon name="shield" className="size-3.5 text-gold" />Face never changed</li>
+          <li className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-2.5 py-1"><Icon name="lock" className="size-3.5 text-gold" />Never shared with makers</li>
         </ul>
         {state && !state.eligible && <p className="mt-3 text-sm text-gold">{state.reason}</p>}
         {error && (isExpectedText(error) ? <LimitState error={error} /> : <p className="mt-3 text-sm text-red-300" role="alert">{error}</p>)}
         <Button className="mt-4 w-full" onClick={start} disabled={busy || (state ? !state.eligible : false)}>
-          {busy ? "Starting…" : `▶ ${t("xr.seeItMove")}`}
+          {busy ? "Starting…" : <><Icon name="play" className="size-4" /> {t("xr.seeItMove")}</>}
         </Button>
       </Sheet>
 
@@ -172,13 +174,13 @@ function MotionLayer({ clip, anchor, alt, onClose }: { clip: MotionClip; anchor:
   if (!target) return null;
   const fixed = target === document.body;
   return createPortal(
-    <div className={`${fixed ? "fixed" : "absolute"} inset-x-0 top-[96px] bottom-[150px] z-[5] flex animate-rise items-center justify-center`}>
-      <div className="relative h-full">
+    <div className={`${fixed ? "fixed" : "absolute"} inset-0 z-[5] animate-fade bg-black`}>
+      <div className="relative size-full">
         {useImg ? (
           paused && clip.poster ? (
-            <img src={clip.poster} alt={alt} className="h-full w-auto object-contain" />
+            <img src={clip.poster} alt={alt} className="size-full object-cover object-center" />
           ) : (
-            <img src={clip.webp!} alt={alt} className="h-full w-auto object-contain" />
+            <img src={clip.webp!} alt={alt} className="size-full object-cover object-center" />
           )
         ) : (
           <video
@@ -191,51 +193,19 @@ function MotionLayer({ clip, anchor, alt, onClose }: { clip: MotionClip; anchor:
             autoPlay={!paused}
             aria-label={alt}
             onError={() => setUseImg(true)}
-            className="h-full w-auto object-contain"
+            className="size-full object-cover object-center"
           />
         )}
-        {/* Controls sit on the left so they never collide with the right rail. */}
-        <div className="absolute left-2 top-2 flex items-center gap-1.5">
-          <span className="rounded-full border border-white/20 bg-black/60 px-2.5 py-1.5 text-[11px] font-semibold backdrop-blur">▶ {t("xr.motionLabel")}</span>
-          <button onClick={() => setPaused((x) => !x)} aria-label={paused ? "Play motion preview" : "Pause motion preview"} className="glass grid size-9 place-items-center rounded-full text-sm">
-            {paused ? "▶" : "❚❚"}
-          </button>
-          <button onClick={onClose} aria-label="Close motion preview" className="glass grid size-9 place-items-center rounded-full text-sm">✕</button>
+        {/* Controls sit on the left, under the floating top chrome, clear of the right rail. */}
+        <div className="absolute left-3 top-[calc(max(env(safe-area-inset-top),12px)+96px)] flex items-center gap-2">
+          <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold text-white ${MATERIAL}`}><Icon name="play" className="size-3" /> {t("xr.motionLabel")}</span>
+          <GlassControl label={paused ? "Play motion preview" : "Pause motion preview"} onClick={() => setPaused((x) => !x)}>
+            <Icon name={paused ? "play" : "pause"} className="size-4" />
+          </GlassControl>
+          <GlassControl label="Close motion preview" onClick={onClose}><Icon name="x" className="size-4" /></GlassControl>
         </div>
       </div>
     </div>,
     target,
-  );
-}
-
-function Rail({ children, label, onClick, active, busy, progress = 0, ariaLabel }: { children: ReactNode; label: string; onClick: () => void; active?: boolean; busy?: boolean; progress?: number; ariaLabel?: string }) {
-  return (
-    <button onClick={onClick} aria-label={ariaLabel} className="flex flex-col items-center gap-1 text-xs font-semibold">
-      <span className={`glass relative grid size-12 place-items-center rounded-full text-lg ${active ? "bg-violet/70 text-white" : ""}`}>
-        {busy && (
-          <svg viewBox="0 0 48 48" className="absolute inset-0 -rotate-90" aria-hidden>
-            <circle cx="24" cy="24" r="22" fill="none" stroke="rgba(255,255,255,.15)" strokeWidth="3" />
-            <circle cx="24" cy="24" r="22" fill="none" stroke="url(#xr-g)" strokeWidth="3" strokeLinecap="round" strokeDasharray={`${(progress / 100) * 138} 138`} className="transition-[stroke-dasharray] duration-500" />
-            <defs>
-              <linearGradient id="xr-g" x1="0" x2="1">
-                <stop offset="0" stopColor="#e0703f" />
-                <stop offset="1" stopColor="#8b5cf6" />
-              </linearGradient>
-            </defs>
-          </svg>
-        )}
-        <span aria-hidden>{children}</span>
-      </span>
-      {label}
-    </button>
-  );
-}
-
-function CubeIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="size-6 drop-shadow-[0_0_8px_rgba(56,189,248,.6)]" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" aria-hidden>
-      <path d="M12 2.8 4 7.3v9.4l8 4.5 8-4.5V7.3z" fill="rgba(56,189,248,.18)" />
-      <path d="M4 7.3 12 12l8-4.7M12 12v9.2" />
-    </svg>
   );
 }

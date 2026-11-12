@@ -3,13 +3,16 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AdminShell } from "@/components/admin-shell";
+import { ADMIN_TABS, adminTabHref } from "../tabs";
 import { Badge, Card, Chip, Empty, Field, Icon, Input, Kpi, Meter, Monogram, Note, ScreenSkeleton, SButton, SectionTitle, Select, StudioSheet, Switch } from "@/components/studio";
 import { api, rwf } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { useApi } from "@/lib/use-api";
 import { Fact, LearnMore } from "@/components/kit";
+import { MoreActions } from "@/components/ios";
+import { useDrag } from "@/lib/drag";
+import { haptic } from "@/lib/native";
 
-const TABS = ["Overview", "Verify", "Moderation", "Migration", "Flags & models", "Outbox", "Audit", "Pilot", "Agents & partners"] as const;
 const SCOPES = ["catalogue:read", "checkout:write", "mcp:use", "tryon:write", "usage:read"] as const;
 // Categorical series colours (validated: lightness band, chroma, CVD ΔE ≥ 17 on the light surface).
 const SERIES = [
@@ -52,7 +55,7 @@ export default function AgentsAdmin() {
   const [newClient, setNewClient] = useState(false);
   if (!me?.isHost) return null;
   return (
-    <AdminShell tabs={TABS} tab="Agents & partners" onTab={(t) => (t === "Pilot" ? router.push("/admin/pilot") : t !== "Agents & partners" && router.push(`/admin?tab=${encodeURIComponent(t)}`))}>
+    <AdminShell tabs={ADMIN_TABS} tab="Agents & partners" onTab={(t) => t !== "Agents & partners" && router.push(adminTabHref(t))}>
       {!data ? (
         <ScreenSkeleton />
       ) : (
@@ -64,9 +67,9 @@ export default function AgentsAdmin() {
             <LearnMore>AI shopping agents read the public catalogue and start checkouts that shoppers confirm in Nyambika; partners buy guarded try-ons on synthetic models. Keys are stored as hashes only.</LearnMore>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Chip tone={data.killSwitch["agents.kill_switch"] ? "red" : "mint"}>{data.killSwitch["agents.kill_switch"] ? "■ Agent channel paused" : "● Agent channel open"}</Chip>
-            <Chip tone={data.killSwitch["partners.kill_switch"] ? "red" : "mint"}>{data.killSwitch["partners.kill_switch"] ? "■ Partner API paused" : "● Partner API open"}</Chip>
-            <span className="text-xs font-semibold text-cocoa-2">Kill switches live in Flags & models.</span>
+            <Chip tone={data.killSwitch["agents.kill_switch"] ? "red" : "mint"}><Icon name={data.killSwitch["agents.kill_switch"] ? "pause" : "checkCircle"} className="size-3.5" />{data.killSwitch["agents.kill_switch"] ? "Agent channel paused" : "Agent channel open"}</Chip>
+            <Chip tone={data.killSwitch["partners.kill_switch"] ? "red" : "mint"}><Icon name={data.killSwitch["partners.kill_switch"] ? "pause" : "checkCircle"} className="size-3.5" />{data.killSwitch["partners.kill_switch"] ? "Partner API paused" : "Partner API open"}</Chip>
+            <a href="/admin?tab=Flags%20%26%20models" className="st-press inline-flex min-h-11 items-center gap-1 rounded-2xl px-2 text-xs font-bold text-violet-ink hover:bg-paper-2">Kill switches <Icon name="chevron" className="size-3.5" /></a>
             <SButton className="ml-auto" onClick={() => setNewClient(true)}><Icon name="plus" className="size-4" /> New client</SButton>
           </div>
 
@@ -105,7 +108,7 @@ export default function AgentsAdmin() {
                     <div className="space-y-1.5 p-3">
                       <div className="flex flex-wrap gap-1.5">
                         <Badge value={j.status.toUpperCase()} />
-                        {j.result?.c2pa.signed && <Chip tone="violet">C2PA ✓</Chip>}
+                        {j.result?.c2pa.signed && <Chip tone="violet"><Icon name="check" className="size-3.5" />C2PA</Chip>}
                       </div>
                       <p className="truncate text-xs font-bold text-cocoa">{j.clientName}</p>
                       <p className="truncate text-[11px] text-cocoa-2">{j.model_id} · {j.billing.band === "none" ? "not billed" : `${j.billing.band}${j.billing.price.amount ? ` · ${rwf(j.billing.price.amount)}` : ""}`}</p>
@@ -221,6 +224,11 @@ function ClientCard({ c, models, onChange }: { c: ClientRow; models: Overview["m
   const [secret, setSecret] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const live = c.keys.filter((k) => k.state === "OK");
+  const toggleStatus = async () => {
+    await api(`/admin/agents/clients/${c.id}/status`, { method: "POST", json: { status: c.status === "ACTIVE" ? "SUSPENDED" : "ACTIVE" } });
+    onChange();
+  };
+  const rotateSecret = async () => setSecret((await api<{ secret: string }>(`/admin/agents/clients/${c.id}/webhook-secret`, { method: "POST" })).secret);
   return (
     <Card className="min-w-0 space-y-4">
       <div className="flex items-start gap-3">
@@ -233,9 +241,16 @@ function ClientCard({ c, models, onChange }: { c: ClientRow; models: Overview["m
             <Chip>{c.calls14d} calls · 14 d</Chip>
           </div>
         </div>
-        <SButton variant="ghost" className="min-h-10" onClick={async () => { await api(`/admin/agents/clients/${c.id}/status`, { method: "POST", json: { status: c.status === "ACTIVE" ? "SUSPENDED" : "ACTIVE" } }); onChange(); }}>
-          {c.status === "ACTIVE" ? "Suspend" : "Reactivate"}
-        </SButton>
+        <MoreActions
+          label={`More for ${c.name}`}
+          title={c.name}
+          actions={[
+            ...(c.contract ? [{ label: "Edit contract", icon: "edit" as const, onSelect: () => setContractSheet(true) }] : []),
+            ...(c.kind === "PARTNER" ? [{ label: "Usage CSV", icon: "download" as const, onSelect: () => window.location.assign(`/api/admin/agents/clients/${c.id}/usage.csv`) }] : []),
+            ...(c.kind === "PARTNER" ? [{ label: c.hasWebhookSecret ? "Rotate webhook secret" : "Create webhook secret", icon: "key" as const, onSelect: () => void rotateSecret() }] : []),
+            { label: c.status === "ACTIVE" ? "Suspend client" : "Reactivate client", icon: c.status === "ACTIVE" ? ("pause" as const) : ("play" as const), destructive: c.status === "ACTIVE", onSelect: () => void toggleStatus() },
+          ]}
+        />
       </div>
 
       {c.kind === "PARTNER" && c.contract && c.usage && (
@@ -245,34 +260,19 @@ function ClientCard({ c, models, onChange }: { c: ClientRow; models: Overview["m
             <p className="text-xs font-semibold text-cocoa-2">{rwf(c.contract.monthlyFeeRwf)}/month · overage {rwf(c.contract.overagePriceRwf)}{c.contract.hardCap ? " · hard cap" : ""}</p>
           </div>
           <Meter value={c.usage.billed} max={c.contract.monthlyQuota} label="Looks used this month against quota" />
-          <p className="text-xs text-cocoa-2"><b className="text-cocoa">{c.usage.billed}</b> of {c.contract.monthlyQuota} included looks this month · {c.usage.overage} overage ({rwf(c.usage.overageRwf)}) · {c.usage.sandbox} sandbox</p>
-          <div className="flex flex-wrap gap-2 pt-1">
-            <SButton variant="outline" className="min-h-10" onClick={() => setContractSheet(true)}>Edit contract</SButton>
-            <SButton variant="outline" className="min-h-10" onClick={() => setSandboxSheet(true)}><Icon name="sparkle" className="size-4" /> Sandbox try-on</SButton>
-            <a className="st-press inline-flex min-h-10 items-center gap-1.5 rounded-2xl border border-hairline bg-white px-3.5 text-sm font-bold text-cocoa" href={`/api/admin/agents/clients/${c.id}/usage.csv`} download><Icon name="download" className="size-4" /> Usage CSV</a>
-            <SButton variant="ghost" className="min-h-10" onClick={async () => setSecret((await api<{ secret: string }>(`/admin/agents/clients/${c.id}/webhook-secret`, { method: "POST" })).secret)}>
-              {c.hasWebhookSecret ? "Rotate webhook secret" : "Create webhook secret"}
-            </SButton>
-          </div>
+          <p className="text-xs text-cocoa-2"><b className="text-cocoa tabular-nums">{c.usage.billed}/{c.contract.monthlyQuota}</b> looks · {c.usage.overage} overage ({rwf(c.usage.overageRwf)}) · {c.usage.sandbox} sandbox</p>
+          <SButton variant="outline" className="w-full" onClick={() => setSandboxSheet(true)}><Icon name="sparkle" className="size-4" /> Sandbox try-on</SButton>
         </div>
       )}
 
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <p className="text-sm font-bold text-cocoa">Keys <span className="text-cocoa-2">· {live.length} active</span></p>
-          <SButton variant="dark" className="min-h-10" onClick={() => setKeySheet(true)}><Icon name="plus" className="size-4" /> New key</SButton>
+          <SButton variant="dark" onClick={() => setKeySheet(true)}><Icon name="plus" className="size-4" /> New key</SButton>
         </div>
         <ul className="space-y-2">
           {c.keys.map((k) => (
-            <li key={k.id} className={`flex flex-wrap items-center gap-2 rounded-2xl bg-white p-2.5 ring-1 ring-inset ring-hairline ${k.state !== "OK" ? "bg-paper-2 [&_code]:line-through" : ""}`}>
-              <code className="rounded-lg bg-paper-2 px-2 py-1 text-xs font-bold text-cocoa">{k.prefix}…</code>
-              <Chip tone={k.env === "LIVE" ? "mint" : "sky"}>{k.env.toLowerCase()}</Chip>
-              {k.state !== "OK" && <Badge value={k.state === "REVOKED" ? "CANCELLED" : "SUSPENDED"} label={k.state.toLowerCase()} />}
-              <span className="order-last w-full text-xs leading-relaxed text-cocoa-2">{k.scopes.join(" · ")} · {k.rateLimitPerMin}/min{k.monthlyQuota ? ` · ${k.monthlyQuota.toLocaleString()}/month` : ""} · used {ago(k.lastUsedAt)}</span>
-              {k.state === "OK" && (
-                <SButton variant="ghost" className="ml-auto min-h-9 text-red-800" aria-label={`Revoke key ${k.prefix}`} onClick={async () => { await api(`/admin/agents/keys/${k.id}/revoke`, { method: "POST" }); onChange(); }}>Revoke</SButton>
-              )}
-            </li>
+            <KeyItem key={k.id} k={k} onRevoke={async () => { await api(`/admin/agents/keys/${k.id}/revoke`, { method: "POST" }); onChange(); }} />
           ))}
           {c.keys.length === 0 && <li className="text-sm text-cocoa-2">No keys yet.</li>}
         </ul>
@@ -287,12 +287,67 @@ function ClientCard({ c, models, onChange }: { c: ClientRow; models: Overview["m
   );
 }
 
+const REVEAL = 96;
+
+/** Key row. Phones: swipe left to reveal Revoke (iOS trailing swipe action); keyboard/desktop: the visible button. */
+function KeyItem({ k, onRevoke }: { k: KeyRow; onRevoke: () => void }) {
+  const live = k.state === "OK";
+  const [x, setX] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const bind = useDrag(
+    ({ movement: [mx], last, tap }) => {
+      if (!live || tap) return;
+      const base = x <= -REVEAL / 2 ? -REVEAL : 0;
+      const next = Math.min(0, Math.max(-REVEAL - 24, base + mx));
+      if (last) {
+        const open = next < -REVEAL / 2;
+        if (open && base === 0) haptic("light");
+        setX(open ? -REVEAL : 0);
+        setDragging(false);
+      } else {
+        setDragging(true);
+        setX(next);
+      }
+    },
+    { axis: "x", filterTaps: true },
+  );
+  const revealed = x <= -REVEAL / 2;
+  return (
+    <li className="relative overflow-hidden rounded-2xl">
+      {live && (
+        <button
+          type="button"
+          tabIndex={revealed ? 0 : -1}
+          aria-hidden={!revealed}
+          onClick={() => { haptic("medium"); setX(0); onRevoke(); }}
+          className="absolute inset-y-0 right-0 flex w-24 items-center justify-center gap-1 bg-red-600 text-sm font-bold text-[#fff]"
+        >
+          <Icon name="trash" className="size-4" /> Revoke
+        </button>
+      )}
+      <div
+        {...(live ? bind() : {})}
+        style={{ transform: `translateX(${x}px)` }}
+        className={`relative flex touch-pan-y flex-wrap items-center gap-2 rounded-2xl bg-white p-2.5 ring-1 ring-inset ring-hairline ${dragging ? "" : "transition-transform duration-300 ease-[var(--spring)]"} ${!live ? "bg-paper-2 [&_code]:line-through" : ""}`}
+      >
+        <code className="rounded-lg bg-paper-2 px-2 py-1 text-xs font-bold text-cocoa">{k.prefix}…</code>
+        <Chip tone={k.env === "LIVE" ? "mint" : "sky"}>{k.env.toLowerCase()}</Chip>
+        {!live && <Badge value={k.state === "REVOKED" ? "CANCELLED" : "SUSPENDED"} label={k.state.toLowerCase()} />}
+        <span className="order-last w-full truncate text-xs text-cocoa-2">{k.scopes.join(" · ")} · {k.rateLimitPerMin}/min{k.monthlyQuota ? ` · ${k.monthlyQuota.toLocaleString()}/month` : ""} · used {ago(k.lastUsedAt)}</span>
+        {live && (
+          <SButton variant="ghost" className="ml-auto text-red-800" aria-label={`Revoke key ${k.prefix}`} onClick={() => { haptic("medium"); onRevoke(); }}>Revoke</SButton>
+        )}
+      </div>
+    </li>
+  );
+}
+
 function SecretSheet({ secret, onClose }: { secret: string | null; onClose: () => void }) {
   const [copied, setCopied] = useState(false);
   return (
     <StudioSheet open={Boolean(secret)} onClose={() => { setCopied(false); onClose(); }} title="Copy this secret now" footer={<SButton className="w-full" onClick={() => { setCopied(false); onClose(); }}>I saved it</SButton>}>
       <div className="space-y-3">
-        <p className="text-sm text-cocoa-2">Nyambika stores only a hash. This is the only time it is shown.</p>
+        <div className="flex flex-wrap gap-1.5"><Fact icon="lock">Stored as a hash</Fact><Fact icon="eye">Shown once</Fact></div>
         <code data-testid="new-secret" className="block break-all rounded-2xl bg-cocoa p-4 font-mono text-sm font-bold text-white">{secret}</code>
         <SButton variant="outline" onClick={async () => { await navigator.clipboard?.writeText(secret ?? "").catch(() => undefined); setCopied(true); }}><Icon name="copy" className="size-4" /> {copied ? "Copied" : "Copy"}</SButton>
       </div>
@@ -346,7 +401,7 @@ function KeySheet({ client, open, onClose, onCreated, onError }: { client: Clien
             ))}
           </div>
         </Field>
-        <Field label="Scopes" group hint="A key can only call routes whose scope it holds.">
+        <Field label="Scopes" group hint="Routes this key may call">
           <div className="space-y-1">
             {allowed.map((s) => (
               <Switch key={s} checked={scopes.includes(s)} onChange={(v) => setScopes(v ? [...scopes, s] : scopes.filter((x) => x !== s))} label={s} />
@@ -354,7 +409,7 @@ function KeySheet({ client, open, onClose, onCreated, onError }: { client: Clien
           </div>
         </Field>
         <Field label="Rate limit (requests per minute)"><Input inputMode="numeric" value={rate} onChange={(e) => setRate(e.target.value.replace(/\D/g, ""))} /></Field>
-        <Field label="Monthly quota (calls)" hint="Leave empty for no monthly cap."><Input inputMode="numeric" value={quota} onChange={(e) => setQuota(e.target.value.replace(/\D/g, ""))} placeholder="e.g. 50000" /></Field>
+        <Field label="Monthly quota (calls)" hint="Empty = no cap"><Input inputMode="numeric" value={quota} onChange={(e) => setQuota(e.target.value.replace(/\D/g, ""))} placeholder="e.g. 50000" /></Field>
       </div>
     </StudioSheet>
   );
@@ -399,7 +454,7 @@ function ContractSheet({ client, open, onClose, onDone }: { client: ClientRow; o
           <Field label="Overage price (RWF / look)"><Input inputMode="numeric" value={f.overagePriceRwf} onChange={(e) => setF({ ...f, overagePriceRwf: e.target.value })} /></Field>
           <Field label="Sandbox calls / day"><Input inputMode="numeric" value={f.sandboxDailyCap} onChange={(e) => setF({ ...f, sandboxDailyCap: e.target.value })} /></Field>
         </div>
-        <Switch checked={f.hardCap} onChange={(v) => setF({ ...f, hardCap: v })} label="Hard cap" description="Refuse calls past the quota instead of billing overage." />
+        <Switch checked={f.hardCap} onChange={(v) => setF({ ...f, hardCap: v })} label="Hard cap" description="Refuse past quota, no overage" />
         <Note error={err} />
       </div>
     </StudioSheet>
@@ -451,7 +506,7 @@ function SandboxSheet({ client, models, open, onClose, onDone }: { client: Clien
       }
     >
       <div className="space-y-4">
-        <p className="text-sm text-cocoa-2">Runs as {client.name} with its sandbox key: same guard and C2PA as live, watermarked, never billed.</p>
+        <div className="flex flex-wrap gap-1.5"><Fact icon="lock">Sandbox key</Fact><Fact icon="shield">Guard + C2PA</Fact><Fact icon="sparkle">Watermarked · not billed</Fact></div>
         <Field label="Synthetic model">
           <Select value={model} onChange={(e) => setModel(e.target.value)}>
             {models.map((m) => <option key={m.id} value={m.id}>{m.label} ({m.id})</option>)}

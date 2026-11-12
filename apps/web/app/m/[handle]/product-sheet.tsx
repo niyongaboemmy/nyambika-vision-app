@@ -9,6 +9,7 @@ import { rwf } from "@/lib/api";
 import { waLink, type MakerProduct, type MakerSpace } from "@/lib/maker";
 import type { Commerce } from "@/lib/region";
 import { track } from "@/lib/track";
+import { Icon } from "@/components/icons";
 
 // Maker Space product sheet (split from client.tsx, JS budget pass). The 3D section and checkout load on first open.
 const Garment3dSection = dynamic(() => import("@/components/xr-maker").then((m) => m.Garment3dSection), { ssr: false });
@@ -31,21 +32,21 @@ export function ProductSheet({ maker, product, commerce, onClose }: { maker: Mak
           <p className="text-sm text-mut">{product.madeToOrder ? `Ready in ${product.leadTimeDays} days` : v.inStock ? "In stock" : "Out of stock"}</p>
           <div className="flex flex-wrap gap-2 pt-1" role="radiogroup" aria-label="Colour">
             {product.variants.map((x, j) => (
-              <button key={x.id} role="radio" aria-checked={j === vi} aria-label={x.colourName} onClick={() => setVi(j)} className={`size-8 rounded-full border-2 ${j === vi ? "border-gold" : "border-white/30"}`} style={{ background: x.colourHex }} />
+              <button key={x.id} role="radio" aria-checked={j === vi} aria-label={x.colourName} onClick={() => setVi(j)} className={`hit size-8 rounded-full border-2 ${j === vi ? "border-gold" : "border-white/30"}`} style={{ background: x.colourHex }} />
             ))}
           </div>
         </div>
       </div>
       <div className="mt-5 grid grid-cols-2 gap-2">
-        <Button onClick={tryOn} disabled={product.readiness !== "READY"}>✨ Try on me</Button>
+        <Button onClick={tryOn} disabled={product.readiness !== "READY"}><Icon name="sparkle" className="size-5" /> Try on me</Button>
         <a
-          className="glass inline-flex min-h-12 items-center justify-center rounded-2xl font-semibold"
+          className="glass inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl font-semibold"
           href={waLink(maker.whatsapp, `Muraho ${maker.name}! I'd like "${product.title}" (${v.colourName}). ${typeof window !== "undefined" ? window.location.origin : ""}/m/${maker.handle}`)}
           target="_blank"
           rel="noreferrer"
           onClick={() => track("maker_contacted", { pageId: maker.id, productId: product.id, channel: "whatsapp" })}
         >
-          💬 Order on WhatsApp
+          <Icon name="chat" className="size-5" /> Order on WhatsApp
         </a>
       </div>
       {product.readiness !== "READY" && <p className="mt-2 text-center text-xs text-mut">Try-on isn't available for this item yet.</p>}

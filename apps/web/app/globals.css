@@ -338,8 +338,11 @@
   --color-txt: #f5efe8;
   --color-mut: #a79e96;
   --color-line: rgb(255 255 255 / 0.16);
-  --font-sans: var(--font-body), "Avenir Next", "Helvetica Neue", system-ui, sans-serif;
-  --font-display: var(--font-display-face), var(--font-body), system-ui, sans-serif;
+  /* iOS pass: SF on Apple devices (system UI font, no download), Inter/Segoe/Roboto elsewhere. The Nunito brand face
+     is kept only for the wordmark and the Muse hero (`font-brand`). */
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", Inter, "Segoe UI", Roboto, "Helvetica Neue", system-ui, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro", Inter, "Segoe UI", Roboto, "Helvetica Neue", system-ui, sans-serif;
+  --font-brand: var(--font-display-face), var(--font-display);
   --animate-orb: orb-spin 9s linear infinite;
   --animate-pulse-ring: pulse-ring 1.8s ease-out infinite;
   --animate-rise: rise 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
@@ -540,16 +543,6 @@ body {
   background-size: 16px 16px;
 }
 
-/* Look rail: up to 7 actions must clear the back button and maker card on short phones (360x800). */
-@media (max-height: 860px) {
-  .look-rail { gap: 0.6rem; }
-  .look-rail button { font-size: 10px; gap: 2px; }
-  .look-rail button > span.glass { width: 2.5rem; height: 2.5rem; font-size: 1rem; }
-}
-@media (max-height: 700px) {
-  .look-rail button { font-size: 0; gap: 0; }
-}
-
 /* E35 fashion show: reactions float up from the bar (not rendered with reduced motion). */
 @keyframes vr-float {
   0% { transform: translateY(0) scale(.6); opacity: 0; }
@@ -581,3 +574,54 @@ body {
 
 /* Tabular figures for prices and counters. */
 .tabular { font-variant-numeric: tabular-nums; }
+
+/* ==== Copy & alignment pass ==== */
+/* Touch targets: `.hit` grows a control's hit area to at least 44×44 px with an invisible ::after, without changing
+   layout. Lives in the utilities layer with zero-specificity positioning, so `absolute`/`fixed`/`sticky` still win.
+   (The element must not clip its own overflow.) */
+@layer utilities {
+  :where(.hit) { position: relative; }
+  .hit::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: max(100%, 44px);
+    height: max(100%, 44px);
+    transform: translate(-50%, -50%);
+  }
+  .font-brand { font-family: var(--font-brand); }
+}
+
+/* ==== iOS design language (docs/design/ui-audit.md §Copy & alignment → iOS) ==== */
+:root {
+  /* Springs as CSS linear() curves (no JS library). --spring: gentle settle (sheets, thumbs); --spring-bouncy: pops. */
+  --spring: linear(0, 0.009, 0.035 2.1%, 0.141, 0.281 6.7%, 0.723 12.9%, 0.938 16.7%, 1.017, 1.077, 1.121 24%, 1.149 26.3%, 1.159, 1.163, 1.161, 1.154 31.8%, 1.129 34.4%, 1.051 41.1%, 1.017 44.8%, 0.991 49%, 0.977, 0.975 59.2%, 0.984 66.3%, 0.997 76.3%, 1.002 84.5%, 1);
+  --spring-bouncy: linear(0, 0.006, 0.025 2.8%, 0.101 6.1%, 0.539 18.9%, 0.721 25.3%, 0.849 31.5%, 0.937 38.1%, 0.968 41.8%, 0.991 45.7%, 1.006 50.1%, 1.015 55%, 1.017 63.9%, 1.001);
+  --spring-dur: 0.5s;
+  --hairline: color-mix(in oklab, var(--fg) 14%, transparent);
+  --ios-green: #1f9d55;
+}
+[data-theme="dark"] { --ios-green: #30d158; }
+.theme-light { --hairline: color-mix(in oklab, var(--color-cocoa, #1c1714) 12%, transparent); }
+
+/* Spring transitions for transform/opacity; `spring-pop` for one-shot pops (chips, reactions, hearts). */
+.spring { transition: transform var(--spring-dur) var(--spring), opacity 0.2s ease-out, background-color 0.2s, color 0.2s; }
+@keyframes spring-pop { 0% { transform: scale(0.6); } 100% { transform: scale(1); } }
+.spring-pop { animation: spring-pop 0.55s var(--spring-bouncy) both; }
+
+/* iOS materials: translucent bars and sheets (blur + saturation "vibrancy"), hairline edge. */
+.material {
+  background: color-mix(in oklab, var(--surface-2) 72%, transparent);
+  backdrop-filter: blur(24px) saturate(1.8);
+  -webkit-backdrop-filter: blur(24px) saturate(1.8);
+  border-color: var(--hairline);
+}
+.theme-light .material { background: color-mix(in oklab, var(--surface-2) 76%, transparent); }
+
+/* Hairline separators (0.5 px on retina), as in iOS inset grouped lists. */
+.hairline-b { box-shadow: inset 0 -0.5px 0 var(--hairline); }
+.hairline-t { box-shadow: inset 0 0.5px 0 var(--hairline); }
+@media (prefers-reduced-motion: reduce) {
+  .spring, .spring-pop { transition: none !important; animation: none !important; }
+}

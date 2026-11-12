@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { InfoTip } from "@/components/kit";
 import { Chip, Icon, Note, SButton, StudioSheet, Switch } from "@/components/studio";
 import { GarmentViewer } from "@/components/xr-viewer";
 import { api, rwf } from "@/lib/api";
@@ -85,12 +86,12 @@ export function Garment3dCard({ productId, title, canManage }: { productId: stri
                 {approved ? "Live for shoppers" : building ? "Building" : ready.length ? "Needs your review" : "Not set up"}
               </Chip>
             </div>
-            <p className="mt-0.5 text-sm text-cocoa-2">AI turns each colour&apos;s cut-out into a 3D model shoppers can spin and place in their room at true size.</p>
+            <p className="mt-1 flex flex-wrap items-center gap-1.5"><Chip>Spin</Chip><Chip>AR · true size</Chip><InfoTip label="About 3D and AR view">AI turns each colour&apos;s cut-out into a 3D model shoppers can spin and place in their room at true size.</InfoTip></p>
           </div>
         </div>
 
         {withCutout.length === 0 ? (
-          <p className="rounded-2xl bg-white/80 p-3 text-sm text-cocoa-2 ring-1 ring-inset ring-hairline">Add a photo for a colour first. The 3D model is built from its try-on cut-out.</p>
+          <p className="flex items-center gap-2 rounded-2xl bg-white/80 p-3 text-sm font-semibold text-cocoa-2 ring-1 ring-inset ring-hairline"><Icon name="camera" className="size-4 shrink-0" />Add a colour photo first</p>
         ) : (
           <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {s.variants.map((v) => (
@@ -115,8 +116,8 @@ export function Garment3dCard({ productId, title, canManage }: { productId: stri
         </div>
         {withCutout.length > 0 && (
           <p className="text-xs text-cocoa-2">
-            {rwf(s.costRwf)} per colour from your page allowance
-            {s.allowance.cap !== null ? ` · ${Math.max(0, s.allowance.cap - s.allowance.used)} of ${s.allowance.cap} AI actions left this month` : ""}.
+            {rwf(s.costRwf)} / colour
+            {s.allowance.cap !== null ? ` · ${Math.max(0, s.allowance.cap - s.allowance.used)}/${s.allowance.cap} AI left` : ""}
           </p>
         )}
 
@@ -126,19 +127,19 @@ export function Garment3dCard({ productId, title, canManage }: { productId: stri
               checked={approved}
               onChange={approve}
               label="Show 3D to shoppers"
-              description={`Labelled “${s.label}”. Check the shape and print first; rebuilding hides it again until you approve.`}
+              description={`Labelled “${s.label}”`}
             />
-            {!s.published && <p className="mt-2 text-xs text-gold-ink">Shoppers see it once the product is published.</p>}
+            {!s.published && <p className="mt-2 text-xs font-semibold text-gold-ink">Visible once published</p>}
           </div>
         )}
-        {ready.length > 0 && !canManage && <p className="text-xs text-cocoa-2">Your cooperative admin approves 3D models before shoppers see them.</p>}
+        {ready.length > 0 && !canManage && <p className="text-xs font-semibold text-cocoa-2">Admin approves 3D</p>}
       </div>
 
       <StudioSheet open={preview} onClose={() => setPreview(false)} title={`${title} in 3D`}>
         <div className="-mx-1 rounded-[30px] bg-surface-3 p-2 text-fg">
           {preview && <GarmentViewer assets={viewerAssets} title={title} />}
         </div>
-        <p className="mt-3 text-xs text-cocoa-2">This is what shoppers see after you approve it. On phones with AR they can also place it in their room at true size.</p>
+        <p className="mt-3 text-xs font-semibold text-cocoa-2">Shopper view · AR on supported phones</p>
       </StudioSheet>
     </section>
   );

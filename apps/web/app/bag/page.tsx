@@ -4,11 +4,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { EmptyBag } from "@/components/bag";
-import { Button, Chip, ErrorNote, Screen, Sheet, TopBar } from "@/components/ui";
+import { Button, Chip, ErrorNote, Fact, InfoTip, Screen, Sheet, TopBar } from "@/components/ui";
 import { api, rwf } from "@/lib/api";
 import { BAG_DELIVERY_FEE, type Bag, type BagGroup, type CheckoutResult, type SavedAddress } from "@/lib/bag";
 import { useSession } from "@/lib/session";
 import { track } from "@/lib/track";
+import { Icon } from "@/components/icons";
 
 type Mode = "DELIVERY" | "PICKUP";
 
@@ -65,7 +66,10 @@ export default function BagPage() {
                 <p className="font-display text-lg font-black">
                   {groups.length} {t("bag.makers")} · {groups.length} {t("bag.payments")}
                 </p>
-                <p className="mt-1 text-sm text-txt/90">{t("bag.splitNote")}</p>
+                <p className="mt-2 flex items-center gap-1">
+                  <Fact icon="wallet">Paid directly to each maker</Fact>
+                  <InfoTip label="About split payments">{t("bag.splitNote")}</InfoTip>
+                </p>
               </section>
             )}
             {groups.map((g) => (
@@ -73,7 +77,7 @@ export default function BagPage() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <h2 id={`g-${g.key}`} className="truncate font-display text-lg font-black">{g.pageName}</h2>
-                    <p className="truncate text-xs text-mut">🔐 {t("buy.paidTo")} {g.payoutLabel}</p>
+                    <p className="flex items-center gap-1 truncate text-xs text-mut"><Icon name="lock" className="size-3.5 shrink-0" /> {t("buy.paidTo")} {g.payoutLabel}</p>
                   </div>
                   <span className="shrink-0 rounded-full bg-white/10 px-2.5 py-1 text-xs font-semibold">{rwf(g.subtotalRwf + fee(g))}</span>
                 </div>
@@ -87,21 +91,21 @@ export default function BagPage() {
                         <p className="text-sm">{rwf(l.unitPriceRwf)}</p>
                       </div>
                       <div className="flex shrink-0 items-center gap-1 rounded-2xl bg-white/10 p-1" role="group" aria-label={`Quantity of ${l.title}`}>
-                        <button className="grid size-9 place-items-center rounded-xl text-lg" aria-label={l.qty === 1 ? `${t("bag.remove")} ${l.title}` : `One fewer ${l.title}`} onClick={() => setQty(l.id, l.qty - 1)}>
-                          {l.qty === 1 ? "🗑" : "−"}
+                        <button className="hit grid size-9 place-items-center rounded-xl text-lg" aria-label={l.qty === 1 ? `${t("bag.remove")} ${l.title}` : `One fewer ${l.title}`} onClick={() => setQty(l.id, l.qty - 1)}>
+                          <Icon name={l.qty === 1 ? "trash" : "minus"} className="size-[18px]" />
                         </button>
-                        <span className="w-5 text-center font-semibold" aria-live="polite">{l.qty}</span>
-                        <button className="grid size-9 place-items-center rounded-xl text-lg disabled:opacity-40" aria-label={`One more ${l.title}`} disabled={l.qty >= 5 || (!l.madeToOrder && l.qty >= l.stock)} onClick={() => setQty(l.id, l.qty + 1)}>＋</button>
+                        <span key={l.qty} className="spring-pop tabular w-5 text-center font-semibold" aria-live="polite">{l.qty}</span>
+                        <button className="hit grid size-9 place-items-center rounded-xl text-lg disabled:opacity-40" aria-label={`One more ${l.title}`} disabled={l.qty >= 5 || (!l.madeToOrder && l.qty >= l.stock)} onClick={() => setQty(l.id, l.qty + 1)}><Icon name="plus" className="size-[18px]" /></button>
                       </div>
                     </li>
                   ))}
                 </ul>
                 <fieldset className="flex flex-wrap gap-2">
                   <legend className="sr-only">Delivery or pickup from {g.pageName}</legend>
-                  <Chip active={mode(g) === "DELIVERY"} onClick={() => setDelivery({ ...delivery, [g.key]: "DELIVERY" })}>🛵 {t("bag.delivery")} +{rwf(BAG_DELIVERY_FEE)}</Chip>
-                  <Chip active={mode(g) === "PICKUP"} onClick={() => setDelivery({ ...delivery, [g.key]: "PICKUP" })}>🏪 {t("bag.pickup")}{g.sector ? ` · ${g.sector}` : ""}</Chip>
+                  <Chip active={mode(g) === "DELIVERY"} onClick={() => setDelivery({ ...delivery, [g.key]: "DELIVERY" })}><Icon name="moto" className="size-4" /> {t("bag.delivery")} +{rwf(BAG_DELIVERY_FEE)}</Chip>
+                  <Chip active={mode(g) === "PICKUP"} onClick={() => setDelivery({ ...delivery, [g.key]: "PICKUP" })}><Icon name="store" className="size-4" /> {t("bag.pickup")}{g.sector ? ` · ${g.sector}` : ""}</Chip>
                 </fieldset>
-                {g.problems.map((p) => <p key={p} className="text-sm text-terra">⚠ {p}</p>)}
+                {g.problems.map((p) => <p key={p} className="flex items-start gap-1.5 text-sm text-terra"><Icon name="alert" className="mt-0.5 size-4 shrink-0" /> {p}</p>)}
               </section>
             ))}
           </>
@@ -207,13 +211,13 @@ function CheckoutSheet({ open, onClose, groups, delivery, total, onDone }: {
           <fieldset className="space-y-2">
             <legend className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-mut">{t("bag.address")}</legend>
             <div className="flex flex-wrap gap-2">
-              {addresses?.map((a) => <Chip key={a.id} active={addressId === a.id} onClick={() => setAddressId(a.id)}>📍 {a.label} · {a.address.slice(0, 22)}</Chip>)}
-              {addresses && addresses.length > 0 && <Chip active={addressId === "new"} onClick={() => setAddressId("new")}>＋ {t("bag.newAddress")}</Chip>}
+              {addresses?.map((a) => <Chip key={a.id} active={addressId === a.id} onClick={() => setAddressId(a.id)}><Icon name="pin" className="size-4" /> {a.label} · {a.address.slice(0, 22)}</Chip>)}
+              {addresses && addresses.length > 0 && <Chip active={addressId === "new"} onClick={() => setAddressId("new")}><Icon name="plus" className="size-4" /> {t("bag.newAddress")}</Chip>}
             </div>
             {addressId === "new" && (
               <>
                 <input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="e.g. KG 7 Ave, Kacyiru" aria-label={t("bag.address")} className="glass h-12 w-full rounded-2xl px-4 outline-none placeholder:text-white/40" />
-                <label className="flex items-center gap-2 text-sm text-mut">
+                <label className="flex min-h-11 items-center gap-2 text-sm text-mut">
                   <input type="checkbox" checked={save} onChange={(e) => setSave(e.target.checked)} className="size-4 accent-[#f2b84b]" />
                   {t("bag.saveAddress")}
                 </label>
@@ -224,8 +228,8 @@ function CheckoutSheet({ open, onClose, groups, delivery, total, onDone }: {
         <fieldset>
           <legend className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-mut">{t("bag.wallet")}</legend>
           <div className="flex flex-wrap gap-2">
-            <Chip active={wallet === "MTN_MOMO"} onClick={() => setWallet("MTN_MOMO")}>🟡 MTN MoMo · {me?.phone.slice(-4).padStart(8, "•")}</Chip>
-            <Chip active={wallet === "AIRTEL_MONEY"} onClick={() => setWallet("AIRTEL_MONEY")}>🔴 Airtel Money</Chip>
+            <Chip active={wallet === "MTN_MOMO"} onClick={() => setWallet("MTN_MOMO")}><span aria-hidden className="size-2.5 rounded-full bg-[#ffcc00]" /> MTN MoMo · {me?.phone.slice(-4).padStart(8, "•")}</Chip>
+            <Chip active={wallet === "AIRTEL_MONEY"} onClick={() => setWallet("AIRTEL_MONEY")}><span aria-hidden className="size-2.5 rounded-full bg-[#e40000]" /> Airtel Money</Chip>
           </div>
         </fieldset>
         <section aria-label="Payments">
@@ -236,7 +240,7 @@ function CheckoutSheet({ open, onClose, groups, delivery, total, onDone }: {
                 <li key={g.key} className="flex items-center gap-3 rounded-2xl bg-white/5 px-3 py-2.5">
                   <span className="grid size-8 shrink-0 place-items-center rounded-full bg-violet/30 text-sm font-bold" aria-hidden>{i + 1}</span>
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-semibold">🔐 {g.payoutLabel}</span>
+                    <span className="flex items-center gap-1 truncate text-sm font-semibold"><Icon name="lock" className="size-3.5 shrink-0" /> {g.payoutLabel}</span>
                     <span className="block text-xs text-mut">{g.lines.reduce((n, l) => n + l.qty, 0)} items · {fee ? `${t("bag.delivery")} +${rwf(fee)}` : t("bag.pickup")}</span>
                   </span>
                   <span className="font-semibold">{rwf(g.subtotalRwf + fee)}</span>
@@ -244,7 +248,12 @@ function CheckoutSheet({ open, onClose, groups, delivery, total, onDone }: {
               );
             })}
           </ol>
-          {groups.length > 1 && <p className="mt-2 text-xs text-gold">{t("bag.splitNote")}</p>}
+          {groups.length > 1 && (
+            <p className="mt-2 flex items-center gap-1 text-xs text-gold">
+              {groups.length} {t("bag.payments")}
+              <InfoTip label="About split payments">{t("bag.splitNote")}</InfoTip>
+            </p>
+          )}
         </section>
       </div>
       <ErrorNote error={error} />
@@ -252,7 +261,7 @@ function CheckoutSheet({ open, onClose, groups, delivery, total, onDone }: {
         {busy ? "…" : `${t("bag.pay")} ${rwf(total)}${groups.length > 1 ? ` · ${groups.length} ${t("bag.payments")}` : ""}`}
       </Button>
       {needsAddress && !ready && <p className="mt-2 text-center text-xs text-gold">Add a delivery address to continue</p>}
-      <p className="mt-2 text-center text-xs text-mut">You approve each request with your Mobile Money PIN. Nothing is taken before that.</p>
+      <p className="mt-2 flex items-center justify-center gap-1 text-center text-xs text-mut"><Icon name="lock" className="size-3.5" /> Approve each with your PIN · nothing taken before</p>
     </Sheet>
   );
 }
@@ -262,7 +271,7 @@ function CheckoutDone({ result }: { result: CheckoutResult }) {
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-3">
-        <span className="grid size-14 place-items-center rounded-full bg-mint text-3xl text-ink" aria-hidden>📲</span>
+        <span className="spring-pop grid size-14 shrink-0 place-items-center rounded-full bg-mint text-ink" aria-hidden><Icon name="phone" className="size-7" /></span>
         <div>
           <p className="font-display text-xl font-black">{t("bag.sent")}</p>
           <p className="text-sm text-mut">{t("bag.sentBody")}</p>
@@ -277,12 +286,12 @@ function CheckoutDone({ result }: { result: CheckoutResult }) {
                 <span className="block text-xs text-mut">{o.code} · {o.items} items</span>
               </span>
               <span className="font-semibold">{rwf(o.totalRwf)}</span>
-              <span aria-hidden>→</span>
+              <Icon name="chevron" className="size-4 text-mut" />
             </Link>
           </li>
         ))}
       </ul>
-      {result.failed.map((f) => <p key={f.pageName} className="text-sm text-terra">⚠ {f.pageName}: {f.reason}</p>)}
+      {result.failed.map((f) => <p key={f.pageName} className="flex items-start gap-1.5 text-sm text-terra"><Icon name="alert" className="mt-0.5 size-4 shrink-0" /> {f.pageName}: {f.reason}</p>)}
       {process.env.NODE_ENV !== "production" && <Link href="/dev/handset" className="block text-center text-sm text-gold underline">Open the simulated handset (dev)</Link>}
     </div>
   );

@@ -74,7 +74,7 @@ console.log(`poll ${pollId} → ${owner.shareUrl}`);
 assert(owner.options.length >= 2, `poll has ${owner.options.length} looks`);
 
 await page.goto(`${BASE}${href}`);
-await page.getByText(/votes and comments appear here/i).waitFor();
+await page.getByText(/no votes yet/i).waitFor();
 await page.getByText("Live", { exact: true }).waitFor({ timeout: 8000 });
 await shot("owner-waiting");
 
@@ -107,7 +107,7 @@ await friend.getByText("Your vote ✓").waitFor();
 await friend.waitForTimeout(900);
 await friend.screenshot({ path: `${out}51-friend-voted.png` });
 await friend.getByRole("button", { name: /add a comment/i }).click();
-await friend.getByRole("button", { name: "React 💙" }).click();
+await friend.getByRole("button", { name: "React: Yes" }).click();
 await friend.getByLabel(/your name/i).fill("Grace");
 await friend.getByLabel(/comment/i).fill("This one! So elegant");
 await friend.screenshot({ path: `${out}52-friend-comment.png` });

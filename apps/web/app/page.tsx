@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { RecordingTimer, TranscriptReview, VoiceConsentSheet, VoiceOrb, VoiceSettingsSheet } from "@/components/voice-muse";
-import { Icon } from "@/components/icons";
+import { Icon, type IconName } from "@/components/icons";
 import { Button, Chip, ErrorNote, Screen, Sheet, Spinner } from "@/components/ui";
 import { api, ApiError, rwf } from "@/lib/api";
 import { describeError } from "@/lib/api-errors";
@@ -239,7 +239,7 @@ export default function Muse() {
       ?? (window as unknown as { webkitSpeechRecognition?: new () => SpeechRec }).webkitSpeechRecognition;
     if (!Ctor) {
       holding.current = false;
-      setError("Voice isn't available in this browser yet. Type what you need instead.");
+      setError("Voice isn't available here · type instead");
       setPhase("typing");
       return;
     }
@@ -278,7 +278,7 @@ export default function Muse() {
       <header className="relative z-20 flex items-center justify-between px-4 pt-[max(env(safe-area-inset-top),14px)]">
         <span className="flex items-center gap-2">
           <span className="orb size-7 rounded-full shadow-[0_0_18px_rgba(242,184,75,.5)]" />
-          <span className="font-display text-lg font-black">Nyambika</span>
+          <span className="font-brand text-lg font-black">Nyambika</span>
         </span>
         {loading ? null : me ? (
           <span className="flex items-center gap-2">
@@ -288,21 +288,21 @@ export default function Muse() {
                 aria-pressed={!prefs.muted}
                 aria-label={t("voice.speakReplies")}
                 title={prefs.muted ? t("voice.unmute") : t("voice.mute")}
-                className="glass press grid size-10 place-items-center rounded-full"
+                className="hit glass press grid size-10 place-items-center rounded-full"
               >
                 <Icon name={prefs.muted ? "mute" : "volume"} className="size-5" />
               </button>
             )}
-            <button onClick={() => setMenu(true)} onPointerEnter={() => void import("@/components/menu")} aria-label="Menu" className="glass press grid size-10 place-items-center rounded-full"><Icon name="menu" className="size-5" /></button>
+            <button onClick={() => setMenu(true)} onPointerEnter={() => void import("@/components/menu")} aria-label="Menu" className="hit glass press grid size-10 place-items-center rounded-full"><Icon name="menu" className="size-5" /></button>
           </span>
         ) : (
-          <Link href="/signin" className="glass rounded-full px-4 py-2 text-sm font-semibold">Sign in</Link>
+          <Link href="/signin" className="hit glass rounded-full px-4 py-2 text-sm font-semibold">Sign in</Link>
         )}
       </header>
 
       <main className="flex flex-1 flex-col items-center px-5 text-center">
-        <p className="mt-6 text-txt/80">{t("home.greeting")}{name ? ` ${name}` : ""} 👋</p>
-        <h1 className="font-display text-[34px] font-black leading-tight text-grad">{t("muse.question")}</h1>
+        <p className="mt-6 text-txt/80">{t("home.greeting")}{name ? ` ${name}` : ""}</p>
+        <h1 className="font-brand text-[34px] font-black leading-tight text-grad">{t("muse.question")}</h1>
 
         <TwinNudge place="home" />
         {me && phase === "idle" && <WardrobeAmbient />}
@@ -330,18 +330,18 @@ export default function Muse() {
         {phase === "understood" && intent && (
           <div className="mt-4 w-full animate-rise">
             <p className="mb-2 text-xs font-semibold uppercase tracking-[.2em] text-gold">{t("muse.understood")}</p>
-            {reply && <p className="mx-auto mb-3 max-w-sm text-sm text-txt/90" aria-live="polite">{speaking ? "🔊 " : ""}{reply}</p>}
+            {reply && <p className="mx-auto mb-3 max-w-sm text-sm text-txt/90" aria-live="polite">{speaking ? <Icon name="volume" className="mr-1 inline size-4 align-[-3px]" /> : null}{reply}</p>}
             <div className="flex flex-wrap justify-center gap-2">
               {chips.map((c) => (
-                <Chip key={c.key} onClick={c.edit ? () => { setTouched(true); setEdit(c.edit!); } : undefined}>{c.label}</Chip>
+                <Chip key={c.key} onClick={c.edit ? () => { setTouched(true); setEdit(c.edit!); } : undefined}><Icon name={c.icon} className="size-4 text-gold" />{c.label}</Chip>
               ))}
             </div>
             {me ? (
               <div className="mt-4">
                 {session ? (
-                  <Button className="w-full" onClick={() => router.push(`/looks/${session.sessionId}`)}>✨ {t("muse.showLooks")} ({session.total})</Button>
+                  <Button className="w-full" onClick={() => router.push(`/looks/${session.sessionId}`)}><Icon name="sparkle" className="size-5" /> {t("muse.showLooks")} ({session.total})</Button>
                 ) : (
-                  <p className="text-sm font-semibold text-gold">✨ {me.hasTwin ? t("muse.rendering") : t("muse.renderingModel")}</p>
+                  <p className="text-sm font-semibold text-gold"><Icon name="sparkle" className="mr-1 inline size-4 align-[-3px]" />{me.hasTwin ? t("muse.rendering") : t("muse.renderingModel")}</p>
                 )}
               </div>
             ) : (
@@ -366,7 +366,7 @@ export default function Muse() {
               aria-label={t("muse.type")}
               className="glass h-14 w-full rounded-2xl px-4 text-base outline-none placeholder:text-white/40"
             />
-            <button type="button" onClick={() => setText(t("muse.example"))} className="mt-2 text-sm text-mut underline">e.g. “{t("muse.example")}”</button>
+            <button type="button" onClick={() => setText(t("muse.example"))} className="hit mt-2 text-sm text-mut underline">e.g. “{t("muse.example")}”</button>
           </form>
         )}
 
@@ -410,9 +410,9 @@ export default function Muse() {
           </button>
           <button aria-label={t("muse.type")} title={t("muse.type")} onClick={() => setPhase("typing")} className="glass press grid size-16 place-items-center rounded-full"><Icon name="keyboard" className="size-7" /></button>
         </div>
-        <p className="mt-2 text-center text-xs text-mut">
+        <p className="mt-1 flex min-h-11 items-center justify-center gap-1 text-center text-xs text-mut">
           {voiceOn ? t("muse.hold") : t("muse.type")}
-          {voiceOn && me && <> · <button type="button" onClick={() => setVoiceSheet(true)} className="underline underline-offset-2">{t("voice.options")}</button></>}
+          {voiceOn && me && <> · <button type="button" onClick={() => setVoiceSheet(true)} className="inline-flex min-h-11 items-center underline underline-offset-2">{t("voice.options")}</button></>}
         </p>
       </footer>
 
@@ -448,14 +448,14 @@ function BudgetEdit({ value, onDone }: { value: number | null; onDone: (b: numbe
 }
 
 function buildChips(i: Intent, twinSize: string | null) {
-  const chips: { key: string; label: string; edit?: "occasion" | "budget" }[] = [];
-  chips.push({ key: "o", label: i.occasion ? `💍 ${cap(i.occasion.replace("-", " "))}${i.date ? ` · ${dayLabel(i.date)}` : ""}` : "💍 Any occasion", edit: "occasion" });
-  chips.push({ key: "b", label: i.budgetMax ? `💰 Under ${rwf(i.budgetMax)}` : "💰 Any budget", edit: "budget" });
+  const chips: { key: string; label: string; icon: IconName; edit?: "occasion" | "budget" }[] = [];
+  chips.push({ key: "o", icon: "ring", label: i.occasion ? `${cap(i.occasion.replace("-", " "))}${i.date ? ` · ${dayLabel(i.date)}` : ""}` : "Any occasion", edit: "occasion" });
+  chips.push({ key: "b", icon: "cash", label: i.budgetMax ? `Under ${rwf(i.budgetMax)}` : "Any budget", edit: "budget" });
   const style = [...i.categories, ...i.colours, ...i.styles];
-  if (style.length) chips.push({ key: "s", label: `🎨 ${style.map(cap).join(" · ")}` });
+  if (style.length) chips.push({ key: "s", icon: "palette", label: style.map(cap).join(" · ") });
   const size = i.size ?? twinSize;
-  chips.push({ key: "z", label: size ? `📏 Your twin · size ${size}` : "📏 Size from your twin" });
-  chips.push({ key: "l", label: `📍 ${i.location ?? "Kigali"} makers` });
+  chips.push({ key: "z", icon: "ruler", label: size ? `Your twin · size ${size}` : "Size from your twin" });
+  chips.push({ key: "l", icon: "pin", label: `${i.location ?? "Kigali"} makers` });
   return chips;
 }
 

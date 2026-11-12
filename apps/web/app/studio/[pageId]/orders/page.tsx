@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
+import { MoreActions } from "@/components/ios";
 import { Badge, Empty, Icon, Note, ScreenSkeleton, SButton, SectionTitle, StudioSheet, type IconName } from "@/components/studio";
 import { api, rwf } from "@/lib/api";
 import { ORDER_LABEL, type OrderView } from "@/lib/orders";
@@ -63,19 +64,23 @@ export default function Orders() {
   const actions = (o: OrderView, full?: boolean) => {
     const next = o.next.filter((n) => ACTION[n]);
     if (!next.length) return null;
+    const primary = next.filter((n) => !SECONDARY.includes(n));
+    const secondary = next.filter((n) => SECONDARY.includes(n));
     return (
-      <div className={`flex flex-wrap gap-2 ${full ? "" : "pt-1"}`}>
-        {next.map((n) => (
-          <SButton
-            key={n}
-            variant={SECONDARY.includes(n) ? "outline" : "primary"}
-            disabled={busy === o.id + n}
-            onClick={() => move(o.id, n)}
-            className={SECONDARY.includes(n) ? "min-h-10 px-3" : "min-h-10 flex-1 px-3"}
-          >
+      <div className={`flex items-center gap-2 ${full ? "" : "pt-1"}`}>
+        {primary.map((n) => (
+          <SButton key={n} disabled={busy === o.id + n} onClick={() => move(o.id, n)} className="flex-1 px-3">
             {ACTION[n]}
           </SButton>
         ))}
+        {secondary.length > 0 && (
+          <MoreActions
+            label={`More actions for order ${o.code}`}
+            title={`${o.item.title} · ${o.code}`}
+            className="size-11 shrink-0 bg-white ring-1 ring-inset ring-hairline"
+            actions={secondary.map((n) => ({ label: ACTION[n], icon: "x", destructive: true, disabled: busy === o.id + n, onSelect: () => move(o.id, n) }))}
+          />
+        )}
       </div>
     );
   };
@@ -95,7 +100,7 @@ export default function Orders() {
       {loading && !data && <ScreenSkeleton variant="list" />}
       {data?.length === 0 && (
         <Empty icon="inbox" title="No orders yet">
-          Paid orders from hold-to-buy appear here, and on your WhatsApp. Share your page to get the first one.
+          Paid orders land here and on WhatsApp
         </Empty>
       )}
 
@@ -108,7 +113,7 @@ export default function Orders() {
                 key={l.key}
                 type="button"
                 onClick={() => lanesRef.current?.querySelector(`#lane-${l.key}`)?.scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" })}
-                className="st-press inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-full bg-white px-3 text-xs font-bold text-cocoa ring-1 ring-inset ring-hairline"
+                className="st-press inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full bg-white px-3.5 text-xs font-bold text-cocoa ring-1 ring-inset ring-hairline"
               >
                 <span aria-hidden className={`size-2 rounded-full ${l.accent}`} />
                 {l.title}
@@ -168,12 +173,11 @@ export default function Orders() {
                 <Badge value={current.status} label={ORDER_LABEL[current.status]} />
               </div>
             </div>
-            <div className="flex items-start gap-3 rounded-2xl bg-emerald-50 p-3 ring-1 ring-inset ring-emerald-200">
-              <Icon name="wallet" className="mt-0.5 size-5 shrink-0 text-mint-ink" />
+            <div className="flex items-center gap-3 rounded-2xl bg-emerald-50 p-3 ring-1 ring-inset ring-emerald-200">
+              <Icon name="wallet" className="size-5 shrink-0 text-mint-ink" />
               <p className="text-sm text-mint-ink">
                 <strong>Paid to {current.payoutLabel}</strong> · {current.payment?.status.toLowerCase() ?? "no payment yet"}
                 {current.payment?.reconciled ? " · reconciled" : ""}
-                <span className="block text-xs">Mobile Money goes straight to you; Nyambika never holds it.</span>
               </p>
             </div>
             <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 rounded-2xl bg-white p-3.5 text-sm ring-1 ring-inset ring-hairline">
@@ -210,7 +214,7 @@ export default function Orders() {
             )}
             {current.review && (
               <p className="rounded-2xl bg-amber-50 p-3 text-sm text-gold-ink ring-1 ring-inset ring-amber-200">
-                {"★".repeat(current.review.rating)}{"☆".repeat(5 - current.review.rating)} “{current.review.text}”
+                <span className="mr-1 inline-flex align-[-2px]" role="img" aria-label={`${current.review.rating} of 5 stars`}>{[1, 2, 3, 4, 5].map((n) => <Icon key={n} name="star" filled={n <= current.review!.rating} className="size-4" />)}</span> “{current.review.text}”
               </p>
             )}
           </div>

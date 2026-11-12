@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
-import { Icon, type IconName } from "@/components/studio";
+import { Icon, type IconName } from "@/components/icons";
 
 /**
  * Tailor desk sub-navigation: one pill row at every width. The studio shell already owns the
@@ -58,10 +58,10 @@ export function StatusChip({ status, label }: { status: string; label: string })
 
 export function Bento({ label, value, hint, accent }: { label: string; value: ReactNode; hint?: string; accent?: string }) {
   return (
-    <div className={`rounded-3xl p-4 ${accent ?? "bg-white ring-1 ring-stone-200"}`}>
-      <p className="text-xs font-bold uppercase tracking-wider opacity-70">{label}</p>
-      <p className="mt-1 text-3xl font-black leading-none">{value}</p>
-      {hint && <p className="mt-1 text-xs opacity-70">{hint}</p>}
+    <div className={`flex min-w-0 flex-col gap-1 rounded-3xl p-4 ${accent ?? "bg-white ring-1 ring-stone-200"}`}>
+      <p className="truncate text-xs font-bold uppercase tracking-wider opacity-70">{label}</p>
+      <p className="break-words text-3xl font-black leading-none tabular-nums">{value}</p>
+      {hint && <p className="mt-auto truncate text-xs opacity-70">{hint}</p>}
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import { validatePassport, type PassportData } from "@nyambika/contracts";
 import { useCallback, useEffect, useState } from "react";
 import { QrCode } from "@/components/qr";
+import { InfoTip } from "@/components/kit";
 import { Chip, Field, Icon, Input, Note, SButton, SLink, StudioSheet, Switch, Textarea } from "@/components/studio";
 import { api } from "@/lib/api";
 
@@ -38,7 +39,7 @@ export function PassportCard({ productId, title, canManage }: { productId: strin
         <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-cocoa text-white shadow-[0_8px_18px_-8px_rgba(29,24,20,.7)]"><Icon name="qr" className="size-5" /></span>
         <div className="min-w-0 flex-1">
           <h3 id="dpp-t" className="font-display text-lg font-black tracking-tight text-cocoa">Product passport</h3>
-          <p className="text-sm text-cocoa-2">Where it comes from, who made it, how to care for and repair it. Shoppers scan the QR on the hang-tag. Ready for export rules (EU DPP draft).</p>
+          <p className="mt-1 flex flex-wrap items-center gap-1.5"><Chip>Origin</Chip><Chip>Care</Chip><Chip>Repair</Chip><InfoTip label="About the product passport">Where it comes from, who made it, how to care for and repair it. Shoppers scan the QR on the hang-tag. Ready for export rules (EU DPP draft).</InfoTip></p>
         </div>
       </div>
       <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -136,7 +137,7 @@ function PassportSheet({ draft, onClose, onSaved }: { draft: Draft; onClose: () 
           <Field label="Cooperative (if any)"><Input value={f.origin.cooperative} onChange={(e) => set("origin", { ...f.origin, cooperative: e.target.value })} /></Field>
         </div>
         <Field label="Made by" hint="Names of the makers who agreed to be credited, separated by commas."><Input value={makers} onChange={(e) => setMakers(e.target.value)} /></Field>
-        <Switch checked={f.origin.handmade} onChange={(v) => set("origin", { ...f.origin, handmade: v })} label="Handmade" description="Cut and sewn by hand, not mass-produced." />
+        <Switch checked={f.origin.handmade} onChange={(v) => set("origin", { ...f.origin, handmade: v })} label="Handmade" description="Not mass-produced" />
 
         <div className="grid grid-cols-2 gap-3">
           <Field label="Made in (month)"><Input value={f.production.date} placeholder="2026-10" onChange={(e) => set("production", { ...f.production, date: e.target.value })} /></Field>
@@ -157,7 +158,7 @@ function PassportSheet({ draft, onClose, onSaved }: { draft: Draft; onClose: () 
         </Field>
 
         <Field label="Care" hint="One instruction per line."><Textarea value={care} onChange={(e) => setCare(e.target.value)} /></Field>
-        <Switch checked={f.repair.offered} onChange={(v) => set("repair", { ...f.repair, offered: v })} label="I offer repairs and alterations" description="Shown on the passport so buyers keep the piece longer." />
+        <Switch checked={f.repair.offered} onChange={(v) => set("repair", { ...f.repair, offered: v })} label="I offer repairs and alterations" description="Shown on the passport" />
         {f.repair.offered && <Field label="Repair services" hint="One per line, e.g. hem and fit alterations."><Textarea value={services} onChange={(e) => setServices(e.target.value)} className="min-h-20" /></Field>}
 
         <Field label="Certifications" group>
@@ -177,7 +178,7 @@ function PassportSheet({ draft, onClose, onSaved }: { draft: Draft; onClose: () 
 
         <div className="rounded-2xl bg-white p-3 ring-1 ring-inset ring-hairline">
           <p className="text-[13px] font-bold text-cocoa">Claims</p>
-          <p className="text-xs text-cocoa-2">A Nyambika host checks these before they show as verified.</p>
+          <p className="text-xs text-cocoa-2">Host-verified</p>
           <div className="mt-2 space-y-3">
             <Field label="Made in label"><Input value={f.claims.madeIn} onChange={(e) => set("claims", { ...f.claims, madeIn: e.target.value })} placeholder="Made in Rwanda" /></Field>
             <Field label="Impact story"><Textarea value={f.claims.impactStory} onChange={(e) => set("claims", { ...f.claims, impactStory: e.target.value })} className="min-h-20" /></Field>

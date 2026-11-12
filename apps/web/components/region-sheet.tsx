@@ -35,7 +35,7 @@ export function RegionSheet({ open, onClose }: { open: boolean; onClose: () => v
         <legend className="mb-2 text-xs font-semibold uppercase tracking-widest text-mut">{t("region.country")}</legend>
         <div className="flex flex-wrap gap-2">
           {REGION_CODES.map((c) => (
-            <Chip key={c} active={prefs.country === c} onClick={() => void set({ country: c })}>{REGIONS[c].flag} {REGIONS[c].name}</Chip>
+            <Chip key={c} active={prefs.country === c} onClick={() => void set({ country: c })}>{REGIONS[c].name}</Chip>
           ))}
         </div>
       </fieldset>

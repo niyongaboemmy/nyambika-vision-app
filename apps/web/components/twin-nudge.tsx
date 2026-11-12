@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useExperiment } from "@/lib/experiments";
 import { useSession } from "@/lib/session";
 import { track } from "@/lib/track";
+import { Icon } from "@/components/icons";
 
 // Literal (type-checked against the contract) so this shell-level nudge does not pull zod into the home route.
 const TWIN_NUDGE: (typeof EXPERIMENTS)["twinNudge"] = "twin.nudge";
@@ -32,7 +33,7 @@ export function TwinNudge({ place, index = 0 }: { place: "home" | "stream"; inde
   if (place === "home") {
     return (
       <Link href="/mirror" onClick={click} className="glass mt-3 rounded-2xl px-4 py-2 text-sm">
-        🪞 Create your private twin to see looks on <b>you</b> →
+        <Icon name="mirror" className="mr-1 inline size-4 align-[-3px]" />Create your private twin to see looks on <b>you</b> →
       </Link>
     );
   }
@@ -40,7 +41,7 @@ export function TwinNudge({ place, index = 0 }: { place: "home" | "stream"; inde
     <div className="pointer-events-none fixed inset-x-0 top-[calc(max(env(safe-area-inset-top),12px)+120px)] z-30 flex justify-center px-4">
       <div className="glass pointer-events-auto flex max-w-[440px] animate-rise items-center gap-1 rounded-full py-1 pl-4 pr-1 text-sm shadow-[0_8px_30px_rgba(139,92,246,.35)]">
         <Link href="/mirror" onClick={click} className="flex min-h-10 items-center gap-2 font-semibold">
-          <span aria-hidden>✨</span> {t("twin.nudgeSoft")} <span aria-hidden>→</span>
+          <Icon name="sparkle" className="mr-1 inline size-4 align-[-3px]" />{t("twin.nudgeSoft")} <span aria-hidden>→</span>
         </Link>
         <button type="button" aria-label="Hide" onClick={() => setClosed(true)} className="grid size-10 place-items-center rounded-full text-white/70 hover:text-white">✕</button>
       </div>

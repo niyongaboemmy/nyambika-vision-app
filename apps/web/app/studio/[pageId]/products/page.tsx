@@ -24,11 +24,11 @@ const MATCH: Record<Filter, (p: StudioProduct) => boolean> = {
 };
 
 const EMPTY: Record<Filter, string> = {
-  all: "No products yet. Add your first one with a clear photo on a plain background.",
-  live: "Nothing is live yet. Publish a product so shoppers can try it on.",
-  draft: "No drafts. Everything you added is live or waiting.",
-  photo: "Every photo passed the try-on check. Nice work.",
-  improve: "Every listing has a full description. ✨",
+  all: "Clear photo · plain background",
+  live: "Nothing live yet",
+  draft: "No drafts",
+  photo: "All photos passed",
+  improve: "All descriptions complete",
 };
 
 const readinessLabel = (r: string) => `try-on: ${r.replace(/_/g, " ").toLowerCase()}`;
@@ -111,14 +111,14 @@ function Products() {
             { value: "live", label: "Live", count: rest.filter(MATCH.live).length },
             { value: "draft", label: "Drafts", count: rest.filter(MATCH.draft).length },
             { value: "photo", label: "Needs photo", count: rest.filter(MATCH.photo).length },
-            { value: "improve", label: "✨ Improve", count: rest.filter(MATCH.improve).length },
+            { value: "improve", label: "Improve", count: rest.filter(MATCH.improve).length },
           ]}
         />
       )}
       {filter === "improve" && shown.length > 0 && (
-        <p className="flex items-start gap-2 rounded-2xl bg-violet-50 p-3 text-sm text-violet-ink ring-1 ring-inset ring-violet-200">
-          <Icon name="sparkle" className="mt-0.5 size-4 shrink-0" />
-          These listings have a short description. Open one and tap “✨ Write it for me” for a draft in Kinyarwanda, English or French.
+        <p className="flex items-center gap-2 rounded-2xl bg-violet-50 px-3 py-2.5 text-sm font-semibold text-violet-ink ring-1 ring-inset ring-violet-200">
+          <Icon name="sparkle" className="size-4 shrink-0" />
+          Short descriptions · open one → “Write it for me”
         </p>
       )}
 
@@ -148,11 +148,14 @@ function Products() {
                 )}
               </div>
               <div className="space-y-1.5 p-3">
-                <p className="truncate text-sm font-extrabold text-cocoa">{p.title}</p>
+                <p className="line-clamp-2 min-h-[2.5em] text-sm font-extrabold leading-tight text-cocoa">{p.title}</p>
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-sm font-bold tabular-nums text-cocoa">{rwf(p.priceRwf)}</span>
-                  <span className="flex -space-x-1" aria-label={`${p.variants.length} colour(s)`}>
-                    {p.variants.slice(0, 4).map((v) => <span key={v.id} className="size-4 rounded-full ring-2 ring-white" style={{ background: v.colourHex }} />)}
+                  <span className="flex min-w-0 items-center gap-1.5" aria-label={`${p.variants.length} colour(s): ${p.variants.map((v) => v.colourName).join(", ")}`}>
+                    {p.variants.length === 1 && <span className="truncate text-[11px] font-bold text-cocoa-2">{p.variants[0].colourName}</span>}
+                    <span className="flex shrink-0 -space-x-1">
+                      {p.variants.slice(0, 4).map((v) => <span key={v.id} className="size-4 rounded-full ring-2 ring-white" style={{ background: v.colourHex }} />)}
+                    </span>
                   </span>
                 </div>
                 <p className={`truncate text-[11px] font-bold ${p.readiness === "READY" ? "text-mint-ink" : RETAKE.includes(p.readiness) ? "text-gold-ink" : "text-cocoa-2"}`}>
