@@ -81,7 +81,7 @@ async function seedCredit(path: string, credit: Credit, extraChanges: string[] =
     licence: credit.licence,
     licenceUrl: credit.licenceUrl,
     shareAlike: credit.shareAlike,
-    changes: [...credit.changes.filter((c) => extraChanges.length || !c.startsWith("background removed")), ...extraChanges],
+    changes: [...credit.changes.filter((c) => !c.startsWith("background removed")), ...extraChanges],
     illustration: credit.illustration,
   };
   await prisma.mediaCredit.upsert({ where: { path }, create: { path, ...data }, update: data });
