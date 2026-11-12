@@ -1,6 +1,7 @@
 // Unit tests for the API error mapping (error sweep). Run: `pnpm --filter @nyambika/web test` (node --test, type stripping).
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { loadLocale } from "@nyambika/i18n";
 import { describeError, errorText, formatCountdown, nextKigaliMidnight, recallFriendly, rememberFriendly } from "./api-errors.ts";
 
 const apiErr = (status: number, body: unknown, message = (body as { message?: string })?.message ?? "") => Object.assign(new Error(message), { status, body });
@@ -27,8 +28,11 @@ describe("describeError", () => {
     assert.match(d.title, /3D twin/);
   });
 
-  it("localises RW / FR and falls back to EN for SW", () => {
+  it("localises RW / FR and falls back to EN for SW", async () => {
     const e = apiErr(503, { code: "KILL_SWITCH", message: "Looks are paused for a moment." });
+    // Catalogues other than English load on demand (JS budget pass 2); until then the English string is shown.
+    assert.equal(describeError(e, "rw").title, describeError(e, "en").title);
+    await Promise.all([loadLocale("rw"), loadLocale("fr"), loadLocale("sw")]);
     assert.match(describeError(e, "en").title, /resting/);
     assert.match(describeError(e, "fr").title, /reposent/);
     assert.match(describeError(e, "rw").title, /ruhutse/);
