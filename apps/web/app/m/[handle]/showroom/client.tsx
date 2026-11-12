@@ -138,7 +138,7 @@ function Room({ room, commerce }: { room: Showroom; commerce: Commerce | null })
             ref={on ? (el) => el?.scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" }) : undefined}
             onClick={() => pick(on ? null : i.productId)}
             aria-pressed={on}
-            className={`glass flex shrink-0 snap-start items-center gap-2 rounded-2xl p-1.5 pr-3 text-left transition-transform active:scale-95 ${on ? "ring-2 ring-gold" : ""}`}
+            className={`float-panel flex shrink-0 snap-start items-center gap-2 rounded-2xl p-1.5 pr-3 text-left transition-transform active:scale-95 ${on ? "outline outline-2 -outline-offset-2 outline-gold" : ""}`}
           >
             {(i.poster ?? i.photo) ? <img src={(i.poster ?? i.photo)!} alt="" loading="lazy" className="size-11 rounded-xl bg-black/30 object-contain" /> : <span className="size-11 rounded-xl bg-white/10" />}
             <span className="min-w-0 max-w-[120px]">
@@ -227,7 +227,7 @@ function Room({ room, commerce }: { room: Showroom; commerce: Commerce | null })
           onKeyDown={onKey}
           onKeyUp={onKey}
           aria-label={`${room.page.name} 3D showroom. Drag to look around, tap the floor to walk, tap a piece to select it. Keys: arrows or W A S D to walk and turn, Q and E to step sideways, N and P for the next or previous piece, H to return to the entrance, Escape to deselect.`}
-          className="absolute inset-0 size-full touch-none outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gold"
+          className="absolute inset-0 z-0 size-full touch-none outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-gold"
         />
       )}
       {mode !== "flat" && !firstView && (
@@ -262,11 +262,11 @@ function Room({ room, commerce }: { room: Showroom; commerce: Commerce | null })
       {mode === "flat" && <FlatRoom room={room} onPick={(id) => setSelected(id)} price={price} />}
 
       {/* Bottom: controls, piece rail, selected card */}
-      <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/85 via-black/55 to-transparent px-3 pb-[max(env(safe-area-inset-bottom),12px)] pt-10">
+      <div className="absolute inset-x-0 bottom-0 z-30 bg-gradient-to-t from-black/85 via-black/55 to-transparent px-3 pb-[max(env(safe-area-inset-bottom),12px)] pt-10">
         {item && look ? (
           <>
           {room.items.length > 1 && <div className="mx-auto mb-2 max-w-[480px] lg:max-w-[880px]">{pieceStrip}</div>}
-          <section aria-label={`${item.title} details`} className="glass mx-auto max-w-[480px] animate-rise rounded-[26px] p-3">
+          <section aria-label={`${item.title} details`} className="float-panel mx-auto max-w-[480px] animate-rise rounded-[26px] p-3">
             <div className="flex items-center gap-3">
               {(item.photo ?? item.poster) && <img src={(item.photo ?? item.poster)!} alt={item.title} className="size-16 shrink-0 rounded-2xl bg-white/90 object-contain p-1" />}
               <div className="min-w-0 flex-1">
