@@ -26,7 +26,7 @@ export const REACTIONS = ["🔥", "😍", "👏", "✨", "💃"] as const;
 export type Reaction = (typeof REACTIONS)[number];
 
 /** FR-VR-08: the room's whole initial payload stays under 25 MB; each garment is ≤ 2 MB (E27 budget). */
-export const SHOWROOM_BUDGET = { totalBytes: 25 * 1024 * 1024, maxItems: 12, mannequins: 5 } as const;
+export const SHOWROOM_BUDGET = { totalBytes: 25 * 1024 * 1024, maxItems: 12, roomItems: 36, mannequins: 5 } as const;
 
 /** Synthetic runway models (Monk-scale swatches, standard sizes). Never a shopper's twin. */
 export const RUNWAY_SKINS = ["#A07E56", "#825C43", "#604134", "#3A312A"] as const;
@@ -158,26 +158,57 @@ export interface ShelfItem {
   category: string;
   variantId: string;
   colourName: string;
-  glbPath: string;
+  /** Null for a piece shown as its cut-out photo on a stand (no approved 3D model yet). */
+  glbPath: string | null;
   posterPath: string | null;
   photoPath: string | null;
   heightM: number;
   bytes: number;
   size: string;
   featured: boolean;
-  colours: { variantId: string; colourName: string; colourHex: string; glbPath: string; posterPath: string | null }[];
+  colours: { variantId: string; colourName: string; colourHex: string; glbPath: string | null; posterPath: string | null }[];
 }
+
+/** Display height (m) of a photo stand-in by category, so flat pieces sit at a believable scale. */
+const FLAT_HEIGHT: Record<string, number> = { shirt: 0.75, "t-shirt": 0.7, top: 0.7, blouse: 0.7, jacket: 0.8, skirt: 0.75 };
 
 /**
  * The 3D shelf / showroom line-up: one entry per product that has at least one approved 3D colour, featured
  * pieces first (in the maker's order), then the page order; capped by count and by the 25 MB room budget.
+ * With `includeFlat` (the showroom), products without a 3D model join as their cut-out photo on a stand, so
+ * every published piece with a photo is in the room.
  */
-export function shapeShelf(src: ShelfSource, max: number = SHOWROOM_BUDGET.maxItems, budgetBytes: number = SHOWROOM_BUDGET.totalBytes): ShelfItem[] {
+export function shapeShelf(
+  src: ShelfSource,
+  max: number = SHOWROOM_BUDGET.maxItems,
+  budgetBytes: number = SHOWROOM_BUDGET.totalBytes,
+  includeFlat = false,
+): ShelfItem[] {
   const featured = src.featured ?? [];
   const items: ShelfItem[] = [];
   for (const p of src.products) {
     const colours = p.variants.filter((v) => src.assets.has(v.id));
-    if (!colours.length) continue;
+    if (!colours.length) {
+      const photos = includeFlat ? p.variants.filter((v) => v.imagePath) : [];
+      if (!photos.length) continue;
+      items.push({
+        productId: p.id,
+        title: p.title,
+        priceRwf: p.priceRwf,
+        category: p.category,
+        variantId: photos[0].id,
+        colourName: photos[0].colourName,
+        glbPath: null,
+        posterPath: photos[0].imagePath,
+        photoPath: photos[0].imagePath,
+        heightM: FLAT_HEIGHT[p.category.toLowerCase()] ?? 1.1,
+        bytes: 0,
+        size: "",
+        featured: featured.includes(p.id),
+        colours: photos.map((v) => ({ variantId: v.id, colourName: v.colourName, colourHex: v.colourHex, glbPath: null, posterPath: v.imagePath })),
+      });
+      continue;
+    }
     const first = colours[0];
     const a = src.assets.get(first.id)!;
     items.push({
@@ -236,10 +267,13 @@ export function roomLayout(count: number, mannequins: number = SHOWROOM_BUDGET.m
   }
   const rest = count - m;
   const railR = 5.4;
+  const perSide = Math.ceil(rest / 2);
+  // 17° apart for a few pieces; tighter (≥ 6.5°, about 0.6 m on the rail) so a full room never wraps behind.
+  const step = perSide > 1 ? Math.max(6.5, Math.min(17, (165 - 62) / (perSide - 1))) : 17;
   for (let i = 0; i < rest; i++) {
     const side = i % 2 === 0 ? -1 : 1;
     const slot = Math.floor(i / 2);
-    const deg = 62 + slot * 17;
+    const deg = 62 + slot * step;
     const a = (deg * Math.PI) / 180;
     const x = side * Math.sin(a) * railR;
     const z = -Math.cos(a) * railR + 0.4;

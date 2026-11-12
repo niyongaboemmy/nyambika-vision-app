@@ -127,6 +127,30 @@ function Room({ room, commerce }: { room: Showroom; commerce: Commerce | null })
     [],
   );
 
+  // Every piece in the room, always one tap away (also while a piece is open).
+  const pieceStrip = (
+    <nav aria-label="Pieces in this room" className="no-scrollbar -mx-3 flex snap-x gap-2 overflow-x-auto px-3 pb-1">
+      {room.items.map((i) => {
+        const on = i.productId === selected;
+        return (
+          <button
+            key={i.productId}
+            ref={on ? (el) => el?.scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" }) : undefined}
+            onClick={() => pick(on ? null : i.productId)}
+            aria-pressed={on}
+            className={`glass flex shrink-0 snap-start items-center gap-2 rounded-2xl p-1.5 pr-3 text-left transition-transform active:scale-95 ${on ? "ring-2 ring-gold" : ""}`}
+          >
+            {(i.poster ?? i.photo) ? <img src={(i.poster ?? i.photo)!} alt="" loading="lazy" className="size-11 rounded-xl bg-black/30 object-contain" /> : <span className="size-11 rounded-xl bg-white/10" />}
+            <span className="min-w-0 max-w-[120px]">
+              <span className="block truncate text-xs font-bold">{i.title}</span>
+              <span className="block whitespace-nowrap text-[11px] tabular-nums text-gold">{price(i)}</span>
+            </span>
+          </button>
+        );
+      })}
+    </nav>
+  );
+
   async function enterVr() {
     setXrError(null);
     try {
@@ -217,7 +241,7 @@ function Room({ room, commerce }: { room: Showroom; commerce: Commerce | null })
         <Link href={`/m/${room.page.handle}`} aria-label={`Back to ${room.page.name}`} className="glass grid size-11 shrink-0 place-items-center rounded-full">←</Link>
         <div className="min-w-0 flex-1">
           <h1 className="truncate font-display text-lg font-black leading-tight">{room.page.name} {room.page.verified && <span className="text-mint" title="Verified member">✓</span>}</h1>
-          <p className="truncate text-xs text-txt/75">3D showroom · {room.items.length} pieces</p>
+          <p className="truncate text-xs text-txt/75">3D showroom · {room.items.length} {room.items.length === 1 ? "piece" : "pieces"}</p>
         </div>
         <Toggle on={sound} set={setSound} label="Ambient sound" icon={<Icon name={sound ? "volume" : "mute"} className="size-5" />} />
         <Toggle on={contrast} set={setContrast} label="High-contrast labels" icon="◐" />
@@ -240,28 +264,34 @@ function Room({ room, commerce }: { room: Showroom; commerce: Commerce | null })
       {/* Bottom: controls, piece rail, selected card */}
       <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/85 via-black/55 to-transparent px-3 pb-[max(env(safe-area-inset-bottom),12px)] pt-10">
         {item && look ? (
+          <>
+          {room.items.length > 1 && <div className="mx-auto mb-2 max-w-[480px] lg:max-w-[880px]">{pieceStrip}</div>}
           <section aria-label={`${item.title} details`} className="glass mx-auto max-w-[480px] animate-rise rounded-[26px] p-3">
-            <div className="flex gap-3">
-              {(item.photo ?? item.poster) && <img src={(item.photo ?? item.poster)!} alt={item.title} className="h-24 w-20 shrink-0 rounded-2xl object-cover" />}
+            <div className="flex items-center gap-3">
+              {(item.photo ?? item.poster) && <img src={(item.photo ?? item.poster)!} alt={item.title} className="size-16 shrink-0 rounded-2xl bg-white/90 object-contain p-1" />}
               <div className="min-w-0 flex-1">
-                <div className="flex items-start gap-2">
-                  <h2 className="min-w-0 flex-1 font-display text-lg font-black leading-tight">{item.title}</h2>
-                  <button onClick={() => (offTwin(), pick(null))} aria-label="Close piece details" className="grid size-9 shrink-0 place-items-center rounded-full bg-white/10">✕</button>
+                <h2 className="truncate font-display text-base font-black leading-tight" title={item.title}>{item.title}</h2>
+                <p className="mt-0.5 whitespace-nowrap font-semibold tabular-nums text-gold">{price(item)}{item.product.madeToOrder ? <span className="font-normal text-mut"> · made to measure</span> : null}</p>
+                {/* Colours as swatches (names on hover and for screen readers), the payout promise as one short line. */}
+                <div className="mt-1 flex items-center gap-1.5">
+                  {item.colours.map((c) => (
+                    <span key={c.variantId} title={c.colourName} aria-label={c.colourName} role="img" className="size-3.5 shrink-0 rounded-full ring-1 ring-inset ring-white/25" style={{ background: c.colourHex }} />
+                  ))}
+                  <span className="ml-1 truncate text-[11px] text-mut">Paid to maker</span>
                 </div>
-                <p className="font-semibold text-gold">{price(item)}{item.product.madeToOrder ? " · made to measure" : ""}</p>
-                <p className="text-xs text-mut">{item.colours.map((c) => c.colourName).join(" · ")} · paid directly to {room.page.name}</p>
               </div>
-              <div className="self-end">
-                {me ? (
-                  <HoldToBuy key={`buy-${item.productId}-${handoff}`} look={look} autoOpen={handoff > 0} />
-                ) : (
-                  <button onClick={() => router.push(`/signin?next=${encodeURIComponent(`/m/${room.page.handle}/showroom?item=${item.productId}`)}`)} className="grad-cta inline-flex items-center gap-1.5 rounded-2xl px-4 py-2 text-sm font-bold"><Icon name="hand" className="size-4" /> Sign in to buy</button>
-                )}
-              </div>
+              <button onClick={() => (offTwin(), pick(null))} aria-label="Close piece details" className="grid size-9 shrink-0 self-start place-items-center rounded-full bg-white/10"><Icon name="x" className="size-4" /></button>
+            </div>
+            <div className="mt-3">
+              {me ? (
+                <HoldToBuy key={`buy-${item.productId}-${handoff}`} look={look} autoOpen={handoff > 0} />
+              ) : (
+                <button onClick={() => router.push(`/signin?next=${encodeURIComponent(`/m/${room.page.handle}/showroom?item=${item.productId}`)}`)} className="grad-cta flex min-h-11 w-full items-center justify-center gap-1.5 whitespace-nowrap rounded-2xl px-4 text-sm font-bold"><Icon name="hand" className="size-4" /> Sign in to buy</button>
+              )}
             </div>
             <div className="no-scrollbar mt-3 flex gap-2 overflow-x-auto">
-              <Pill onClick={() => void view3d(item)}><Icon name="cube" className="size-4" /> View in 3D</Pill>
-              {me && mode === "3d" && (twin?.id === item.productId && twin.state === "on" ? <Pill onClick={offTwin}><Icon name="rotate" className="size-4" /> Back to mannequin</Pill> : <Pill onClick={() => void onMyTwin(item)} busy={twin?.id === item.productId && twin.state === "working"}><Icon name="mirror" className="size-4" /> See it on my 3D twin</Pill>)}
+              {item.glb && <Pill onClick={() => void view3d(item)}><Icon name="cube" className="size-4" /> View in 3D</Pill>}
+              {me && mode === "3d" && item.glb && (twin?.id === item.productId && twin.state === "on" ? <Pill onClick={offTwin}><Icon name="rotate" className="size-4" /> Back to mannequin</Pill> : <Pill onClick={() => void onMyTwin(item)} busy={twin?.id === item.productId && twin.state === "working"}><Icon name="mirror" className="size-4" /> See it on my 3D twin</Pill>)}
               <Pill href={`/looks/try?variant=${item.variantId}`}><Icon name="sparkle" className="size-4" /> Try on me</Pill>
               {/* Secondary destinations live in an iOS action sheet instead of more pills. */}
               <MoreActions
@@ -278,8 +308,9 @@ function Room({ room, commerce }: { room: Showroom; commerce: Commerce | null })
             {twin?.id === item.productId && twin.state === "none" && <p className="mt-2 text-xs text-mut"><Link className="text-gold underline" href="/mirror/3d">Make your 3D twin</Link> · 2 min</p>}
             {twin?.id === item.productId && twin.state === "error" && <p className="mt-2 text-xs text-terra">{twin.note}</p>}
           </section>
+          </>
         ) : (
-          <div className="mx-auto max-w-[480px]">
+          <div className="mx-auto max-w-[480px] lg:max-w-[880px]">
             <div className="mb-2 flex items-center justify-center gap-2">
               <Ctl label="Previous piece" onClick={() => engine.current?.step(-1)}>‹</Ctl>
               <Ctl label="Turn left" onClick={() => engine.current?.turn(Math.PI / 6)}>⟲</Ctl>
@@ -288,17 +319,7 @@ function Room({ room, commerce }: { room: Showroom; commerce: Commerce | null })
               <Ctl label="Next piece" onClick={() => engine.current?.step(1)}>›</Ctl>
             </div>
             {mode === "3d" && <p className="mb-2 text-center text-[11px] text-txt/75">Drag · tap floor to walk · tap a piece</p>}
-            <nav aria-label="Pieces in this room" className="no-scrollbar -mx-3 flex gap-2 overflow-x-auto px-3 pb-1">
-              {room.items.map((i) => (
-                <button key={i.productId} onClick={() => pick(i.productId)} className="glass flex shrink-0 items-center gap-2 rounded-2xl p-1.5 pr-3 text-left">
-                  {i.poster ? <img src={i.poster} alt="" className="size-11 rounded-xl bg-black/30 object-contain" /> : <span className="size-11 rounded-xl bg-white/10" />}
-                  <span className="max-w-[120px]">
-                    <span className="block truncate text-xs font-bold">{i.title}</span>
-                    <span className="block text-[11px] text-gold">{price(i)}</span>
-                  </span>
-                </button>
-              ))}
-            </nav>
+            {pieceStrip}
             {room.shows[0] && (
               <Link href={`/m/${room.page.handle}/shows/${room.shows[0].id}`} className="mt-1 flex min-h-11 items-center justify-center gap-2 text-xs font-semibold text-gold">
                 {room.shows[0].phase === "LIVE" ? `● ${t("vr.live")}: ${room.shows[0].title}` : `${t("vr.fashionShow")} · ${fmtWhen(room.shows[0].startsAt)}`} ›

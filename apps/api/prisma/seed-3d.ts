@@ -23,9 +23,10 @@ interface Result3d {
   sha256: string;
 }
 
-export async function seed3d(prisma: PrismaClient, limit = 6) {
+/** `handle`: only that maker's pieces (e.g. a full showroom for one page). */
+export async function seed3d(prisma: PrismaClient, limit = 6, handle?: string) {
   const products = await prisma.product.findMany({
-    where: { status: "PUBLISHED", readiness: "READY", category: { notIn: ["shoes", "bag"] } },
+    where: { status: "PUBLISHED", readiness: "READY", category: { notIn: ["shoes", "bag"] }, ...(handle ? { page: { handle } } : {}) },
     include: { variants: true },
     orderBy: [{ featured: "desc" }, { createdAt: "asc" }],
   });
@@ -80,7 +81,8 @@ export async function seed3d(prisma: PrismaClient, limit = 6) {
 
 if (require.main === module) {
   const prisma = new PrismaClient();
-  seed3d(prisma)
+  // SEED_3D_HANDLE=kigali-kitenge-house SEED_3D_LIMIT=50 pnpm db:seed:3d → every piece of one maker in 3D.
+  seed3d(prisma, Number(process.env.SEED_3D_LIMIT ?? 6), process.env.SEED_3D_HANDLE || undefined)
     .catch((e) => {
       console.error(e);
       process.exit(1);
