@@ -10,7 +10,7 @@ import { MorphRail } from "@/components/morph-sheet";
 import { XrRail } from "@/components/xr-rail";
 import { VideoRail } from "@/components/video-tryon";
 import { LookPrice } from "@/components/region";
-import { Icon, type IconName } from "@/components/studio";
+import { Icon, type IconName } from "@/components/icons";
 import { Avatar, Sheet } from "@/components/ui";
 import { rwf } from "@/lib/api";
 import { isRendering, type Look } from "@/lib/looks";

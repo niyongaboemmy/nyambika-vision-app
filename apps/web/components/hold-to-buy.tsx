@@ -8,7 +8,7 @@ import { DiscountField, type AppliedDiscount } from "@/components/growth-offer";
 import { WalletPhone, type CheckoutResult } from "@/components/region-pay";
 import { SizeNotes, useSizeRecommendation } from "@/components/size-hint";
 import { SPRING } from "@/components/look-rail";
-import { Icon } from "@/components/studio";
+import { Icon } from "@/components/icons";
 import { Chip, ErrorNote, Sheet, Spinner } from "@/components/ui";
 import { api, rwf } from "@/lib/api";
 import type { Look } from "@/lib/looks";

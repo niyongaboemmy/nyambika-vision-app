@@ -4,7 +4,7 @@ import { isExpectedText, LimitState } from "@/components/limit-state";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { GlassControl, MATERIAL, RailButton } from "@/components/look-rail";
-import { Icon } from "@/components/studio";
+import { Icon } from "@/components/icons";
 import { XrStage } from "@/components/xr-viewer";
 import { Button, Sheet } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";

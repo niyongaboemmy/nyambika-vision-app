@@ -5,8 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { LooksSkeleton } from "@/components/look-rail";
-import { LimitState } from "@/components/limit-state";
-import { Icon } from "@/components/studio";
+const LimitState = dynamic(() => import("@/components/limit-state").then((m) => m.LimitState), { ssr: false }); // error-only
+import { Icon } from "@/components/icons";
 import { Screen } from "@/components/ui";
 import { api } from "@/lib/api";
 import type { Look } from "@/lib/looks";

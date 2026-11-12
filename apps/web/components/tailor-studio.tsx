@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
-import { Icon, type IconName } from "@/components/studio";
+import { Icon, type IconName } from "@/components/icons";
 
 /**
  * Tailor desk sub-navigation: one pill row at every width. The studio shell already owns the

@@ -5,7 +5,7 @@ import { morphPrice, quantizeHue, type MorphLength, type MorphSleeve, type Morph
 import { useCallback, useEffect, useRef, useState, type PointerEvent as RPointerEvent } from "react";
 import { AskTailorSheet } from "@/components/ask-tailor";
 import { RailButton } from "@/components/look-rail";
-import { Icon } from "@/components/studio";
+import { Icon } from "@/components/icons";
 import { Sheet } from "@/components/ui";
 import { api, rwf } from "@/lib/api";
 import type { Look } from "@/lib/looks";

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Icon } from "@/components/studio";
+import { Icon } from "@/components/icons";
 import { Button, Chip, ErrorNote, Sheet } from "@/components/ui";
 import { api } from "@/lib/api";
 import type { Look } from "@/lib/looks";

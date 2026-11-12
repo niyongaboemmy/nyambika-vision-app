@@ -1,11 +1,15 @@
 "use client";
 
-import { isExpectedText, LimitState } from "@/components/limit-state";
+import dynamic from "next/dynamic";
+import { recallFriendly } from "@/lib/api-errors";
 import { useEffect, useState } from "react";
 import { api, rwf } from "@/lib/api";
 import type { MakerSpace } from "@/lib/maker";
 import { useSession } from "@/lib/session";
 import { Icon } from "@/components/icons";
+
+// Only after a failed call: load the limit card on demand (Maker Space first-load JS).
+const LimitState = dynamic(() => import("@/components/limit-state").then((m) => m.LimitState), { ssr: false });
 
 export interface AppliedDiscount {
   code: string | null;
@@ -79,7 +83,7 @@ export function DiscountField({ variantId, open, onChange }: { variantId: string
         ) : (
           <button type="button" onClick={() => setEditing(true)} className="text-xs font-semibold text-white/70 underline underline-offset-2">Have a code from the maker?</button>
         ))}
-      {err && (isExpectedText(err) ? <LimitState error={err} /> : <p className="text-xs text-gold" role="status">{err}</p>)}
+      {err && (recallFriendly(err)?.expected ? <LimitState error={err} /> : <p className="text-xs text-gold" role="status">{err}</p>)}
     </div>
   );
 }

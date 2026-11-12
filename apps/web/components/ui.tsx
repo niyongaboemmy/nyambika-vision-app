@@ -4,9 +4,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { isExpectedText, LimitState } from "./limit-state";
+import dynamic from "next/dynamic";
+import { recallFriendly } from "@/lib/api-errors";
 import { Icon } from "@/components/icons";
 import { useSheetDrag } from "@/lib/sheet-drag";
+
+// The limit card only renders after a failed call, so it loads on demand (keeps core routes' first-load JS down).
+const LimitState = dynamic(() => import("./limit-state").then((m) => m.LimitState), { ssr: false });
 
 /* Shopper primitives (aurora). Exported names and props are stable (other screens import them); everything
  * styles itself with theme tokens so it reads right in both light and dark (docs/design/ui-audit.md). */
@@ -170,7 +174,7 @@ export function Avatar({ name, size = 44, ring = false }: { name: string; size?:
  */
 export function ErrorNote({ error, onRetry }: { error: unknown; onRetry?: () => void }) {
   if (!error) return null;
-  if (typeof error !== "string" || isExpectedText(error)) return <LimitState error={error} onRetry={onRetry} />;
+  if (typeof error !== "string" || recallFriendly(error)?.expected) return <LimitState error={error} onRetry={onRetry} />;
   return (
     <p role="alert" className="flex items-start gap-2 rounded-2xl border border-red-400/40 bg-red-500/15 px-3.5 py-2.5 text-left text-sm font-medium text-red-100">
       <Icon name="alert" className="mt-0.5 size-4 shrink-0" />

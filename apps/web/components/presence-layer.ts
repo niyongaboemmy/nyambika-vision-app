@@ -6,7 +6,7 @@
  */
 import { AVATAR_HUES, PRESENCE, type PoseEntry, type PresenceMember } from "@nyambika/contracts";
 import * as THREE from "three";
-import { iconPath } from "@/components/icons";
+import { anyIconPath } from "@/components/icons-extra";
 import { vrReaction } from "@/lib/vr-reactions";
 import type { ShowroomEngine } from "./vr-engine";
 
@@ -40,7 +40,7 @@ function iconSprite(value: string) {
   g.fill();
   g.translate(28, 28);
   g.scale(3, 3);
-  const path = new Path2D(iconPath(r.icon));
+  const path = new Path2D(anyIconPath(r.icon));
   g.fillStyle = r.color;
   g.strokeStyle = r.color;
   g.lineWidth = 1.75;

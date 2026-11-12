@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { ThemeToggle } from "@/components/kit";
-import { Icon, type IconName } from "@/components/studio";
+import { Icon, type IconName } from "@/components/icons";
 import { Brand } from "@/components/studio-shell";
 
 const ICONS: Record<string, IconName> = {
