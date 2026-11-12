@@ -274,4 +274,10 @@ export const rw: Messages = {
   "err.auth.signin": "Injira",
   "err.check": "Reba:",
   "err.dismiss": "Funga",
+  "maker.enterShowroom": "Injira mu imurikagurisha",
+  "maker.viewVr": "Reba muri VR",
+  "maker.pieces3d": "imyenda · 3D",
+  "maker.collectionTitle": "Imyenda",
+  "maker.rsvp": "Nzaza",
+  "maker.going": "Uzaza",
 };

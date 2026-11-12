@@ -329,7 +329,8 @@ function Room({ room, commerce }: { room: Showroom; commerce: Commerce | null })
         )}
         {mode === "3d" && xrOk && !inXr && (
           <div className="mx-auto mt-2 max-w-[480px]">
-            <button onClick={() => void enterVr()} className="grad-cta flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl font-bold shadow-[0_12px_32px_rgba(139,92,246,.4)]">
+            {/* Arriving from the Maker Space "View in VR" (?vr=1): the button takes focus; WebXR still needs the tap. */}
+            <button autoFocus={q.get("vr") === "1"} onClick={() => void enterVr()} className="grad-cta flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl font-bold shadow-[0_12px_32px_rgba(139,92,246,.4)]">
               <Icon name="headset" className="size-5" /> {t("vr.enterVr")}{seated ? " · seated" : ""}
             </button>
             {xrError && <p className="mt-1 text-center text-xs text-terra" role="alert">{xrError}</p>}

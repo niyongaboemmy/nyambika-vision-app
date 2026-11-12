@@ -183,6 +183,8 @@ export interface ShowroomOptions {
   onProgress: (p: { loaded: number; total: number; bytes: number }) => void;
   onXr: (active: boolean) => void;
   onReady: () => void;
+  /** Maker Space hero: no input, no XR, a slow look-around sweep (none under reduced motion). */
+  preview?: boolean;
 }
 
 interface PieceNode {
@@ -241,10 +243,11 @@ export class ShowroomEngine {
 
   constructor(private o: ShowroomOptions) {
     this.renderer = makeRenderer(o.canvas, o.lowEnd);
-    this.renderer.xr.enabled = true;
+    this.renderer.xr.enabled = !o.preview;
     const { clientWidth: w, clientHeight: h } = o.canvas;
     this.renderer.setSize(w, h, false);
-    this.camera = new THREE.PerspectiveCamera(62, w / Math.max(1, h), 0.05, 40);
+    this.camera = new THREE.PerspectiveCamera(o.preview ? 58 : 62, w / Math.max(1, h), 0.05, 40);
+    if (o.preview) this.pitch = -0.1;
     this.camera.position.set(0, this.eye, 0);
     this.dolly.position.copy(START);
     this.dolly.add(this.camera);
@@ -255,10 +258,10 @@ export class ShowroomEngine {
     this.scene.add(this.reticle);
     this.buildRoom();
     this.buildPieces();
-    this.setupXr();
+    if (!o.preview) this.setupXr();
     this.ro = new ResizeObserver(() => this.resize());
     this.ro.observe(o.canvas);
-    this.bindPointer();
+    if (!o.preview) this.bindPointer();
     this.renderer.setAnimationLoop((t, f) => this.tick(t, f));
     void this.stream();
   }
@@ -649,6 +652,13 @@ export class ShowroomEngine {
     return { x: p.x, y: p.y, z: p.z, yaw: Math.atan2(-d.x, -d.z), xr, seated: this.seated };
   }
 
+  /** Stop / restart rendering (the Maker Space hero pauses while it is off screen). */
+  setPaused(paused: boolean) {
+    if (this.disposed) return;
+    this.renderer.setAnimationLoop(paused ? null : (t, f) => this.tick(t, f));
+    if (!paused) this.clock.getDelta();
+  }
+
   dispose() {
     this.frameHooks.clear();
     this.disposed = true;
@@ -939,6 +949,7 @@ export class ShowroomEngine {
       const st = (this.keys.has("KeyE") ? 1 : 0) - (this.keys.has("KeyQ") ? 1 : 0);
       if (f || st) this.walk(f * 1.7 * dt, st * 1.4 * dt);
       if (tr) this.turn(tr * 1.5 * dt);
+      if (this.o.preview && !this.o.reducedMotion) this.yaw = Math.sin(performance.now() / 6500) * 0.42;
       this.dolly.rotation.y = this.yaw;
       this.camera.rotation.set(this.pitch, 0, 0, "YXZ");
     } else {

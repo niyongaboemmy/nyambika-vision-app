@@ -1,14 +1,16 @@
 import { Skel } from "@/components/kit-static";
 
-/** Maker Space: banner, identity row, product rail — same boxes as the page so nothing jumps. */
+/** Maker Space: showroom hero, identity block, collection grid — same boxes as the page so nothing jumps. */
 export default function Loading() {
   return (
-    <div role="status" aria-label="Loading" className="relative mx-auto min-h-dvh w-full max-w-[480px] overflow-hidden bg-ink">
-      <Skel className="h-56 w-full rounded-none" />
-      <div className="space-y-3 px-5 pt-4">
-        <div className="flex items-center gap-3"><Skel className="size-16 rounded-full" /><Skel className="h-7 w-48 rounded-full" /></div>
-        <Skel className="h-14 w-full" />
-        <div className="flex gap-3"><Skel className="h-72 w-48 shrink-0 rounded-3xl" /><Skel className="h-72 w-48 shrink-0 rounded-3xl" /></div>
+    <div role="status" aria-label="Loading" className="relative mx-auto min-h-dvh w-full max-w-[480px] overflow-hidden bg-ink lg:max-w-[1120px] lg:px-8 lg:pt-6">
+      <Skel className="h-[clamp(380px,58dvh,500px)] w-full rounded-none rounded-b-[32px] lg:h-[520px] lg:rounded-[32px]" />
+      <div className="space-y-3 px-4 pt-5 lg:px-0">
+        <div className="flex items-center gap-3"><Skel className="size-12" /><Skel className="h-7 w-44 rounded-full" /></div>
+        <Skel className="h-8 w-3/4 rounded-full" />
+        <Skel className="h-5 w-full rounded-full" />
+        <div className="grid grid-cols-2 gap-2"><Skel className="h-11" /><Skel className="h-11" /></div>
+        <div className="grid grid-cols-2 gap-3 pt-4 sm:grid-cols-3 lg:grid-cols-4"><Skel className="aspect-[4/5]" /><Skel className="aspect-[4/5]" /></div>
       </div>
     </div>
   );
