@@ -156,7 +156,8 @@ export function LookView({ look, index, total, intentLabel, onSave, onVariant, p
   return (
     <div
       ref={root}
-      {...bind()}
+      // Portalled sheets (morph ring, buy) bubble React events through this tree: only swipe on real DOM descendants.
+      onPointerDown={(e) => e.currentTarget.contains(e.target as Node) && bind().onPointerDown(e)}
       className="theme-media relative h-full w-full touch-pan-y overflow-hidden bg-black text-txt"
       style={{ transform: dx ? `translateX(${dx * 0.35}px)` : undefined, transition: dx ? "none" : `transform 420ms ${SPRING}` }}
     >

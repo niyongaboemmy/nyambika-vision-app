@@ -177,7 +177,7 @@ try {
   await g1.p.getByRole("button", { name: `Report ${nick2}` }).click();
   await g1.snap("guest1-report-reasons");
   await g1.p.getByRole("button", { name: "Harassment or following me" }).click();
-  await g1.p.getByText(/A moderator will look at it/).waitFor({ timeout: 8000 });
+  await g1.p.getByText(/a moderator will look/i).waitFor({ timeout: 8000 });
   await g1.snap("guest1-report-sent");
   const reportsAfter = Number(sql(`select count(*) from "ModerationItem" where kind='VR_PRESENCE_REPORT'`));
   assert(reportsAfter === reportsBefore + 1, `report landed in the moderation queue (${reportsBefore} → ${reportsAfter})`);

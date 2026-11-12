@@ -276,7 +276,8 @@ for (const it of items) {
   await owner.p.getByText(/thank you/i).first().waitFor();
   await owner.c.close();
 }
-await H.p.getByRole("button", { name: /rehearse cadence/i }).click();
+await H.p.getByRole("button", { name: "More outreach actions" }).click(); // iOS pass: secondary outreach actions live in an action sheet
+await H.p.getByRole("dialog", { name: "Owner outreach" }).getByRole("button", { name: /rehearse cadence/i }).click();
 await H.p.getByText(/rehearsal reminders: 198/i).waitFor({ timeout: 60000 });
 await H.p.getByRole("button", { name: /go live: all signed off \(2\)/i }).click();
 await H.p.getByText(/went live: 2/i).waitFor({ timeout: 30000 });
