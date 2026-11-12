@@ -3,9 +3,23 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui";
 import { Icon } from "@/components/icons";
-import { returnLabel } from "@/lib/nav";
+import { returnLabel, returnTarget } from "@/lib/nav";
 import { haptic } from "@/lib/native";
 import { useReturn } from "@/lib/use-nav";
+
+/**
+ * On a terminal screen (order placed, request sent, poll live): when it was opened with `?next=`, a way back to
+ * where the shopper was. Renders nothing otherwise (or for a `next` pointing at this same screen).
+ */
+export function NextReturn({ className = "" }: { className?: string }) {
+  const [to, setTo] = useState<string | null>(null);
+  useEffect(() => {
+    const n = returnTarget();
+    setTo(n && n.split("?")[0] !== window.location.pathname ? n : null);
+  }, []);
+  if (!to) return null;
+  return <div className={className}><ReturnButton to={to} quiet /></div>;
+}
 
 /**
  * "Back to your looks" at the end of a detour (twin made, measurements saved, consent given). With `auto`, a short
@@ -13,7 +27,7 @@ import { useReturn } from "@/lib/use-nav";
  * but keeps the countdown text and the button. Returning uses history when the origin is the previous screen,
  * so the Looks index, selected piece and scroll come back as they were.
  */
-export function ReturnButton({ to, auto = false, seconds = 3, label }: { to: string; auto?: boolean; seconds?: number; label?: string }) {
+export function ReturnButton({ to, auto = false, seconds = 3, label, quiet = false }: { to: string; auto?: boolean; seconds?: number; label?: string; /** Secondary (glass) style, for screens whose main action is something else. */ quiet?: boolean }) {
   const back = useReturn();
   const [left, setLeft] = useState(auto ? seconds : 0);
   const [stayed, setStayed] = useState(false);
@@ -31,7 +45,7 @@ export function ReturnButton({ to, auto = false, seconds = 3, label }: { to: str
   const counting = auto && !stayed && left > 0;
   return (
     <div className="space-y-2" data-return={to}>
-      <Button className="relative w-full overflow-hidden" onClick={go}>
+      <Button variant={quiet ? "glass" : undefined} className="relative w-full overflow-hidden" onClick={go}>
         {counting && (
           <span
             aria-hidden

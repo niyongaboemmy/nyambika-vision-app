@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { ErrorNote, Screen, TopBar } from "@/components/ui";
+import { NextReturn } from "@/components/return-button";
 import { rwf } from "@/lib/api";
 import { isRendering } from "@/lib/looks";
 import { whenLabel, type WardrobeEventView } from "@/lib/social";
@@ -38,6 +39,7 @@ export default function EventOutfits() {
   return (
     <Screen className="pb-10">
       <TopBar back="/wardrobe" title={data ? `${data.title} · ${date}` : undefined} />
+      <NextReturn className="px-4 pb-3" />
       <header className="px-5 text-center">
         {data ? (
           <>

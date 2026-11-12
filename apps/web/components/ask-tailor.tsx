@@ -7,6 +7,7 @@ import { Button, Chip, ErrorNote, Sheet } from "@/components/ui";
 import { api, rwf } from "@/lib/api";
 import { useSession } from "@/lib/session";
 import { SignInFlow } from "@/components/signin-flow";
+import { withReturn } from "@/lib/nav";
 import { MEASUREMENT_LABEL, specChips, type CustomOrderView, type MeasurementsView } from "@/lib/tailor";
 import { Icon } from "@/components/icons";
 
@@ -95,7 +96,7 @@ export function AskTailorSheet({ open, onClose, request }: { open: boolean; onCl
         },
       });
       navigator.vibrate?.([12, 30, 12]);
-      router.push(`/custom/${co.id}?fresh=1`);
+      router.push(withReturn(`/custom/${co.id}?fresh=1`));
     } catch (e) {
       setError((e as Error).message);
       setBusy(false);

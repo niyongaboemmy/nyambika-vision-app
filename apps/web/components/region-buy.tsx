@@ -11,6 +11,7 @@ import type { MakerProduct, MakerSpace } from "@/lib/maker";
 import { COUNTRY_NAMES, useRegion, type Commerce, type OrderMoney } from "@/lib/region";
 import { useSession } from "@/lib/session";
 import { askSignIn } from "@/lib/auth-ask";
+import { withReturn } from "@/lib/nav";
 import { Icon } from "@/components/icons";
 import { track } from "@/lib/track";
 
@@ -64,7 +65,7 @@ export function RegionBuy({ maker, product, variantIndex, commerce }: { maker: M
       });
       track("hold_started", { orderId: r.orderId, pageId: maker.id, productId: product.id, method, currency: commerce.currency });
       if (r.stripe) setCard(r);
-      else router.push(`/orders/${r.orderId}?fresh=1`);
+      else router.push(withReturn(`/orders/${r.orderId}?fresh=1`));
     } catch (e) {
       setError((e as Error).message);
       key.current = "";
@@ -93,7 +94,7 @@ export function RegionBuy({ maker, product, variantIndex, commerce }: { maker: M
       <Sheet open={open} onClose={() => !busy && (setOpen(false), setCard(null))}>
         <div className="max-h-[78dvh] overflow-y-auto overscroll-contain pr-1">
           {card?.stripe ? (
-            <CardStep result={card} payee={maker.name} onDone={(id) => router.push(`/orders/${id}?fresh=1`)} />
+            <CardStep result={card} payee={maker.name} onDone={(id) => router.push(withReturn(`/orders/${id}?fresh=1`))} />
           ) : (
             <>
               <h3 className="font-display text-2xl font-black">{product.title}</h3>

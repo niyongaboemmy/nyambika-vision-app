@@ -19,6 +19,7 @@ import { useSession } from "@/lib/session";
 import { track } from "@/lib/track";
 import { useNeedSignIn } from "@/lib/auth-ask";
 import { go, takeResume } from "@/lib/use-nav";
+import { withReturn } from "@/lib/nav";
 
 const HOLD_MS = 1200;
 const DELIVERY_FEE = 2000;
@@ -74,7 +75,7 @@ export function HoldToBuy({ look, autoOpen = false }: { look: Look; /** E35: ope
       });
       track("hold_started", { lookId: look.id, orderId: o.id, pageId: look.maker.pageId });
       haptic("success");
-      go(router, `/orders/${o.id}?fresh=1`, "push");
+      go(router, withReturn(`/orders/${o.id}?fresh=1`), "push");
     } catch (e) {
       setError(e); // ApiError: DAILY/limit/offline codes render calmly via ErrorNote → LimitState
       setBusy(false);
@@ -184,7 +185,7 @@ function RegionHold({ look, commerce, size, eta, busy, setBusy }: { look: Look; 
       });
       track("hold_started", { lookId: look.id, orderId: r.orderId, pageId: look.maker.pageId, method, currency: commerce.currency });
       haptic("success");
-      go(router, `/orders/${r.orderId}?fresh=1`, "push");
+      go(router, withReturn(`/orders/${r.orderId}?fresh=1`), "push");
     } catch (e) {
       setError((e as Error).message);
       setBusy(false);

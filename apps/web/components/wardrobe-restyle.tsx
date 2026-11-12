@@ -6,6 +6,7 @@ import { Button, Chip, ErrorNote, Sheet } from "@/components/ui";
 import { api, rwf } from "@/lib/api";
 import { nice, OCCASIONS, type WardrobeEventView } from "@/lib/social";
 import { Icon } from "@/components/icons";
+import { withReturn } from "@/lib/nav";
 
 interface MuseIntent {
   id: string;
@@ -55,7 +56,7 @@ export function RestyleSheet({ open, onClose }: { open: boolean; onClose: () => 
     try {
       const e = await api<WardrobeEventView>("/wardrobe/events", { method: "POST", json: { title: title.trim() || undefined, occasion, date, budgetMax: budget, intentSessionId: intentId } });
       navigator.vibrate?.(12);
-      router.push(`/wardrobe/events/${e.id}`);
+      router.push(withReturn(`/wardrobe/events/${e.id}`));
     } catch (err) {
       setError((err as Error).message);
       setBusy(false);
