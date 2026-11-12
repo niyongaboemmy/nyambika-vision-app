@@ -33,10 +33,15 @@ Open http://localhost:3000 on a phone-sized window (or your phone on the same ne
 | Phone | Role |
 |---|---|
 | 0788000001 | Shopper (Aline) |
-| 0788100001 | Tailor: Uwase Couture |
-| 0788100002 | Cooperative admin: Abahizi Sewing Cooperative |
-| 0788100003 | Seller: Kigali Kitenge House |
+| 0788100001 | Tailor: Umurage Wear |
+| 0788100002 | Cooperative admin: Urudodo Stitch Collective (0788100004 is a member) |
+| 0788100003 | Seller: Kanombe Kitenge Corner |
+| 0788100005 / 0788100008 | Tailors: Inkindi Studio / Isimbi Tailoring |
+| 0788100006 / 0788100009 | Sellers: Akeza Couture / Rebero Threads |
+| 0788100010 | Cooperative admin: Gikondo Makers Coop |
 | 0788900001 | Host admin |
+
+Makers and products are fictional; the garment photos are openly licensed (credits at `/credits`). See [docs/seed-data.md](docs/seed-data.md).
 
 ## External services
 
