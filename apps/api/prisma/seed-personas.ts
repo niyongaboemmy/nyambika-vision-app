@@ -42,7 +42,7 @@ export function seedPersonas(): PersonaResult {
     const seedDir = join(STORAGE, "seed");
     if (!existsSync(join(seedDir, "persona-1.png"))) {
       mkdirSync(seedDir, { recursive: true });
-      execFileSync(join(AI_DIR, ".venv/bin/python"), [join(AI_DIR, "scripts/make_seed_assets.py"), seedDir, "--personas"]);
+      execFileSync(process.env.AI_PYTHON ?? join(AI_DIR, ".venv/bin/python"), [join(AI_DIR, "scripts/make_seed_assets.py"), seedDir, "--personas"]);
     }
     for (let i = 1; i <= 5; i++) copyFileSync(join(seedDir, `persona-${i}.png`), join(dir, `persona-${i}.png`));
     files = Array.from({ length: 5 }, (_, i) => `persona-${i + 1}.png`);

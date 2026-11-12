@@ -22,7 +22,7 @@ const prisma = new PrismaClient();
 const AI = process.env.AI_GATEWAY_URL ?? "http://localhost:8100";
 const STORAGE = resolve(process.env.STORAGE_DIR ?? "./storage");
 const REAL_DIR = join(STORAGE, "seed", "real");
-const AI_PY = resolve(__dirname, "../../ai/.venv/bin/python");
+const AI_PY = process.env.AI_PYTHON ?? resolve(__dirname, "../../ai/.venv/bin/python");
 const ASSETS = resolve(__dirname, "../../../scripts/seed-assets");
 const NO_TRYON = new Set(["fabric", "accessories"]);
 
