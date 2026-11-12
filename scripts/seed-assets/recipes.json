@@ -1,0 +1,46 @@
+{
+  "_doc": "How each seed image is made from sources.json. Boxes are fractions of the source image [x0, y0, x1, y1]. blur = brand labels blurred; mask = printed emblems painted out with the surrounding colour; pad = studio margin in the background colour; recolours = faithful colourways of the same photo (hue = degrees rotated, tint = hex colourised over the photo's own shading). kind: photo (default) | umushanana (procedural illustration from swatches) | print (swatch motif printed on a garment photo) | fabric (swatch crop, no try-on).",
+  "assets": [
+    { "key": "g32", "source": "g32", "category": "dress", "pad": 0.03, "recolours": [{ "key": "g32-indigo", "hue": 200, "name": "Indigo floral" }, { "key": "g32-teal", "hue": 140, "name": "Teal floral" }] },
+    { "key": "g35", "source": "g35", "category": "dress", "pad": 0.03, "recolours": [{ "key": "g35-teal", "hue": 200, "name": "Teal" }, { "key": "g35-gold", "hue": 75, "name": "Marigold" }] },
+    { "key": "g33", "source": "g33", "category": "dress", "pad": 0.03, "recolours": [{ "key": "g33-plum", "hue": 85, "name": "Plum" }] },
+    { "key": "g31", "source": "g31", "category": "dress", "pad": 0.03 },
+    { "key": "g11", "source": "g11", "category": "wrap", "pad": 0.08, "recolours": [{ "key": "g11-forest", "hue": -110, "name": "Forest green" }] },
+
+    { "key": "g07", "source": "g07", "category": "shirt", "pad": 0.04, "recolours": [{ "key": "g07-ocean", "hue": 180, "name": "Ocean blue" }] },
+    { "key": "g09", "source": "g09", "category": "top", "pad": 0.04 },
+    { "key": "g25", "source": "g25", "category": "skirt", "pad": 0.04, "recolours": [{ "key": "g25-terracotta", "tint": "#B5502F", "name": "Terracotta" }, { "key": "g25-navy", "tint": "#22305E", "name": "Navy" }] },
+    { "key": "g28", "source": "g28", "category": "skirt", "crop": [0.0, 0.0, 1.0, 0.93], "pad": 0.06, "recolours": [{ "key": "g28-cobalt", "hue": 90, "name": "Cobalt swirl" }] },
+    { "key": "g24", "source": "g24", "category": "skirt", "pad": 0.03 },
+
+    { "key": "g12", "source": "g12", "category": "dress", "pad": 0.03, "recolours": [{ "key": "g12-emerald", "tint": "#2A6E52", "name": "Emerald" }] },
+    { "key": "g14", "source": "g14", "category": "shirt", "studio": 34, "crop": [0.02, 0.0, 0.98, 1.0], "blur": [[0.40, 0.08, 0.62, 0.24]], "pad": 0.03 },
+    { "key": "g27", "source": "g27", "category": "skirt", "pad": 0.06 },
+    { "key": "s21", "source": "s21", "kind": "fabric", "category": "fabric", "crop": [0.0, 0.28, 0.48, 0.72] },
+    { "key": "s29", "source": "s29", "kind": "fabric", "category": "fabric", "crop": [0.03, 0.03, 0.97, 0.97] },
+    { "key": "g01", "source": "g01", "category": "dress", "studio": 0, "crop": [0.40, 0.0, 0.68, 1.0] },
+
+    { "key": "umushanana-kente", "kind": "umushanana", "category": "umushanana", "body": "s49", "bodyCrop": [0.05, 0.05, 0.95, 0.55], "bodyScale": 280, "sash": "s57", "sashCrop": [0.15, 0.06, 0.85, 0.66] },
+    { "key": "umushanana-igitenge", "kind": "umushanana", "category": "umushanana", "body": "s21", "bodyCrop": [0.0, 0.28, 0.48, 0.72], "sash": "s54", "sashCrop": [0.1, 0.1, 0.9, 0.9] },
+    { "key": "g21", "source": "g21", "category": "top", "pad": 0.03, "backdrop": "#3a3836" },
+    { "key": "g38", "source": "g38", "category": "top", "pad": 0.03 },
+    { "key": "g10", "source": "g10", "category": "accessories", "studio": 0, "pad": 0.03 },
+    { "key": "g36", "source": "g36", "category": "dress", "pad": 0.03, "recolours": [{ "key": "g36-rose", "tint": "#C98B8B", "name": "Dusty rose" }] },
+
+    { "key": "g22", "source": "g22", "category": "shirt", "pad": 0.03, "recolours": [{ "key": "g22-petrol", "tint": "#1E5B66", "name": "Petrol blue" }, { "key": "g22-wine", "hue": -25, "name": "Wine" }] },
+    { "key": "g39", "source": "g39", "category": "top", "pad": 0.03, "backdrop": "#3a3836" },
+    { "key": "g40", "source": "g40", "category": "top", "pad": 0.03, "backdrop": "#3a3836" },
+    { "key": "g02", "source": "g02", "category": "dress", "studio": 0, "crop": [0.36, 0.06, 0.68, 0.99] },
+
+    { "key": "g04", "source": "g04", "category": "dress", "studio": 0, "crop": [0.0, 0.0, 0.52, 1.0] },
+    { "key": "g05", "source": "g05", "category": "dress", "studio": 0 },
+    { "key": "g03", "source": "g03", "category": "dress", "studio": 0 },
+    { "key": "g06", "source": "g06", "category": "shirt", "studio": 0, "crop": [0.18, 0.22, 0.58, 0.99] },
+
+    { "key": "g18-imigongo", "kind": "print", "category": "top", "base": "g18", "pad": 0.03, "print": "s57", "printCrop": [0.15, 0.06, 0.85, 0.66], "box": [0.40, 0.42, 0.60, 0.62], "ink": "#EFE6D2" },
+    { "key": "g18", "source": "g18", "category": "top", "pad": 0.03 },
+    { "key": "g20", "source": "g20", "category": "top", "crop": [0.0, 0.0, 0.93, 1.0], "mask": [[0.51, 0.25, 0.67, 0.43]], "pad": 0.04, "studio": 70, "recolours": [{ "key": "g20-sage", "tint": "#8A9A6B", "name": "Sage" }] },
+    { "key": "g13", "source": "g13", "category": "jacket", "blur": [[0.42, 0.02, 0.64, 0.14]], "pad": 0.02, "recolours": [{ "key": "g13-indigo", "hue": 25, "name": "Deep indigo" }] },
+    { "key": "g17", "source": "g17", "category": "shirt", "studio": 0 }
+  ]
+}
