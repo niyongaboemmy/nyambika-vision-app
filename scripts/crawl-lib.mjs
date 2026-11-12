@@ -71,7 +71,7 @@ export async function signIn(page, phone) {
  * `name` (string or RegExp) picks a piece by its accessible name; without it, the first piece (products[0]).
  */
 export async function openMakerPiece(page, name) {
-  await page.getByRole("button", { name: /See all \d+ pieces/ }).click();
+  await page.getByRole("button", { name: /\d+ pieces.*see all/i }).click();
   const list = page.getByRole("list", { name: "Collection" });
   await list.waitFor();
   await (name ? list.getByRole("button", { name }).first() : list.getByRole("button").first()).click();

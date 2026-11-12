@@ -24,7 +24,7 @@ assert((await page.getByRole("listbox").count()) === 0, "no coverflow or 3D shel
 await page.waitForFunction(() => document.querySelector("section canvas")?.classList.contains("opacity-100"), null, { timeout: 45000 });
 await page.waitForTimeout(1500);
 await shot("hero-live-preview");
-await page.getByRole("button", { name: /See all \d+ pieces/ }).click();
+await page.getByRole("button", { name: /\d+ pieces.*see all/i }).click();
 const list = page.getByRole("list", { name: "Collection" });
 await list.waitFor();
 assert((await list.getByRole("button").count()) >= 6, "the sheet lists every piece");

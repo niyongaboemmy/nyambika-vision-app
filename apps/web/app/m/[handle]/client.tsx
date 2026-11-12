@@ -31,11 +31,11 @@ export function AllPieces({ maker, commerce, in3d }: { maker: MakerSpace; commer
       <button
         type="button"
         onClick={() => setOpen(true)}
-        aria-label={`See all ${n} pieces`}
-        className="press inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded-full bg-white/15 pl-2.5 pr-2 text-[13px] font-semibold text-white backdrop-blur"
+        className="hit press inline-flex h-8 items-center gap-1.5 whitespace-nowrap rounded-full bg-white/15 pl-2.5 pr-2 text-[13px] font-semibold text-white backdrop-blur"
       >
         <Icon name="grid" className="size-3.5" />
         <span className="tabular-nums">{n}</span> {in3d.length ? t("maker.pieces3d") : "pieces"}
+        <span className="sr-only"> · see all</span>
         <Icon name="chevron" className="size-3.5 opacity-70" />
       </button>
       {open && <PiecesSheet maker={maker} commerce={commerce} in3d={in3d} onClose={() => setOpen(false)} />}

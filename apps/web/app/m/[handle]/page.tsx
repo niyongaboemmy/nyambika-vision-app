@@ -136,7 +136,7 @@ export default async function MakerSpacePage({ params }: Props) {
 
 function Chip({ children, icon, tone }: { children: React.ReactNode; icon?: "pin" | "shield"; tone?: "trust" }) {
   return (
-    <span className={`inline-flex h-7 max-w-full items-center gap-1 whitespace-nowrap rounded-full px-2.5 text-[13px] font-semibold ${tone === "trust" ? "bg-mint/12 text-mint" : "bg-fill text-fg"}`}>
+    <span className={`inline-flex h-7 max-w-full items-center gap-1 whitespace-nowrap rounded-full px-2.5 text-[13px] font-semibold ${tone === "trust" ? "bg-mint/8 text-mint" : "bg-fill text-fg"}`}>
       {icon && <Icon name={icon} className="size-3.5 shrink-0" />}
       {children}
     </span>

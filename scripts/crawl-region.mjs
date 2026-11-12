@@ -36,7 +36,7 @@ async function ctx(label) {
 }
 // Prices live in the hero's "N pieces" sheet (Maker Space redesign): open it, check the currency, then a piece.
 const openPieces = async (p) => {
-  await p.getByRole("button", { name: /See all \d+ pieces/ }).click();
+  await p.getByRole("button", { name: /\d+ pieces.*see all/i }).click();
   await p.getByRole("list", { name: "Collection" }).waitFor();
 };
 const pickFirst = async (p) => {
