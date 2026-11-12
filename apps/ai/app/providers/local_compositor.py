@@ -232,7 +232,10 @@ class LocalCompositor(VTONProvider):
         hem = body.frac(top_y + ref_h * s)
         fy = 1.0
         if hem > hi:
-            fy = max(1 - MAX_FY, (body.top + hi * body.height - top_y) / (ref_h * s))
+            need = (body.top + hi * body.height - top_y) / (ref_h * s)
+            fy = max(1 - MAX_FY, need)
+            if need < fy:  # still too long: shrink uniformly a little too (keeps most of the chest cover)
+                s *= max(0.88, need / fy)
         elif hem < lo and not free_length:
             fy = min(1 + MAX_FY, (body.top + lo * body.height - top_y) / (ref_h * s))
         if free_length:

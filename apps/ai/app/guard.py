@@ -15,7 +15,7 @@ from PIL import Image
 
 from . import config
 from .garment import resolve_category
-from .imaging import bbox
+from .imaging import bbox, erode
 from .landmarks import PLACEMENT, landmarks
 from .twin import subject
 
@@ -90,7 +90,9 @@ def evaluate(
     if exclude_box:
         ex0, ey0, ex1, ey1 = exclude_box
         body[ey0:ey1, ex0:ex1] = False
-    skin = body & _skin_like(a, mask, box)
+    # Eroded so a garment that sways or a body that moves a few pixels (motion / video frames) still compares
+    # skin with skin rather than with the background next to it.
+    skin = body & erode(_skin_like(a, mask, box), max(1, int(0.012 * (y1 - y0))))
     region = skin if skin.sum() >= 200 else body
     skin_delta = float(np.abs(a[region].mean(axis=0) - b[region].mean(axis=0)).mean() / 255) if region.any() else 0.0
 
