@@ -109,9 +109,19 @@ export class GenerationService implements OnModuleInit, OnModuleDestroy {
 
     await this.metering.assertBudgetOpen();
     await this.metering.assertDailyCap(userId);
-    const gen = await this.prisma.generation.create({
-      data: { userId, variantId, twinVersion: twin?.version ?? 0, modelVersion: model.id, tier, cacheKey, status: "QUEUED" },
-    });
+    let gen: Generation;
+    try {
+      gen = await this.prisma.generation.create({
+        data: { userId, variantId, twinVersion: twin?.version ?? 0, modelVersion: model.id, tier, cacheKey, status: "QUEUED" },
+      });
+    } catch (e) {
+      // Two requests for the same render at once (a double tap, retwin next to advance): the other one won the
+      // unique cache key, so this is a cache hit, not an error (it was a 500 before, caught by crawl-sweep).
+      if ((e as { code?: string }).code !== "P2002") throw e;
+      const winner = await this.prisma.generation.findUnique({ where: { cacheKey } });
+      if (!winner) throw e;
+      return winner;
+    }
     // jobId = generation id: enqueueing the same generation twice is a no-op.
     await this.queue.add("render", { id: gen.id, persona, morph }, { jobId: gen.id, attempts: 1, removeOnComplete: 1000, removeOnFail: 5000 });
     return gen;
