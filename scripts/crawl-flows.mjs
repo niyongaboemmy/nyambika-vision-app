@@ -16,6 +16,9 @@ const here = (p = page) => {
   const u = new URL(p.url());
   return u.pathname + u.search;
 };
+// The seeded tailor with a showroom: "umurage-wear" since the realistic reseed, "uwase-couture" before it.
+const HANDLE = (await Promise.all(["umurage-wear", "uwase-couture"].map(async (h) => ((await fetch(`${BASE}/api/pages/by-handle/${h}`)).ok ? h : null)))).find(Boolean) ?? "umurage-wear";
+console.log(`maker: ${HANDLE}`);
 const fresh = (prefix) => `${prefix}${String(Date.now()).slice(-5)}`;
 const api = (p, path, body) =>
   p.evaluate(
@@ -50,13 +53,13 @@ async function hold(p, button) {
 }
 
 // ── 1. Signed out: Maker Space Follow → sign-in sheet → still on the Maker Space, following ─────────────────────
-await page.goto(`${BASE}/m/uwase-couture`);
+await page.goto(`${BASE}/m/${HANDLE}`);
 await page.getByRole("button", { name: /follow/i }).first().click();
 await page.getByRole("dialog").getByText("Sign in to follow").waitFor();
 await shot("anon-follow-signin-sheet");
 await signInOnSheet(page, fresh("07883"));
 await page.getByRole("dialog").waitFor({ state: "detached", timeout: 15000 });
-ok(here() === "/m/uwase-couture", `Follow: signed in on a sheet, still on ${here()}`);
+ok(here() === `/m/${HANDLE}`, `Follow: signed in on a sheet, still on ${here()}`);
 await page.getByRole("button", { name: /following/i }).first().waitFor({ timeout: 10000 }).catch(() => {});
 ok((await page.getByRole("button", { name: /following/i }).count()) > 0, "Follow resumed after sign-in (Following)");
 
@@ -66,7 +69,7 @@ ok((await page.getByRole("button", { name: /following/i }).count()) > 0, "Follow
   const p = await anon.newPage();
   p.on("pageerror", (e) => issues.push(`pageerror(anon): ${e.message}`));
   p.on("response", (r) => r.status() >= 500 && issues.push(`HTTP ${r.status()} ${r.url()}`));
-  await p.goto(`${BASE}/m/uwase-couture/showroom`);
+  await p.goto(`${BASE}/m/${HANDLE}/showroom`);
   const strip = p.getByRole("navigation", { name: "Pieces in this room" });
   await strip.waitFor({ timeout: 30000 });
   // The 3D room streams its pieces in first (crawl-vr does the same wait).
@@ -212,7 +215,7 @@ ok((await lookIndex()) === 3, `order → Back to your looks → look 4 (${here()
   s.on("pageerror", (e) => issues.push(`pageerror(studio): ${e.message}`));
   await signIn(s, "0788100001");
   const pages = await api(s, "/pages/mine/list");
-  const uwase = pages.find?.((x) => x.name.includes("Uwase")) ?? pages[0];
+  const uwase = pages.find?.((x) => x.handle === HANDLE) ?? pages[0];
   await s.goto(`${BASE}/studio/${uwase.id}/products?filter=live`);
   const first = s.locator(`a[href^="/studio/${uwase.id}/products/"]`).filter({ hasNot: s.locator('[href$="/new"]') }).first();
   await first.waitFor({ timeout: 20000 });
