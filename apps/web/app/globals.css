@@ -677,3 +677,37 @@ body {
 /* One-line controls: pills, chips, tabs, badges, segmented items. Long values truncate (title carries the full one). */
 .nowrap { white-space: nowrap; }
 .one-line { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ==== Navigation & workflow pass: iOS push / pop between related screens (lib/use-nav.ts go()) ====
+   The outgoing screen slides a third of the way and dims, the incoming one slides fully in (push from the right,
+   pop from the left), on the gentle spring. Theme cross-fades keep the default fade (no data-nav). Reduced motion:
+   go() skips the transition and the rule above turns any animation off. */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-nav]::view-transition-old(root),
+  html[data-nav]::view-transition-new(root) {
+    animation-duration: 0.38s;
+    animation-timing-function: var(--spring, cubic-bezier(.2, .8, .2, 1));
+    animation-fill-mode: both;
+    mix-blend-mode: normal;
+  }
+  html[data-nav="push"]::view-transition-old(root) { animation-name: nv-nav-out-left; }
+  html[data-nav="push"]::view-transition-new(root) { animation-name: nv-nav-in-right; }
+  html[data-nav="pop"]::view-transition-old(root) { animation-name: nv-nav-out-right; z-index: 2; }
+  html[data-nav="pop"]::view-transition-new(root) { animation-name: nv-nav-in-left; }
+}
+@keyframes nv-nav-in-right { from { transform: translateX(100%); } to { transform: none; } }
+@keyframes nv-nav-out-left { from { transform: none; filter: none; } to { transform: translateX(-30%); filter: brightness(.82); } }
+@keyframes nv-nav-in-left { from { transform: translateX(-30%); filter: brightness(.82); } to { transform: none; filter: none; } }
+@keyframes nv-nav-out-right { from { transform: none; } to { transform: translateX(100%); } }
+
+/* Twin follow-through: the previous render stays while the look re-renders on the twin, under a moving sheen. */
+.nv-retwin { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.nv-retwin::after {
+  content: "";
+  position: absolute;
+  inset: -20% -60%;
+  background: linear-gradient(105deg, transparent 35%, rgb(255 255 255 / 0.22) 50%, transparent 65%);
+  animation: nv-sheen 1.6s ease-in-out infinite;
+}
+@keyframes nv-sheen { from { transform: translateX(-60%); } to { transform: translateX(60%); } }
+@media (prefers-reduced-motion: reduce) { .nv-retwin::after { animation: none; background: rgb(255 255 255 / 0.08); } }

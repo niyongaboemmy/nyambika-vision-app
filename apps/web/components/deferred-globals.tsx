@@ -3,6 +3,8 @@
 import dynamic from "next/dynamic";
 import { useEffect } from "react";
 import { loadExtraIcons } from "@/components/icons-lazy";
+import { useSignInAsk } from "@/lib/auth-ask";
+import { installNavTrail } from "@/lib/use-nav";
 
 /*
  * App-wide helpers that never paint on first load: the pilot survey (a sheet that appears later on
@@ -10,12 +12,17 @@ import { loadExtraIcons } from "@/components/icons-lazy";
  * they stay out of every route's critical JS (docs/design/ui-audit.md §Performance).
  * iOS pass: the non-core icon glyphs (components/icons-extra.ts) are prefetched once the page has loaded and the
  * main thread is idle, so screens that use them draw them immediately without costing first-load JS.
+ * Navigation pass: the tab's screen trail (back buttons) starts here, and the sign-in sheet mounts on demand when
+ * a screen calls `askSignIn()`.
  */
 const PilotSurvey = dynamic(() => import("@/components/pilot-survey").then((m) => m.PilotSurvey), { ssr: false });
 const NativeBridge = dynamic(() => import("@/components/native-bridge").then((m) => m.NativeBridge), { ssr: false });
+const AuthSheet = dynamic(() => import("@/components/auth-sheet"), { ssr: false });
 
 export function DeferredGlobals() {
+  const ask = useSignInAsk();
   useEffect(() => {
+    installNavTrail();
     const idle = () => ("requestIdleCallback" in window ? window.requestIdleCallback(() => void loadExtraIcons(), { timeout: 3000 }) : setTimeout(() => void loadExtraIcons(), 1500));
     if (document.readyState === "complete") idle();
     else window.addEventListener("load", idle, { once: true });
@@ -24,6 +31,7 @@ export function DeferredGlobals() {
     <>
       <PilotSurvey />
       <NativeBridge />
+      {ask && <AuthSheet ask={ask} />}
     </>
   );
 }
