@@ -102,7 +102,7 @@ export default function Trust() {
                 title="My twin"
                 subtitle={data.twin ? `v${data.twin.version} · size ${data.twin.size ?? "—"} · ${new Date(data.twin.createdAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}` : "No twin · looks use an AI model"}
                 value={data.twin ? "View" : "Create"}
-                href="/mirror"
+                href="/mirror?next=%2Ftrust"
               />
               <GroupRow icon="sparkle" tone="terra" title="Looks" value={<span className="tabular">{data.counts.looks}</span>} />
               <GroupRow icon="heart" tone="red" title="Saved looks" value={<span className="tabular">{data.counts.saved}</span>} href="/saved" />

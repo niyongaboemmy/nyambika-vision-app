@@ -2,7 +2,9 @@
 
 import type { EXPERIMENTS } from "@nyambika/contracts";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { withReturn } from "@/lib/nav";
 import { useExperiment } from "@/lib/experiments";
 import { useSession } from "@/lib/session";
 import { track } from "@/lib/track";
@@ -18,6 +20,7 @@ const TWIN_NUDGE: (typeof EXPERIMENTS)["twinNudge"] = "twin.nudge";
  */
 export function TwinNudge({ place, index = 0 }: { place: "home" | "stream"; index?: number }) {
   const { me, t } = useSession();
+  const router = useRouter();
   const arm = useExperiment(TWIN_NUDGE);
   const [closed, setClosed] = useState(false);
   const modelFirst = arm === "model_first";
@@ -28,7 +31,12 @@ export function TwinNudge({ place, index = 0 }: { place: "home" | "stream"; inde
   }, [show, place, arm]);
 
   if (!show) return null;
-  const click = () => track("twin_nudge_clicked", { place, arm: arm ?? "default" });
+  // Open the twin flow with a way back here (the Looks stream or the Muse), read at click time.
+  const click = (e: React.MouseEvent) => {
+    track("twin_nudge_clicked", { place, arm: arm ?? "default" });
+    e.preventDefault();
+    router.push(withReturn("/mirror"));
+  };
 
   if (place === "home") {
     return (
