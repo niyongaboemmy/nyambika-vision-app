@@ -51,8 +51,10 @@ const bar = page.locator("[data-maker-bar]");
 assert((await bar.getAttribute("aria-hidden")) === "true", "floating bar hidden at the top");
 await page.waitForLoadState("networkidle");
 await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-await page.waitForTimeout(600);
-assert((await bar.getAttribute("aria-hidden")) === "false", "floating bar appears once the hero scrolls away");
+// Poll: the SwiftShader preview can delay IntersectionObserver callbacks by a few seconds.
+const shown = await page.waitForFunction(() => document.querySelector("[data-maker-bar]")?.getAttribute("aria-hidden") === "false", null, { timeout: 8000 }).then(() => true, () => false);
+assert(shown, "floating bar appears once the hero scrolls away");
+await page.waitForTimeout(400);
 const overlap = await page.evaluate(() => {
   const b = document.querySelector("[data-maker-bar]").getBoundingClientRect();
   const follow = [...document.querySelectorAll("button")].find((x) => x.textContent?.trim().endsWith("Follow"))?.getBoundingClientRect();
@@ -70,7 +72,10 @@ await shot("showroom-from-bar");
 await page.goto(`${BASE}/m/umurage-wear`);
 const showRow = page.getByRole("region", { name: /Fashion show:/ });
 await showRow.waitFor();
-assert(await showRow.getByRole("timer").isVisible(), "upcoming show shows a ticking countdown");
+await showRow.getByRole("timer").waitFor();
+const t0 = await showRow.getByRole("timer").innerText();
+for (let i = 0; i < 12 && t0 === (await showRow.getByRole("timer").innerText()); i++) await page.waitForTimeout(500); // SwiftShader WebGL starves timers
+assert(t0 !== (await showRow.getByRole("timer").innerText()), "upcoming show shows a ticking countdown");
 await shot("show-row");
 await showRow.getByRole("button", { name: "RSVP" }).click();
 await page.waitForURL(/\/signin/);
