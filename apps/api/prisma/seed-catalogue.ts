@@ -33,7 +33,7 @@ export interface ProductDef {
   category: string;
   title: L3;
   /** One asset key per colour (scripts/seed-assets/recipes.json); each colour is a real photo or a recolour of one. */
-  colours: { asset: string; name: L3 }[];
+  colours: { asset: string; name: L3; hex?: string }[];
   priceRwf: number;
   madeToOrder: boolean;
   leadTimeDays: number;
@@ -165,7 +165,8 @@ export const MAKERS: MakerDef[] = [
   },
 ];
 
-const c = (asset: string, rw: string, en: string, fr: string) => ({ asset, name: { rw, en, fr } });
+/** `hex` overrides the swatch colour for busy shop photos, where the pipeline's dominant colour is the background. */
+const c = (asset: string, rw: string, en: string, fr: string, hex?: string) => ({ asset, name: { rw, en, fr }, hex });
 
 export const PRODUCTS: ProductDef[] = [
   // ---- Umurage Wear (boutique made to order, 5–10 days)
@@ -254,7 +255,7 @@ export const PRODUCTS: ProductDef[] = [
   {
     handle: "kanombe-kitenge-corner", kind: "dress", category: "dress",
     title: { rw: "Ikanzu y'igitenge, ubururu", en: "Blue kitenge sundress", fr: "Robe d'été en kitenge bleu" },
-    colours: [c("g01", "Ubururu", "Blue print", "Imprimé bleu")],
+    colours: [c("g01", "Ubururu", "Blue print", "Imprimé bleu", "#2D6FB3")],
     priceRwf: 24000, madeToOrder: false, leadTimeDays: 1, styles: ["casual", "bold"], occasions: ["casual", "party"], fabric: "Cotton kitenge",
   },
 
@@ -312,7 +313,7 @@ export const PRODUCTS: ProductDef[] = [
   {
     handle: "akeza-couture", kind: "dress", category: "dress",
     title: { rw: "Ikanzu y'igitenge, umutuku wijimye", en: "Burgundy kitenge day dress", fr: "Robe de jour en kitenge bordeaux" },
-    colours: [c("g02", "Umutuku wijimye", "Burgundy print", "Imprimé bordeaux")],
+    colours: [c("g02", "Umutuku wijimye", "Burgundy print", "Imprimé bordeaux", "#7A2333")],
     priceRwf: 27500, madeToOrder: false, leadTimeDays: 1, styles: ["casual", "traditional"], occasions: ["casual", "church"], fabric: "Cotton kitenge",
   },
 
@@ -320,27 +321,22 @@ export const PRODUCTS: ProductDef[] = [
   {
     handle: "isimbi-tailoring", kind: "dress", category: "dress",
     title: { rw: "Ikanzu y'ibice bibiri y'igitenge", en: "Two-piece kitenge dress", fr: "Robe deux pièces en kitenge" },
-    colours: [c("g04", "Umuhondo n'ubururu", "Yellow and teal", "Jaune et sarcelle")],
+    colours: [c("g04", "Umuhondo n'ubururu", "Yellow and teal", "Jaune et sarcelle", "#D9B23A")],
     priceRwf: 22000, madeToOrder: true, leadTimeDays: 2, styles: ["bold", "traditional"], occasions: ["party", "church"], fabric: "Cotton kitenge",
   },
   {
     handle: "isimbi-tailoring", kind: "dress", category: "dress",
     title: { rw: "Ikanzu ndende y'igitenge, umukara n'umuhondo", en: "Black and yellow kitenge maxi", fr: "Robe longue kitenge noir et jaune" },
-    colours: [c("g05", "Umukara n'umuhondo", "Black and yellow", "Noir et jaune")],
+    colours: [c("g05", "Umukara n'umuhondo", "Black and yellow", "Noir et jaune", "#1F1F1F")],
     priceRwf: 25000, madeToOrder: true, leadTimeDays: 3, styles: ["bold"], occasions: ["party", "wedding"], fabric: "Cotton kitenge",
   },
   {
     handle: "isimbi-tailoring", kind: "dress", category: "dress",
     title: { rw: "Kaftani y'igitenge gisize amabara", en: "Tie-dye kitenge kaftan", fr: "Caftan kitenge tie-dye" },
-    colours: [c("g03", "Ubururu n'umuhondo", "Indigo and ochre", "Indigo et ocre")],
+    colours: [c("g03", "Ubururu n'umuhondo", "Indigo and ochre", "Indigo et ocre", "#3B4A6B")],
     priceRwf: 21000, madeToOrder: true, leadTimeDays: 2, styles: ["casual", "bold"], occasions: ["casual", "party"], fabric: "Tie-dyed cotton",
   },
-  {
-    handle: "isimbi-tailoring", kind: "shirt", category: "shirt",
-    title: { rw: "Ishati y'igitenge, ubururu bwerurutse", en: "Pale blue kitenge shirt", fr: "Chemise kitenge bleu clair" },
-    colours: [c("g06", "Ubururu bwerurutse", "Pale blue", "Bleu clair")],
-    priceRwf: 16500, madeToOrder: true, leadTimeDays: 1, styles: ["casual"], occasions: ["casual", "office"], fabric: "Cotton", chart: "men",
-  },
+
 
   // ---- Rebero Threads (printed tees)
   {
@@ -384,7 +380,7 @@ export const PRODUCTS: ProductDef[] = [
   {
     handle: "gikondo-makers-coop", kind: "shirt", category: "shirt",
     title: { rw: "Ishati ya kera ifite imitako", en: "Vintage print camp shirt", fr: "Chemise vintage imprimée" },
-    colours: [c("g17", "Umweru n'icunga", "Cream and rust", "Crème et rouille")],
+    colours: [c("g17", "Umweru n'icunga", "Cream and rust", "Crème et rouille", "#C8643C")],
     priceRwf: 23000, madeToOrder: true, leadTimeDays: 5, styles: ["casual", "bold"], occasions: ["casual", "party"], fabric: "Cotton print", chart: "men",
   },
 ];

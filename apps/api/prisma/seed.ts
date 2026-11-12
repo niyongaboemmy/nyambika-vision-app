@@ -182,7 +182,7 @@ async function main() {
           submittedById: owner.id,
           sizeChartId: p.chart === "none" ? null : p.chart === "men" ? men.id : women.id,
           variants: {
-            create: p.colours.map((col) => ({ colourName: col.name.en, colourHex: index[col.asset]?.hex ?? "#888888", sizes, stock: p.madeToOrder ? 0 : 6 })),
+            create: p.colours.map((col) => ({ colourName: col.name.en, colourHex: col.hex ?? index[col.asset]?.hex ?? "#888888", sizes, stock: p.madeToOrder ? 0 : 6 })),
           },
           ...(maker ? { makers: { create: [{ coopMemberId: maker.id }] } } : {}),
         },
