@@ -190,8 +190,8 @@ const keys = await (await page.request.get(`${BASE}/api/auth/passkeys`)).json();
 assert(keys[0]?.lastUsedAt, "passkey last-used time recorded");
 
 // ── Bag: two makers (split explained), then two items from one maker ─────────
-const kkh = await (await page.request.get(`${BASE}/api/pages/by-handle/kigali-kitenge-house`)).json();
-const imena = await (await page.request.get(`${BASE}/api/pages/by-handle/imena-styles`)).json();
+const kkh = await (await page.request.get(`${BASE}/api/pages/by-handle/kanombe-kitenge-corner`)).json();
+const imena = await (await page.request.get(`${BASE}/api/pages/by-handle/akeza-couture`)).json();
 const pick = (pg, n) => pg.products.filter((p) => !p.madeToOrder && p.readiness === "READY" && p.variants.some((v) => v.inStock)).slice(0, n);
 const [shirt, skirt] = pick(kkh, 2);
 const [wrap] = pick(imena, 1);
@@ -215,7 +215,7 @@ await page.goto(`${BASE}/bag`);
 await page.getByText(/2 makers · 2 mobile money requests/i).waitFor();
 await page.waitForTimeout(400);
 await shot("bag-two-makers-split");
-// Back to one maker: remove the Imena wrap, add a second shirt.
+// Back to one maker: remove the Akeza piece, add a second shirt.
 await page.getByRole("button", { name: new RegExp(`remove ${wrap.title}`, "i") }).click();
 await page.getByText(/2 makers/i).waitFor({ state: "detached" });
 const oneMore = page.getByRole("button", { name: new RegExp(`one more ${shirt.title}`, "i") });
@@ -238,14 +238,14 @@ await page.getByRole("button", { name: /^pay rwf/i }).click();
 await page.getByText(/approve on your phone/i).waitFor({ timeout: 15000 });
 await page.waitForTimeout(300);
 await shot("checkout-sent");
-const orderLink = page.getByRole("link", { name: /kigali kitenge house/i });
+const orderLink = page.getByRole("link", { name: /kanombe kitenge corner/i });
 const orderHref = await orderLink.getAttribute("href");
 
 // ── /dev/handset: approve with PIN ────────────────────────────────────────────
 const handset = await context.newPage();
 handset.on("console", (m) => m.type() === "error" && issues.push(`handset console: ${m.text()}`));
 await handset.goto(`${BASE}/dev/handset`);
-await handset.getByText(/pay .*rwf .* to .*kigali kitenge house/i).waitFor({ timeout: 15000 });
+await handset.getByText(/pay .*rwf .* to .*kanombe kitenge corner/i).waitFor({ timeout: 15000 });
 await handset.getByLabel("PIN").fill("12345");
 await handset.screenshot({ path: `${out}handset-pin.png` });
 await handset.getByRole("button", { name: /approve/i }).click();

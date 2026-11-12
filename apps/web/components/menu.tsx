@@ -39,6 +39,7 @@ export function MenuSheet({ open, onClose }: { open: boolean; onClose: () => voi
       header: "More",
       items: [
         { href: "/trust", icon: "lock", label: t("trust.title"), tone: "stone" },
+        { href: "/credits", icon: "info", label: "Image credits", tone: "stone" },
         { href: "/studio", icon: "needle", label: manages ? t("studio.title") : "Sell on Nyambika", tone: "gold" },
         ...(me?.isHost ? [{ href: "/admin", icon: "settings" as IconName, label: "Host admin", tone: "stone" as const }] : []),
       ],

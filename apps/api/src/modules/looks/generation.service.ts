@@ -100,7 +100,7 @@ export class GenerationService implements OnModuleInit, OnModuleDestroy {
     if (twin && !(await this.consent.has(userId, "TRYON_GENERATION"))) {
       throw new ForbiddenException({ message: "You paused looks on your twin. Turn them back on in the Trust centre.", code: "CONSENT_WITHDRAWN", purpose: "TRYON_GENERATION" });
     }
-    const twinKey = twin ? `${twin.id}:v${twin.version}` : `persona-${persona}:v0`;
+    const twinKey = twin ? `${twin.id}:v${twin.version}` : `persona-${persona}:v${this.twins.personaVersion()}`;
     const model = await this.model(tier);
     const cacheKey = `${twinKey}|${variantId}|${model.id}${morph ? `|morph:${morph.key}` : ""}`;
     const existing = await this.prisma.generation.findUnique({ where: { cacheKey } });

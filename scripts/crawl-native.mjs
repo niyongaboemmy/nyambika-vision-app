@@ -64,7 +64,7 @@ try {
   // ── 1. Never ask on load ────────────────────────────────────────────────
   await page.goto(`${BASE}/`);
   await page.waitForLoadState("networkidle");
-  await page.goto(`${BASE}/m/uwase-couture`);
+  await page.goto(`${BASE}/m/umurage-wear`);
   await page.waitForLoadState("networkidle");
   assert((await page.evaluate(() => window.__permAsks)) === 0, "no notification permission prompt on page load");
   assert((await page.locator('[data-testid="push-ask"]').count()) === 0, "no push ask on the Maker Space");
@@ -82,7 +82,7 @@ try {
   // ── 3. Hold to buy → the meaningful moment: "Tell me when it's paid" ─────
   await signIn(page, phone);
   const products = await (await page.request.get(`${BASE}/api/v1/public/products?limit=20`)).json();
-  const product = products.data.find((p) => p.maker.handle === "uwase-couture") ?? products.data[0];
+  const product = products.data.find((p) => p.maker.handle === "umurage-wear") ?? products.data[0];
   const variant = product.variants[0];
   const order = await page.evaluate(
     async ({ variantId, size, phone }) => {

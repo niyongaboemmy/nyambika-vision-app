@@ -53,7 +53,7 @@ const tools = (await mcp.listTools()).tools.map((t) => t.name);
 assert(tools.length === 5 && tools.includes("create_checkout_intent"), `MCP tools: ${tools.join(", ")}`);
 const text = (r) => JSON.parse(r.content[0].text);
 const found = text(await mcp.callTool({ name: "search_products", arguments: { query: "kitenge shirt under 30000", limit: 6 } }));
-const pick = found.results.find((r) => !r.made_to_order && r.maker.handle === "kigali-kitenge-house" && r.variants.some((v) => v.availability === "in_stock" || v.availability === "low_stock")) ?? found.results.find((r) => r.variants.some((v) => v.availability !== "out_of_stock"));
+const pick = found.results.find((r) => !r.made_to_order && r.maker.handle === "kanombe-kitenge-corner" && r.variants.some((v) => v.availability === "in_stock" || v.availability === "low_stock")) ?? found.results.find((r) => r.variants.some((v) => v.availability !== "out_of_stock"));
 assert(pick, `search_products found ${found.results.length} results (picked ${pick?.title} by ${pick?.maker.name})`);
 const v = pick.variants.find((x) => x.availability !== "out_of_stock");
 const avail = text(await mcp.callTool({ name: "check_availability", arguments: { id: v.id, size: v.sizes[0] } }));
@@ -139,7 +139,7 @@ await page.request.post(`${BASE}/api/auth/logout`);
 
 // ── Maker: opt in/out of AI assistants (FR-AGT-05) ──────────────────────────────────────
 await signIn(page, "0788100003");
-const kkh = await (await page.request.get(`${BASE}/api/pages/by-handle/kigali-kitenge-house`)).json();
+const kkh = await (await page.request.get(`${BASE}/api/pages/by-handle/kanombe-kitenge-corner`)).json();
 await page.goto(`${BASE}/studio/${kkh.id}/settings`);
 const ai = page.getByRole("heading", { name: /ai assistants & marketplaces/i });
 await ai.waitFor();

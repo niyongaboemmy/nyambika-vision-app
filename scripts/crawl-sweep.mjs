@@ -66,8 +66,8 @@ const users = Object.fromEntries(Object.entries(ROLES).map(([r, p]) => [r, p ? u
 const shopperId = users.shopper;
 const pageOf = (userId) => (userId ? one(`select "pageId" from "RoleAssignment" where "userId"='${userId}' and "pageId" is not null order by "pageId" limit 1`) : null);
 const seed = {
-  handle: one(`select handle from "Page" where handle='uwase-couture'`) ?? one(`select handle from "Page" where status='PUBLISHED' order by handle limit 1`),
-  showId: one(`select s.id from "FashionShow" s join "Page" p on p.id=s."pageId" where p.handle='uwase-couture' order by s."startsAt" desc limit 1`) ?? one(`select id from "FashionShow" limit 1`),
+  handle: one(`select handle from "Page" where handle='umurage-wear'`) ?? one(`select handle from "Page" where status='PUBLISHED' order by handle limit 1`),
+  showId: one(`select s.id from "FashionShow" s join "Page" p on p.id=s."pageId" where p.handle='umurage-wear' order by s."startsAt" desc limit 1`) ?? one(`select id from "FashionShow" limit 1`),
   productId: one(`select id from "Product" where status='PUBLISHED' order by "createdAt" limit 1`),
   passportId: one(`select "productId" from "ProductPassport" limit 1`),
   gtin: one(`select gtin from "ProductPassport" where gtin is not null limit 1`) ?? "00000000",

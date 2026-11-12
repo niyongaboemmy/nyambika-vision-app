@@ -71,7 +71,7 @@ export function buildMcpServer(agent: AgentContext, catalogue: CatalogueApi, che
     {
       title: "Get maker",
       description: "A maker's public page (Maker Space): location, rating, how they are paid, and their published products.",
-      inputSchema: { handle: z.string().min(1).max(64).describe("Maker handle, e.g. kigali-kitenge-house") },
+      inputSchema: { handle: z.string().min(1).max(64).describe("Maker handle, e.g. kanombe-kitenge-corner") },
       annotations: { readOnlyHint: true },
     },
     (a) => guard(() => catalogue.makerByHandle(a.handle)),

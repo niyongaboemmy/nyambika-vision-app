@@ -1,4 +1,5 @@
 import "multer";
+import { clampPersona, personaSet } from "../twin/personas";
 import {
   BadRequestException,
   Body,
@@ -79,7 +80,7 @@ export class CatalogueService {
     const garment = await this.storage.read(v.cutoutPath);
     const out: { persona: number; image: string | null; status: string }[] = [];
     for (const n of personas) {
-      const model = await this.storage.read(`personas/persona-${n}.png`);
+      const model = await this.storage.read(`personas/persona-${clampPersona(n, personaSet(this.storage.root).count)}.png`);
       const r = await this.ai.post<{ status: string; image_b64: string | null; c2pa: { sha256: string } | null }>("/v1/tryon", {
         twin_b64: model.toString("base64"),
         garment_b64: garment.toString("base64"),
@@ -221,7 +222,7 @@ export class CatalogueController {
 
   @Post("variants/:id/studio")
   async studio(@Param("id") id: string, @CurrentUser() user: AuthUser, @Body() body: unknown) {
-    const { personas } = parse(z.object({ personas: z.array(z.number().int().min(1).max(5)).min(1).max(5) }), body);
+    const { personas } = parse(z.object({ personas: z.array(z.number().int().min(1).max(12)).min(1).max(5) }), body);
     const v = await this.prisma.variant.findUniqueOrThrow({ where: { id }, include: { product: true } });
     await this.access.requirePage(user.id, v.product.pageId, CONTRIBUTORS);
     return this.catalogue.studio(id, personas);

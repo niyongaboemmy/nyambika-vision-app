@@ -23,6 +23,7 @@ import { PrismaService } from "../../common/prisma.service";
 import { StorageService } from "../../common/storage.service";
 import { parse } from "../../common/zod";
 import { serverEvent } from "../pilot/pilot.service";
+import { clampPersona, personaSet } from "./personas";
 
 interface TwinCheck {
   ok: boolean;
@@ -31,6 +32,7 @@ interface TwinCheck {
   height_ratio: number;
 }
 
+/** Default synthetic persona count; the live count comes from storage/personas/manifest.json (personas.ts). */
 export const PERSONA_COUNT = 5;
 
 /** Persistent photo twin (CR-02, US-06.1). Bytes are AES-256-GCM encrypted; never exposed to makers. */
@@ -53,12 +55,17 @@ export class TwinService {
     if (twin) {
       return { image: await this.storage.readEncrypted(twin.encPath, twin.iv, twin.authTag), twinKey: twin.id, version: twin.version, onTwin: true };
     }
-    return { image: await this.persona(persona), twinKey: `persona-${persona}`, version: 0, onTwin: false };
+    return { image: await this.persona(persona), twinKey: `persona-${persona}`, version: this.personaVersion(), onTwin: false };
   }
 
   persona(n: number) {
-    const i = Math.min(Math.max(1, Math.round(n)), PERSONA_COUNT);
+    const i = clampPersona(n, personaSet(this.storage.root).count);
     return readFile(join(this.storage.root, "personas", `persona-${i}.png`));
+  }
+
+  /** Bumped by the seed when the persona PNGs are swapped, so cached persona try-ons are not reused. */
+  personaVersion() {
+    return personaSet(this.storage.root).version;
   }
 
   check(image: Buffer) {

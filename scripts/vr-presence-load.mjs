@@ -16,7 +16,7 @@ const arg = (k, d) => {
 };
 const API = arg("api", "http://localhost:4102").split(",");
 const WS = arg("ws", "ws://localhost:4102/vr/presence").split(",");
-const ROOM = arg("room", "showroom:uwase-couture");
+const ROOM = arg("room", "showroom:umurage-wear");
 const COUNTS = arg("clients", "20,50,100").split(",").map(Number);
 const DURATION = Number(arg("duration", "20"));
 const LABEL = arg("label", "default-cap");

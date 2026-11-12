@@ -39,7 +39,7 @@ await page.waitForTimeout(400);
 await shot("mirror-twin-ready");
 
 // Maker Space → try on → guarded, labelled look on the twin
-await page.goto(`${BASE}/m/uwase-couture`);
+await page.goto(`${BASE}/m/umurage-wear`);
 await page.getByRole("listbox", { name: "Collection" }).getByRole("option", { selected: true }).click(); // the 3D shelf is a second listbox
 await page.getByRole("button", { name: /try on me/i }).click();
 await page.waitForURL(/looks\/try/);

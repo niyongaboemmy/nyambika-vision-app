@@ -70,7 +70,7 @@ beforeAll(async () => {
   base = `http://127.0.0.1:${(app.getHttpServer().address() as AddressInfo).port}`;
   prisma = app.get(PrismaService);
   vr = app.get(VrService);
-  const page = await prisma.page.findUniqueOrThrow({ where: { handle: "uwase-couture" } });
+  const page = await prisma.page.findUniqueOrThrow({ where: { handle: "umurage-wear" } });
   pageId = page.id;
   products = await prisma.product.findMany({ where: { pageId, status: "PUBLISHED" }, take: 3, orderBy: { createdAt: "asc" } });
 });
@@ -82,14 +82,14 @@ afterAll(async () => {
 
 describe("3D shelf + showroom (E35)", () => {
   it("serves approved 3D pieces only, shaped for the shelf and the room", async () => {
-    const shelf = (await request(app.getHttpServer()).get("/vr/public/pages/uwase-couture/shelf").expect(200)).body;
+    const shelf = (await request(app.getHttpServer()).get("/vr/public/pages/umurage-wear/shelf").expect(200)).body;
     expect(shelf.items.length).toBeGreaterThan(0);
     const approved = await prisma.garmentAsset3d.findMany({ where: { pageId, approved: true, status: "READY" }, select: { productId: true } });
     for (const i of shelf.items) {
       expect(approved.map((a) => a.productId)).toContain(i.productId);
       expect(i.glb).toMatch(/^\/api\/files\/public\/media\/.+\.glb$/);
     }
-    const room = (await request(app.getHttpServer()).get("/vr/public/pages/uwase-couture/showroom").expect(200)).body;
+    const room = (await request(app.getHttpServer()).get("/vr/public/pages/umurage-wear/showroom").expect(200)).body;
     expect(room.budget.totalBytes).toBeLessThanOrEqual(25 * 1024 * 1024);
     expect(room.page.palette.primary).toMatch(/^#/);
     expect(room.items[0].variants[0]).toHaveProperty("sizes");
@@ -155,7 +155,7 @@ describe("fashion shows: scheduling, RSVP, reminders, live counts (FR-VR-05)", (
     const msg = await prisma.notification.findFirstOrThrow({ where: { template: "fashion_show_reminder", refId: showId } });
     expect(msg.channel).toBe("WHATSAPP");
     expect([phone, norm]).toContain(msg.to);
-    expect(msg.body).toContain(`/m/uwase-couture/shows/${showId}`);
+    expect(msg.body).toContain(`/m/umurage-wear/shows/${showId}`);
 
     // A late RSVP (already inside the window) is reminded right away.
     const late = await login(`0789${uniq}4`);

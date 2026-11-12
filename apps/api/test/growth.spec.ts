@@ -130,7 +130,7 @@ describe("assisted mode consent + USSD (E31)", () => {
   let admin: request.Agent;
 
   beforeAll(async () => {
-    const page = await prisma.page.findUniqueOrThrow({ where: { handle: "abahizi-coop" } });
+    const page = await prisma.page.findUniqueOrThrow({ where: { handle: "urudodo-collective" } });
     pageId = page.id;
     const maker = await prisma.coopMember.findFirstOrThrow({ where: { pageId, phone: "+250788100004" } });
     makerId = maker.id;

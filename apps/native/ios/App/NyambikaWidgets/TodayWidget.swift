@@ -11,9 +11,9 @@ struct TodayEntry: TimelineEntry {
 struct TodayProvider: TimelineProvider {
     func placeholder(in context: Context) -> TodayEntry {
         TodayEntry(date: Date(), order: .init(
-            info: OrderInfo(orderId: "preview", code: "NY-3F9A21", makerName: "Uwase Couture", itemTitle: "dress"),
+            info: OrderInfo(orderId: "preview", code: "NY-3F9A21", makerName: "Umurage Wear", itemTitle: "dress"),
             state: OrderProgressState(status: "IN_PREPARATION", phase: "ACTIVE", stepIndex: 2, progress: 0.55,
-                                      headline: "Uwase Couture is sewing your dress", detail: "sewing · ready Thursday",
+                                      headline: "Umurage Wear is sewing your dress", detail: "sewing · ready Thursday",
                                       stepLabels: ["Paid", "Cutting", "Sewing", "Delivery"], readyBy: nil, updatedAt: 0)))
     }
 

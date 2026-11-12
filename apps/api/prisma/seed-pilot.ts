@@ -15,6 +15,7 @@ import { dirname, join, resolve } from "node:path";
 import "dotenv/config";
 import { assign, type Variant } from "../src/modules/pilot/assign";
 import { pseudonymise } from "../src/modules/pilot/privacy";
+import { personaSet } from "../src/modules/twin/personas";
 
 if (process.env.NODE_ENV === "production") throw new Error("seed-pilot is synthetic data: never run it in production");
 
@@ -74,7 +75,7 @@ async function cleanup() {
 /** One encrypted copy per synthetic persona, shared by synthetic twins (saves disk; nobody real is involved). */
 function personaTwinFiles() {
   const out: { encPath: string; iv: string; authTag: string }[] = [];
-  for (let n = 1; n <= 5; n++) {
+  for (let n = 1; n <= personaSet(STORAGE).count; n++) {
     const encPath = `private/twins/synthetic-pilot/persona-${n}.enc`;
     const iv = randomBytes(12);
     const cipher = createCipheriv("aes-256-gcm", TWIN_KEY, iv);
@@ -165,7 +166,7 @@ async function main() {
     const makeTwin = chance(nudge === "twin_first" ? 0.58 : 0.44);
     const twinAt = makeTwin ? joined + (nudge === "twin_first" ? between(1, 6) * 60_000 : between(0.3, 30) * 3_600_000) : null;
     if (twinAt && twinAt < now) {
-      const persona = 1 + Math.floor(rnd() * 5);
+      const persona = 1 + Math.floor(rnd() * twinFiles.length);
       const f = twinFiles[persona - 1];
       const c1 = consent(userId, "TWIN_PROCESSING", new Date(twinAt), "GENESIS");
       consent(userId, "TRYON_GENERATION", new Date(twinAt + 1), c1);
