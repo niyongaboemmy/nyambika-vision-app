@@ -272,6 +272,76 @@ Next levers (not done here)
 - VR showroom / fashion show (205–212 KB) still pull zod through `vr.ts` / `presence.ts` (same split would apply);
   they also need three.js for the scene anyway.
 
+#### JS budget pass 2 (after the iOS pass)
+
+Branch `worktree-agent-a51f6cc1264b6d420`, slot 1. Before = `main` at `a111c77`, after = this branch. Both were built
+with `NEXT_DIST_DIR=.next-build next build` and measured with `scripts/perf-uiux.mjs` on the same machine in the same
+session. "Wire at load" is the budget metric (gzip body plus response headers, before `load`). "Build" is the
+first-load JS from the build manifests (`rootMainFiles` plus every segment's `entryJSFiles`).
+
+| Route | Wire at load, before | Wire at load, after | Build first-load, before | Build first-load, after |
+|---|---:|---:|---:|---:|
+| **Sign in** | 173.0 | **163.1** (−9.9) | 167.6 | **157.9** (−9.7) |
+| **Maker Space** | 173.8 | **163.9** (−9.9) | 168.0 | **158.4** (−9.6) |
+| **Looks** | 171.9 | **159.0** (−12.9) | 166.4 | **154.2** (−12.2) |
+| Try one look | 170.5 | 157.6 (−12.9) | 165.1 | 152.9 (−12.2) |
+| Muse (home) | 175.9 | 166.0 (−9.9) | 170.2 | 160.5 (−9.7) |
+| Trust centre | 175.3 | 165.6 (−9.7) | 169.8 | 160.3 (−9.5) |
+| Bag · Orders | 170.5 · 167.3 | 161.7 · 157.5 | 165.5 · 162.3 | 157.0 · 152.7 |
+| Wardrobe · Circle · Mirror | 171.0 · 167.7 · 169.9 | 161.1 · 157.7 · 161.0 | 165.6 · 162.7 · 164.9 | 155.9 · 152.9 · 156.3 |
+| Studio routes (20) · Admin (5) | – | – | 173.6–183.8 · 174.4–179.3 | 165.0–175.3 · 165.9–170.9 |
+
+Every shopper route is now under 170 on both meters, Muse and Trust included. The app's shared layout chunk went
+from 27.1 to 17.5 KB gz. LCP, CLS and the INP proxy did not change beyond noise (Looks LCP 2760 → 2656 ms, sign in
+1832 → 1752 ms). JS until idle fell by 4 to 24 KB, because the Looks gesture extras and the three other catalogues
+are now fetched only when needed.
+
+What changed (no visual or behaviour change)
+
+- **One i18n file per locale.** `packages/i18n/src/{en,rw,fr,sw}.ts`. `index.ts` keeps `Locale`, `LOCALES`,
+  `MessageKey`, `translate()` (still synchronous), `catalogues` and `SW_MACHINE_DRAFTED`. It adds `loadLocale()`
+  (idempotent dynamic import) and `isLocaleLoaded()`. English is always bundled because it is the key source and
+  the fallback, so the catalogue in the shared chunk fell from 13.8 to 5.9 KB gz.
+  - `SessionProvider` starts loading a stored locale while the module evaluates, before hydration.
+  - On a switch it changes `locale` only after the catalogue arrives, so text, the active chip and `<html lang>` change
+    together, with no English flash.
+  - **Merge note for feature branches:** new keys go into `en.ts`, then at the end of `rw.ts` / `fr.ts` (and `sw.ts`).
+- **Looks gesture extras in a post-load chunk.** The coach mark / swipe peek, the rail's long-press bubble and the
+  double-tap heart burst moved to `components/look-extras.tsx`. look-view and look-rail load it with `next/dynamic` /
+  `import()` and prefetch it on idle once the card is up, so the first gesture finds it ready. The heart markup stays in
+  the DOM, so only the animation code moved.
+- **Duplicate removed.** `look-rail.tsx` shipped twice on Looks and try-on (1.6 KB): once as the `loading.tsx` client
+  reference, with all its exports, and once in the page. `LooksSkeleton` and the material tokens now live in
+  `components/look-material.tsx` with no `"use client"`. The loading state renders on the server with no client JS.
+  After this, no module ships in two first-load chunks of any route (checked per route over the build's chunks).
+- **Kit split.** `components/toast.tsx` (toasts, the only part the root layout needs) and `components/kit-static.tsx`
+  (Skel, ShopperSkeleton, LearnMore, Fact; hook-free). `kit.tsx` / `ui.tsx` re-export both, so imports are unchanged.
+  All 15 `loading.tsx` files and the Maker Space server page import the static half, so they ship no kit JS.
+- **`"sideEffects": ["*.css"]` in `apps/web/package.json`.** Unused re-exports (`ui.tsx` → kit) now drop out of route
+  chunks, saving 1.0–1.4 KB on most shopper routes. No app module is imported for its side effects only, apart from
+  `globals.css`. `server-only` is a package with its own flag.
+- **Icons checked, left as is.** The core set has 73 glyphs (2.9 KB gz). Sign in, Muse, Looks, Maker Space, bag,
+  orders, wardrobe, circle, trust, mirror, makers, saved and measurements draw 37 of them at load. The other 36 are
+  drawn at load by the studio/admin chrome (dock, nav, theme toggle) or by states on the core routes: the Looks
+  occasion chip (store/gift/crown/bell), sheet close `x` and error `alert`. Moving them would make those pop in for
+  about 0.7 KB, so they stay core.
+
+Verification
+
+- **Typechecks:** `apps/web`, `apps/api` and `packages/i18n` are clean.
+- **Tests:** web unit tests 19/19, including the new `lib/i18n-lazy.test.ts`; API 33 files, 383 tests.
+- **Crawls:**
+  - s1–s5 green on the production build.
+  - harden-commerce and region green on `next dev`, because their simulated wallet prompt is dev-only.
+  - crawl-uiux green on the 26 touched screens, light and dark, 390 px plus the 360 overflow pass: 0 console errors,
+    0 overflow, 0 theme flashes and 0 serious/critical axe violations (label `perf2`).
+- **Behaviour (scripted, production build):** these all work, with no console errors:
+  - RW / FR switch, and the stored locale restored on reload;
+  - coach mark on the first visit;
+  - long-press bubble;
+  - double-tap heart, which also saves the look;
+  - drag peek.
+
 ## 5. Accessibility
 
 `@axe-core/playwright` 4.14.0, tags `wcag2a wcag2aa wcag21a wcag21aa wcag22aa`, all 49 screens at 390 px,
@@ -570,6 +640,7 @@ What moved, and what was cut:
   - Next step: split the Looks chrome (coach mark, swipe peek, long-press bubble, double-tap heart) into a
     post-load chunk, and load the sheet drag handler on the first pointerdown.
   - I stopped there rather than restructure fork L's component late in the pass.
+  - **Closed by JS budget pass 2 (§4.1):** sign in 163.1, Maker Space 163.9 and Looks 159.0 KB at load.
 
 ### Verification
 
