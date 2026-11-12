@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { compatible, evaluate, harmony, type Piece, reminderDue, renderOrder, slotOf, suggestOutfits } from "./outfit-rules";
+import { compatible, daysUntil, evaluate, harmony, type Piece, reminderDue, renderOrder, slotOf, suggestOutfits } from "./outfit-rules";
 
 let n = 0;
 const piece = (category: string, colourHex: string, over: Partial<Piece> = {}): Piece => {
@@ -147,5 +147,15 @@ describe("event reminders", () => {
     expect(reminderDue({ date: inDays(-1), reminderSentAt: null }, true, now)).toBe(false);
     expect(reminderDue({ date: inDays(2), reminderSentAt: null }, false, now)).toBe(false);
     expect(reminderDue({ date: inDays(2), reminderSentAt: now }, true, now)).toBe(false);
+  });
+
+  it("counts days on Kigali's calendar, not UTC's (00:00–02:00 Kigali is still yesterday in UTC)", () => {
+    // 01:03 Kigali on the 13th = 23:03 UTC on the 12th; the shopper picked "in 3 days" = the 16th (noon UTC).
+    const lateNight = new Date("2026-11-12T23:03:00Z");
+    const event = new Date("2026-11-16T12:00:00Z");
+    expect(daysUntil(event, lateNight)).toBe(3);
+    expect(reminderDue({ date: event, reminderSentAt: null }, true, lateNight)).toBe(true);
+    // Midday is unaffected.
+    expect(daysUntil(event, new Date("2026-11-13T10:00:00Z"))).toBe(3);
   });
 });
