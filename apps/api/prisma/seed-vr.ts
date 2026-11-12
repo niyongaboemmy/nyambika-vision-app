@@ -1,5 +1,5 @@
 /**
- * E35 demo content: a showroom-ready Maker Space (Uwase Couture: approved 3D for its seeded dresses, booth banner,
+ * E35 demo content: a showroom-ready Maker Space (Umurage Wear: approved 3D for its seeded dresses, booth banner,
  * featured mannequins) and one scheduled virtual fashion show whose runway models are dressed on the synthetic
  * parametric avatar (never a shopper's twin). Uses the real AI gateway (/v1/garment/3d, /v1/avatar/dress).
  *
@@ -13,8 +13,8 @@ import "dotenv/config";
 const AI = process.env.AI_GATEWAY_URL ?? "http://localhost:8100";
 const STORAGE = resolve(process.env.STORAGE_DIR ?? "./storage");
 const SHOW_TITLE = "Imigongo Nights · launch show";
-/** The dresses seeded by seed.ts for Uwase Couture (duplicates from manual tests are ignored). */
-const PIECES = ["Uruziga a-line dress", "Inyenyeri wrap dress", "Imigongo wrap dress", "Inyenyeri a-line dress", "Imigongo a-line dress"];
+/** The pieces seeded by seed.ts for Umurage Wear (seed-catalogue.ts; duplicates from manual tests are ignored). */
+const PIECES = ["Ineza A-line dress", "Gisenyi shirt dress", "Akagera tiered lace dress", "Adire wrapper, 2 m"];
 
 async function post<T>(path: string, body: object): Promise<T> {
   const res = await fetch(`${AI}${path}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
@@ -35,8 +35,8 @@ function eveningIn(days: number) {
 }
 
 export async function seedVr(prisma: PrismaClient) {
-  const page = await prisma.page.findUnique({ where: { handle: "uwase-couture" } });
-  if (!page) return console.log("· E35 seed skipped: uwase-couture not found");
+  const page = await prisma.page.findUnique({ where: { handle: "umurage-wear" } });
+  if (!page) return console.log("· E35 seed skipped: umurage-wear not found");
   const owner = await prisma.roleAssignment.findFirst({ where: { pageId: page.id, role: "PAGE_OWNER" } });
   const products = [];
   for (const title of PIECES) {
@@ -75,8 +75,8 @@ export async function seedVr(prisma: PrismaClient) {
   const featured = products.slice(0, 3).map((p) => p.id);
   await prisma.showroomBooth.upsert({
     where: { pageId: page.id },
-    create: { pageId: page.id, enabled: true, banner: "Imigongo, reimagined in silk and kitenge", featured },
-    update: { enabled: true, banner: "Imigongo, reimagined in silk and kitenge", featured },
+    create: { pageId: page.id, enabled: true, banner: "Florals and adire, cut to measure in Kimihurura", featured },
+    update: { enabled: true, banner: "Florals and adire, cut to measure in Kimihurura", featured },
   });
 
   // 3. One scheduled show (2 days ahead, 18:00 Kigali), runway dressed on the synthetic avatar.
@@ -86,7 +86,7 @@ export async function seedVr(prisma: PrismaClient) {
       data: {
         pageId: page.id,
         title: SHOW_TITLE,
-        description: "Four new dresses walk the runway in 3D. RSVP for a WhatsApp reminder, react live, replay any time.",
+        description: "Four new pieces walk the runway in 3D. RSVP for a WhatsApp reminder, react live, replay any time.",
         startsAt: eveningIn(2),
         modelSkin: "#825C43",
         modelSize: "M",

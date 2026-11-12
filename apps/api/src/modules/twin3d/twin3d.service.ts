@@ -14,7 +14,8 @@ import { config } from "../../config";
 import { GenerationService } from "../looks/generation.service";
 import { MeasurementsService } from "../tailor/measurements";
 import { decryptField, encryptField } from "../tailor/crypto";
-import { PERSONA_COUNT, TwinService } from "../twin/twin.module";
+import { TwinService } from "../twin/twin.module";
+import { clampPersona, personaSet } from "../twin/personas";
 import {
   AVATAR_3D,
   AVATAR_COST,
@@ -139,7 +140,7 @@ export class Twin3dService implements OnModuleInit {
       hasPhotoTwin: Boolean(twin),
       twinSize: twin?.size ?? null,
       hasProfile: Boolean(profile && Object.keys(profile).length),
-      personas: process.env.NODE_ENV === "production" ? 0 : PERSONA_COUNT,
+      personas: process.env.NODE_ENV === "production" ? 0 : personaSet(this.storage.root).count,
       arMirrorPilot: Boolean(flag?.enabled),
       label: AVATAR_LABEL,
       disclaimer: FIT_DISCLAIMER,
@@ -209,8 +210,9 @@ export class Twin3dService implements OnModuleInit {
   /** Synthetic persona turnaround frames (dev/testing, plan §4.6). Cached as public synthetic media. */
   async turnaround(n: number) {
     if (process.env.NODE_ENV === "production") throw new NotFoundException();
-    const i = Math.min(Math.max(1, Math.round(n)), PERSONA_COUNT);
-    const dir = `public/personas/turnaround/persona-${i}`;
+    const set = personaSet(this.storage.root);
+    const i = clampPersona(n, set.count);
+    const dir = set.version ? `public/personas/turnaround/v${set.version}/persona-${i}` : `public/personas/turnaround/persona-${i}`;
     let meta: { yaws: number[]; count: number } | null = null;
     try {
       meta = JSON.parse((await this.storage.read(`${dir}/meta.json`)).toString());

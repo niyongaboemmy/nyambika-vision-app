@@ -15,7 +15,7 @@ export async function seedRegion(prisma: PrismaClient) {
   let ke = await prisma.page.findUnique({ where: { handle: KE_HANDLE } });
   if (!ke) {
     const source = await prisma.page.findUnique({
-      where: { handle: "kigali-kitenge-house" },
+      where: { handle: "kanombe-kitenge-corner" },
       include: { products: { where: { status: "PUBLISHED", readiness: "READY" }, take: 3, orderBy: { createdAt: "asc" }, include: { variants: true } } },
     });
     if (!source?.products.length) {
@@ -47,13 +47,13 @@ export async function seedRegion(prisma: PrismaClient) {
       const p = await prisma.product.create({
         data: {
           pageId: ke.id,
-          title: ["Kikoi wrap dress", "Kitenge safari shirt", "Pwani maxi skirt"][i] ?? sp.title,
-          description: `${sp.description} Sewn in Kariokor, Nairobi.`,
+          title: ["Pwani kaftan maxi", "Kariokor print shirt", "Kariokor wool midi skirt"][i] ?? sp.title,
+          description: `Cut and sewn in Kariokor, Nairobi, by Nairobi Kikoi Studio. ${sp.fabric}. In stock; ships across East Africa in about 4 days.`,
           category: sp.category,
           priceRwf: convertMinor(amountMinor, "KES", "RWF", DEV_FIXED_RATES), // reporting only
           styles: sp.styles,
           occasions: sp.occasions,
-          fabric: "Cotton kikoi",
+          fabric: sp.fabric,
           status: "PUBLISHED",
           readiness: sp.readiness,
           qualityScore: sp.qualityScore,
@@ -81,8 +81,8 @@ export async function seedRegion(prisma: PrismaClient) {
     });
   }
 
-  // ---- Rwandan export settings: Kigali Kitenge House sells to the diaspora by card (Stripe mock account)
-  const kkh = await prisma.page.findUnique({ where: { handle: "kigali-kitenge-house" } });
+  // ---- Rwandan export settings: Kanombe Kitenge Corner sells to the diaspora by card (Stripe mock account)
+  const kkh = await prisma.page.findUnique({ where: { handle: "kanombe-kitenge-corner" } });
   if (kkh) {
     await prisma.pageRegion.upsert({
       where: { pageId: kkh.id },
@@ -100,7 +100,7 @@ export async function seedRegion(prisma: PrismaClient) {
   }
 
   // ---- A product passport with two versions (cooperative piece, maker attribution)
-  const coop = await prisma.page.findUnique({ where: { handle: "abahizi-coop" }, include: { products: { where: { status: "PUBLISHED" }, take: 1, orderBy: { createdAt: "asc" }, include: { makers: { include: { coopMember: true } } } } } });
+  const coop = await prisma.page.findUnique({ where: { handle: "urudodo-collective" }, include: { products: { where: { status: "PUBLISHED" }, take: 1, orderBy: { createdAt: "asc" }, include: { makers: { include: { coopMember: true } } } } } });
   const prod = coop?.products[0];
   const editor = await prisma.user.findUnique({ where: { phone: "+250788100002" } });
   if (coop && prod && editor && !(await prisma.productPassport.findUnique({ where: { productId: prod.id } }))) {
@@ -109,7 +109,7 @@ export async function seedRegion(prisma: PrismaClient) {
       materials: [{ fibre: "Cotton", percent: 100, origin: "Tanzania" }],
       fabric: { type: "Wax-print kitenge", origin: "Dar es Salaam, Tanzania" },
       origin: { country: "RW", district: coop.district, cooperative: coop.name, makers, handmade: true },
-      production: { date: "2026-10", batch: "ABZ-2610-A" },
+      production: { date: "2026-10", batch: "URD-2610-A" },
       process: [
         { step: "Fabric sourced", by: coop.name, place: "Kigali" },
         { step: "Cut by hand", by: makers[0] ?? coop.name, place: coop.sector },
@@ -117,7 +117,7 @@ export async function seedRegion(prisma: PrismaClient) {
       ],
       care: ["Hand wash cold, inside out", "Dry in shade", "Iron on medium"],
       repair: { offered: true, services: ["Hem and fit alterations", "Seam repair"], contact: coop.whatsapp },
-      claims: { madeIn: "Made in Rwanda", impactStory: "Sewn by a women-led cooperative in Nyamirambo; members are paid per piece into their own Mobile Money." },
+      claims: { madeIn: "Made in Rwanda", impactStory: "Sewn by a twelve-tailor cooperative in Nyamirambo; members are paid per piece into their own Mobile Money." },
     });
     const v2 = { ...v1, certifications: [{ name: "Made in Rwanda (MINICOM brand)", issuer: "Rwanda Ministry of Trade and Industry", reference: "synthetic-demo" }] };
     await prisma.productPassportVersion.createMany({
