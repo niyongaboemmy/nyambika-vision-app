@@ -38,7 +38,7 @@ await shot("look-with-morph-rail");
 // ── Live morph ────────────────────────────────────────────────────────────────
 await page.getByRole("button", { name: "Morph" }).click();
 const sheet = page.getByRole("dialog");
-await sheet.getByText(/live morph · uwase couture/i).waitFor();
+await sheet.getByText(/live morph · umurage wear/i).waitFor();
 await page.waitForTimeout(500);
 await shot("morph-sheet");
 // Drag the knob around the ring towards blue (~225°).
@@ -62,20 +62,20 @@ const morphImg = await sheet.locator('img[alt*="live morph preview"]').getAttrib
 assert(morphImg?.startsWith("/api/private/look"), "morph preview rendered through the generation path (signed private image)");
 await page.waitForTimeout(400);
 await shot("morph-blue-maxi-long");
-const askText = await sheet.getByRole("button", { name: /ask uwase to sew this/i }).innerText();
+const askText = await sheet.getByRole("button", { name: /ask umurage to sew this/i }).innerText();
 assert(/RWF 39,000/.test(askText), `price = base + options (${askText.split("\n").join(" ")})`);
 
 // ── Ask Uwase to sew this ─────────────────────────────────────────────────────
-await sheet.getByRole("button", { name: /ask uwase to sew this/i }).click();
+await sheet.getByRole("button", { name: /ask umurage to sew this/i }).click();
 const ask = page.getByRole("dialog").last();
-await ask.getByText(/what uwase will see/i).waitFor();
+await ask.getByText(/what umurage will see/i).waitFor();
 await ask.getByRole("checkbox", { name: /this preview image/i }).check();
 await page.waitForTimeout(300);
 await shot("ask-tailor-consent");
-await ask.getByRole("button", { name: /send request to uwase/i }).click();
+await ask.getByRole("button", { name: /send request to umurage/i }).click();
 await page.waitForURL(/\/custom\/.+fresh=1/, { timeout: 20000 });
 const coId = new URL(page.url()).pathname.split("/").pop();
-await page.getByText(/sent to uwase couture/i).waitFor();
+await page.getByText(/sent to umurage wear/i).waitFor();
 await page.waitForTimeout(500);
 await shot("custom-order-requested");
 
@@ -113,7 +113,7 @@ async function approveOnHandset(label) {
   await handset.getByText(/no pending payment requests/i).waitFor({ timeout: 10000 });
 }
 await page.reload();
-await page.getByText(/quote from uwase/i).waitFor({ timeout: 10000 });
+await page.getByText(/quote from umurage/i).waitFor({ timeout: 10000 });
 await page.waitForTimeout(300);
 await shot("shopper-quote");
 await page.getByRole("button", { name: /accept & pay deposit/i }).click();

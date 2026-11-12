@@ -90,7 +90,7 @@ for (const vp of ["phone", "desk"]) {
     const { context, page } = await session("0788100001", vp);
     await page.goto(`${BASE}/studio`);
     await shot(page, "studio-pages", vp);
-    const p = await firstPage(page, "Uwase");
+    const p = await firstPage(page, "Umurage");
     await page.goto(`${BASE}/studio/${p.id}`);
     await shot(page, "tailor-home", vp, { full: true });
     if (vp === "phone") {
