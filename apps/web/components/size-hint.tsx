@@ -26,7 +26,15 @@ export function useSizeRecommendation(productId: string, variantId: string, enab
 const CONF: Record<string, string> = { high: "great fit", medium: "good fit", low: "estimate" };
 
 export function SizeNotes({ rec, size, resumeKey }: { rec: SizeRecommendation | null; size: string; /** Reopen this buy sheet when the shopper comes back from measurements. */ resumeKey?: string }) {
-  if (!rec) return null;
+  // No chart-based advice for this piece: still one tap to the measurements, and the buy sheet reopens on return.
+  if (!rec)
+    return resumeKey ? (
+      <p className="mt-1.5 text-xs">
+        <DetourLink href="/measurements" onBeforeGo={() => stashResume("buy", resumeKey)} className="inline-flex min-h-8 items-center gap-1 font-semibold text-gold underline-offset-2 hover:underline">
+          <Icon name="ruler" className="size-3.5" /> My measurements
+        </DetourLink>
+      </p>
+    ) : null;
   return (
     <div className="mt-1.5 text-xs text-txt/80" aria-live="polite">
       {rec.size === size ? (

@@ -98,7 +98,9 @@ function Stream() {
   }, [data, index, me?.hasTwin, error, sessionId, load]);
   useEffect(() => {
     if (!data || !retwin.size) return;
-    const done = data.looks.filter((l) => retwin.has(l.id) && !isRendering(l.status));
+    // Done = rendered on the twin, or the re-render ended (failed / withheld). The old model render that is still
+    // in `data` right after the request does not count.
+    const done = data.looks.filter((l) => retwin.has(l.id) && ((l.status === "DELIVERED" && l.onTwin) || l.status === "FAILED" || l.status === "WITHHELD"));
     if (!done.length) return;
     const onYou = done.some((l) => l.onTwin && l.status === "DELIVERED" && data.looks[index]?.id === l.id);
     setRetwin((s) => new Set([...s].filter((id) => !done.some((l) => l.id === id))));
