@@ -2,6 +2,7 @@ import "multer";
 import { BadRequestException, Body, Controller, Get, Injectable, Module, NotFoundException, Param, Post, UploadedFile, UseInterceptors } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { countryOfPhone, EXPERIMENTS, Intent, IntentRequest, isRegion, LOOK_GUARDRAILS, type RegionCode } from "@nyambika/contracts";
+import { z } from "zod";
 import { AiClient } from "../../common/ai.client";
 import { AuthUser, CurrentUser, Public } from "../../common/auth";
 import { PrismaService } from "../../common/prisma.service";
@@ -199,6 +200,13 @@ export class IntentController {
     if (!session) throw new NotFoundException();
     const looks = await this.looks.views(await this.looks.rows({ intentSessionId: sessionId, userId: user.id }));
     return { id: session.id, input: session.input, source: session.source, intent: session.intent, looks };
+  }
+
+  /** Navigation pass: back from making a twin, the looks around `index` re-render on it (visible first). */
+  @Post(":sessionId/retwin")
+  async retwin(@CurrentUser() user: AuthUser, @Param("sessionId") sessionId: string, @Body() body: unknown) {
+    const { index } = parse(z.object({ index: z.number().int().min(0).max(500).default(0) }), body ?? {});
+    return this.looks.retwin(user.id, sessionId, index);
   }
 
   @Post(":sessionId/advance")

@@ -8,6 +8,7 @@ import { parse } from "../../common/zod";
 import { TwinModule, TwinService } from "../twin/twin.module";
 import { PilotService } from "../pilot/pilot.service";
 import { GenerationService } from "./generation.service";
+import { retwinOrder, twinKeyPrefix } from "../intent/retwin";
 
 const lookInclude = {
   generation: true,
@@ -39,6 +40,38 @@ export class LooksService {
     return gen;
   }
 
+  /**
+   * Twin follow-through: re-render the session's looks near `index` that were drawn on a model (or an older
+   * twin) on the current twin. Cached renders come back at once (`ensure` keys by twin); new ones respect the
+   * daily cap, budget and consent. The first look's error is thrown (the client shows the limit card); a later
+   * neighbour's error just stops the batch.
+   */
+  async retwin(userId: string, sessionId: string, index: number) {
+    const prefix = twinKeyPrefix(await this.twins.current(userId));
+    if (!prefix) return { queued: 0, lookIds: [] as string[] };
+    const looks = await this.prisma.look.findMany({
+      where: { intentSessionId: sessionId, userId },
+      include: { generation: { select: { cacheKey: true } } },
+      orderBy: { rank: "asc" },
+    });
+    if (!looks.length) throw new NotFoundException();
+    const order = retwinOrder(
+      looks.map((l, i) => ({ id: l.id, index: i, rendered: Boolean(l.generationId), onCurrentTwin: Boolean(l.generation?.cacheKey.startsWith(prefix)) })),
+      index,
+    );
+    const lookIds: string[] = [];
+    for (const id of order) {
+      try {
+        await this.render(id);
+        lookIds.push(id);
+      } catch (e) {
+        if (!lookIds.length) throw e;
+        break;
+      }
+    }
+    return { queued: lookIds.length, lookIds };
+  }
+
   async views(rows: LookRow[]) {
     const productIds = [...new Set(rows.map((r) => r.productId))];
     const products = await this.prisma.product.findMany({
@@ -46,7 +79,9 @@ export class LooksService {
       include: { page: true, variants: true, makers: { include: { coopMember: true } } },
     });
     const byId = new Map(products.map((p) => [p.id, p]));
-    const hasTwin = rows.length ? Boolean(await this.twins.current(rows[0].userId)) : false;
+    // A look is "on your twin" when its render used the current twin key, not merely because a twin exists now
+    // (navigation pass: looks rendered on a model before the twin was made used to claim "on your twin").
+    const prefix = rows.length ? twinKeyPrefix(await this.twins.current(rows[0].userId)) : null;
     return rows.map((l) => {
       const p = byId.get(l.productId)!;
       const v = p.variants.find((x) => x.id === l.variantId) ?? p.variants[0];
@@ -58,7 +93,7 @@ export class LooksService {
         saved: Boolean(l.savedAt),
         status: g?.status ?? "PENDING",
         image: g?.status === "DELIVERED" && g.outputPath ? this.storage.sign(g.outputPath, "look") : null,
-        onTwin: hasTwin,
+        onTwin: Boolean(prefix && g?.cacheKey.startsWith(prefix)),
         tier: g?.tier ?? "PREVIEW",
         c2pa: g?.c2pa ? { signed: true, sha256: (g.c2pa as { sha256: string }).sha256.slice(0, 16), model: g.modelVersion } : null,
         guardPassed: guard?.passed ?? null,
