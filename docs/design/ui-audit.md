@@ -521,3 +521,68 @@ override, which was shortened. Examples:
 - **tailor:** `/recommended/`, `/your measurements ·/`.
 - **mlspike:** fairness copy.
 - **vr / mrvr:** "React: Fire", "Fire 1", "reacted: Fire".
+- **s3:** occasion chip `/office|any occasion/` (emoji dropped from its name).
+- **growth:** Rehearse cadence via the "More outreach actions" sheet.
+- **mrvr:** `/a moderator will look/`, first privacy note.
+
+### Bugs found on the way
+
+- **Swipe-to-Maker-Space hijack.** React portals bubble synthetic events through the component tree. Dragging
+  the colour ring inside the portalled morph sheet therefore also drove the Looks swipe, which navigated to the
+  Maker Space mid-drag (caught by crawl-tailor). `look-view` now swipes only on real DOM descendants.
+- **Header contrast in dark.** The studio and admin material headers fell back to a light surface in dark mode.
+  The `.material` override now uses `--surface-2`.
+
+### JS budget (core routes)
+
+Measured with a production build (`NEXT_DIST_DIR=.next-build next build && next start`) and `scripts/perf-uiux.mjs`
+(Pixel 7, 4× CPU, slow 4G, cold, signed-in shopper). Values are JS at the load event, in KB gz including response
+headers. The main column is the same commit as `main` (460d0b9), built and measured **on the same machine in the
+same session**. It does not match §4.1's 168.3 / 169.5 / 164.4, which were measured in another session.
+
+| Route | main, same machine | this branch, first build | this branch, final |
+|---|---:|---:|---:|
+| Sign in | 171.4 | 174.1 | **173.0** (+1.6) |
+| Maker Space | 172.6 | 174.6 | **173.8** (+1.2) |
+| Looks | 167.5 | 173.6 | **171.9** (+4.4) |
+| Try one look | 166.4 | 176.8 | **170.5** (+4.1) |
+| Muse | 174.1 | 176.8 | 175.9 |
+
+What moved, and what was cut:
+
+- **New critical bytes:**
+  - The icon set grew 2.2 KB gz (45 glyphs).
+  - Sheet drag and large-title code added about 0.9 KB.
+  - The full-bleed Looks stream (gestures, rail, coach mark, hold pill) grew look-view's chunk from 3.1 to 7.9 KB.
+- **Cuts made:**
+  - **Icon split.** 32 glyphs that no core route draws at load moved to `components/icons-extra.ts`.
+    `<LazyIcon>` draws a same-size empty svg until they arrive, and `DeferredGlobals` prefetches them after
+    `load`.
+  - **LimitState on demand.** It now loads only when an error renders: in the root `ErrorToaster`, `ErrorNote`,
+    growth offer and the Looks pages. It used to sit in every route's first-load JS through the error toaster.
+  - **Icon imports.** `Icon` is now imported from `icons.tsx` instead of the studio kit. This cut 11 KB from
+    "until idle" on Looks.
+  - The i18n catalogue shrank 0.8 KB with the shorter strings.
+- **Gap:**
+  - The coordinator's "≤ 170 KB at load" is **not met on this machine** for sign in, Maker Space and Looks.
+  - Main itself measures 171.4 / 172.6 here, so the remaining real regression versus main is +1.2 to +1.6 KB on
+    sign in and Maker Space, and +4.4 KB on Looks.
+  - Next step: split the Looks chrome (coach mark, swipe peek, long-press bubble, double-tap heart) into a
+    post-load chunk, and load the sheet drag handler on the first pointerdown.
+  - I stopped there rather than restructure fork L's component late in the pass.
+
+### Verification
+
+- **Typechecks:** `apps/web` and `apps/api` `tsc --noEmit` are clean.
+- **Tests:**
+  - Web unit tests: 16/16, including `no-emoji.test.ts`.
+  - API: 33 files, 383 tests green.
+- **crawl-uiux:** 49 screens × light/dark × 390/1280, with a 360 overflow pass. 0 console errors, 0 5xx,
+  0 overflow, 0 theme flashes, 0 serious/critical axe violations and 0 emoji in both themes. Final run: label
+  `final`.
+- **Every other crawl on slot 1** (all except `crawl-infer`, which needs its own gateway with the fake pool):
+  see the final table in the delivery log.
+- **mlspike** depends on database state: each run permanently withdraws a uniquely titled shared piece. After
+  many reruns it needs a fresh copy of the slot DB, `createdb -T nyambika_tpl`.
+- **Screenshot review:** light, dark and desktop contact sheets for every screen. Looks was checked at 360, 390
+  and 430 in both themes.
