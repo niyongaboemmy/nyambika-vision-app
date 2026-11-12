@@ -125,13 +125,16 @@ await shot("attr-suggestion");
 await card.screenshot({ path: `${OUT}06b-attr-card.png` });
 const use = card.getByRole("button", { name: /^(Use|Add tag)$/ }).first();
 assert(await use.count(), "a mistyped colour gets a one-tap fix");
+// Real seed photos (docs/seed-data.md) carry descriptive names ("Cream floral"); the spike model answers with a base
+// colour, so the fix must apply exactly what the card suggested.
+const suggested = ((await card.textContent()) ?? "").match(/main colour\s*([A-Za-z][A-Za-z ]*?)\s*\d+% sure/i)?.[1]?.trim() ?? realName;
 if (await use.count()) {
   await use.click();
   await card.getByText(/Added|Matches/).first().waitFor();
   await maker.waitForTimeout(400);
   await shot("attr-suggestion-applied");
   const after = await (await maker.request.get(`${BASE}/api/products/${PRODUCT}`)).json();
-  assert(after.variants.find((v) => v.id === firstPhoto.id)?.colourName === realName, `colour name restored to "${realName}" only after the maker tapped Use`);
+  assert(after.variants.find((v) => v.id === firstPhoto.id)?.colourName === suggested && suggested !== "Crimson", `colour name fixed to the suggested "${suggested}" (was mistyped "Crimson") only after the maker tapped Use`);
 }
 assert(await card.getByText(/stay off until they pass/).count(), "blocked heads are explained to the maker");
 
