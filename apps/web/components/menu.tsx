@@ -24,6 +24,7 @@ export function MenuSheet({ open, onClose }: { open: boolean; onClose: () => voi
     { href: "/measurements", icon: "ruler", label: t("tailor.measurements") },
     { href: "/makers", icon: "store", label: "Browse makers" },
     { href: "/trust", icon: "lock", label: t("trust.title") },
+    { href: "/credits", icon: "info", label: "Image credits" },
     ...(manages ? [{ href: "/studio", icon: "needle" as IconName, label: t("studio.title") }] : [{ href: "/studio", icon: "needle" as IconName, label: "Sell on Nyambika" }]),
     ...(me?.isHost ? [{ href: "/admin", icon: "settings" as IconName, label: "Host admin" }] : []),
   ];
