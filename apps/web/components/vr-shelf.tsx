@@ -107,7 +107,7 @@ export function Shelf3d({ shelf, brand, commerce }: { shelf: Shelf; brand: strin
           if (e.key === "End") setI(count - 1);
           if (e.key === "Enter" || e.key === " ") (e.preventDefault(), void open(focus));
         }}
-        className="relative h-[330px] touch-pan-y select-none overflow-hidden rounded-[30px] border border-white/10 outline-none [perspective:1000px] focus-visible:ring-2 focus-visible:ring-gold"
+        className="relative h-[330px] touch-pan-y select-none overflow-hidden rounded-[30px] outline-none [perspective:1000px] focus-visible:ring-2 focus-visible:ring-gold"
         style={{ background: "radial-gradient(70% 60% at 50% 30%, rgba(139,92,246,.26), transparent 70%), radial-gradient(60% 40% at 50% 100%, rgba(224,112,63,.30), transparent 70%), linear-gradient(180deg,#15111f,#0a090e)" }}
       >
         {/* The glass shelf: a lit edge with a soft reflection under the pieces. */}
@@ -168,7 +168,7 @@ export function Shelf3d({ shelf, brand, commerce }: { shelf: Shelf; brand: strin
           </button>
           <ShelfButton label="Next piece" disabled={i === count - 1} onClick={() => go(1)}>›</ShelfButton>
         </div>
-        <span className="pointer-events-none absolute left-3 top-3 z-20 rounded-full border border-white/15 bg-black/55 px-2.5 py-1 text-[11px] font-semibold backdrop-blur"><Icon name="sparkle" className="mr-1 inline size-3 align-[-2px]" />{t("xr.aiLabel")}</span>
+        <span className="pointer-events-none absolute left-3 top-3 z-20 rounded-full bg-black/55 px-2.5 py-1 text-[11px] font-semibold backdrop-blur"><Icon name="sparkle" className="mr-1 inline size-3 align-[-2px]" />{t("xr.aiLabel")}</span>
       </div>
 
       <div className="mt-3 grid gap-2 px-4">
@@ -176,7 +176,7 @@ export function Shelf3d({ shelf, brand, commerce }: { shelf: Shelf; brand: strin
           <Link
             href={`/m/${shelf.handle}/showroom`}
            
-            className="group relative flex min-h-16 items-center gap-3 overflow-hidden rounded-[22px] border border-white/10 px-4 py-3"
+            className="group relative flex min-h-16 items-center gap-3 overflow-hidden rounded-[22px] px-4 py-3"
             style={{ background: "linear-gradient(110deg, rgba(224,112,63,.28), rgba(139,92,246,.28) 60%, rgba(56,189,248,.18))" }}
           >
             <span aria-hidden className="grid size-11 shrink-0 place-items-center rounded-2xl bg-black/35"><Icon name="headset" className="size-5" /></span>

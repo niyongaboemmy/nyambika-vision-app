@@ -83,7 +83,7 @@ function OverviewTab() {
         <section className="st-hero relative col-span-2 overflow-hidden rounded-[28px] p-5 lg:row-span-2 lg:p-6">
           <div aria-hidden className="orb absolute -right-12 -top-12 size-44 animate-orb rounded-full opacity-20 blur-2xl" />
           <p className="relative flex items-center gap-2 text-sm font-extrabold text-mint-ink"><Icon name="wallet" className="size-4" /> Paid directly to makers</p>
-          <p className="relative mt-1 font-display text-4xl font-black tracking-tight tabular-nums text-cocoa lg:text-5xl">{rwf(o.gmvDirectToMakersRwf)}</p>
+          <p className="relative mt-1 whitespace-nowrap font-display text-[clamp(1.75rem,8.5vw,2.25rem)] font-black tracking-tight tabular-nums text-cocoa lg:text-5xl">{rwf(o.gmvDirectToMakersRwf)}</p>
           <p className="relative mt-1 flex flex-wrap items-center gap-1.5 text-sm text-cocoa-2">
             <span className="tabular-nums">{o.orders} orders · {o.completedOrders} completed</span>
             <InfoTip label="Who holds the money">Shoppers pay makers directly. Nyambika never holds the money.</InfoTip>
@@ -165,7 +165,7 @@ function VerifyTab() {
             </div>
             <Badge value={p.status} />
           </div>
-          {p.story && <p className="rounded-2xl bg-paper p-3 text-sm italic leading-relaxed text-cocoa-2 ring-1 ring-inset ring-hairline">“{p.story}”</p>}
+          {p.story && <p className="rounded-2xl bg-paper p-3 text-sm italic leading-relaxed text-cocoa-2">“{p.story}”</p>}
           <div className="flex gap-2">
             {p.status === "SUSPENDED" ? (
               <SButton disabled={busy === p.id} onClick={() => act(p.id, "reinstate")}>Reinstate</SButton>
@@ -256,7 +256,7 @@ function FlagsTab() {
               </div>
               <dl className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
                 {[["Cost / gen", `RWF ${m.costRwf}`], ["Generations", m.generations], ["Guard fail", `${(m.guardFailureRate * 100).toFixed(1)}%`], ["Avg latency", `${m.avgLatencyMs} ms`]].map(([k, v]) => (
-                  <div key={k} className="rounded-xl bg-paper px-2.5 py-1.5 ring-1 ring-inset ring-hairline">
+                  <div key={k} className="rounded-xl bg-paper px-2.5 py-1.5">
                     <dt className="font-semibold text-cocoa-2">{k}</dt>
                     <dd className="font-bold tabular-nums text-cocoa">{v}</dd>
                   </div>
@@ -286,7 +286,7 @@ function OutboxTab() {
             <span className="min-w-0 break-all text-cocoa-2">· {n.template}</span>
             <span className="ml-auto text-cocoa-2">{new Date(n.createdAt).toLocaleString()}</span>
           </div>
-          <p className="break-words rounded-2xl rounded-tl-md bg-paper p-3 text-sm leading-relaxed text-cocoa ring-1 ring-inset ring-hairline [overflow-wrap:anywhere]">{n.body.replace(/code: \d{6}/, "code: ••••••")}</p>
+          <p className="break-words rounded-2xl rounded-tl-md bg-paper p-3 text-sm leading-relaxed text-cocoa [overflow-wrap:anywhere]">{n.body.replace(/code: \d{6}/, "code: ••••••")}</p>
         </li>
       ))}
     </ul>
@@ -438,7 +438,7 @@ function MigrationTab() {
                       {defectTags(i.defects).map((t) => <Chip key={t}>{t}</Chip>)}
                     </div>
                   )}
-                  {i.ownerNote && <p className="truncate rounded-xl bg-red-50 px-3 py-2 text-xs text-red-800 ring-1 ring-inset ring-red-200" title={i.ownerNote}>Owner: “{i.ownerNote}”</p>}
+                  {i.ownerNote && <p className="truncate rounded-xl bg-red-50 px-3 py-2 text-xs text-red-800" title={i.ownerNote}>Owner: “{i.ownerNote}”</p>}
                   <div className="flex flex-wrap items-center gap-2">
                     {["IMPORTED", "CHANGES_REQUESTED", "IN_REVIEW"].includes(i.status) && <SButton variant="outline" onClick={() => act(i.id, "send-review")}>{i.status === "IMPORTED" ? "Send review link" : "Resend review link"}</SButton>}
                     {i.status === "SIGNED_OFF" && <SButton onClick={() => act(i.id, "go-live")}>Go live + redirect</SButton>}

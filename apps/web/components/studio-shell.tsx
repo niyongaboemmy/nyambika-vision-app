@@ -99,7 +99,7 @@ function PageSwitcherList({ pages, current, onPick }: { pages: ShellPage[]; curr
             href={`/studio/${p.id}`}
             onClick={onPick}
             aria-current={p.id === current ? "page" : undefined}
-            className={`st-press flex items-center gap-3 rounded-2xl p-3 ring-1 ring-inset ${p.id === current ? "bg-white ring-cocoa" : "bg-white/60 ring-hairline hover:bg-white"}`}
+            className={`st-press flex items-center gap-3 rounded-2xl p-3 ring-1 ring-inset ${p.id === current ? "bg-white ring-cocoa" : "bg-white/60 hover:bg-white ring-transparent"}`}
           >
             <Monogram name={p.name} size={40} />
             <span className="min-w-0 flex-1">
@@ -115,7 +115,7 @@ function PageSwitcherList({ pages, current, onPick }: { pages: ShellPage[]; curr
 }
 
 function SheetLink({ href, icon, label, hint, onClick, external }: { href: string; icon: IconName; label: string; hint?: string; onClick?: () => void; external?: boolean }) {
-  const cls = "st-press flex min-h-14 items-center gap-3 rounded-2xl bg-white px-3.5 ring-1 ring-inset ring-hairline hover:ring-cocoa-3";
+  const cls = "st-press flex min-h-14 items-center gap-3 rounded-2xl bg-white px-3.5";
   const body = (
     <>
       <span className="grid size-9 place-items-center rounded-xl bg-paper-2 text-cocoa"><Icon name={icon} className="size-[18px]" /></span>
@@ -177,7 +177,7 @@ export function StudioShell({ page, pages, member, badges = {}, children }: { pa
           type="button"
           onClick={() => multi && setSwitching(true)}
           aria-label={multi ? `Switch page (current: ${page.name})` : undefined}
-          className={`st-press flex items-center gap-3 rounded-2xl bg-white p-2.5 text-left ring-1 ring-inset ring-hairline ${multi ? "hover:ring-cocoa-3" : "cursor-default"}`}
+          className={`st-press flex items-center gap-3 rounded-2xl bg-white p-2.5 text-left ${multi ? "" : "cursor-default"}`}
         >
           <Monogram name={page.name} size={40} />
           <span className="min-w-0 flex-1">
@@ -243,7 +243,7 @@ export function StudioShell({ page, pages, member, badges = {}, children }: { pa
             <a
               href={`/m/${page.handle}`}
               aria-label="View Maker Space"
-              className="st-press inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-2 rounded-2xl bg-white px-3 text-sm font-bold text-cocoa ring-1 ring-inset ring-hairline hover:ring-cocoa-3"
+              className="st-press inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-2 rounded-2xl bg-white px-3 text-sm font-bold text-cocoa"
             >
               <Icon name="store" className="size-5" />
               <span className="hidden sm:inline">View Maker Space</span>
@@ -263,11 +263,12 @@ export function StudioShell({ page, pages, member, badges = {}, children }: { pa
               key={n.href}
               href={n.href}
               aria-current={active ? "page" : undefined}
+              aria-label={n.short && n.short !== n.label ? n.label : undefined}
               onClick={() => navigator.vibrate?.(6)}
               className={`st-press relative flex min-h-[54px] flex-1 flex-col items-center justify-center gap-0.5 rounded-[22px] text-[11px] font-extrabold ${active ? "bg-cocoa text-white" : "text-cocoa-2 hover:text-cocoa"}`}
             >
               <Icon name={n.icon} className="size-[22px]" />
-              <span className="max-w-full truncate px-1">{n.label}</span>
+              <span className="max-w-full truncate px-1">{n.short ?? n.label}</span>
               {badges[n.label] ? (
                 <span aria-hidden className="absolute right-[calc(50%-20px)] top-1.5 grid min-w-[18px] place-items-center rounded-full bg-terra-ink px-1 text-[10px] font-black leading-[18px] text-white ring-2 ring-white">
                   {badges[n.label]}
@@ -292,12 +293,12 @@ export function StudioShell({ page, pages, member, badges = {}, children }: { pa
           {nav.filter((n) => n.secondary).map((n) => (
             <SheetLink key={n.href} href={n.href} icon={n.icon} label={n.label} hint={n.hint} onClick={close} />
           ))}
-          <button type="button" onClick={() => { close(); setSharing(true); }} className="st-press flex min-h-14 w-full items-center gap-3 rounded-2xl bg-white px-3.5 text-left ring-1 ring-inset ring-hairline hover:ring-cocoa-3">
+          <button type="button" onClick={() => { close(); setSharing(true); }} className="st-press flex min-h-14 w-full items-center gap-3 rounded-2xl bg-white px-3.5 text-left">
             <span className="grid size-9 place-items-center rounded-xl bg-paper-2 text-cocoa"><Icon name="qr" className="size-[18px]" /></span>
             <span className="flex-1"><span className="block font-bold text-cocoa">Share my page</span><span className="block text-xs text-cocoa-2">QR code and link</span></span>
           </button>
           {multi && (
-            <button type="button" onClick={() => { close(); setSwitching(true); }} className="st-press flex min-h-14 w-full items-center gap-3 rounded-2xl bg-white px-3.5 text-left ring-1 ring-inset ring-hairline hover:ring-cocoa-3">
+            <button type="button" onClick={() => { close(); setSwitching(true); }} className="st-press flex min-h-14 w-full items-center gap-3 rounded-2xl bg-white px-3.5 text-left">
               <span className="grid size-9 place-items-center rounded-xl bg-paper-2 text-cocoa"><Icon name="swap" className="size-[18px]" /></span>
               <span className="flex-1"><span className="block font-bold text-cocoa">Switch page</span><span className="block text-xs text-cocoa-2">{pages.length} pages</span></span>
             </button>
@@ -305,7 +306,7 @@ export function StudioShell({ page, pages, member, badges = {}, children }: { pa
           <SheetLink href={`/m/${page.handle}`} icon="store" label="Open my Maker Space" hint="What shoppers see" external onClick={close} />
           <SheetLink href="/studio" icon="grid" label="All my pages" onClick={close} />
           <SheetLink href="/" icon="eye" label="Shopper view" external onClick={close} />
-          <div className="flex min-h-14 items-center justify-between gap-3 rounded-2xl bg-white px-3.5 ring-1 ring-inset ring-hairline">
+          <div className="flex min-h-14 items-center justify-between gap-3 rounded-2xl bg-white px-3.5">
             <span className="font-bold text-cocoa">Display</span>
             <ThemeToggle />
           </div>

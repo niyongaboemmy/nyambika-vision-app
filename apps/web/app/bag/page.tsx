@@ -62,7 +62,7 @@ export default function BagPage() {
         ) : (
           <>
             {groups.length > 1 && (
-              <section className="animate-rise rounded-3xl border border-gold/40 bg-gold/10 p-4" aria-label="Payment split">
+              <section className="animate-rise rounded-3xl bg-gold/10 p-4" aria-label="Payment split">
                 <p className="font-display text-lg font-black">
                   {groups.length} {t("bag.makers")} · {groups.length} {t("bag.payments")}
                 </p>
@@ -114,7 +114,7 @@ export default function BagPage() {
 
       {groups.length > 0 && (
         <footer className="fixed inset-x-0 bottom-0 z-30 mx-auto max-w-[480px] px-4 pb-[max(env(safe-area-inset-bottom),16px)] pt-3">
-          <div className="flex items-center gap-3 rounded-3xl border border-white/15 bg-ink-2/95 p-3 shadow-[0_-10px_40px_rgba(0,0,0,.55)] backdrop-blur-xl">
+          <div className="flex items-center gap-3 rounded-3xl bg-ink-2/95 p-3 shadow-[0_-10px_40px_rgba(0,0,0,.55)] backdrop-blur-xl">
             <div className="min-w-0 flex-1 pl-1">
               <p className="text-xs text-mut">{t("bag.total")} · {bag?.count} items</p>
               <p className="font-display text-xl font-black">{rwf(total)}</p>

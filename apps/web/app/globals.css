@@ -56,13 +56,13 @@
   --surface-3: #1f1c26;
   --fg: #f5efe8;
   --fg-muted: #a79e96;
-  --border: rgb(255 255 255 / 0.16);
+  --border: rgb(255 255 255 / 0.1);
   --accent: #f2b84b;
   --accent-fg: #0b0a0f;
   --focus: #f2b84b;
   --glass-bg: rgb(255 255 255 / 0.09);
-  --glass-border: rgb(255 255 255 / 0.16);
-  --glass-shadow: none;
+  --glass-border: transparent;
+  --glass-shadow: inset 0 0.5px 0 rgb(255 255 255 / 0.12);
   --scrim: rgb(0 0 0 / 0.6);
   --skel-a: rgb(255 255 255 / 0.04);
   --skel-b: rgb(255 255 255 / 0.12);
@@ -83,7 +83,7 @@
   --color-ink-3: #1f1c26;
   --color-txt: #f5efe8;
   --color-mut: #a79e96;
-  --color-line: rgb(255 255 255 / 0.16);
+  --color-line: rgb(255 255 255 / 0.1);
   --color-white: #fff;
   --color-black: #000;
   --color-terra: #e0703f;
@@ -101,13 +101,13 @@
   --surface-3: #f2e9df;
   --fg: #1c1714;
   --fg-muted: #5c5148;
-  --border: rgb(28 23 20 / 0.14);
+  --border: rgb(28 23 20 / 0.09);
   --accent: #8a5a00;
   --accent-fg: #fff;
   --focus: #6239c9;
-  --glass-bg: rgb(255 255 255 / 0.72);
-  --glass-border: rgb(28 23 20 / 0.1);
-  --glass-shadow: 0 1px 2px rgb(28 23 20 / 0.05), 0 8px 24px -14px rgb(28 23 20 / 0.25);
+  --glass-bg: rgb(255 255 255 / 0.78);
+  --glass-border: transparent;
+  --glass-shadow: 0 0.5px 1px rgb(28 23 20 / 0.05), 0 6px 20px -12px rgb(28 23 20 / 0.16);
   --scrim: rgb(28 23 20 / 0.45);
   --skel-a: #efe6db;
   --skel-b: #f9f4ee;
@@ -126,7 +126,7 @@
   --color-ink-3: #f2e9df;
   --color-txt: #1c1714;
   --color-mut: #5c5148;
-  --color-line: rgb(28 23 20 / 0.14);
+  --color-line: rgb(28 23 20 / 0.09);
   --color-white: #1c1714;
   --color-terra: #b4532a;
   --color-gold: #8a5a00;
@@ -153,25 +153,25 @@
 /* ── studio · light (default for .theme-light) ───────────────────────────────────────────────────────────── */
 .theme-light {
   color-scheme: light;
-  --surface: #fbf7f2;
+  --surface: #f6f1eb;
   --surface-2: #ffffff;
-  --surface-3: #f4ede4;
+  --surface-3: #efe8e0;
   --fg: #1d1814;
   --fg-muted: #5c524a;
-  --border: #e8dfd4;
+  --border: rgb(29 24 20 / 0.09);
   --accent: #a8481f;
   --accent-fg: #fff;
   --focus: #6239c9;
   --scrim: rgb(29 24 20 / 0.4);
   --skel-a: #efe7dc;
   --skel-b: #f8f3ec;
-  --elev-1: 0 1px 2px rgb(29 24 20 / 0.04), 0 10px 30px -18px rgb(29 24 20 / 0.18);
-  --elev-2: 0 1px 2px rgb(29 24 20 / 0.05), 0 18px 36px -18px rgb(29 24 20 / 0.28);
+  --elev-1: 0 0.5px 1px rgb(29 24 20 / 0.04), 0 4px 14px -8px rgb(29 24 20 / 0.1);
+  --elev-2: 0 1px 2px rgb(29 24 20 / 0.05), 0 14px 32px -18px rgb(29 24 20 / 0.24);
   --elev-3: 0 18px 40px -16px rgb(29 24 20 / 0.35), 0 2px 6px rgb(29 24 20 / 0.06);
   --st-card: #fff;
-  --st-card-border: rgb(29 24 20 / 0.07);
+  --st-card-border: transparent;
   --st-dock: rgb(255 255 255 / 0.88);
-  --st-glass: rgb(251 247 242 / 0.84);
+  --st-glass: rgb(246 241 235 / 0.84);
   --st-hero:
     radial-gradient(120% 140% at 0% 0%, #f7c9a6 0%, transparent 55%),
     radial-gradient(120% 140% at 100% 0%, #dccbff 0%, transparent 55%),
@@ -188,13 +188,13 @@
   --fg-legacy: #1d1814;
   --color-white: #fff;
   --color-black: #000;
-  --color-paper: #fbf7f2;
-  --color-paper-2: #f4ede4;
-  --color-paper-3: #ebe2d6;
+  --color-paper: #f6f1eb;
+  --color-paper-2: #efe8e0;
+  --color-paper-3: #e5ddd3;
   --color-cocoa: #1d1814;
   --color-cocoa-2: #5c524a;
   --color-cocoa-3: #7a6f65;
-  --color-hairline: #e8dfd4;
+  --color-hairline: rgb(29 24 20 / 0.09);
   --color-terra-ink: #a8481f;
   --color-violet-ink: #6239c9;
   --color-gold-ink: #7a5200;
@@ -214,7 +214,7 @@
   --surface-3: #25201c;
   --fg: #f4ede6;
   --fg-muted: #c9bcb0;
-  --border: #3a312b;
+  --border: rgb(255 255 255 / 0.08);
   --accent: #f0936a;
   --accent-fg: #1b1714;
   --focus: #c4b1ff;
@@ -225,7 +225,7 @@
   --elev-2: 0 1px 2px rgb(0 0 0 / 0.5), 0 18px 36px -18px rgb(0 0 0 / 0.8);
   --elev-3: 0 18px 40px -16px rgb(0 0 0 / 0.8);
   --st-card: #1c1815;
-  --st-card-border: rgb(255 255 255 / 0.07);
+  --st-card-border: transparent;
   --st-dock: rgb(32 27 24 / 0.9);
   --st-glass: rgb(19 16 14 / 0.84);
   --st-hero:
@@ -248,7 +248,7 @@
   --color-cocoa: #f4ede6;
   --color-cocoa-2: #c9bcb0;
   --color-cocoa-3: #a19488;
-  --color-hairline: #3a312b;
+  --color-hairline: rgb(255 255 255 / 0.08);
   --color-terra-ink: #f0936a;
   --color-violet-ink: #c4b1ff;
   --color-gold-ink: #f2c46b;
@@ -394,7 +394,6 @@ body {
 
 .glass {
   background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
@@ -483,8 +482,7 @@ body {
 
 .st-card {
   background: var(--st-card);
-  border: 1px solid var(--st-card-border);
-  box-shadow: var(--elev-1);
+  box-shadow: var(--elev-1), var(--edge);
 }
 
 .st-cta {
@@ -499,8 +497,7 @@ body {
 
 .st-dock {
   background: var(--st-dock);
-  border: 1px solid var(--st-card-border);
-  box-shadow: var(--elev-3);
+  box-shadow: var(--elev-3), var(--edge);
   backdrop-filter: blur(18px) saturate(1.4);
   -webkit-backdrop-filter: blur(18px) saturate(1.4);
 }
@@ -599,11 +596,9 @@ body {
   --spring: linear(0, 0.009, 0.035 2.1%, 0.141, 0.281 6.7%, 0.723 12.9%, 0.938 16.7%, 1.017, 1.077, 1.121 24%, 1.149 26.3%, 1.159, 1.163, 1.161, 1.154 31.8%, 1.129 34.4%, 1.051 41.1%, 1.017 44.8%, 0.991 49%, 0.977, 0.975 59.2%, 0.984 66.3%, 0.997 76.3%, 1.002 84.5%, 1);
   --spring-bouncy: linear(0, 0.006, 0.025 2.8%, 0.101 6.1%, 0.539 18.9%, 0.721 25.3%, 0.849 31.5%, 0.937 38.1%, 0.968 41.8%, 0.991 45.7%, 1.006 50.1%, 1.015 55%, 1.017 63.9%, 1.001);
   --spring-dur: 0.5s;
-  --hairline: color-mix(in oklab, var(--fg) 14%, transparent);
   --ios-green: #1f9d55;
 }
 [data-theme="dark"] { --ios-green: #30d158; }
-.theme-light { --hairline: color-mix(in oklab, var(--color-cocoa, #1c1714) 12%, transparent); }
 
 /* Spring transitions for transform/opacity; `spring-pop` for one-shot pops (chips, reactions, hearts). */
 .spring { transition: transform var(--spring-dur) var(--spring), opacity 0.2s ease-out, background-color 0.2s, color 0.2s; }
@@ -615,7 +610,7 @@ body {
   background: color-mix(in oklab, var(--surface-2) 72%, transparent);
   backdrop-filter: blur(24px) saturate(1.8);
   -webkit-backdrop-filter: blur(24px) saturate(1.8);
-  border-color: var(--hairline);
+  border-color: transparent;
 }
 .theme-light .material { background: color-mix(in oklab, var(--surface-2) 76%, transparent); }
 
@@ -625,3 +620,60 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .spring, .spring-pop { transition: none !important; animation: none !important; }
 }
+
+/* ==== Polish pass: wrapping, alignment, light surfaces (docs/design/ui-audit.md §8) ====
+   Surfaces separate by fill and soft elevation, not outlines: grouped background (--surface) < elevated card
+   (--surface-2 / st-card) < filled controls (--fill). Outlines are gone from cards, chips, inputs, list rows and
+   sheets; the only lines left are 0.5 px hairlines (--hairline) between rows of a grouped list and under bars.
+   Focus stays visible (:focus-visible outline, 2.5 px). */
+:root,
+.theme-media {
+  --fill: rgb(255 255 255 / 0.08);
+  --fill-2: rgb(255 255 255 / 0.12);
+  --hairline: rgb(255 255 255 / 0.1);
+  --edge: inset 0 0.5px 0 rgb(255 255 255 / 0.1);
+  /* Sheets sit one step up from the page; grouped rows one more step (iOS elevated dark). */
+  --sheet-bg: #15131b;
+  --group-bg: #221f2a;
+}
+[data-theme="light"] {
+  --fill: rgb(28 23 20 / 0.06);
+  --fill-2: rgb(28 23 20 / 0.1);
+  --hairline: rgb(28 23 20 / 0.1);
+  --edge: inset 0 0 0 0.5px rgb(28 23 20 / 0.04);
+  /* Light: sheets are the grouped (cream) background, rows are white cards. */
+  --sheet-bg: #f7f1ea;
+  --group-bg: #ffffff;
+}
+.theme-light {
+  --fill: rgb(29 24 20 / 0.055);
+  --fill-2: rgb(29 24 20 / 0.09);
+  --hairline: rgb(29 24 20 / 0.1);
+  --edge: inset 0 0 0 0.5px rgb(29 24 20 / 0.03);
+  --sheet-bg: var(--surface);
+  --group-bg: var(--surface-2);
+}
+[data-theme="dark"] .theme-light {
+  --fill: rgb(255 255 255 / 0.06);
+  --fill-2: rgb(255 255 255 / 0.1);
+  --hairline: rgb(255 255 255 / 0.09);
+  --edge: inset 0 0.5px 0 rgb(255 255 255 / 0.06);
+  --sheet-bg: var(--surface);
+  --group-bg: var(--surface-2);
+}
+@theme inline {
+  --color-fill: var(--fill);
+  --color-fill-2: var(--fill-2);
+}
+
+/* Text: titles balance, short body lines avoid orphans; numbers never break and use tabular figures. */
+:where(h1, h2, h3, h4, legend, figcaption) { text-wrap: balance; }
+:where(p, li, dd, blockquote, small) { text-wrap: pretty; }
+.tabular, :is(span, b, strong, small, dd, data, time, td).tabular-nums { white-space: nowrap; }
+/* Separators inside grouped lists and under bars are 0.5 px hairlines. */
+.material.border-b, .material.border-t { border-width: 0; }
+.material.border-b { box-shadow: inset 0 -0.5px 0 var(--hairline); }
+:where(.divide-hairline) > :not(:last-child) { border-bottom-width: 0.5px; }
+/* One-line controls: pills, chips, tabs, badges, segmented items. Long values truncate (title carries the full one). */
+.nowrap { white-space: nowrap; }
+.one-line { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

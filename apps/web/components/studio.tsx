@@ -32,7 +32,7 @@ type SVariant = "primary" | "outline" | "danger" | "ghost" | "soft" | "dark";
 const SBTN: Record<SVariant, string> = {
   primary: "st-cta text-white hover:brightness-110",
   dark: "bg-cocoa text-white hover:bg-black",
-  outline: "border border-hairline bg-white text-cocoa hover:border-cocoa-3",
+  outline: "bg-white text-cocoa shadow-e1 hover:bg-paper",
   soft: "bg-paper-2 text-cocoa hover:bg-paper-3",
   danger: "bg-red-700 text-white hover:bg-red-800",
   ghost: "text-cocoa-2 hover:bg-paper-2 hover:text-cocoa",
@@ -42,7 +42,7 @@ export function SButton({ variant = "primary", className = "", ...p }: ButtonHTM
   return (
     <button
       {...p}
-      className={`st-press inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl px-4 text-sm font-bold disabled:pointer-events-none disabled:opacity-45 ${SBTN[variant]} ${className}`}
+      className={`st-press inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-2xl px-4 text-sm font-bold disabled:pointer-events-none disabled:opacity-45 ${SBTN[variant]} ${className}`}
     />
   );
 }
@@ -50,7 +50,7 @@ export function SButton({ variant = "primary", className = "", ...p }: ButtonHTM
 /** Same look as SButton for navigation (a real link, never a button nested in a link). */
 export function SLink({ href, variant = "primary", className = "", children, ...p }: { href: string; variant?: SVariant; className?: string; children: ReactNode; target?: string; rel?: string; "aria-label"?: string }) {
   return (
-    <Link href={href} {...p} className={`st-press inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl px-4 text-sm font-bold ${SBTN[variant]} ${className}`}>
+    <Link href={href} {...p} className={`st-press inline-flex min-h-11 items-center justify-center gap-2 whitespace-nowrap rounded-2xl px-4 text-sm font-bold ${SBTN[variant]} ${className}`}>
       {children}
     </Link>
   );
@@ -103,8 +103,9 @@ export function Field({ label, hint, children, group }: { label: string; hint?: 
   );
 }
 
+// Filled field (iOS): a tinted fill gives the affordance, no outline; focus lifts it to the card surface with a ring.
 const inputCls =
-  "min-h-11 w-full rounded-2xl border border-hairline bg-white px-3.5 py-3 text-[15px] text-cocoa placeholder:text-cocoa-3 shadow-[inset_0_1px_2px_rgb(29_24_20/0.04)] outline-none transition focus:border-violet-ink focus:ring-4 focus:ring-violet-ink/15 disabled:bg-paper-2";
+  "min-h-11 w-full rounded-2xl bg-fill px-3.5 py-3 text-[15px] text-cocoa placeholder:text-cocoa-3 outline-none transition focus:bg-white focus:ring-2 focus:ring-violet-ink/60 disabled:opacity-60";
 export const Input = (p: InputHTMLAttributes<HTMLInputElement>) => <input {...p} className={`${inputCls} ${p.className ?? ""}`} />;
 export const Textarea = (p: TextareaHTMLAttributes<HTMLTextAreaElement>) => <textarea {...p} className={`${inputCls} min-h-28 leading-relaxed ${p.className ?? ""}`} />;
 export const Select = (p: SelectHTMLAttributes<HTMLSelectElement>) => (
@@ -117,12 +118,12 @@ export const Select = (p: SelectHTMLAttributes<HTMLSelectElement>) => (
 
 type Tone = "mint" | "gold" | "sky" | "red" | "stone" | "violet";
 const TONE: Record<Tone, string> = {
-  mint: "bg-emerald-50 text-mint-ink ring-emerald-200",
-  gold: "bg-amber-50 text-gold-ink ring-amber-200",
-  sky: "bg-sky-50 text-sky-800 ring-sky-200",
-  red: "bg-red-50 text-red-800 ring-red-200",
-  stone: "bg-paper-2 text-cocoa-2 ring-hairline",
-  violet: "bg-violet-50 text-violet-ink ring-violet-200",
+  mint: "bg-emerald-50 text-mint-ink",
+  gold: "bg-amber-50 text-gold-ink",
+  sky: "bg-sky-50 text-sky-800",
+  red: "bg-red-50 text-red-800",
+  stone: "bg-paper-2 text-cocoa-2",
+  violet: "bg-violet-50 text-violet-ink",
 };
 const DOT: Record<Tone, string> = { mint: "bg-emerald-500", gold: "bg-amber-500", sky: "bg-sky-500", red: "bg-red-500", stone: "bg-stone-400", violet: "bg-violet-500" };
 
@@ -168,7 +169,7 @@ export const badgeTone = (value: string): Tone => BADGE[value] ?? "stone";
 export function Badge({ value, label }: { value: string; label?: string }) {
   const tone = badgeTone(value);
   return (
-    <span className={`inline-flex max-w-full items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-bold ring-1 ring-inset ${TONE[tone]}`}>
+    <span className={`inline-flex max-w-full items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-bold ${TONE[tone]}`}>
       <span aria-hidden className={`size-1.5 shrink-0 rounded-full ${DOT[tone]}`} />
       <span className="truncate">{label ?? value.replace(/_/g, " ").toLowerCase()}</span>
     </span>
@@ -177,7 +178,7 @@ export function Badge({ value, label }: { value: string; label?: string }) {
 
 /** Generic chip in a given tone (for counts, hints and AI labels). */
 export function Chip({ tone = "stone", children, className = "" }: { tone?: Tone; children: ReactNode; className?: string }) {
-  return <span className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-bold ring-1 ring-inset ${TONE[tone]} ${className}`}>{children}</span>;
+  return <span className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-bold ${TONE[tone]} ${className}`}>{children}</span>;
 }
 
 export interface StudioNavItem {
@@ -188,6 +189,8 @@ export interface StudioNavItem {
   secondary?: boolean;
   /** One-line description under the label in the More sheet. */
   hint?: string;
+  /** Dock label when the full one would not fit a fifth of a phone (the full label stays the accessible name). */
+  short?: string;
 }
 
 /** One list drives the phone dock, the desktop sidebar and PageTabs. Add a studio section with one line here. */
@@ -195,9 +198,9 @@ export function studioNav(pageId: string, isCoop: boolean, member?: boolean, tai
   const base = `/studio/${pageId}`;
   return [
     { href: base, label: "Home", icon: "home" },
-    { href: `${base}/products`, label: member ? "My products" : "Products", icon: "hanger" },
+    { href: `${base}/products`, label: member ? "My products" : "Products", short: "Products", icon: "hanger" },
     ...(member ? [] : [{ href: `${base}/orders`, label: "Orders", icon: "inbox" } as StudioNavItem]),
-    ...(tailor && !member ? [{ href: `${base}/tailor`, label: "Custom orders", icon: "scissors" } as StudioNavItem] : []),
+    ...(tailor && !member ? [{ href: `${base}/tailor`, label: "Custom orders", short: "Custom", icon: "scissors" } as StudioNavItem] : []),
     ...(isCoop && !member ? [{ href: `${base}/makers`, label: "Makers", icon: "users" } as StudioNavItem] : []),
     ...(member ? [] : [{ href: `${base}/grow`, label: "Grow", icon: "trend", secondary: true, hint: "Promo cards, offers, followers, insights" } as StudioNavItem]),
     ...(member ? [] : [{ href: `${base}/showroom`, label: "Showroom", icon: "layers", secondary: true, hint: "3D showroom, VR and virtual fashion shows" } as StudioNavItem]),
@@ -222,7 +225,7 @@ export function PageTabs({ pageId, isCoop, member }: { pageId: string; isCoop: b
             key={t.href}
             href={t.href}
             aria-current={active ? "page" : undefined}
-            className={`st-press whitespace-nowrap rounded-full px-4 py-2 text-sm font-bold ${active ? "bg-cocoa text-white" : "bg-white text-cocoa-2 ring-1 ring-hairline hover:text-cocoa"}`}
+            className={`st-press whitespace-nowrap rounded-full px-4 py-2 text-sm font-bold ${active ? "bg-cocoa text-white" : "bg-white text-cocoa-2 hover:text-cocoa"}`}
           >
             {t.label}
           </Link>
@@ -235,12 +238,12 @@ export function PageTabs({ pageId, isCoop, member }: { pageId: string; isCoop: b
 /** Designed empty state. `children` stays the message (compatible); icon/title/action are optional. */
 export function Empty({ children, icon = "sparkle", title, action }: { children: ReactNode; icon?: IconName; title?: string; action?: ReactNode }) {
   return (
-    <div className="flex flex-col items-center gap-3 rounded-[22px] border border-dashed border-paper-3 bg-white/70 px-6 py-10 text-center">
+    <div className="flex flex-col items-center gap-3 rounded-[22px] bg-white/60 px-6 py-10 text-center">
       <span className="st-hero grid size-14 place-items-center rounded-2xl text-terra-ink shadow-sm">
         <Icon name={icon} className="size-6" />
       </span>
-      {title && <p className="font-display text-lg font-black text-cocoa">{title}</p>}
-      <div className="max-w-sm text-sm leading-relaxed text-cocoa-2">{children}</div>
+      {title && <p className="text-balance font-display text-lg font-black text-cocoa">{title}</p>}
+      <div className="max-w-sm text-pretty text-sm leading-relaxed text-cocoa-2">{children}</div>
       {action}
     </div>
   );
@@ -251,14 +254,14 @@ export function Note({ error, ok, onRetry }: { error?: unknown; ok?: string | nu
   if (error && (typeof error !== "string" || isExpectedText(error))) return <LimitState error={error} tone="light" onRetry={onRetry} />;
   if (typeof error === "string" && error)
     return (
-      <p role="alert" className="flex items-start gap-2 rounded-2xl bg-red-50 px-3.5 py-2.5 text-sm font-medium text-red-800 ring-1 ring-inset ring-red-200">
+      <p role="alert" className="flex items-start gap-2 rounded-2xl bg-red-50 px-3.5 py-2.5 text-sm font-medium text-red-800">
         <Icon name="alert" className="mt-0.5 size-4 shrink-0" />
         <span>{error}</span>
       </p>
     );
   if (ok)
     return (
-      <p role="status" className="flex animate-pop items-start gap-2 rounded-2xl bg-emerald-50 px-3.5 py-2.5 text-sm font-medium text-mint-ink ring-1 ring-inset ring-emerald-200">
+      <p role="status" className="flex animate-pop items-start gap-2 rounded-2xl bg-emerald-50 px-3.5 py-2.5 text-sm font-medium text-mint-ink">
         <Icon name="check" className="mt-0.5 size-4 shrink-0" />
         <span>{ok}</span>
       </p>
@@ -303,7 +306,7 @@ export function Segmented<T extends string>({ label, options, value, onChange, c
     return () => ro.disconnect();
   }, [value, options.length]);
   return (
-    <div ref={box} role="group" aria-label={label} className={`no-scrollbar relative flex max-w-full gap-1 overflow-x-auto rounded-2xl bg-paper-2 p-1 ring-1 ring-inset ring-hairline ${className}`}>
+    <div ref={box} role="group" aria-label={label} className={`no-scrollbar relative flex max-w-full gap-1 overflow-x-auto rounded-2xl bg-paper-2 p-1 ${className}`}>
       {thumb && <span aria-hidden className="spring pointer-events-none absolute bottom-1 top-1 left-0 rounded-xl bg-white shadow-[0_3px_8px_rgba(0,0,0,.12),0_1px_1px_rgba(0,0,0,.04)]" style={{ width: thumb.w, transform: `translateX(${thumb.x}px)` }} />}
       {options.map((o) => {
         const on = o.value === value;
@@ -359,7 +362,7 @@ export function Sparkline({ data, className = "", tone = "terra" }: { data: numb
 /** KPI tile for bento grids. */
 export function Kpi({ label, value, hint, spark, tone = "terra", warn, className = "" }: { label: string; value: ReactNode; hint?: ReactNode; spark?: number[]; tone?: "terra" | "violet" | "mint" | "gold"; warn?: boolean; className?: string }) {
   return (
-    <div className={`st-card flex min-w-0 flex-col gap-1.5 rounded-[22px] p-4 ${warn ? "!border-amber-300 !bg-amber-50" : ""} ${className}`}>
+    <div className={`st-card flex min-w-0 flex-col gap-1.5 rounded-[22px] p-4 ${warn ? "!bg-amber-50" : ""} ${className}`}>
       <p className="flex items-center gap-1.5 text-xs font-bold text-cocoa-2">
         {warn && <Icon name="alert" className="size-3.5 text-gold-ink" />}
         {label}
@@ -490,7 +493,7 @@ export function StudioSheet({ open, onClose, title, children, footer }: { open: 
           </div>
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-5">{children}</div>
-        {footer && <div className="border-t border-hairline px-5 pb-[max(env(safe-area-inset-bottom),16px)] pt-3">{footer}</div>}
+        {footer && <div className="hairline-t px-5 pb-[max(env(safe-area-inset-bottom),16px)] pt-3">{footer}</div>}
         {!footer && <div className="h-[env(safe-area-inset-bottom)]" />}
       </div>
     </div>,
@@ -510,7 +513,7 @@ export function TogglePills({ all, on, toggle, labels }: { all: string[]; on: st
             type="button"
             aria-pressed={sel}
             onClick={() => toggle(v)}
-            className={`st-press inline-flex min-h-11 items-center gap-1.5 rounded-full px-3.5 text-sm font-semibold ring-1 ring-inset ${sel ? "bg-cocoa text-white ring-cocoa" : "bg-white text-cocoa ring-hairline hover:ring-cocoa-3"}`}
+            className={`st-press inline-flex min-h-11 items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 text-sm font-semibold ${sel ? "bg-cocoa text-white" : "bg-fill text-cocoa hover:bg-fill-2"}`}
           >
             {sel && <Icon name="check" className="size-3.5" />}
             {labels?.[v] ?? v.replace(/-/g, " ")}

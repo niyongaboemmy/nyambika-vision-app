@@ -39,10 +39,10 @@ export default function Services() {
       )}
       <div className="grid gap-3 sm:grid-cols-2">
         {data?.map((s) => (
-          <article key={s.id} className={`flex flex-col rounded-3xl bg-white p-4 ring-1 ring-stone-200 ${s.active ? "" : "opacity-60"}`}>
+          <article key={s.id} className={`flex flex-col rounded-3xl bg-white p-4 ${s.active ? "" : "opacity-60"}`}>
             <div className="flex items-start justify-between gap-2">
               <h3 className="text-lg font-black leading-tight">{s.title}</h3>
-              <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${s.active ? "bg-emerald-100 text-emerald-900" : "bg-stone-200 text-stone-700"}`}>{s.active ? "on your page" : "hidden"}</span>
+              <span className={`shrink-0 whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-bold ${s.active ? "bg-emerald-100 text-emerald-900" : "bg-stone-200 text-stone-700"}`}>{s.active ? "Live" : "Hidden"}</span>
             </div>
             <p className="mt-1 text-sm text-stone-600">{s.description}</p>
             <p className="mt-2 text-sm"><b>from {rwf(s.startingPriceRwf)}</b> · {s.leadTimeDays} days</p>
@@ -97,7 +97,7 @@ function ServiceForm({ pageId, initial, onDone, onCancel }: { pageId: string; in
           {MEASUREMENT_FIELDS.map((m) => {
             const on = req.includes(m);
             return (
-              <label key={m} className={`inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full px-3 text-sm font-semibold ring-1 has-[:focus-visible]:outline has-[:focus-visible]:outline-2 ${on ? "bg-stone-900 text-white ring-stone-900" : "bg-white ring-stone-300"}`}>
+              <label key={m} className={`inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full px-3 text-sm font-semibold ring-1 has-[:focus-visible]:outline has-[:focus-visible]:outline-2 ${on ? "bg-stone-900 text-white ring-stone-900" : "bg-white ring-transparent"}`}>
                 <input type="checkbox" className="sr-only" checked={on} onChange={() => setS({ ...s, requiredMeasurements: on ? req.filter((x) => x !== m) : [...req, m] })} />
                 {MEASUREMENT_LABEL[m].label}
               </label>

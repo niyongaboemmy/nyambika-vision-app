@@ -460,7 +460,7 @@ function Viewer({
           )}
           <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Size">
             {garment.sizes.map((s) => (
-              <button key={s} role="radio" aria-checked={s === fit.size} onClick={() => s !== fit.size && dress(fit.variantId, s)} className={`min-h-10 min-w-12 rounded-2xl border px-3 text-sm font-bold transition ${s === fit.size ? "border-gold/70 bg-gold/20" : "border-white/20 bg-white/10"}`}>
+              <button key={s} role="radio" aria-checked={s === fit.size} onClick={() => s !== fit.size && dress(fit.variantId, s)} className={`min-h-10 min-w-12 whitespace-nowrap rounded-full px-3.5 text-sm font-bold transition ${s === fit.size ? "bg-gold/25 shadow-[inset_0_0_0_0.5px_rgb(242_184_75/.6)]" : "bg-fill"}`}>
                 {s}
                 {s === garment.recommended && <span className="ml-1 text-[10px] font-semibold text-mint">your size</span>}
               </button>

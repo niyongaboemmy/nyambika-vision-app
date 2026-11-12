@@ -254,7 +254,7 @@ function ClientCard({ c, models, onChange }: { c: ClientRow; models: Overview["m
       </div>
 
       {c.kind === "PARTNER" && c.contract && c.usage && (
-        <div className="space-y-2 rounded-2xl bg-paper p-3 ring-1 ring-inset ring-hairline">
+        <div className="space-y-2 rounded-2xl bg-paper p-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-sm font-bold text-cocoa">Contract <Badge value={c.contract.status} /></p>
             <p className="text-xs font-semibold text-cocoa-2">{rwf(c.contract.monthlyFeeRwf)}/month · overage {rwf(c.contract.overagePriceRwf)}{c.contract.hardCap ? " · hard cap" : ""}</p>
@@ -328,7 +328,7 @@ function KeyItem({ k, onRevoke }: { k: KeyRow; onRevoke: () => void }) {
       <div
         {...(live ? bind() : {})}
         style={{ transform: `translateX(${x}px)` }}
-        className={`relative flex touch-pan-y flex-wrap items-center gap-2 rounded-2xl bg-white p-2.5 ring-1 ring-inset ring-hairline ${dragging ? "" : "transition-transform duration-300 ease-[var(--spring)]"} ${!live ? "bg-paper-2 [&_code]:line-through" : ""}`}
+        className={`relative flex touch-pan-y flex-wrap items-center gap-2 rounded-2xl bg-white p-2.5 ${dragging ? "" : "transition-transform duration-300 ease-[var(--spring)]"} ${!live ? "bg-paper-2 [&_code]:line-through" : ""}`}
       >
         <code className="rounded-lg bg-paper-2 px-2 py-1 text-xs font-bold text-cocoa">{k.prefix}…</code>
         <Chip tone={k.env === "LIVE" ? "mint" : "sky"}>{k.env.toLowerCase()}</Chip>
@@ -394,7 +394,7 @@ function KeySheet({ client, open, onClose, onCreated, onError }: { client: Clien
         <Field label="Environment" group>
           <div className="flex gap-2">
             {(["LIVE", "SANDBOX"] as const).map((e) => (
-              <label key={e} className={`st-press flex min-h-11 flex-1 cursor-pointer items-center justify-center rounded-2xl text-sm font-bold ring-inset ${env === e ? "bg-cocoa text-white" : "bg-white text-cocoa ring-1 ring-hairline"}`}>
+              <label key={e} className={`st-press flex min-h-11 flex-1 cursor-pointer items-center justify-center rounded-2xl text-sm font-bold ${env === e ? "bg-cocoa text-white" : "bg-white text-cocoa"}`}>
                 <input type="radio" name="env" className="sr-only" checked={env === e} onChange={() => setEnv(e)} />
                 {e === "LIVE" ? "Live" : "Sandbox (watermarked)"}
               </label>
@@ -515,7 +515,7 @@ function SandboxSheet({ client, models, open, onClose, onDone }: { client: Clien
         <Field label="Sample garment" group>
           <div className="grid grid-cols-3 gap-2">
             {(samples ?? []).map((s) => (
-              <label key={s.id} className={`st-press cursor-pointer overflow-hidden rounded-2xl bg-white ring-inset ${pick === s.id ? "ring-2 ring-cocoa" : "ring-1 ring-hairline"}`}>
+              <label key={s.id} className={`st-press cursor-pointer overflow-hidden rounded-2xl bg-white ring-inset ${pick === s.id ? "ring-2 ring-cocoa" : ""}`}>
                 <input type="radio" name="garment" className="sr-only" checked={pick === s.id} onChange={() => setVariant(s.id)} />
                 {s.image && <img src={s.image} alt="" className="aspect-square w-full object-cover" />}
                 <span className="block truncate px-2 py-1 text-[11px] font-bold text-cocoa">{s.title} · {s.colourName}</span>
@@ -524,7 +524,7 @@ function SandboxSheet({ client, models, open, onClose, onDone }: { client: Clien
           </div>
         </Field>
         {job && (
-          <div ref={(el) => { if (el && job.image) el.scrollIntoView({ block: "center", behavior: "auto" }); }} className="space-y-2 rounded-2xl bg-paper p-3 ring-1 ring-inset ring-hairline" role="status">
+          <div ref={(el) => { if (el && job.image) el.scrollIntoView({ block: "center", behavior: "auto" }); }} className="space-y-2 rounded-2xl bg-paper p-3" role="status">
             <div className="flex items-center gap-2"><Badge value={job.status.toUpperCase()} /><span className="text-xs text-cocoa-2">{job.id}</span></div>
             {job.image ? <img src={job.image} alt="Sandbox try-on result (watermarked)" className="mx-auto max-h-80 rounded-2xl" /> : !job.error && <div data-skeleton className="st-skel mx-auto aspect-[3/4] w-48 rounded-2xl" />}
             {job.error && <p className="text-xs text-red-800">{job.error}</p>}
@@ -570,7 +570,7 @@ function NewClientSheet({ open, onClose, onDone }: { open: boolean; onClose: () 
         <Field label="Kind" group>
           <div className="flex gap-2">
             {(["AGENT", "PARTNER"] as const).map((k) => (
-              <label key={k} className={`st-press flex min-h-11 flex-1 cursor-pointer items-center justify-center rounded-2xl text-sm font-bold ring-inset ${kind === k ? "bg-cocoa text-white" : "bg-white text-cocoa ring-1 ring-hairline"}`}>
+              <label key={k} className={`st-press flex min-h-11 flex-1 cursor-pointer items-center justify-center rounded-2xl text-sm font-bold ${kind === k ? "bg-cocoa text-white" : "bg-white text-cocoa"}`}>
                 <input type="radio" name="kind" className="sr-only" checked={kind === k} onChange={() => setKind(k)} />
                 {k === "AGENT" ? "AI shopping agent" : "Try-on partner"}
               </label>

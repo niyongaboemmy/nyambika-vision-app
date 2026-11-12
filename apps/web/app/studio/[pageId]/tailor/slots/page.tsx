@@ -93,7 +93,7 @@ export default function Slots() {
           const n = byDay(d);
           const booked = n.filter((s) => s.booked).length;
           return (
-            <button key={d} role="tab" aria-selected={i === day} onClick={() => { setDay(i); setPicked([]); }} className={`flex min-h-20 flex-col items-center justify-center rounded-2xl ${i === day ? "bg-stone-900 text-white" : "bg-white ring-1 ring-stone-200"}`}>
+            <button key={d} role="tab" aria-selected={i === day} onClick={() => { setDay(i); setPicked([]); }} className={`flex min-h-20 flex-col items-center justify-center rounded-2xl ${i === day ? "bg-stone-900 text-white" : "bg-white"}`}>
               <span className="text-[11px] font-semibold uppercase">{new Date(d).toLocaleDateString("en-GB", { weekday: "short", timeZone: "UTC" })}</span>
               <span className="text-xl font-black">{new Date(d).getUTCDate()}</span>
               <span className="mt-0.5 flex gap-0.5" aria-label={`${n.length} slots, ${booked} booked`}>
@@ -125,7 +125,7 @@ export default function Slots() {
               await reload();
             };
             const row = (
-              <div className={`flex items-center gap-3 rounded-2xl p-3 ${s.booked ? "bg-fuchsia-50 ring-1 ring-inset ring-fuchsia-200" : "bg-stone-50 ring-1 ring-inset ring-stone-200"}`}>
+              <div className={`flex items-center gap-3 rounded-2xl p-3 ${s.booked ? "bg-fuchsia-50" : "bg-stone-50"}`}>
                 <span className="w-14 text-lg font-black tabular-nums">{time}</span>
                 <div className="min-w-0 flex-1 text-sm">
                   {s.booked ? (
@@ -161,7 +161,7 @@ export default function Slots() {
               const exists = taken.has(t);
               const on = picked.includes(t);
               return (
-                <button key={t} type="button" aria-pressed={on} disabled={exists} onClick={() => setPicked(on ? picked.filter((x) => x !== t) : [...picked, t])} className={`min-h-12 rounded-xl text-sm font-bold ${exists ? "bg-stone-100 text-stone-400 line-through" : on ? "bg-stone-900 text-white" : "bg-white ring-1 ring-stone-300"}`}>
+                <button key={t} type="button" aria-pressed={on} disabled={exists} onClick={() => setPicked(on ? picked.filter((x) => x !== t) : [...picked, t])} className={`min-h-12 rounded-xl text-sm font-bold ${exists ? "bg-stone-100 text-stone-400 line-through" : on ? "bg-stone-900 text-white" : "bg-white"}`}>
                   {t}
                 </button>
               );

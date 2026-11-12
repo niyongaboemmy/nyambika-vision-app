@@ -183,7 +183,7 @@ export function LookView({ look, index, total, intentLabel, onSave, onVariant, p
           <div className="absolute inset-0" role="status" aria-label={t("looks.generating")}>
             <div className="skeleton absolute inset-0 rounded-none" />
             <div className="absolute inset-x-0 h-0.5 animate-[scan_1.8s_ease-in-out_infinite] bg-sky/80 shadow-[0_0_24px_#38bdf8]" style={{ top: "40%" }} />
-            <span className={`absolute left-1/2 top-[42%] inline-flex -translate-x-1/2 items-center gap-2 rounded-full px-3.5 py-2 text-sm font-semibold text-white ${MATERIAL}`}>
+            <span className={`absolute left-1/2 top-[42%] inline-flex -translate-x-1/2 items-center gap-2 whitespace-nowrap rounded-full px-3.5 py-2 text-sm font-semibold text-white ${MATERIAL}`}>
               <Icon name="sparkle" className="size-4 text-gold" />
               {t("looks.generating")}
             </span>
@@ -309,7 +309,7 @@ export function LookView({ look, index, total, intentLabel, onSave, onVariant, p
                   onVariant(v.id);
                   setRing(false);
                 }}
-                className={`absolute size-14 -translate-x-1/2 -translate-y-1/2 rounded-full border-4 transition-transform duration-300 active:scale-90 ${on ? "scale-110 border-gold" : "border-white/30"}`}
+                className={`absolute size-14 -translate-x-1/2 -translate-y-1/2 rounded-full border-4 transition-transform duration-300 active:scale-90 ${on ? "scale-110 border-gold" : ""}`}
                 style={{ left: `${50 + Math.cos(a) * 38}%`, top: `${50 + Math.sin(a) * 38}%`, background: v.colourHex, transitionTimingFunction: SPRING }}
               />
             );

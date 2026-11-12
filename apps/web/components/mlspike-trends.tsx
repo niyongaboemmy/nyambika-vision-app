@@ -92,7 +92,7 @@ export function TrendsCard({ pageId }: { pageId: string }) {
               <h3 className="flex items-center gap-1.5 font-extrabold text-cocoa"><Icon name="trend" className="size-4 text-terra-ink" /> Rising in the last 2 weeks</h3>
               <ul className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                 {data.rising.slice(0, 6).map((r, i) => (
-                  <li key={r.key} className="animate-rise rounded-2xl bg-paper p-3 ring-1 ring-inset ring-hairline" style={{ animationDelay: `${i * 50}ms` }}>
+                  <li key={r.key} className="animate-rise rounded-2xl bg-paper p-3" style={{ animationDelay: `${i * 50}ms` }}>
                     <div className="flex items-center gap-2">
                       {r.dimension === "colour" ? (
                         <span className="size-7 shrink-0 rounded-full ring-2 ring-white shadow" style={{ background: SWATCH[r.value] ?? "#999" }} aria-hidden />
@@ -114,7 +114,7 @@ export function TrendsCard({ pageId }: { pageId: string }) {
           )}
           <div className="space-y-3">
             {data.gaps.length > 0 && (
-              <div className="rounded-[22px] bg-gradient-to-br from-amber-100 to-white p-4 ring-1 ring-inset ring-black/5">
+              <div className="rounded-[22px] bg-gradient-to-br from-amber-100 to-white p-4">
                 <h3 className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider text-gold-ink"><Icon name="sparkle" className="size-3.5" /> Many asks, few makers</h3>
                 <ul className="mt-2 space-y-2.5">
                   {data.gaps.map((g) => (
@@ -131,7 +131,7 @@ export function TrendsCard({ pageId }: { pageId: string }) {
               </div>
             )}
             {data.priceHints.length > 0 && (
-              <div className="rounded-[22px] bg-gradient-to-br from-sky-100 to-white p-4 ring-1 ring-inset ring-black/5">
+              <div className="rounded-[22px] bg-gradient-to-br from-sky-100 to-white p-4">
                 <h3 className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider text-sky-800"><Icon name="wallet" className="size-3.5" /> Price sweet spot</h3>
                 {data.priceHints.map((h) => <p key={h.key} className="mt-2 text-[13px] font-semibold leading-snug text-cocoa">{h.text}</p>)}
                 <p className="mt-1.5 text-[11px] text-cocoa-2">A hint, not a promise</p>

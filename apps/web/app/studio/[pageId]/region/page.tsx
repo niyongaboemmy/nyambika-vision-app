@@ -79,7 +79,7 @@ export default function RegionStudio() {
             <legend className="sr-only">Country</legend>
             <div className="grid grid-cols-2 gap-2">
               {s.regions.map((r) => (
-                <button key={r.code} type="button" aria-pressed={s.region === r.code} onClick={() => r.code !== s.region && save({ region: r.code }, `Your page is now in ${r.name}. Prices are charged in ${r.currency}.`)} className={`st-press flex min-h-16 items-center gap-3 rounded-2xl px-3 text-left ring-1 ring-inset ${s.region === r.code ? "bg-cocoa text-white ring-cocoa" : "bg-white text-cocoa ring-hairline"}`}>
+                <button key={r.code} type="button" aria-pressed={s.region === r.code} onClick={() => r.code !== s.region && save({ region: r.code }, `Your page is now in ${r.name}. Prices are charged in ${r.currency}.`)} className={`st-press flex min-h-16 items-center gap-3 rounded-2xl px-3 text-left ring-1 ring-inset ${s.region === r.code ? "bg-cocoa text-white ring-cocoa" : "bg-white text-cocoa ring-transparent"}`}>
                   <span aria-hidden className={`grid size-9 shrink-0 place-items-center rounded-xl text-xs font-black tracking-wide ${s.region === r.code ? "bg-white/15" : "bg-paper-2 text-cocoa-2"}`}>{r.code}</span>
                   <span className="min-w-0"><span className="block text-sm font-bold">{r.name}</span><span className={`block text-xs ${s.region === r.code ? "text-white/80" : "text-cocoa-2"}`}>{r.currency}{r.launched ? "" : " · pilot"}</span></span>
                 </button>
@@ -119,7 +119,7 @@ export default function RegionStudio() {
             </div>
             <Chip tone={s.stripeStatus === "ACTIVE" ? "mint" : s.stripeStatus === "PENDING" ? "gold" : "stone"}>{s.stripeStatus === "ACTIVE" ? "Connected" : s.stripeStatus === "PENDING" ? "Onboarding" : "Not connected"}</Chip>
           </div>
-          {s.stripeMode !== "live" && <p className="rounded-2xl bg-amber-50 px-3 py-2 text-xs text-gold-ink ring-1 ring-inset ring-amber-200">{s.stripeMode === "mock" ? "Test mock · payments simulated" : "Stripe test mode · no real money"}</p>}
+          {s.stripeMode !== "live" && <p className="rounded-2xl bg-amber-50 px-3 py-2 text-xs text-gold-ink">{s.stripeMode === "mock" ? "Test mock · payments simulated" : "Stripe test mode · no real money"}</p>}
           <div className="flex flex-wrap items-center gap-3">
             {s.stripeStatus !== "ACTIVE" && <SButton onClick={connect}><Icon name="wallet" className="size-4" /> {s.stripeAccountId ? "Continue Stripe onboarding" : "Connect my Stripe account"}</SButton>}
             {s.stripeAccountId && <span className="font-mono text-xs text-cocoa-2">{s.stripeAccountId}</span>}
@@ -138,7 +138,7 @@ export default function RegionStudio() {
           {s.zones.length === 0 && <p className="rounded-2xl bg-paper-2 p-4 text-sm text-cocoa-2">No zones yet</p>}
           <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {s.zones.map((z) => (
-              <li key={z.id} className="flex items-start gap-3 rounded-2xl bg-white p-3 ring-1 ring-inset ring-hairline">
+              <li key={z.id} className="flex items-start gap-3 rounded-2xl bg-white p-3">
                 <Icon name="truck" className="mt-0.5 size-5 shrink-0 text-cocoa-2" />
                 <div className="min-w-0 flex-1">
                   <p className="font-bold text-cocoa">{z.name} · {formatMoney(z.feeMinor, z.currency)}</p>
@@ -216,7 +216,7 @@ function ZoneSheet({ open, currency, pageId, onClose, onSaved }: { open: boolean
         <Field label="Zone" group>
           <div className="grid grid-cols-2 gap-2">
             {PRESETS.map((p, i) => (
-              <button key={p.name} type="button" aria-pressed={preset === i} onClick={() => setPreset(i)} className={`st-press min-h-12 rounded-2xl px-3 text-sm font-bold ring-1 ring-inset ${preset === i ? "bg-cocoa text-white ring-cocoa" : "bg-white text-cocoa ring-hairline"}`}>{p.name}</button>
+              <button key={p.name} type="button" aria-pressed={preset === i} onClick={() => setPreset(i)} className={`st-press min-h-12 rounded-2xl px-3 text-sm font-bold ring-1 ring-inset ${preset === i ? "bg-cocoa text-white ring-cocoa" : "bg-white text-cocoa ring-transparent"}`}>{p.name}</button>
             ))}
           </div>
         </Field>

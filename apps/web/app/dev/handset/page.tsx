@@ -42,7 +42,7 @@ export default function Handset() {
       <main className="space-y-4 p-4">
         <input value={phone} onChange={(e) => setPhone(e.target.value)} aria-label="Payer phone" className="glass h-12 w-full rounded-2xl px-4 outline-none" />
         {pending ? (
-          <section className="rounded-3xl border border-yellow-400/40 bg-yellow-400/10 p-5">
+          <section className="rounded-3xl bg-yellow-400/10 p-5">
             <p className="text-xs uppercase tracking-widest text-yellow-300">{pending.wallet === "MTN_MOMO" ? "MTN MoMo" : "Airtel Money"} · USSD</p>
             <p className="mt-2 text-lg">Pay <b>{rwf(pending.amountRwf)}</b> to <b>{pending.to}</b> for {pending.code}?</p>
             <input inputMode="numeric" maxLength={5} value={pin} onChange={(e) => setPin(e.target.value.replace(/\D/g, ""))} placeholder="Enter PIN" aria-label="PIN" className="mt-4 h-14 w-full rounded-2xl bg-black/40 px-4 text-center text-2xl tracking-[.5em] outline-none" />

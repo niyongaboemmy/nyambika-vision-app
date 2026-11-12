@@ -24,13 +24,13 @@ export function AiWrite<T>({ pageId, kind, fields, onResult }: { pageId: string;
     }
   }
   return (
-    <div className="flex flex-wrap items-center gap-2 rounded-2xl bg-gradient-to-br from-violet-50 to-orange-50 p-2.5 ring-1 ring-inset ring-violet-200">
+    <div className="flex flex-wrap items-center gap-2 rounded-2xl bg-gradient-to-br from-violet-50 to-orange-50 p-2.5">
       <button type="button" onClick={run} disabled={busy} title="A draft from your details. Check it before saving." className="inline-flex min-h-11 items-center rounded-xl bg-violet-ink px-3.5 text-sm font-bold text-white shadow-[0_8px_18px_-10px_rgba(98,57,201,.8)] transition active:scale-[.97] disabled:opacity-50">
         <Icon name="sparkle" className="mr-1.5 size-4" />{busy ? "Writing…" : "Write it for me"}
       </button>
       <div role="group" aria-label="Draft language" className="flex items-center gap-0.5">
         {(["rw", "en", "fr"] as Locale[]).map((l) => (
-          <button key={l} type="button" aria-pressed={l === locale} onClick={() => setLocale(l)} className={`min-h-11 min-w-11 rounded-lg px-2 text-xs font-bold transition ${l === locale ? "bg-white text-violet-ink shadow-sm ring-1 ring-violet-200" : "text-violet-ink/80 hover:bg-white/60"}`}>
+          <button key={l} type="button" aria-pressed={l === locale} onClick={() => setLocale(l)} className={`min-h-11 min-w-11 rounded-lg px-2 text-xs font-bold transition ${l === locale ? "bg-white text-violet-ink shadow-sm" : "text-violet-ink/80 hover:bg-white/60"}`}>
             {l.toUpperCase()}
           </button>
         ))}

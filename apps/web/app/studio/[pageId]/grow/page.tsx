@@ -83,7 +83,7 @@ function ProductPicker({ products, value, onChange, label }: { products: StudioP
               type="button"
               aria-pressed={on}
               onClick={() => onChange(p.id)}
-              className={`st-press relative w-[128px] shrink-0 overflow-hidden rounded-2xl bg-white text-left ring-2 ring-inset transition ${on ? "ring-violet-ink shadow-[0_8px_20px_-10px_rgba(98,57,201,.6)]" : "ring-hairline"}`}
+              className={`st-press relative w-[128px] shrink-0 overflow-hidden rounded-2xl bg-white text-left ring-2 ring-inset transition ${on ? "ring-violet-ink shadow-[0_8px_20px_-10px_rgba(98,57,201,.6)]" : "ring-transparent"}`}
             >
               <span className="block aspect-[4/5] bg-paper-2">{img ? <img loading="lazy" decoding="async" src={img} alt="" className="size-full object-cover" /> : <Icon name="hanger" className="m-auto mt-8 size-6 text-cocoa-3" />}</span>
               <span className="block px-2 pt-1.5"><span className="line-clamp-2 h-8 text-xs font-bold leading-4 text-cocoa">{p.title}</span></span>
@@ -178,7 +178,7 @@ function ShareKit({ products, initial }: { products: StudioProduct[]; initial: s
       </section>
 
       <section aria-label="Card preview" className="space-y-3">
-        <div className={`relative mx-auto w-full overflow-hidden rounded-[26px] bg-paper-2 ring-1 ring-hairline ${format === "story" ? "max-w-[300px] aspect-[9/16]" : "max-w-[380px] aspect-square"}`}>
+        <div className={`relative mx-auto w-full overflow-hidden rounded-[26px] bg-paper-2 ${format === "story" ? "max-w-[300px] aspect-[9/16]" : "max-w-[380px] aspect-square"}`}>
           {busy && <Skeleton className="absolute inset-0 rounded-none" />}
           {card && !busy && <img src={card.url} alt={`Promo card: ${products.find((p) => p.id === productId)?.title ?? ""}`} className="animate-pop size-full object-cover" />}
           {!card && !busy && (
@@ -190,7 +190,7 @@ function ShareKit({ products, initial }: { products: StudioProduct[]; initial: s
         {card && (
           <div className="grid grid-cols-2 gap-2">
             <SButton onClick={share}><Icon name="share" className="size-4" /> Share</SButton>
-            <a href={card.url} download={`nyambika-${format}-${locale}.png`} className="st-press inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-hairline bg-white px-4 text-sm font-bold text-cocoa"><Icon name="download" className="size-4" /> Download</a>
+            <a href={card.url} download={`nyambika-${format}-${locale}.png`} className="st-press inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-white px-4 text-sm font-bold text-cocoa"><Icon name="download" className="size-4" /> Download</a>
             <a href={card.links.wa_status.whatsapp} target="_blank" rel="noreferrer" className="st-press col-span-2 inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-emerald-700 px-4 text-sm font-bold text-[#fff] hover:bg-emerald-800"><Icon name="chat" className="size-4" /> WhatsApp</a>
           </div>
         )}
@@ -389,13 +389,13 @@ function Broadcast({ products }: { products: StudioProduct[] }) {
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_360px]">
       <section className="st-card space-y-4 rounded-[24px] p-4">
         <div className="grid grid-cols-2 gap-2">
-          <div className="rounded-2xl bg-paper p-3 ring-1 ring-inset ring-hairline"><p className="text-[11px] font-bold text-cocoa-2">Followers</p><p className="font-display text-2xl font-black tabular-nums text-cocoa">{data.followers}</p></div>
-          <div className="rounded-2xl bg-emerald-50 p-3 ring-1 ring-inset ring-emerald-200"><p className="text-[11px] font-bold text-mint-ink">Want WhatsApp updates</p><p className="font-display text-2xl font-black tabular-nums text-cocoa">{data.optedIn}</p></div>
+          <div className="rounded-2xl bg-paper p-3"><p className="text-[11px] font-bold text-cocoa-2">Followers</p><p className="font-display text-2xl font-black tabular-nums text-cocoa">{data.followers}</p></div>
+          <div className="rounded-2xl bg-emerald-50 p-3"><p className="text-[11px] font-bold text-mint-ink">Want WhatsApp updates</p><p className="font-display text-2xl font-black tabular-nums text-cocoa">{data.optedIn}</p></div>
         </div>
         <fieldset>
           <legend className="mb-2 flex items-center gap-1.5 text-[13px] font-bold text-cocoa"><Icon name="sparkle" className="size-4 text-violet-ink" /> Start from</legend>
           <div className="flex flex-wrap gap-2">
-            {TEMPLATES.map((t, i) => <button key={i} type="button" onClick={() => setMsg(t)} aria-pressed={msg === t} className={`st-press min-h-11 rounded-full px-3.5 text-left text-xs font-bold ring-1 ring-inset ${msg === t ? "bg-violet-50 text-violet-ink ring-violet-200" : "bg-white text-cocoa-2 ring-hairline"}`}>{t.split(/[.!:]/)[0]}</button>)}
+            {TEMPLATES.map((t, i) => <button key={i} type="button" onClick={() => setMsg(t)} aria-pressed={msg === t} className={`st-press min-h-11 rounded-full px-3.5 text-left text-xs font-bold ring-1 ring-inset ${msg === t ? "bg-violet-50 text-violet-ink ring-transparent" : "bg-white text-cocoa-2 ring-transparent"}`}>{t.split(/[.!:]/)[0]}</button>)}
           </div>
         </fieldset>
         <Field label="Message" hint={`${msg.length}/320`}><Textarea value={msg} maxLength={320} onChange={(e) => setMsg(e.target.value)} /></Field>
@@ -403,7 +403,7 @@ function Broadcast({ products }: { products: StudioProduct[] }) {
           <ProductPicker products={products} value={picked[0] ?? null} onChange={(id) => setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : [id, ...p].slice(0, 6)))} label="Feature a piece (optional)" />
         )}
         <Note error={err} ok={ok} />
-        {data.blocked && <p className="rounded-2xl bg-sky-50 p-3 text-sm text-sky-800 ring-1 ring-inset ring-sky-200"><Icon name="clock" className="mr-1 inline size-4" />{data.blocked.message}{data.blocked.retryAt ? ` Next: ${new Date(data.blocked.retryAt).toLocaleString("en-GB", { weekday: "short", hour: "2-digit", minute: "2-digit" })}.` : ""}</p>}
+        {data.blocked && <p className="rounded-2xl bg-sky-50 p-3 text-sm text-sky-800"><Icon name="clock" className="mr-1 inline size-4" />{data.blocked.message}{data.blocked.retryAt ? ` Next: ${new Date(data.blocked.retryAt).toLocaleString("en-GB", { weekday: "short", hour: "2-digit", minute: "2-digit" })}.` : ""}</p>}
         <SButton className="min-h-12 w-full" onClick={send} disabled={busy || !data.canSend || msg.trim().length < 10 || data.optedIn === 0}>
           <Icon name="mail" className="size-4" /> {busy ? "Sending…" : data.optedIn === 0 ? "No opted-in followers yet" : `Send to ${data.optedIn} on WhatsApp`}
         </SButton>

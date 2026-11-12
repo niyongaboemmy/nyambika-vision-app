@@ -102,7 +102,7 @@ export default function RegionsAdmin() {
                     <li key={i.key} className="flex min-h-12 items-center gap-3 py-2">
                       {i.kind === "auto" ? (
                         <>
-                          <span className={`grid size-6 shrink-0 place-items-center rounded-full ${i.done ? "bg-mint-ink text-white" : "bg-paper-2 text-cocoa-3 ring-1 ring-inset ring-hairline"}`}>{i.done ? <Icon name="check" className="size-3.5" /> : <Icon name="clock" className="size-3.5" />}</span>
+                          <span className={`grid size-6 shrink-0 place-items-center rounded-full ${i.done ? "bg-mint-ink text-white" : "bg-paper-2 text-cocoa-3"}`}>{i.done ? <Icon name="check" className="size-3.5" /> : <Icon name="clock" className="size-3.5" />}</span>
                           <span className="min-w-0 flex-1">
                             <span className="block text-sm font-bold">{head}</span>
                             <span className="block truncate text-xs text-cocoa-2">Auto · {i.detail}</span>

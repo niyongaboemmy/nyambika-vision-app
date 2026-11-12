@@ -57,7 +57,7 @@ function ProductDetail() {
   return (
     <div className="space-y-5">
       <div className="flex items-center gap-3">
-        <Link href={`/studio/${page.id}/products`} aria-label="Back to products" className="st-press grid size-11 shrink-0 place-items-center rounded-full bg-white text-cocoa ring-1 ring-inset ring-hairline">
+        <Link href={`/studio/${page.id}/products`} aria-label="Back to products" className="st-press grid size-11 shrink-0 place-items-center rounded-full bg-white text-cocoa">
           <Icon name="back" className="size-5" />
         </Link>
         <div className="min-w-0 flex-1">
@@ -87,7 +87,7 @@ function ProductDetail() {
               {p.qualityScore !== null && <span className="text-xs font-semibold text-cocoa-2">photo quality {Math.round(p.qualityScore * 100)}%</span>}
             </div>
             {p.readinessNotes.length > 0 && (
-              <ul className="space-y-1 rounded-2xl bg-amber-50 p-3 text-sm text-gold-ink ring-1 ring-inset ring-amber-200">
+              <ul className="space-y-1 rounded-2xl bg-amber-50 p-3 text-sm text-gold-ink">
                 {p.readinessNotes.map((n) => <li key={n} className="flex gap-2"><Icon name="camera" className="mt-0.5 size-4 shrink-0" />{n}</li>)}
               </ul>
             )}
@@ -153,7 +153,7 @@ function ProductDetail() {
 function Check({ ok, label }: { ok: boolean; label: string }) {
   return (
     <p className="flex items-center gap-2 text-sm">
-      <span className={`grid size-5 shrink-0 place-items-center rounded-full ${ok ? "bg-mint-ink text-white" : "bg-paper-2 text-cocoa-3 ring-1 ring-inset ring-hairline"}`}>
+      <span className={`grid size-5 shrink-0 place-items-center rounded-full ${ok ? "bg-mint-ink text-white" : "bg-paper-2 text-cocoa-3"}`}>
         {ok && <Icon name="check" className="size-3" />}
       </span>
       <span className={ok ? "font-semibold text-cocoa" : "text-cocoa-2"}>
@@ -227,7 +227,7 @@ function StudioCard({ p, onChange }: { p: StudioProduct; onChange: () => Promise
     }
   }
   return (
-    <section aria-labelledby="ai-studio-t" className="relative overflow-hidden rounded-[24px] bg-gradient-to-br from-violet-50 via-white to-orange-50 p-4 ring-1 ring-inset ring-violet-200 sm:p-5">
+    <section aria-labelledby="ai-studio-t" className="relative overflow-hidden rounded-[24px] bg-gradient-to-br from-violet-50 via-white to-orange-50 p-4 sm:p-5">
       <div className="space-y-3">
         <div className="flex items-start gap-3">
           <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-violet-ink text-white shadow-[0_8px_18px_-8px_rgba(98,57,201,.8)]"><Icon name="sparkle" className="size-5" /></span>
@@ -238,7 +238,7 @@ function StudioCard({ p, onChange }: { p: StudioProduct; onChange: () => Promise
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {ready.map((v) => (
-            <button key={v.id} type="button" aria-pressed={v.id === variantId} onClick={() => setVariantId(v.id)} className={`st-press inline-flex min-h-11 items-center gap-2 rounded-full px-3.5 text-sm font-semibold ring-1 ring-inset ${v.id === variantId ? "bg-cocoa text-white ring-cocoa" : "bg-white text-cocoa ring-hairline"}`}>
+            <button key={v.id} type="button" aria-pressed={v.id === variantId} onClick={() => setVariantId(v.id)} className={`st-press inline-flex min-h-11 items-center gap-2 rounded-full px-3.5 text-sm font-semibold ring-1 ring-inset ${v.id === variantId ? "bg-cocoa text-white ring-cocoa" : "bg-white text-cocoa ring-transparent"}`}>
               <span className="size-3.5 rounded-full ring-1 ring-white/60" style={{ background: v.colourHex }} />
               {v.colourName}
             </button>
@@ -256,7 +256,7 @@ function StudioCard({ p, onChange }: { p: StudioProduct; onChange: () => Promise
                 aria-pressed={on}
                 aria-label={`AI model ${n}`}
                 onClick={() => setModels(on ? models.filter((x) => x !== n) : [...models, n])}
-                className={`st-press relative size-11 rounded-full ring-offset-2 ${on ? "ring-[3px] ring-violet-ink" : "opacity-45 ring-1 ring-hairline"}`}
+                className={`st-press relative size-11 rounded-full ring-offset-2 ${on ? "ring-[3px] ring-violet-ink" : "opacity-45"}`}
                 style={{ background: tone }}
               >
                 {on && <Icon name="check" className="absolute inset-0 m-auto size-4 text-white" />}
@@ -317,14 +317,14 @@ function VariantRow({ v, onChange }: { v: StudioVariant; onChange: () => Promise
   }
 
   return (
-    <div className="space-y-3 rounded-[20px] bg-paper p-3 ring-1 ring-inset ring-hairline">
+    <div className="space-y-3 rounded-[20px] bg-paper p-3">
       <div className="flex items-center gap-2">
         <span className="size-5 rounded-full ring-2 ring-white" style={{ background: v.colourHex }} />
         <span className="font-extrabold text-cocoa">{v.colourName}</span>
         <span className="truncate text-xs text-cocoa-2">· sizes {v.sizes.join(", ")} · stock {v.stock}</span>
       </div>
       <div className="grid grid-cols-2 gap-2">
-        <figure className="overflow-hidden rounded-2xl bg-white ring-1 ring-hairline">
+        <figure className="overflow-hidden rounded-2xl bg-white">
           {busy ? (
             <div data-skeleton className="st-skel aspect-[4/5]" />
           ) : v.image ? (
@@ -334,7 +334,7 @@ function VariantRow({ v, onChange }: { v: StudioVariant; onChange: () => Promise
           )}
           <figcaption className="px-2.5 py-1.5 text-xs font-semibold text-cocoa-2">Your photo</figcaption>
         </figure>
-        <figure className="st-checker overflow-hidden rounded-2xl ring-1 ring-hairline">
+        <figure className="st-checker overflow-hidden rounded-2xl">
           {v.cutout ? <img src={v.cutout} alt={`${v.colourName} cut-out`} className="aspect-[4/5] w-full object-contain" /> : <div className="grid aspect-[4/5] place-items-center text-sm text-cocoa-3">—</div>}
           <figcaption className="bg-white/85 px-2.5 py-1.5 text-xs font-semibold text-cocoa-2">Try-on cut-out (auto)</figcaption>
         </figure>

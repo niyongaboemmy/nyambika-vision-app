@@ -104,7 +104,7 @@ export function GarmentViewer({ assets, title, initialVariantId, variantId, clas
   return (
     <div className={className}>
       <div
-        className={`xr-stage relative isolate overflow-hidden rounded-[28px] border border-white/10 ${tall ? "h-[min(62dvh,560px)]" : "h-[340px]"}`}
+        className={`xr-stage relative isolate overflow-hidden rounded-[28px] ${tall ? "h-[min(62dvh,560px)]" : "h-[340px]"}`}
         // Backdrop follows the theme (lit studio by day, night stage in dark mode); --backdrop-3d is a token.
         style={{ background: "radial-gradient(70% 55% at 50% 38%, rgba(139,92,246,.22), transparent 70%), radial-gradient(60% 45% at 50% 100%, rgba(224,112,63,.2), transparent 72%), var(--backdrop-3d)" }}
       >
@@ -162,8 +162,8 @@ export function GarmentViewer({ assets, title, initialVariantId, variantId, clas
           </div>
         )}
 
-        <span className="pointer-events-none absolute left-3 top-3 rounded-full border border-white/15 bg-black/55 px-2.5 py-1 text-[11px] font-semibold backdrop-blur"><Icon name="sparkle" className="mr-1 inline size-3 align-[-2px]" />{t("xr.aiLabel")}</span>
-        <span className="pointer-events-none absolute right-3 top-3 rounded-full border border-white/15 bg-black/55 px-2.5 py-1 text-[11px] font-semibold backdrop-blur" title="Real-world size used in AR">
+        <span className="pointer-events-none absolute left-3 top-3 rounded-full bg-black/55 px-2.5 py-1 text-[11px] font-semibold backdrop-blur"><Icon name="sparkle" className="mr-1 inline size-3 align-[-2px]" />{t("xr.aiLabel")}</span>
+        <span className="pointer-events-none absolute right-3 top-3 rounded-full bg-black/55 px-2.5 py-1 text-[11px] font-semibold backdrop-blur" title="Real-world size used in AR">
           <Icon name="ruler" className="mr-1 inline size-3 align-[-2px]" />{fmtM(a.dimensions.height)} · size {a.size}
         </span>
 
@@ -185,7 +185,7 @@ export function GarmentViewer({ assets, title, initialVariantId, variantId, clas
               aria-checked={x.variantId === a.variantId}
               aria-label={x.colourName}
               onClick={() => pick(x.variantId)}
-              className={`size-10 rounded-full border-[3px] transition ${x.variantId === a.variantId ? "scale-110 border-gold shadow-[0_0_16px_rgba(242,184,75,.5)]" : "border-white/25"}`}
+              className={`size-10 rounded-full border-[3px] transition ${x.variantId === a.variantId ? "scale-110 border-gold shadow-[0_0_16px_rgba(242,184,75,.5)]" : ""}`}
               style={{ background: x.colourHex }}
             />
           ))}

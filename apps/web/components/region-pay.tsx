@@ -88,7 +88,7 @@ export function OrderMoneyPanel({ money: m, payee, onChange }: { money: OrderMon
       </dl>
       <p className="flex items-center gap-1.5 text-xs text-mut"><Icon name="lock" className="size-3.5 shrink-0" /> {t("buy.paidTo")} {payee}{m.method === "CARD" ? " (their own Stripe account)" : ""}.</p>
       {simulated && (
-        <div className="mt-2 rounded-2xl border border-mint/40 bg-mint/10 p-3" role="group" aria-label="Simulated phone prompt">
+        <div className="mt-2 rounded-2xl bg-mint/10 p-3" role="group" aria-label="Simulated phone prompt">
           <p className="flex items-center gap-1.5 text-sm font-semibold"><Icon name="phone" className="size-4" /> {t("region.approve")}</p>
           <p className="text-xs text-mut">Dev simulator: this is what the {m.methodLabel} prompt on {m.payment?.ref.startsWith("MPESA") ? "the Safaricom" : "the"} phone asks.</p>
           <p className="mt-2 text-sm">Pay <b>{m.total}</b> to <b>{payee}</b>?</p>

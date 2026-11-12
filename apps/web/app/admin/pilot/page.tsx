@@ -117,7 +117,7 @@ function Dashboard({ s, reload }: { s: Summary; reload: () => Promise<void> }) {
   return (
     <div className="space-y-6">
       {s.synthetic && (
-        <p className="flex items-start gap-2 rounded-2xl bg-amber-50 p-3 text-sm font-semibold text-gold-ink ring-1 ring-inset ring-amber-300">
+        <p className="flex items-start gap-2 rounded-2xl bg-amber-50 p-3 text-sm font-semibold text-gold-ink">
           <Icon name="alert" className="mt-0.5 size-4 shrink-0" /> <span className="flex-1">Synthetic data · rehearsal only</span><InfoTip label="About synthetic pilot data">Seeded by seed-pilot (phones +25078999xxxx). Use it to rehearse the Gate 3 review, not to decide.</InfoTip>
         </p>
       )}
@@ -132,7 +132,7 @@ function Dashboard({ s, reload }: { s: Summary; reload: () => Promise<void> }) {
           </ul>
           <div className="relative mt-4 flex flex-wrap gap-2">
             <a href="/api/admin/pilot/gate3?format=md" download className="st-press st-cta inline-flex min-h-11 items-center gap-2 rounded-2xl px-4 text-sm font-bold text-white"><Icon name="download" className="size-4" /> Gate 3 report (.md)</a>
-            <a href="/api/admin/pilot/gate3?format=json" download className="st-press inline-flex min-h-11 items-center gap-2 rounded-2xl border border-hairline bg-white px-4 text-sm font-bold text-cocoa"><Icon name="download" className="size-4" /> JSON</a>
+            <a href="/api/admin/pilot/gate3?format=json" download className="st-press inline-flex min-h-11 items-center gap-2 rounded-2xl bg-white px-4 text-sm font-bold text-cocoa"><Icon name="download" className="size-4" /> JSON</a>
           </div>
         </section>
         <Kpi label="Pilot day" value={`${dayOf} / 26`} hint={`${new Date(s.cohort.start).toLocaleDateString("en-GB", { day: "numeric", month: "short" })} → ${new Date(s.cohort.end).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}`} />
@@ -345,7 +345,7 @@ function ExperimentCard({ e, reload }: { e: Experiment; reload: () => Promise<vo
             <li key={a.key}>
               <div className="flex items-baseline justify-between gap-2 text-sm">
                 <span className="font-bold text-cocoa">{a.key}{i === 0 && <span className="font-semibold text-cocoa-2"> · control</span>} <span className="text-xs font-semibold text-cocoa-2">({a.weight}%)</span></span>
-                <span className="tabular-nums text-cocoa"><b>{pct(rate)}</b> <span className="text-xs text-cocoa-2">n={a.n} · {a.generationsPerUser.toFixed(1)} gens/user</span></span>
+                <span className="shrink-0 tabular-nums text-cocoa"><b>{pct(rate)}</b> <span className="text-xs text-cocoa-2">n={a.n} · {a.generationsPerUser.toFixed(1)}/user</span></span>
               </div>
               <div className="mt-1 h-2.5 overflow-hidden rounded-full bg-paper-2" aria-hidden>
                 <div className={`h-full rounded-full ${i === 0 ? "bg-cocoa-3" : "bg-gradient-to-r from-terra to-violet"}`} style={{ width: `${Math.max(2, (rate / maxRate) * 100)}%` }} />
@@ -355,7 +355,7 @@ function ExperimentCard({ e, reload }: { e: Experiment; reload: () => Promise<vo
         })}
       </ul>
       {e.tests.map((t) => (
-        <div key={t.arm} className={`rounded-2xl p-3 text-xs ${t.significant ? "bg-violet-50 ring-1 ring-inset ring-violet-200" : "bg-paper-2"}`}>
+        <div key={t.arm} className={`rounded-2xl p-3 text-xs ${t.significant ? "bg-violet-50" : "bg-paper-2"}`}>
           <p className="font-bold text-cocoa">
             {t.arm} vs {control.key}: {t.diff >= 0 ? "+" : ""}{(t.diff * 100).toFixed(1)} pts
             {t.z !== null && <> · z = {t.z.toFixed(2)} · p = {t.p! < 0.001 ? "< 0.001" : t.p!.toFixed(3)}</>}
@@ -458,7 +458,7 @@ function Hypercare({ h, reload }: { h: Summary["hypercare"]; reload: () => Promi
             <option value="OTHER">Other</option>
           </Select>
           <label className="sr-only" htmlFor="inc-sum">What happened</label>
-          <input id="inc-sum" value={summary} onChange={(e) => setSummary(e.target.value)} placeholder="What happened, impact, mitigation" className="min-h-11 flex-1 rounded-2xl border border-hairline bg-white px-3 text-sm text-cocoa outline-none focus-visible:ring-2 focus-visible:ring-terra" />
+          <input id="inc-sum" value={summary} onChange={(e) => setSummary(e.target.value)} placeholder="What happened, impact, mitigation" className="min-h-11 flex-1 rounded-2xl bg-white px-3 text-sm text-cocoa outline-none focus-visible:ring-2 focus-visible:ring-terra" />
           <SButton variant="dark" disabled={summary.trim().length < 4}>Log incident</SButton>
         </form>
         <Note ok={msg} />

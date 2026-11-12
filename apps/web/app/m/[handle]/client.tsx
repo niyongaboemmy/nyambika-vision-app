@@ -63,9 +63,9 @@ export function Collection({ maker, commerce }: { maker: MakerSpace; commerce?: 
       </div>
       {/* Pager: buttons mirror the swipe; tapping the centre card opens it. */}
       <div className="mt-2 flex items-center justify-center gap-3 text-xs text-mut">
-        <button type="button" aria-label="Previous in collection" disabled={i === 0} onClick={() => setI((x) => Math.max(0, x - 1))} className="hit press grid size-8 place-items-center rounded-full border border-white/15 bg-white/5 text-base disabled:opacity-35">‹</button>
+        <button type="button" aria-label="Previous in collection" disabled={i === 0} onClick={() => setI((x) => Math.max(0, x - 1))} className="hit press grid size-8 place-items-center rounded-full bg-white/5 text-base disabled:opacity-35">‹</button>
         <span className="min-w-12 text-center tabular-nums" aria-live="polite">{i + 1} / {items.length}</span>
-        <button type="button" aria-label="Next in collection" disabled={i === items.length - 1} onClick={() => setI((x) => Math.min(items.length - 1, x + 1))} className="hit press grid size-8 place-items-center rounded-full border border-white/15 bg-white/5 text-base disabled:opacity-35">›</button>
+        <button type="button" aria-label="Next in collection" disabled={i === items.length - 1} onClick={() => setI((x) => Math.min(items.length - 1, x + 1))} className="hit press grid size-8 place-items-center rounded-full bg-white/5 text-base disabled:opacity-35">›</button>
       </div>
       <ProductSheet maker={maker} product={open} commerce={commerce} onClose={() => setOpen(null)} />
     </section>

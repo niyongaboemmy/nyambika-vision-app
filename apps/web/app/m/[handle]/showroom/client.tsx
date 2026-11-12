@@ -267,7 +267,7 @@ function Room({ room, commerce }: { room: Showroom; commerce: Commerce | null })
               <MoreActions
                 label="More for this piece"
                 title={item.title}
-                className="size-10 shrink-0 bg-white/10 ring-1 ring-inset ring-white/15"
+                className="size-10 shrink-0 bg-white/10"
                 actions={[
                   ...(me && mrMirror ? [{ label: "Mixed-reality mirror", icon: "headset" as const, onSelect: () => router.push(`/mirror/mr?product=${item.productId}&variant=${item.variantId}`) }] : []),
                   { label: "Maker Space", icon: "store" as const, onSelect: () => router.push(`/m/${room.page.handle}`) },
@@ -363,7 +363,7 @@ function Ctl({ label, onClick, children }: { label: string; onClick: () => void;
 }
 
 function Pill({ children, onClick, href, busy }: { children: React.ReactNode; onClick?: () => void; href?: string; busy?: boolean }) {
-  const cls = "inline-flex min-h-10 shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-white/10 px-3.5 text-xs font-semibold ring-1 ring-inset ring-white/15 transition active:scale-95";
+  const cls = "inline-flex min-h-10 shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-white/10 px-3.5 text-xs font-semibold transition active:scale-95";
   if (href) return <Link href={href} className={cls}>{children}</Link>;
   return (
     <button onClick={onClick} disabled={busy} aria-busy={busy} className={`${cls} disabled:opacity-60`}>

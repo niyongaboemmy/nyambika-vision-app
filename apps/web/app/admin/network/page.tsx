@@ -217,8 +217,8 @@ export default function NetworkMigration() {
                   </ul>
                 )}
                 <div className="grid grid-cols-2 gap-2">
-                  <a href={`/api/admin/migration/network/${d.wave.id}/redirects?format=csv`} onClick={() => setTimeout(load, 800)} className="st-press inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-hairline bg-white px-3 text-sm font-bold text-cocoa"><Icon name="download" className="size-4" /> CSV map</a>
-                  <a href={`/api/admin/migration/network/${d.wave.id}/redirects?format=nginx`} onClick={() => setTimeout(load, 800)} className="st-press inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-hairline bg-white px-3 text-sm font-bold text-cocoa"><Icon name="download" className="size-4" /> nginx map</a>
+                  <a href={`/api/admin/migration/network/${d.wave.id}/redirects?format=csv`} onClick={() => setTimeout(load, 800)} className="st-press inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-white px-3 text-sm font-bold text-cocoa"><Icon name="download" className="size-4" /> CSV map</a>
+                  <a href={`/api/admin/migration/network/${d.wave.id}/redirects?format=nginx`} onClick={() => setTimeout(load, 800)} className="st-press inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl bg-white px-3 text-sm font-bold text-cocoa"><Icon name="download" className="size-4" /> nginx map</a>
                 </div>
               </Card>
             </div>
@@ -227,8 +227,8 @@ export default function NetworkMigration() {
               <h3 className="font-extrabold text-cocoa">Cut-over checklist</h3>
               <ul className="mt-3 space-y-2">
                 {d.checklist.map((c) => (
-                  <li key={c.key} className="flex items-center gap-3 rounded-2xl bg-paper p-3 ring-1 ring-inset ring-hairline">
-                    <span className={`grid size-8 shrink-0 place-items-center rounded-full ${c.done ? "bg-emerald-600 text-white" : "bg-white text-cocoa-3 ring-1 ring-inset ring-hairline"}`}>{c.done ? <Icon name="check" className="size-4" /> : null}</span>
+                  <li key={c.key} className="flex items-center gap-3 rounded-2xl bg-paper p-3">
+                    <span className={`grid size-8 shrink-0 place-items-center rounded-full ${c.done ? "bg-emerald-600 text-white" : "bg-white text-cocoa-3"}`}>{c.done ? <Icon name="check" className="size-4" /> : null}</span>
                     <span className="min-w-0 flex-1">
                       <span className="block text-sm font-bold text-cocoa">{c.label}</span>
                       <span className="block truncate text-xs text-cocoa-2">{c.auto ? "Auto" : "Manual"}{c.hint ? ` · ${c.hint}` : ""}</span>

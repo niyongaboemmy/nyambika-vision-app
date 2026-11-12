@@ -72,7 +72,7 @@ export function Garment3dCard({ productId, title, canManage }: { productId: stri
   }
 
   return (
-    <section aria-labelledby="xr3d-t" className="relative overflow-hidden rounded-[24px] bg-gradient-to-br from-sky-50 via-white to-violet-50 p-4 ring-1 ring-inset ring-sky-200 sm:p-5">
+    <section aria-labelledby="xr3d-t" className="relative overflow-hidden rounded-[24px] bg-gradient-to-br from-sky-50 via-white to-violet-50 p-4 sm:p-5">
       <div aria-hidden className="pointer-events-none absolute -right-10 -top-10 size-40 rounded-full bg-[conic-gradient(from_200deg,rgba(56,189,248,.25),rgba(139,92,246,.2),transparent_60%)] blur-2xl" />
       <div className="relative space-y-3">
         <div className="flex items-start gap-3">
@@ -91,7 +91,7 @@ export function Garment3dCard({ productId, title, canManage }: { productId: stri
         </div>
 
         {withCutout.length === 0 ? (
-          <p className="flex items-center gap-2 rounded-2xl bg-white/80 p-3 text-sm font-semibold text-cocoa-2 ring-1 ring-inset ring-hairline"><Icon name="camera" className="size-4 shrink-0" />Add a colour photo first</p>
+          <p className="flex items-center gap-2 rounded-2xl bg-white/80 p-3 text-sm font-semibold text-cocoa-2"><Icon name="camera" className="size-4 shrink-0" />Add a colour photo first</p>
         ) : (
           <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             {s.variants.map((v) => (
@@ -122,7 +122,7 @@ export function Garment3dCard({ productId, title, canManage }: { productId: stri
         )}
 
         {ready.length > 0 && canManage && (
-          <div className="rounded-2xl bg-white p-3 ring-1 ring-inset ring-hairline">
+          <div className="rounded-2xl bg-white p-3">
             <Switch
               checked={approved}
               onChange={approve}
@@ -149,7 +149,7 @@ function VariantTile({ name, hex, hasCutout, asset }: { name: string; hex: strin
   const st = STATUS[asset?.status ?? "NONE"];
   const busy = asset && (asset.status === "QUEUED" || asset.status === "GENERATING");
   return (
-    <li className="overflow-hidden rounded-2xl bg-white ring-1 ring-inset ring-hairline">
+    <li className="overflow-hidden rounded-2xl bg-white">
       <div className="relative grid aspect-[4/5] place-items-center bg-[radial-gradient(70%_60%_at_50%_40%,#ede9fe,transparent_70%),linear-gradient(180deg,#f8fafc,#eef2f7)]">
         {asset?.status === "READY" && asset.poster ? (
           <img src={asset.poster} alt={`${name} 3D preview`} className="h-[88%] w-[88%] object-contain drop-shadow-[0_10px_14px_rgba(29,24,20,.18)]" />
@@ -163,7 +163,7 @@ function VariantTile({ name, hex, hasCutout, asset }: { name: string; hex: strin
         ) : (
           <Icon name={hasCutout ? "layers" : "camera"} className="size-8 text-cocoa-3" />
         )}
-        <span className="absolute left-2 top-2 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-2 py-0.5 text-[11px] font-bold text-cocoa ring-1 ring-hairline">
+        <span className="absolute left-2 top-2 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-2 py-0.5 text-[11px] font-bold text-cocoa">
           <span className="size-2.5 rounded-full" style={{ background: hex }} /> {name}
         </span>
       </div>

@@ -57,7 +57,7 @@ export default function EventOutfits() {
       <div ref={rail} className="no-scrollbar mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-[8%]" aria-label="Outfits">
         {(data?.looks ?? [null, null, null]).map((o, i) => (
           <article key={o?.id ?? i} className={`w-[84vw] max-w-[400px] shrink-0 snap-center transition duration-300 ${i === index ? "" : "scale-[.95] opacity-70"}`} aria-label={`Outfit ${i + 1}`}>
-            <div className="relative h-[min(54vh,500px)] overflow-hidden rounded-[32px] border border-white/15 bg-[#15131b]">
+            <div className="relative h-[min(54vh,500px)] overflow-hidden rounded-[32px] bg-[#15131b]">
               {o?.image ? (
                 <img src={o.image} alt={`Outfit ${i + 1}: ${o.pieces.map((p) => p.title).join(" with ")}, AI preview on your twin`} className="h-full w-full animate-rise object-contain" />
               ) : o && !isRendering(o.status) ? (

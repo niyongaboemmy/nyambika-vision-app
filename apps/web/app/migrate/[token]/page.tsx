@@ -86,7 +86,7 @@ export default function MigrationReview() {
             </section>
 
             {r.defects.length > 0 && (
-              <section className="space-y-2 rounded-[24px] bg-amber-50 p-4 ring-1 ring-inset ring-amber-200">
+              <section className="space-y-2 rounded-[24px] bg-amber-50 p-4">
                 <p className="flex items-center gap-2 font-extrabold text-gold-ink"><Icon name="alert" className="size-5" /> Things to check</p>
                 <ul className="space-y-1.5">
                   {r.defects.map((d, i) => (
@@ -124,7 +124,7 @@ export default function MigrationReview() {
                 <SButton variant="outline" className="w-full" disabled={note.trim().length < 3} onClick={() => act("request-changes", { note }, "Sent. We'll fix it within 48 hours and ask you again.")}>Request changes</SButton>
               </Card>
             ) : (
-              <p className="flex items-center justify-center gap-2 rounded-2xl bg-emerald-50 p-4 text-center text-sm font-bold text-mint-ink ring-1 ring-inset ring-emerald-200">
+              <p className="flex items-center justify-center gap-2 rounded-2xl bg-emerald-50 p-4 text-center text-sm font-bold text-mint-ink">
                 <Icon name="check" className="size-5" /> {r.status === "LIVE" ? "Your new page is live. Old links now open it." : "Signed off. Thank you!"}
               </p>
             )}

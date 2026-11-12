@@ -6,7 +6,7 @@ import { useMemo, useState } from "react";
 import { Chip, Icon, Kpi, Meter, ScreenSkeleton, Skeleton, type IconName } from "@/components/studio";
 import { ShareSheet } from "@/components/studio-shell";
 import { VoiceModeGate } from "@/components/coop-assist";
-import { rwf } from "@/lib/api";
+import { rwf, rwfCompact } from "@/lib/api";
 import type { OrderView } from "@/lib/orders";
 import { useSession } from "@/lib/session";
 import type { StudioProduct } from "@/lib/types";
@@ -34,10 +34,6 @@ const IN_PROGRESS = ["ACCEPTED", "IN_PREPARATION", "READY", "SHIPPED"];
 const RETAKE = ["NEEDS_BETTER_PHOTO", "NOT_SUPPORTED"];
 const DAYS = 14;
 
-/** "RWF 4.39M" on tiles (the full amount is the title); amounts under a million stay exact. */
-function rwfCompact(n: number) {
-  return n < 1_000_000 ? rwf(n) : `RWF ${new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 2 }).format(n)}`;
-}
 
 /** Daily series over the last `DAYS` days from the order list (client-side; the API returns 30-day totals). */
 function daily(orders: OrderView[], pick: (o: OrderView) => number) {
@@ -110,7 +106,7 @@ export default function Home() {
   if (s.drafts.length)
     todos.push({ key: "drafts", icon: "layers", tone: "sky", title: `${s.drafts.length} ${s.drafts.length === 1 ? "draft" : "drafts"} not live yet`, hint: "Publish to go live", href: `${base}/products?filter=draft` });
   if (a?.plan && used >= 0.8)
-    todos.push({ key: "allowance", icon: "alert", tone: used >= 1 ? "terra" : "gold", title: used >= 1 ? "Try-on allowance used up" : `${Math.round(used * 100)}% of allowance used`, hint: used >= 1 ? "Shoppers use their own looks" : "Upgrade plan", href: `${base}/settings#plan` });
+    todos.push({ key: "allowance", icon: "alert", tone: used >= 1 ? "terra" : "gold", title: used >= 1 ? "Try-ons used up" : `${Math.round(used * 100)}% of allowance used`, hint: used >= 1 ? "Shoppers use their own looks" : "Upgrade plan", href: `${base}/settings#plan` });
 
   const loadingTodos = !products || (manager && !orders);
   const firstName = me?.name?.split(" ")[0];
@@ -140,7 +136,7 @@ export default function Home() {
                   <>
                     <span className={`grid size-11 shrink-0 place-items-center rounded-2xl ${TODO_TONE[t.tone]}`}><Icon name={t.icon} className="size-5" /></span>
                     <span className="min-w-0 flex-1">
-                      <span className="block font-extrabold text-cocoa">{t.title}</span>
+                      <span className="block truncate font-extrabold text-cocoa">{t.title}</span>
                       <span className="block truncate text-sm text-cocoa-2">{t.hint}</span>
                     </span>
                     {t.href && <Icon name="chevron" className="size-5 shrink-0 text-cocoa-3" />}
