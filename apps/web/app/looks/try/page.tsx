@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { Suspense, useEffect, useRef, useState } from "react";
-import { LooksSkeleton } from "@/components/look-rail";
+import { LooksSkeleton } from "@/components/look-material";
 const LimitState = dynamic(() => import("@/components/limit-state").then((m) => m.LimitState), { ssr: false }); // error-only
 import { Icon } from "@/components/icons";
 import { Screen } from "@/components/ui";

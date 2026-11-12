@@ -4,7 +4,7 @@ import type { Intent } from "@nyambika/contracts";
 import { useParams, useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
-import { LooksSkeleton } from "@/components/look-rail";
+import { LooksSkeleton } from "@/components/look-material";
 const LimitState = dynamic(() => import("@/components/limit-state").then((m) => m.LimitState), { ssr: false }); // error-only
 import { Screen } from "@/components/ui";
 import { api } from "@/lib/api";

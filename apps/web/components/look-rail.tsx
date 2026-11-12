@@ -5,16 +5,16 @@
  * SF-like glyphs, press-scale + spring, a long-press label bubble, haptics. Shared by look-view, morph, XR and
  * video rails so every rail button looks and behaves the same.
  */
+import dynamic from "next/dynamic";
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { MAT_BASE, MATERIAL, SPRING } from "@/components/look-material";
 import { haptic } from "@/lib/native";
 
-/** iOS-like spring (≈ stiffness 260 / damping 20) as a CSS/WAAPI `linear()` easing. */
-export const SPRING =
-  "linear(0, 0.013 0.6%, 0.05 1.2%, 0.2 2.6%, 0.588 5.6%, 0.8 7.6%, 0.944 9.7%, 1.034 11.9%, 1.08 14.3%, 1.092 16.4%, 1.084 19.2%, 1.043 25.1%, 1.016 30.7%, 0.999 37.5%, 0.995 46.2%, 1.001 63.1%, 1)";
+export { LooksSkeleton, MAT_BASE, MATERIAL, SPRING } from "@/components/look-material";
 
-/** Dark material for chrome floating over photos (stays legible on any garment, both themes: media is dark). */
-export const MAT_BASE = "border border-white/15 backdrop-blur-xl backdrop-saturate-150 shadow-[0_8px_24px_-12px_rgba(0,0,0,.6)]";
-export const MATERIAL = `${MAT_BASE} bg-black/35`;
+/** Coach mark, long-press bubble and heart burst (components/look-extras.tsx): a post-load chunk (JS budget pass 2). */
+export const preloadLookExtras = () => import("@/components/look-extras");
+const RailBubble = dynamic(() => preloadLookExtras().then((m) => m.RailBubble), { ssr: false });
 
 export const reduced = () => typeof window !== "undefined" && Boolean(window.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
 
@@ -99,11 +99,7 @@ export function RailButton({
         )}
         <span aria-hidden className="grid place-items-center">{children}</span>
       </span>
-      {bubble && (
-        <span aria-hidden className={`pointer-events-none absolute right-[calc(100%+8px)] top-2.5 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold text-white ${MATERIAL}`}>
-          {caption ?? label}
-        </span>
-      )}
+      {bubble && <RailBubble text={caption ?? label} />}
     </button>
   );
 }
@@ -114,19 +110,5 @@ export function GlassControl({ label, onClick, children }: { label: string; onCl
     <button type="button" onClick={onClick} aria-label={label} className={`hit grid size-10 place-items-center rounded-full text-white transition-transform active:scale-90 ${MATERIAL}`}>
       {children}
     </button>
-  );
-}
-
-/** Full-bleed loading state for the stream and try-on (same anatomy as the final screen). */
-export function LooksSkeleton() {
-  return (
-    <div role="status" aria-label="Loading" className="theme-media relative mx-auto h-dvh w-full max-w-[480px] overflow-hidden bg-black">
-      <div data-skeleton aria-hidden className="skeleton absolute inset-0 rounded-none" />
-      <div aria-hidden className="absolute inset-x-0 top-0 grid grid-cols-[44px_1fr_44px] items-center px-3 pt-[max(env(safe-area-inset-top),12px)]">
-        <span className={`size-10 rounded-full ${MATERIAL}`} />
-        <span className={`mx-auto h-7 w-24 rounded-full ${MATERIAL}`} />
-      </div>
-      <div aria-hidden className={`absolute inset-x-0 bottom-0 rounded-t-[28px] ${MAT_BASE} bg-black/55`} style={{ height: "max(13dvh, 128px)" }} />
-    </div>
   );
 }

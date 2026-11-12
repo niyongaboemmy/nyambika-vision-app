@@ -7,7 +7,7 @@ import { CollectionAlerts, TailorServices } from "@/components/maker-lazy";
 import { Shelf3d } from "@/components/vr-shelf";
 import type { Shelf } from "@/lib/vr";
 import { RegionPill } from "@/components/region";
-import { Fact } from "@/components/kit";
+import { Fact } from "@/components/kit-static";
 import type { Commerce } from "@/lib/region";
 
 type Props = { params: Promise<{ handle: string }> };
