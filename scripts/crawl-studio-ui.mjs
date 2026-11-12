@@ -90,7 +90,7 @@ for (const vp of ["phone", "desk"]) {
     const { context, page } = await session("0788100001", vp);
     await page.goto(`${BASE}/studio`);
     await shot(page, "studio-pages", vp);
-    const p = await firstPage(page, "Uwase");
+    const p = await firstPage(page, "Umurage");
     await page.goto(`${BASE}/studio/${p.id}`);
     await shot(page, "tailor-home", vp, { full: true });
     if (vp === "phone") {
@@ -135,7 +135,7 @@ for (const vp of ["phone", "desk"]) {
   // Cooperative admin: home + makers + products (approval queue)
   {
     const { context, page } = await session("0788100002", vp);
-    const p = await firstPage(page, "Abahizi");
+    const p = await firstPage(page, "Urudodo");
     await page.goto(`${BASE}/studio/${p.id}`);
     await shot(page, "coop-home", vp, { full: true });
     await page.goto(`${BASE}/studio/${p.id}/makers`);
@@ -147,7 +147,7 @@ for (const vp of ["phone", "desk"]) {
   // Coop maker (member access)
   {
     const { context, page } = await session("0788100004", vp);
-    const p = await firstPage(page, "Abahizi");
+    const p = await firstPage(page, "Urudodo");
     await page.goto(`${BASE}/studio/${p.id}`);
     await shot(page, "maker-home", vp);
     await context.close();

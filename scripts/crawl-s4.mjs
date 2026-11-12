@@ -1,6 +1,6 @@
 import { BASE, signIn, start } from "./crawl-lib.mjs";
 
-const OWNERS = { "Uwase Couture": "0788100001", "Abahizi Sewing Cooperative": "0788100002", "Kigali Kitenge House": "0788100003", "Inzozi Atelier": "0788100005", "Imena Styles": "0788100006" };
+const OWNERS = { "Umurage Wear": "0788100001", "Urudodo Stitch Collective": "0788100002", "Kanombe Kitenge Corner": "0788100003", "Inkindi Studio": "0788100005", "Akeza Couture": "0788100006" };
 const { browser, context, page, shot, finish } = await start("s4");
 
 // Fresh shopper per run: the daily generation cap (15) is per user, so reusing one account trips it.

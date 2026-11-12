@@ -10,6 +10,8 @@ import { waLink, type MakerProduct, type MakerSpace } from "@/lib/maker";
 import type { Commerce } from "@/lib/region";
 import { track } from "@/lib/track";
 import { Icon } from "@/components/icons";
+import { MediaCreditButton } from "@/components/media-credit";
+import { LocalTitle } from "@/components/product-copy";
 
 // Maker Space product sheet (split from client.tsx, JS budget pass). The 3D section and checkout load on first open.
 const Garment3dSection = dynamic(() => import("@/components/xr-maker").then((m) => m.Garment3dSection), { ssr: false });
@@ -24,9 +26,9 @@ export function ProductSheet({ maker, product, commerce, onClose }: { maker: Mak
   return (
     <Sheet open onClose={onClose}>
       <div className="flex gap-4">
-        {v.image && <img src={v.image} alt={product.title} className="h-40 w-32 rounded-2xl object-cover" />}
+        {v.image && <span className="relative h-40 w-32 shrink-0"><img src={v.image} alt={product.title} className="h-40 w-32 rounded-2xl object-cover" /><MediaCreditButton src={v.image} /></span>}
         <div className="min-w-0 flex-1 space-y-1">
-          <h3 className="font-display text-xl font-black">{product.title}</h3>
+          <h3 className="font-display text-xl font-black"><LocalTitle productId={product.id} fallback={product.title} /></h3>
           <p className="font-semibold text-gold">{commerce && commerce.prices[product.id] != null ? <Price minor={commerce.prices[product.id]!} currency={commerce.currency} approxClassName="block text-sm text-txt/70" /> : rwf(product.priceRwf)}{product.madeToOrder ? " · made to measure" : ""}</p>
           {product.makers.length > 0 && <p className="text-sm text-mut">Made by {product.makers.join(", ")}, {maker.name}</p>}
           <p className="text-sm text-mut">{product.madeToOrder ? `Ready in ${product.leadTimeDays} days` : v.inStock ? "In stock" : "Out of stock"}</p>

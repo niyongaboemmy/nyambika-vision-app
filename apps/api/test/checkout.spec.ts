@@ -41,9 +41,9 @@ beforeAll(async () => {
   await app.init();
   prisma = app.get(PrismaService);
   payments = app.get(PaymentsService);
-  variants.shirt = await stocked("kigali-kitenge-house", "Umuraba kitenge shirt");
-  variants.skirt = await stocked("kigali-kitenge-house", "Inyenyeri kitenge skirt");
-  variants.wrap = await stocked("imena-styles", "Uruziga wrap dress");
+  variants.shirt = await stocked("kanombe-kitenge-corner", "Navy floral print shirt");
+  variants.skirt = await stocked("kanombe-kitenge-corner", "Grey wool midi skirt");
+  variants.wrap = await stocked("akeza-couture", "Long-sleeve black office dress");
 });
 
 afterAll(async () => {
@@ -66,8 +66,8 @@ describe("bag + checkout (E29, FR-ORD-07 direct-to-maker split)", () => {
     expect(kkh.lines.find((l: { variantId: string }) => l.variantId === variants.shirt.id).qty).toBe(2);
     await s.post("/bag/items").send({ variantId: variants.wrap.id, size: "XXL" }).expect(400);
 
-    // Pickup at Imena, delivery from Kigali Kitenge House: fees differ per maker.
-    const imena = bag.groups.find((g: { pageName: string }) => /imena/i.test(g.pageName));
+    // Pickup at Akeza, delivery from Kanombe Kitenge Corner: fees differ per maker.
+    const imena = bag.groups.find((g: { pageName: string }) => /akeza/i.test(g.pageName));
     const quote = (await s.post("/bag/quote").send({ delivery: { [imena.key]: "PICKUP" } }).expect(201)).body;
     expect(quote.groups.find((g: { key: string }) => g.key === imena.key).deliveryFeeRwf).toBe(0);
 
@@ -91,7 +91,7 @@ describe("bag + checkout (E29, FR-ORD-07 direct-to-maker split)", () => {
     expect(k.deliveryMode).toBe("DELIVERY");
     expect(k.address).toBe("KG 7 Ave, Kacyiru");
     expect(k.totalRwf).toBe(k.items.reduce((n, i) => n + i.qty * i.unitPriceRwf, 0) + 2000);
-    const i = orders.find((o) => /imena/i.test(o.page.name))!;
+    const i = orders.find((o) => /akeza/i.test(o.page.name))!;
     expect(i.deliveryMode).toBe("PICKUP");
     expect(i.deliveryFeeRwf).toBe(0);
     expect((await prisma.variant.findUniqueOrThrow({ where: { id: variants.shirt.id } })).stock).toBe(variants.shirt.stock - 2);

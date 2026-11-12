@@ -25,9 +25,9 @@ const api = async (p, path, init) => {
 const phone = `07887${String(Date.now()).slice(-5)}`;
 await signIn(page, phone);
 await api(page, "/twin/persona", { persona: 3, consent: true });
-const uwase = await api(page, "/pages/by-handle/uwase-couture");
-const dress = uwase.products.find((p) => p.title === "Uruziga a-line dress");
-assert(Boolean(dress), "Uwase's customizable Uruziga dress is listed");
+const uwase = await api(page, "/pages/by-handle/umurage-wear");
+const dress = uwase.products.find((p) => p.title === "Ineza A-line dress");
+assert(Boolean(dress), "Umurage's customizable Ineza dress is listed");
 
 await page.goto(`${BASE}/looks/try?variant=${dress.variants[0].id}`);
 await page.locator('img[alt*="AI preview"]').first().waitFor({ timeout: 30000 });
@@ -38,7 +38,7 @@ await shot("look-with-morph-rail");
 // ── Live morph ────────────────────────────────────────────────────────────────
 await page.getByRole("button", { name: "Morph" }).click();
 const sheet = page.getByRole("dialog");
-await sheet.getByText(/live morph · uwase couture/i).waitFor();
+await sheet.getByText(/live morph · umurage wear/i).waitFor();
 await page.waitForTimeout(500);
 await shot("morph-sheet");
 // Drag the knob around the ring towards blue (~225°).
@@ -62,20 +62,22 @@ const morphImg = await sheet.locator('img[alt*="live morph preview"]').getAttrib
 assert(morphImg?.startsWith("/api/private/look"), "morph preview rendered through the generation path (signed private image)");
 await page.waitForTimeout(400);
 await shot("morph-blue-maxi-long");
-const askText = await sheet.getByRole("button", { name: /ask uwase to sew this/i }).innerText();
-assert(/RWF 39,000/.test(askText), `price = base + options (${askText.split("\n").join(" ")})`);
+const askText = await sheet.getByRole("button", { name: /ask umurage to sew this/i }).innerText();
+// Options picked above: colour (+3,000) + maxi (+5,000) + long sleeves (+3,000) on the seeded base price.
+const expected = `RWF ${(dress.priceRwf + 11000).toLocaleString("en-US")}`;
+assert(askText.includes(expected) && askText.includes("+RWF 11,000"), `price = base + options: ${expected} (${askText.split("\n").join(" ")})`);
 
 // ── Ask Uwase to sew this ─────────────────────────────────────────────────────
-await sheet.getByRole("button", { name: /ask uwase to sew this/i }).click();
+await sheet.getByRole("button", { name: /ask umurage to sew this/i }).click();
 const ask = page.getByRole("dialog").last();
-await ask.getByText(/what uwase will see/i).waitFor();
+await ask.getByText(/what umurage will see/i).waitFor();
 await ask.getByRole("checkbox", { name: /this preview image/i }).check();
 await page.waitForTimeout(300);
 await shot("ask-tailor-consent");
-await ask.getByRole("button", { name: /send request to uwase/i }).click();
+await ask.getByRole("button", { name: /send request to umurage/i }).click();
 await page.waitForURL(/\/custom\/.+fresh=1/, { timeout: 20000 });
 const coId = new URL(page.url()).pathname.split("/").pop();
-await page.getByText(/sent to uwase couture/i).waitFor();
+await page.getByText(/sent to umurage wear/i).waitFor();
 await page.waitForTimeout(500);
 await shot("custom-order-requested");
 
@@ -113,7 +115,7 @@ async function approveOnHandset(label) {
   await handset.getByText(/no pending payment requests/i).waitFor({ timeout: 10000 });
 }
 await page.reload();
-await page.getByText(/quote from uwase/i).waitFor({ timeout: 10000 });
+await page.getByText(/quote from umurage/i).waitFor({ timeout: 10000 });
 await page.waitForTimeout(300);
 await shot("shopper-quote");
 await page.getByRole("button", { name: /accept & pay deposit/i }).click();
@@ -194,7 +196,7 @@ await shot("buy-sheet-size-recommendation");
 await page.keyboard.press("Escape");
 
 // Maker Space services + measurements page
-await page.goto(`${BASE}/m/uwase-couture`);
+await page.goto(`${BASE}/m/umurage-wear`);
 await page.getByText("Made for you").scrollIntoViewIfNeeded();
 await page.getByRole("button", { name: "Request this" }).first().waitFor();
 await page.evaluate(() => window.scrollBy(0, 360));
@@ -205,7 +207,7 @@ await page.getByText("Shared with tailors").waitFor();
 await page.waitForTimeout(300);
 await shot("measurements");
 await page.goto(`${BASE}/custom`);
-await page.getByText("Uruziga a-line dress").first().waitFor();
+await page.getByText("Ineza A-line dress").first().waitFor();
 await shot("my-custom-orders");
 
 await tailorCtx.close();

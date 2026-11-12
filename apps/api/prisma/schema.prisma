@@ -1859,3 +1859,43 @@ model TrendSignal {
 
   @@index([week])
 }
+
+// ==== Realistic seed data: media credits + trilingual product copy (CC attribution, Kinyarwanda first) ====
+
+/// Credit for one stored image (product photo, cut-out, recolour or illustration). Keyed by storage path, so
+/// every row that reuses the file (another page, a region copy) carries the same credit.
+model MediaCredit {
+  id           String   @id @default(cuid())
+  path         String   @unique
+  /// Asset key from scripts/seed-assets (e.g. "g25", "g25-terracotta", "umushanana-kente")
+  assetKey     String
+  /// Source ids from scripts/seed-assets/sources.json (one or more, e.g. ["g18","s57"])
+  sourceIds    String[]
+  title        String
+  author       String
+  sourceUrl    String
+  /// Licence of this derivative file (BY-SA sources keep BY-SA)
+  licence      String
+  licenceUrl   String
+  shareAlike   Boolean  @default(false)
+  /// "cropped", "background removed", "label blurred", "recoloured", ...
+  changes      String[]
+  /// True for drawn/procedural images (no photo of the real garment yet)
+  illustration Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  @@index([assetKey])
+}
+
+/// Product title/description per locale (rw/en/fr). `needsReview` marks drafts awaiting a native speaker.
+model ProductCopy {
+  id          String   @id @default(cuid())
+  productId   String
+  locale      String
+  title       String
+  description String   @default("")
+  needsReview Boolean  @default(false)
+  updatedAt   DateTime @updatedAt
+
+  @@unique([productId, locale])
+}

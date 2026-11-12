@@ -16,11 +16,11 @@ const line = (over: Partial<BagLine>): BagLine => ({
   sizes: ["S", "M", "L"],
   available: true,
   pageId: "pageA",
-  pageName: "Kigali Kitenge House",
+  pageName: "Kanombe Kitenge Corner",
   sector: "Kimironko",
   leadTimeDays: 2,
   payoutMsisdn: "0788100003",
-  payoutLabel: "Kigali Kitenge House",
+  payoutLabel: "Kanombe Kitenge Corner",
   makerName: "",
   ...over,
 });
@@ -38,9 +38,9 @@ describe("splitBag (E29 optional checkout)", () => {
 
   it("splits a multi-maker bag into one payment per maker payout account, with per-maker delivery", () => {
     const a = line({});
-    const b = line({ pageId: "pageB", pageName: "Imena Styles", payoutMsisdn: "0788100006", payoutLabel: "Imena Styles", unitPriceRwf: 30000, leadTimeDays: 5 });
+    const b = line({ pageId: "pageB", pageName: "Akeza Couture", payoutMsisdn: "0788100006", payoutLabel: "Akeza Couture", unitPriceRwf: 30000, leadTimeDays: 5 });
     const groups = splitBag([a, b, line({ variantId: "v3" })], { [groupKey(b)]: "PICKUP" });
-    expect(groups.map((g) => g.pageName)).toEqual(["Kigali Kitenge House", "Imena Styles"]);
+    expect(groups.map((g) => g.pageName)).toEqual(["Kanombe Kitenge Corner", "Akeza Couture"]);
     expect(groups[0].lines).toHaveLength(2);
     expect(groups[1].deliveryFeeRwf).toBe(0);
     expect(groups[1].totalRwf).toBe(30000);
@@ -48,8 +48,8 @@ describe("splitBag (E29 optional checkout)", () => {
   });
 
   it("splits one cooperative page by maker account when products pay the maker directly (FR-COOP-05)", () => {
-    const toMaker = line({ pageId: "coop", payoutMsisdn: "0788100004", payoutLabel: "Jeanne (Abahizi)" });
-    const toPage = line({ pageId: "coop", payoutMsisdn: "0788100002", payoutLabel: "Abahizi" });
+    const toMaker = line({ pageId: "coop", payoutMsisdn: "0788100004", payoutLabel: "Jeanne (Urudodo)" });
+    const toPage = line({ pageId: "coop", payoutMsisdn: "0788100002", payoutLabel: "Urudodo" });
     expect(splitBag([toMaker, toPage])).toHaveLength(2);
   });
 

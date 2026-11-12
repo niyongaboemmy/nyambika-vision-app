@@ -22,3 +22,6 @@ scripts/crawl-output/
 apps/web/.next-build/
 .claude/worktrees/
 .refact/
+
+# seed-assets download cache (third-party photos, untrusted)
+scripts/seed-assets/.cache/

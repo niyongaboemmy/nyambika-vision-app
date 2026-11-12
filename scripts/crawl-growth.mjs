@@ -43,7 +43,7 @@ const nav = async (p, name) => {
 // ── E30: tailor share kit + offer ─────────────────────────────────────────────
 const T = await ctx("tailor");
 await signIn(T.p, "0788100001");
-const uwase = await api(T.p, "/pages/by-handle/uwase-couture");
+const uwase = await api(T.p, "/pages/by-handle/umurage-wear");
 await T.p.goto(`${BASE}/studio/${uwase.id}`);
 await T.p.getByRole("heading", { name: "Grow your page" }).waitFor({ timeout: 20000 });
 await T.p.getByText(/suggestion/i).first().waitFor({ timeout: 15000 });
@@ -79,7 +79,7 @@ const shopperPhone = `0789${String(Date.now()).slice(-6)}`;
 const S = await ctx("shopper");
 await signIn(S.p, shopperPhone);
 await api(S.p, "/twin/persona", { persona: 2, consent: true });
-await S.p.goto(`${BASE}/m/uwase-couture?src=wa_status&utm_source=whatsapp`);
+await S.p.goto(`${BASE}/m/umurage-wear?src=wa_status&utm_source=whatsapp`);
 await S.p.getByRole("switch", { name: /whatsapp updates/i }).click();
 await S.p.getByText(/reply STOP any ?time/i).waitFor();
 await S.snap("maker-space-optin", true);
@@ -138,7 +138,7 @@ if (broadcastSent) assert(Array.isArray(outbox) && outbox.some((m) => m.template
 // ── E31: coop admin turns on voice mode + SMS, asks for assisted-mode consent ─
 const A = await ctx("coopadmin");
 await signIn(A.p, "0788100002");
-const coop = await api(A.p, "/pages/by-handle/abahizi-coop");
+const coop = await api(A.p, "/pages/by-handle/urudodo-collective");
 await A.p.goto(`${BASE}/studio/${coop.id}/makers`);
 const jeanne = A.p.locator("li", { hasText: "Mukamana Jeanne" }).first();
 await jeanne.getByText(/voice & icon mode/i).waitFor({ timeout: 15000 });

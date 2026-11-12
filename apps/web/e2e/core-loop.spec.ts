@@ -43,7 +43,7 @@ test("shopper core loop", async ({ page, context }) => {
 
 test("a short hold does not buy", async ({ page }) => {
   await signIn(page, `07886${String(Date.now()).slice(-5)}`);
-  await page.goto("/m/kigali-kitenge-house");
+  await page.goto("/m/kanombe-kitenge-corner");
   await page.getByRole("option", { selected: true }).click();
   await page.getByRole("button", { name: /try on me/i }).click();
   await expect(page.locator('img[alt*="AI preview"]')).toBeVisible({ timeout: 30_000 });
@@ -60,7 +60,7 @@ test("a short hold does not buy", async ({ page }) => {
 });
 
 test.describe("accessibility (WCAG 2.2 AA, critical/serious)", () => {
-  for (const path of ["/", "/signin", "/makers", "/m/uwase-couture"]) {
+  for (const path of ["/", "/signin", "/makers", "/m/umurage-wear"]) {
     test(`public ${path}`, async ({ page }) => {
       await page.goto(path);
       await page.waitForLoadState("networkidle");

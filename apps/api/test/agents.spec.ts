@@ -60,7 +60,7 @@ beforeAll(async () => {
   checkout = app.get(AgentCheckoutService);
   await prisma.featureFlag.updateMany({ where: { key: { in: ["agents.kill_switch", "partners.kill_switch"] } }, data: { enabled: false } });
   host = await login("0788900001");
-  const v = await prisma.variant.findFirstOrThrow({ where: { stock: { gte: 3 }, product: { status: "PUBLISHED", madeToOrder: false, payoutTarget: "PAGE", page: { handle: "kigali-kitenge-house" } } }, include: { product: true } });
+  const v = await prisma.variant.findFirstOrThrow({ where: { stock: { gte: 3 }, product: { status: "PUBLISHED", madeToOrder: false, payoutTarget: "PAGE", page: { handle: "kanombe-kitenge-corner" } } }, include: { product: true } });
   stock.push({ id: v.id, stock: v.stock });
   variant = { id: v.id, size: v.sizes[0], price: v.product.priceRwf };
 });
@@ -104,13 +104,13 @@ describe("public catalogue API (FR-AGT-01)", () => {
   });
 
   it("hides pages that opted out of agent channels (FR-AGT-05)", async () => {
-    const owner = await login("0788100003"); // seller, kigali-kitenge-house
-    const page = await prisma.page.findUniqueOrThrow({ where: { handle: "kigali-kitenge-house" } });
+    const owner = await login("0788100003"); // seller, kanombe-kitenge-corner
+    const page = await prisma.page.findUniqueOrThrow({ where: { handle: "kanombe-kitenge-corner" } });
     await owner.put(`/pages/${page.id}/agent-channels`).send({ agentsEnabled: false, marketplacesEnabled: true }).expect(200);
     const http = request(app.getHttpServer());
-    await http.get("/v1/public/makers/kigali-kitenge-house").expect(404);
+    await http.get("/v1/public/makers/kanombe-kitenge-corner").expect(404);
     await owner.put(`/pages/${page.id}/agent-channels`).send({ agentsEnabled: true, marketplacesEnabled: true }).expect(200);
-    await http.get("/v1/public/makers/kigali-kitenge-house").expect(200);
+    await http.get("/v1/public/makers/kanombe-kitenge-corner").expect(200);
   });
 });
 
@@ -186,7 +186,7 @@ describe("MCP server + mandate checkout (FR-AGT-02..04)", () => {
 
     const product = text(await client.callTool({ name: "get_product", arguments: { product_id: search.results[0].id } }));
     schemas.ProductDetailSchema.parse(product);
-    const maker = text(await client.callTool({ name: "get_maker", arguments: { handle: "kigali-kitenge-house" } }));
+    const maker = text(await client.callTool({ name: "get_maker", arguments: { handle: "kanombe-kitenge-corner" } }));
     schemas.MakerDetailSchema.parse(maker);
     const avail = text(await client.callTool({ name: "check_availability", arguments: { id: variant.id, size: variant.size } }));
     expect(avail.variants[0]).toMatchObject({ variant_id: variant.id, orderable: true });
@@ -201,7 +201,7 @@ describe("MCP server + mandate checkout (FR-AGT-02..04)", () => {
     schemas.CheckoutSessionSchema.parse(session);
     expect(session.status).toBe("not_ready_for_payment");
     expect(session.mandate.confirmation_url).toMatch(/\/confirm\//);
-    expect(session.payment.paid_directly_to).toBe("Kigali Kitenge House");
+    expect(session.payment.paid_directly_to).toBe("Kanombe Kitenge Corner");
     confirmationUrl = session.mandate.confirmation_url;
     sessionId = session.id;
     await client.close();
@@ -215,7 +215,7 @@ describe("MCP server + mandate checkout (FR-AGT-02..04)", () => {
 
     const http = request(app.getHttpServer());
     const preview = (await http.get(`/agent-mandates/${token}`).expect(200)).body;
-    expect(preview).toMatchObject({ state: "open", paidTo: "Kigali Kitenge House", subtotalRwf: variant.price });
+    expect(preview).toMatchObject({ state: "open", paidTo: "Kanombe Kitenge Corner", subtotalRwf: variant.price });
     await http.post(`/agent-mandates/${token}/confirm`).send({}).expect(401); // must be signed in
     const [b, s] = token.split(".");
     await http.get(`/agent-mandates/${b.slice(0, -2)}xx.${s}`).expect(400); // tampered
@@ -256,7 +256,7 @@ describe("MCP server + mandate checkout (FR-AGT-02..04)", () => {
     const a = (await http.post("/v1/agent/checkout_sessions").set(bearer(agentKey)).set("idempotency-key", key).send(items).expect(201)).body;
     const b = (await http.post("/v1/agent/checkout_sessions").set(bearer(agentKey)).set("idempotency-key", key).send(items).expect(201)).body;
     expect(b.id).toBe(a.id);
-    const other = await prisma.variant.findFirstOrThrow({ where: { stock: { gte: 1 }, product: { status: "PUBLISHED", page: { handle: "imena-styles" } } } });
+    const other = await prisma.variant.findFirstOrThrow({ where: { stock: { gte: 1 }, product: { status: "PUBLISHED", page: { handle: "akeza-couture" } } } });
     const multi = await http.post("/v1/agent/checkout_sessions").set(bearer(agentKey)).set("idempotency-key", `rest-${stamp}-2`).send({ items: [...items.items, { id: other.id, size: other.sizes[0], quantity: 1 }] }).expect(400);
     expect(multi.body.code).toBe("MULTIPLE_MAKERS");
 

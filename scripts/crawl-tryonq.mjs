@@ -13,7 +13,7 @@ for (const persona of [3, 5]) {
   await page.getByRole("button", { name: `Persona ${persona}` }).click();
   await page.getByText(/your twin is ready/i).waitFor({ timeout: 20000 });
 
-  await page.goto(`${BASE}/m/kigali-kitenge-house`);
+  await page.goto(`${BASE}/m/kanombe-kitenge-corner`);
   // The collection is a 3D carousel (+-2 cards rendered): step right until the tee is centred, then tap it.
   for (let step = 0; step < 15; step++) {
     const tee = page.getByRole("option", { name: /Plain cotton tee/ });

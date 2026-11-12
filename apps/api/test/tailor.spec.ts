@@ -49,7 +49,7 @@ beforeAll(async () => {
   aiUp = await fetch(`${process.env.AI_GATEWAY_URL ?? "http://localhost:8100"}/health`).then((r) => r.ok).catch(() => false);
   const templated = (await prisma.morphTemplate.findMany()).map((t) => t.productId);
   const product = await prisma.product.findFirstOrThrow({
-    where: { title: "Uruziga a-line dress", page: { handle: "uwase-couture" }, id: { in: templated } },
+    where: { title: "Ineza A-line dress", page: { handle: "umurage-wear" }, id: { in: templated } },
     include: { variants: true },
   });
   productId = product.id;
@@ -69,13 +69,14 @@ describe("measurement profile + size recommendation (FR-SIZE-01/02/08)", () => {
     expect(before.body.profile).toBeNull();
     if (before.body.twinSize) expect(before.body.prefill.bustCm).toBeGreaterThan(70);
 
-    await s.put("/measurements").send({ measurements: { bustCm: 90 }, consent: false }).expect(400);
-    await s.put("/measurements").send({ measurements: { bustCm: 90, waistCm: 72, hipsCm: 96, heightCm: 166 }, consent: true }).expect(200);
+    await s.put("/measurements").send({ measurements: { bustCm: 93 }, consent: false }).expect(400);
+    // Size M on the seeded women's chart (bust 91–96, waist 73–78, hips 97–102; seed-catalogue.ts).
+    await s.put("/measurements").send({ measurements: { bustCm: 93, waistCm: 75, hipsCm: 99, heightCm: 166 }, consent: true }).expect(200);
     const user = await prisma.user.findUniqueOrThrow({ where: { phone: `+250${phone.slice(1)}` } });
     const row = await prisma.measurementProfile.findUniqueOrThrow({ where: { userId: user.id } });
     const raw = JSON.stringify(row.fields);
     // Plaintext would appear as a bare JSON value; random hex in the ciphertext may contain the digits.
-    expect(raw).not.toMatch(/(:|")(90|96|166)("|,|\}|\.)/);
+    expect(raw).not.toMatch(/(:|")(93|99|166)("|,|\}|\.)/);
     expect(Object.values(row.fields as Record<string, string>).every((v) => v.startsWith("v1:"))).toBe(true);
     const consent = await prisma.consentRecord.findFirst({ where: { userId: user.id, purpose: "MEASUREMENT_PROFILE", granted: true } });
     expect(consent).toBeTruthy();
@@ -146,7 +147,7 @@ describe("custom order lifecycle (E24, FR-SIZE-04..07)", () => {
 
     // Tailor sees measurements only while the share is active; others never.
     const m = await tailor.get(`/custom-orders/${co.id}/measurements`).expect(200);
-    expect(m.body.measurements.hipsCm).toBe(96);
+    expect(m.body.measurements.hipsCm).toBe(99);
     expect(await prisma.auditLog.count({ where: { action: "MEASUREMENT_VIEWED", data: { path: ["customOrderId"], equals: co.id } } })).toBe(1);
     await seller.get(`/custom-orders/${co.id}/measurements`).expect(403);
     await seller.get(`/custom-orders/${co.id}`).expect(403);
@@ -254,7 +255,7 @@ describe("custom order lifecycle (E24, FR-SIZE-04..07)", () => {
     const user = await prisma.user.findUniqueOrThrow({ where: { phone: `+250${phone.slice(1)}` } });
     const exp = await s.get("/privacy/export").expect(200);
     const body = JSON.parse(exp.text);
-    expect(body.measurements.profile.bustCm).toBe(90);
+    expect(body.measurements.profile.bustCm).toBe(93);
     expect(body.customOrders.length).toBeGreaterThanOrEqual(3);
     const job = (await s.post("/privacy/delete").send({ scope: "ACCOUNT" }).expect(201)).body;
     expect(job.steps.map((x: { step: string }) => x.step)).toContain("Measurement profile deleted; tailor shares ended");

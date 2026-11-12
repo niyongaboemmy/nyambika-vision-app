@@ -20,7 +20,7 @@ import "dotenv/config";
 const AI = process.env.AI_GATEWAY_URL ?? "http://localhost:8100";
 const STORAGE = resolve(process.env.STORAGE_DIR ?? "./storage");
 const AI_DIR = resolve(__dirname, "../../ai");
-const PAGE = "kigali-kitenge-house";
+const PAGE = "kanombe-kitenge-corner";
 const TITLE = "Plain cotton tee";
 export const TEE_SOURCE = "procedural (apps/ai/scripts/make_seed_assets.py --tee), in-house generated, no third-party content";
 const COLOURS = [
@@ -93,6 +93,23 @@ export async function seedTee(prisma: PrismaClient) {
     if (i === 0) await prisma.product.update({ where: { id: product.id }, data: { qualityScore: a.quality_score, readinessNotes: a.notes } });
   }
   await prisma.product.update({ where: { id: product.id }, data: { readiness: ready ? "READY" : "NEEDS_BETTER_PHOTO" } });
+  // Credits (in-house, no third-party content) and trilingual copy, like the rest of the catalogue.
+  for (const v of await prisma.variant.findMany({ where: { productId: product.id } })) {
+    const files: [string | null, string[]][] = [[v.imagePath, []], [v.cutoutPath, ["background removed (cut-out)"]]];
+    for (const [path, changes] of files) {
+      if (!path) continue;
+      const data = { assetKey: "tee-procedural", sourceIds: ["tee-procedural"], title: "Plain cotton tee (procedural render)", author: "Nyambika Vision", sourceUrl: "https://github.com/niyongaboemmy/nyambika-vision-app/blob/main/apps/ai/scripts/make_seed_assets.py", licence: "Repository licence (in-house)", licenceUrl: "https://github.com/niyongaboemmy/nyambika-vision-app", shareAlike: false, changes, illustration: true };
+      await prisma.mediaCredit.upsert({ where: { path }, create: { path, ...data }, update: data });
+    }
+  }
+  await prisma.productCopy.createMany({
+    data: [
+      { productId: product.id, locale: "en", title: TITLE, description: "Everyday crew-neck tee in soft combed cotton jersey. Plain, no print, true to size. Ready to wear." },
+      { productId: product.id, locale: "fr", title: "T-shirt uni en coton", description: "T-shirt col rond en jersey de coton peigné. Uni, sans imprimé, taille normalement. Prêt-à-porter." },
+      { productId: product.id, locale: "rw", title: "Umupira w'ipamba udafite imitako", description: "Umupira w'ipamba woroshye, nta mitako, ingano isanzwe. Urahari.", needsReview: true },
+    ],
+    skipDuplicates: true,
+  });
   console.log(`✓ ${TITLE} on ${PAGE} (${COLOURS.length} colours, ${ready ? "READY" : "needs better photo"})`);
 }
 

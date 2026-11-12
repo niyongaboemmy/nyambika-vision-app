@@ -32,7 +32,7 @@ export interface PromoInput {
   photo: Buffer | null;
   /** Maker Space URL with source tags, encoded in the QR. */
   url: string;
-  /** Display-only address under the QR, e.g. nyambika.rw/m/uwase-couture */
+  /** Display-only address under the QR, e.g. nyambika.rw/m/umurage-wear */
   shortUrl: string;
   offer?: string | null;
 }

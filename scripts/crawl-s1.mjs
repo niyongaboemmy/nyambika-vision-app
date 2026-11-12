@@ -8,10 +8,10 @@ const { browser, page, shot, finish, context } = await start("s1");
 
 // Shopper-facing: directory + Maker Space (anonymous, SSR)
 await page.goto(`${BASE}/makers`);
-await page.getByText("Uwase Couture").first().waitFor();
+await page.getByText("Umurage Wear").first().waitFor();
 await shot("directory");
-await page.getByText("Uwase Couture").first().click();
-await page.waitForURL(/\/m\/uwase-couture/);
+await page.getByText("Umurage Wear").first().click();
+await page.waitForURL(/\/m\/umurage-wear/);
 await page.getByRole("listbox", { name: "Collection" }).waitFor();
 await shot("maker-space");
 await page.getByRole("listbox", { name: "Collection" }).getByRole("option", { selected: true }).click(); // the 3D shelf is a second listbox
@@ -21,7 +21,7 @@ await shot("maker-product-sheet");
 // Tailor: create product → upload photo → readiness → publish
 await signIn(page, "0788100001");
 await page.goto(`${BASE}/studio`);
-await page.getByText("Uwase Couture").click();
+await page.getByText("Umurage Wear").click();
 await page.getByRole("navigation", { name: "Studio" }).getByRole("link", { name: "Products" }).click();
 await page.getByText(/try-on: ready/i).first().waitFor();
 await shot("studio-products");
@@ -47,7 +47,7 @@ const c2 = await browser.newContext({ ...context._options });
 const maker = await c2.newPage();
 await signIn(maker, "0788100004");
 await maker.goto(`${BASE}/studio`);
-await maker.getByText("Abahizi Sewing Cooperative").click();
+await maker.getByText("Urudodo Stitch Collective").click();
 await maker.getByRole("navigation", { name: "Studio" }).getByRole("link", { name: "My products" }).click();
 await maker.getByRole("button", { name: "Add product" }).click({ timeout: 30000 }).catch(async (e) => { await maker.screenshot({ path: new URL("./crawl-output/s1/89-maker-products-failed.png", import.meta.url).pathname, fullPage: true }); throw e; });
 // Unique per run: a busy dev DB keeps earlier runs' submissions in the approval queue.
@@ -65,7 +65,7 @@ const c3 = await browser.newContext({ ...context._options });
 const admin = await c3.newPage();
 await signIn(admin, "0788100002");
 await admin.goto(`${BASE}/studio`);
-await admin.getByText("Abahizi Sewing Cooperative").click();
+await admin.getByText("Urudodo Stitch Collective").click();
 await admin.getByRole("navigation", { name: "Studio" }).getByRole("link", { name: "Products" }).click();
 await admin.getByText(/waiting for approval/i).waitFor();
 await admin.screenshot({ path: new URL("./crawl-output/s1/91-admin-approval-queue.png", import.meta.url).pathname });

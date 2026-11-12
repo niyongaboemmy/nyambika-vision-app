@@ -32,10 +32,10 @@ const flag = (key, enabled) => api("PATCH", `/admin/flags/${key}`, { enabled });
 await flag("ml.local_attr_spike", false);
 await flag("insights.trends_spike", false);
 
-await signIn(maker, "0788100001"); // Uwase Couture (tailor, page owner)
+await signIn(maker, "0788100001"); // Umurage Wear (tailor, page owner)
 const pages = await (await maker.request.get(`${BASE}/api/pages/mine/list`)).json();
 const P = pages[0].id;
-const PRODUCT = "cmwbblzvu00198o8dfz9ppkuk"; // Imigongo a-line dress (one colour is named "Teal")
+const PRODUCT = (await (await maker.request.get(`${BASE}/api/pages/by-handle/umurage-wear`)).json()).products.find((p) => p.title === "Ineza A-line dress").id; // seed-catalogue.ts, has a "Teal floral" colour
 
 await maker.goto(`${BASE}/studio/${P}`);
 await maker.getByRole("heading", { name: /Today at/ }).waitFor();
@@ -79,8 +79,8 @@ const piece = async (title, want) => {
   await btn.click();
   await maker.getByText(want === "private" ? `${title} is private again.` : `${title} is shared.`).waitFor();
 };
-await piece("Imigongo a-line dress", "shared");
-await piece("Teal Ikiyaga wrap", "private");
+await piece("Ineza A-line dress", "shared");
+await piece("Gisenyi shirt dress", "private"); // seeded (crawl-s1's "Teal Ikiyaga wrap" does not exist on a fresh DB)
 await maker.waitForTimeout(300);
 await shot("training-one-piece-private");
 
@@ -125,13 +125,16 @@ await shot("attr-suggestion");
 await card.screenshot({ path: `${OUT}06b-attr-card.png` });
 const use = card.getByRole("button", { name: /^(Use|Add tag)$/ }).first();
 assert(await use.count(), "a mistyped colour gets a one-tap fix");
+// Real seed photos (docs/seed-data.md) carry descriptive names ("Cream floral"); the spike model answers with a base
+// colour, so the fix must apply exactly what the card suggested.
+const suggested = ((await card.textContent()) ?? "").match(/main colour\s*([A-Za-z][A-Za-z ]*?)\s*\d+% sure/i)?.[1]?.trim() ?? realName;
 if (await use.count()) {
   await use.click();
   await card.getByText(/Added|Matches/).first().waitFor();
   await maker.waitForTimeout(400);
   await shot("attr-suggestion-applied");
   const after = await (await maker.request.get(`${BASE}/api/products/${PRODUCT}`)).json();
-  assert(after.variants.find((v) => v.id === firstPhoto.id)?.colourName === realName, `colour name restored to "${realName}" only after the maker tapped Use`);
+  assert(after.variants.find((v) => v.id === firstPhoto.id)?.colourName === suggested && suggested !== "Crimson", `colour name fixed to the suggested "${suggested}" (was mistyped "Crimson") only after the maker tapped Use`);
 }
 assert(await card.getByText(/off until fairness checks pass/).count(), "blocked heads are explained to the maker");
 
@@ -157,7 +160,7 @@ assert(rw.enabled && rw.rising.length > 0 && /mu byumweru/.test(rw.rising[0].tex
 // ── Cooperative: the credited maker's own consent is needed too (hardening pass 1) ─
 const coopCtx = await browser.newContext({ ...maker.context()._options });
 const coopAdmin = await coopCtx.newPage();
-await signIn(coopAdmin, "0788100002"); // Abahizi coop admin
+await signIn(coopAdmin, "0788100002"); // Urudodo coop admin
 const coopPages = await (await coopAdmin.request.get(`${BASE}/api/pages/mine/list`)).json();
 const C = coopPages.find((p) => p.memberType === "COOPERATIVE")?.id ?? coopPages[0].id;
 await coopAdmin.request.put(`${BASE}/api/pages/${C}/training-data`, { data: { optedIn: true, locale: "en" } });

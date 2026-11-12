@@ -45,6 +45,7 @@ import { VrModule } from "./modules/vr/vr.module";
 import { MlSpikeModule } from "./modules/mlspike/mlspike.module";
 import { PresenceModule } from "./modules/presence/presence.module";
 import { DrapeSpikeModule } from "./modules/drape/drape.module";
+import { CreditsModule } from "./modules/credits/credits.module";
 
 @Controller()
 class HealthController {
@@ -103,6 +104,7 @@ class HealthController {
     MlSpikeModule,
     PresenceModule,
     DrapeSpikeModule,
+    CreditsModule,
   ],
   controllers: [HealthController],
   providers: [{ provide: APP_GUARD, useClass: AuthGuard }],

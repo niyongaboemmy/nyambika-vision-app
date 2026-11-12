@@ -34,8 +34,8 @@ const srcNow = (p) => p.evaluate(() => document.querySelector("model-viewer")?.s
 const tailorCtx = await browser.newContext({ ...devices["Pixel 7"], locale: "en-US" });
 const tailor = await tailorCtx.newPage();
 await signIn(tailor, "0788100001");
-const uwase = await api(tailor, "/pages/by-handle/uwase-couture");
-const seeded = uwase.products.find((p) => p.title === "Uruziga a-line dress");
+const uwase = await api(tailor, "/pages/by-handle/umurage-wear");
+const seeded = uwase.products.find((p) => p.title === "Ineza A-line dress");
 let s3d = await api(tailor, `/xr/products/${seeded.id}/3d`);
 if (!s3d.variants.some((v) => v.asset?.status === "READY")) {
   await api(tailor, `/xr/products/${seeded.id}/3d`, {});

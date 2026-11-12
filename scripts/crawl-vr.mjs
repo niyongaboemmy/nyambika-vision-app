@@ -35,7 +35,7 @@ await context.addInitScript(mockXr);
 // ── Shopper: Maker Space 3D shelf ─────────────────────────────────────────────────────────────────────────
 const phone = `07887${String(Date.now()).slice(-5)}`;
 await signIn(page, phone);
-await page.goto(`${BASE}/m/uwase-couture`);
+await page.goto(`${BASE}/m/umurage-wear`);
 const shelf = page.getByRole("listbox", { name: /pieces in 3D/i });
 await shelf.scrollIntoViewIfNeeded();
 await page.waitForFunction(() => document.querySelector("#shelf3d-title") && document.querySelector("model-viewer")?.loaded === true, null, { timeout: 45000 });
@@ -135,7 +135,7 @@ const tailor = await tailorCtx.newPage();
 tailor.on("console", (m) => m.type() === "error" && issues.push(`tailor console: ${m.text()}`));
 tailor.on("response", (r) => r.status() >= 500 && issues.push(`tailor HTTP ${r.status()} ${r.url()}`));
 await signIn(tailor, "0788100001");
-const uwase = await getJson(tailor, "/pages/by-handle/uwase-couture");
+const uwase = await getJson(tailor, "/pages/by-handle/umurage-wear");
 await tailor.goto(`${BASE}/studio/${uwase.id}/showroom`);
 await tailor.getByText("Your room in 3D and VR").waitFor();
 await tailor.waitForTimeout(500);
@@ -156,7 +156,7 @@ const studio = await getJson(tailor, `/vr/pages/${uwase.id}`);
 const live = studio.shows.find((s) => s.title.startsWith("Crawl live show"));
 assert(live && live.phase === "LIVE", `show scheduled "now" is LIVE (${live?.phase})`);
 // ── Live show: two viewers + reactions ────────────────────────────────────────────────────────────────────
-const showUrl = `${BASE}/m/uwase-couture/shows/${live.id}`;
+const showUrl = `${BASE}/m/umurage-wear/shows/${live.id}`;
 const anonCtx = await browser.newContext({ ...devices["Pixel 7"], locale: "en-US" });
 const viewerB = await anonCtx.newPage();
 viewerB.on("console", (m) => m.type() === "error" && issues.push(`viewerB console: ${m.text()}`));
@@ -192,7 +192,7 @@ await tailor.screenshot({ path: new URL("./crawl-output/vr/22-studio-shows.png",
 // ── RSVP on the seeded upcoming show ──────────────────────────────────────────────────────────────────────
 const seeded = studio.shows.find((s) => s.phase === "UPCOMING" && s.title.startsWith("Imigongo Nights"));
 assert(Boolean(seeded), "seeded show is scheduled");
-await page.goto(`${BASE}/m/uwase-couture/shows/${seeded.id}`);
+await page.goto(`${BASE}/m/umurage-wear/shows/${seeded.id}`);
 await page.getByRole("button", { name: /Remind me on WhatsApp/ }).click();
 await page.getByRole("button", { name: /on the list/ }).waitFor();
 await shot("upcoming-show-rsvp");

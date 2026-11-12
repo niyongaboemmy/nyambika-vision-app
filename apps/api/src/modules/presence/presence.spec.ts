@@ -38,7 +38,7 @@ function makeService(opts: { flag?: boolean; store?: typeof MemoryPresenceBus.sh
   return { svc, reports, audits, store };
 }
 
-const ROOM = "showroom:uwase-couture";
+const ROOM = "showroom:umurage-wear";
 const claims = (sub: string, role: "host" | "guest" = "guest"): TicketClaims => ({ sub, room: ROOM, role, pageId: "page1" });
 const msg = (o: object) => JSON.stringify(o);
 
@@ -70,7 +70,7 @@ describe("presence protocol (contracts)", () => {
   });
 
   it("parses room ids", () => {
-    expect(parseRoom("showroom:uwase-couture")).toEqual({ kind: "showroom", key: "uwase-couture" });
+    expect(parseRoom("showroom:umurage-wear")).toEqual({ kind: "showroom", key: "umurage-wear" });
     expect(parseRoom("show:cm123")).toEqual({ kind: "show", key: "cm123" });
     expect(parseRoom("lobby:x")).toBeNull();
     expect(parseRoom("showroom:../etc")).toBeNull();

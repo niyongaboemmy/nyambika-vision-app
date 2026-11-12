@@ -144,7 +144,7 @@ const sshot = async (label) => {
 };
 await signIn(page, `07884${String(Date.now()).slice(-5)}`);
 await post(page, "/twin/persona", { persona: 4, consent: true });
-const uwase = await get(page, "/pages/by-handle/uwase-couture");
+const uwase = await get(page, "/pages/by-handle/umurage-wear");
 const withVariants = uwase.products.filter((p) => p.variants?.length);
 const [first, second] = withVariants;
 

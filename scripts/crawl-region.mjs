@@ -47,7 +47,7 @@ await K.p.goto(`${BASE}/makers`);
 await K.p.getByRole("link", { name: /Nairobi Kikoi Studio/ }).first().waitFor({ timeout: 20000 });
 const firstMaker = await K.p.locator("main a, div.mt-4 a").first().innerText().catch(() => "");
 assert(/Nairobi Kikoi/.test(firstMaker) || (await K.p.locator('a[href="/m/nairobi-kikoi-studio"]').count()) > 0, "Kenyan shopper sees the Kenyan maker (home country first)");
-const rwCount = await K.p.locator('a[href="/m/uwase-couture"]').count();
+const rwCount = await K.p.locator('a[href="/m/umurage-wear"]').count();
 assert(rwCount === 0, "Rwandan makers hidden for a Kenyan shopper without cross-border opt-in");
 await K.snap("directory-ke");
 await K.p.goto(`${BASE}/m/nairobi-kikoi-studio`);
@@ -108,7 +108,7 @@ await R.snap("order-paid-card", true);
 // ── Coop admin · DPP editor + public passport ─────────────────────────────────
 const C = await ctx("coop-admin");
 await signIn(C.p, "0788100002");
-const coop = await api(C.p, "/pages/by-handle/abahizi-coop");
+const coop = await api(C.p, "/pages/by-handle/urudodo-collective");
 let productId = null;
 for (const pr of coop.products) {
   const r = await C.p.request.get(`${BASE}/api/passports/${pr.id}`);

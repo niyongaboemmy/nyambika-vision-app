@@ -196,8 +196,14 @@ export function reminderDue(e: { date: Date; reminderSentAt: Date | null }, hasR
   return days >= 0 && days <= 3;
 }
 
+/** Kigali is UTC+2 all year (no DST); shoppers pick event days on Kigali's calendar. */
+const KIGALI_OFFSET_MS = 2 * 3600_000;
+
+/** Whole calendar days from `now` to `date`, counted on Kigali's calendar (not UTC's, which lags 2 h at night). */
 export function daysUntil(date: Date, now = new Date()) {
-  const a = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
-  const b = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
-  return Math.round((a - b) / 86400_000);
+  const day = (d: Date) => {
+    const k = new Date(d.getTime() + KIGALI_OFFSET_MS);
+    return Date.UTC(k.getUTCFullYear(), k.getUTCMonth(), k.getUTCDate());
+  };
+  return Math.round((day(date) - day(now)) / 86400_000);
 }

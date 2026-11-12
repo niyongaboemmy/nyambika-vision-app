@@ -2,7 +2,7 @@
 // MR mirror: flag off → explainer; flag on with a mocked navigator.xr (immersive-ar + immersive-vr "supported",
 // session start fails: no headset in CI) → inline stage preview, colour/size switch, enter-MR error path;
 // no WebXR → inline fallback = the E34 AR mirror. Multi-user: host (maker) + two guests share
-// /m/uwase-couture/showroom: presence count + avatars, spatial reaction + caption, report → moderation queue,
+// /m/umurage-wear/showroom: presence count + avatars, spatial reaction + caption, report → moderation queue,
 // host mute + remove (guest sees why), host starts the runway (guest gets the banner).
 // Run: BASE_URL=http://localhost:3102 node scripts/crawl-mrvr.mjs   (needs psql access to nyambika_mrvr)
 import { execSync } from "node:child_process";
@@ -126,7 +126,7 @@ try {
     for (const trigger of ["ORDER_PAID", "LOOKS_5"]) await x.p.request.post(`${BASE}/api/survey`, { data: { trigger, helped: null, nps: null, dismissed: true } });
     // SwiftShader WebGL on a busy machine can stall the first scene load: one reload before giving up.
     for (let attempt = 0; ; attempt++) {
-      await x.p.goto(`${BASE}/m/uwase-couture/showroom`);
+      await x.p.goto(`${BASE}/m/umurage-wear/showroom`);
       try {
         await x.p.locator("canvas").waitFor({ timeout: 60000 });
         await x.p.waitForFunction(() => !document.body.innerText.includes("Bringing in pieces") && Boolean(window.__vrShowroom), null, { timeout: 90000 });
@@ -217,7 +217,7 @@ try {
   setFlag("vr.multiuser_spike", false);
   for (const x of [host, g1, g2]) await x.c.close();
   const anon = await ctx("anon", mockXr);
-  await anon.p.goto(`${BASE}/m/uwase-couture/showroom`);
+  await anon.p.goto(`${BASE}/m/umurage-wear/showroom`);
   await anon.p.waitForFunction(() => Boolean(window.__vrShowroom), null, { timeout: 60000 });
   await anon.p.waitForTimeout(1500);
   assert((await anon.p.getByRole("button", { name: /Shared room/ }).count()) === 0, "flag off → no shared-room entry");
