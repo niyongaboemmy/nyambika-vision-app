@@ -17,7 +17,7 @@ import { useSession } from "@/lib/session";
  * returns to `next`, the sheet resumes the action that asked). Filled iOS fields on theme tokens, so it reads right
  * on the aurora page and on a cream / charcoal sheet.
  */
-export function SignInFlow({ onDone, initialInvite = "", allowInvite = true }: { onDone: (r: { invite: string }) => void; initialInvite?: string; allowInvite?: boolean }) {
+export function SignInFlow({ onDone, initialInvite = "", allowInvite = true, onPasskeyOffer }: { onDone: (r: { invite: string }) => void; initialInvite?: string; allowInvite?: boolean; /** The passkey offer is showing (the page gives it the whole screen). */ onPasskeyOffer?: () => void }) {
   const { t, locale, reload } = useSession();
   const [invite, setInvite] = useState(initialInvite);
   const [showInvite, setShowInvite] = useState(Boolean(initialInvite));
@@ -64,6 +64,7 @@ export function SignInFlow({ onDone, initialInvite = "", allowInvite = true }: {
         const keys = await api<unknown[]>("/auth/passkeys").catch(() => [1]);
         if (keys.length === 0) {
           setStep("passkey");
+          onPasskeyOffer?.();
           return;
         }
       }
