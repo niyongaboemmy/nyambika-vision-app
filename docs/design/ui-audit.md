@@ -804,3 +804,12 @@ Global text rules (`globals.css`, polish block):
 - The other crawls (s1–s5, studio-ui, …) were not re-run here. The change is class-only, and accessible names are
   unchanged apart from the order action "Ready" (s4 clicks Accept / Start making / Send out / Mark delivered, not
   Ready). The dock keeps its full labels as accessible names, so s1's "My products" still resolves.
+
+## 9. Navigation & workflow pass (Nov 2026)
+
+Detours (sign in, consent, twin, measurements, order, …) now return to the exact screen they left, small
+prerequisites are sheets over the current screen, and Back is history-aware with push/pop motion. The flow map,
+mechanisms, before/after and verification are in [`flows.md`](flows.md); `scripts/crawl-flows.mjs` guards it.
+New primitives: `BackButton` / `BackLink` (`components/back-link.tsx`, re-exported from `ui.tsx`), `DetourLink`,
+`ReturnButton` / `NextReturn`, `SignInFlow` + the lazy sign-in sheet (`askSignIn()`), and `TopBar onBack` for
+in-screen steps. `TopBar`'s existing props are unchanged.
