@@ -63,7 +63,9 @@ assert(morphImg?.startsWith("/api/private/look"), "morph preview rendered throug
 await page.waitForTimeout(400);
 await shot("morph-blue-maxi-long");
 const askText = await sheet.getByRole("button", { name: /ask umurage to sew this/i }).innerText();
-assert(/RWF 39,000/.test(askText), `price = base + options (${askText.split("\n").join(" ")})`);
+// Options picked above: colour (+3,000) + maxi (+5,000) + long sleeves (+3,000) on the seeded base price.
+const expected = `RWF ${(dress.priceRwf + 11000).toLocaleString("en-US")}`;
+assert(askText.includes(expected) && askText.includes("+RWF 11,000"), `price = base + options: ${expected} (${askText.split("\n").join(" ")})`);
 
 // ── Ask Uwase to sew this ─────────────────────────────────────────────────────
 await sheet.getByRole("button", { name: /ask umurage to sew this/i }).click();
