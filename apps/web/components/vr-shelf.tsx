@@ -195,7 +195,7 @@ export function Shelf3d({ shelf, brand, commerce }: { shelf: Shelf; brand: strin
                 {s.phase === "LIVE" ? <span className="rounded-full bg-terra px-2 py-0.5 text-white">● {t("vr.live")}</span> : <span className="text-gold">{t("vr.fashionShow")}</span>}
               </span>
               <span className="block truncate font-bold">{s.title}</span>
-              <span className="block text-xs text-mut">{s.phase === "LIVE" ? t("vr.watchNow") : `${fmtWhen(s.startsAt)} · in ${countdown(new Date(s.startsAt).getTime() - Date.now())}`}</span>
+              <span className="block text-xs text-mut" suppressHydrationWarning>{s.phase === "LIVE" ? t("vr.watchNow") : `${fmtWhen(s.startsAt)} · in ${countdown(new Date(s.startsAt).getTime() - Date.now())}`}</span>
             </span>
             <span aria-hidden>›</span>
           </Link>

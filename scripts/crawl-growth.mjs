@@ -116,7 +116,7 @@ let broadcastSent = false;
 if (await sendBtn.isEnabled().catch(() => false)) {
   broadcastSent = true;
   await sendBtn.click();
-  await T.p.getByText(/sent to \d+ follower/i).waitFor();
+  await T.p.getByText(/sent to \d+ (follower|on whatsapp)/i).waitFor();
 } else console.log("ℹ broadcast already sent today (rate limit) — showing the blocked state");
 await T.snap("broadcast-sent", true);
 await T.p.getByRole("button", { name: "Insights" }).click();
