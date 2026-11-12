@@ -581,7 +581,9 @@ What moved, and what was cut:
   0 overflow, 0 theme flashes, 0 serious/critical axe violations and 0 emoji in both themes. Final run: label
   `final`.
 - **Every other crawl on slot 1** (all except `crawl-infer`, which needs its own gateway with the fake pool):
-  see the final table in the delivery log.
+  all 25 green (23 on the first final run; crawl-growth after its broadcast assertion followed the shorter toast;
+  crawl-sweep after a transient proxy 500 and a pre-existing 3D-shelf countdown hydration race, fixed with
+  `suppressHydrationWarning` on that ticking text).
 - **mlspike** depends on database state: each run permanently withdraws a uniquely titled shared piece. After
   many reruns it needs a fresh copy of the slot DB, `createdb -T nyambika_tpl`.
 - **Screenshot review:** light, dark and desktop contact sheets for every screen. Looks was checked at 360, 390
