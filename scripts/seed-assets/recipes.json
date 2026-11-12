@@ -10,7 +10,7 @@
     { "key": "g07", "source": "g07", "category": "shirt", "pad": 0.04, "recolours": [{ "key": "g07-ocean", "hue": 180, "name": "Ocean blue" }] },
     { "key": "g09", "source": "g09", "category": "top", "pad": 0.04 },
     { "key": "g25", "source": "g25", "category": "skirt", "pad": 0.04, "recolours": [{ "key": "g25-terracotta", "tint": "#B5502F", "name": "Terracotta" }, { "key": "g25-navy", "tint": "#22305E", "name": "Navy" }] },
-    { "key": "g28", "source": "g28", "category": "skirt", "crop": [0.0, 0.0, 1.0, 0.93], "pad": 0.06, "recolours": [{ "key": "g28-cobalt", "hue": 90, "name": "Cobalt swirl" }] },
+    { "key": "g28", "source": "g28", "category": "skirt", "crop": [0.0, 0.0, 1.0, 0.93], "pad": 0.06, "recolours": [{ "key": "g28-cobalt", "hue": 90, "name": "Cobalt swirl" }, { "key": "g28-charcoal", "tint": "#45454C", "name": "Charcoal swirl" }, { "key": "g28-navy", "tint": "#26335F", "name": "Navy swirl" }] },
     { "key": "g24", "source": "g24", "category": "skirt", "pad": 0.03 },
 
     { "key": "g12", "source": "g12", "category": "dress", "pad": 0.03, "recolours": [{ "key": "g12-emerald", "tint": "#2A6E52", "name": "Emerald" }] },

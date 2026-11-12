@@ -67,7 +67,7 @@ describe("bag + checkout (E29, FR-ORD-07 direct-to-maker split)", () => {
     await s.post("/bag/items").send({ variantId: variants.wrap.id, size: "XXL" }).expect(400);
 
     // Pickup at Akeza, delivery from Kanombe Kitenge Corner: fees differ per maker.
-    const imena = bag.groups.find((g: { pageName: string }) => /imena/i.test(g.pageName));
+    const imena = bag.groups.find((g: { pageName: string }) => /akeza/i.test(g.pageName));
     const quote = (await s.post("/bag/quote").send({ delivery: { [imena.key]: "PICKUP" } }).expect(201)).body;
     expect(quote.groups.find((g: { key: string }) => g.key === imena.key).deliveryFeeRwf).toBe(0);
 

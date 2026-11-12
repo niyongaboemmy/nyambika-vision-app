@@ -487,6 +487,60 @@
   "credit": "\"Skirt, short (AM 2005.65.2-1).jpg\" by Auckland Museum, CC BY 4.0, via Wikimedia Commons; modified (cropped, studio margin added, backdrop evened to studio grey, resized, background removed (cut-out), recoloured (hue rotated)). This image: CC BY 4.0."
  },
  {
+  "key": "g28-charcoal",
+  "of": "g28",
+  "sources": [
+   {
+    "id": "g28",
+    "title": "Skirt, short (AM 2005.65.2-1).jpg",
+    "author": "Auckland Museum",
+    "licence": "CC BY 4.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Skirt,_short_(AM_2005.65.2-1).jpg"
+   }
+  ],
+  "licence": "CC BY 4.0",
+  "licenceUrl": "https://creativecommons.org/licenses/by/4.0",
+  "shareAlike": false,
+  "changes": [
+   "cropped",
+   "studio margin added",
+   "backdrop evened to studio grey",
+   "resized",
+   "background removed (cut-out)",
+   "recoloured (tinted)"
+  ],
+  "illustration": false,
+  "credit": "\"Skirt, short (AM 2005.65.2-1).jpg\" by Auckland Museum, CC BY 4.0, via Wikimedia Commons; modified (cropped, studio margin added, backdrop evened to studio grey, resized, background removed (cut-out), recoloured (tinted)). This image: CC BY 4.0."
+ },
+ {
+  "key": "g28-navy",
+  "of": "g28",
+  "sources": [
+   {
+    "id": "g28",
+    "title": "Skirt, short (AM 2005.65.2-1).jpg",
+    "author": "Auckland Museum",
+    "licence": "CC BY 4.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by/4.0",
+    "page": "https://commons.wikimedia.org/wiki/File:Skirt,_short_(AM_2005.65.2-1).jpg"
+   }
+  ],
+  "licence": "CC BY 4.0",
+  "licenceUrl": "https://creativecommons.org/licenses/by/4.0",
+  "shareAlike": false,
+  "changes": [
+   "cropped",
+   "studio margin added",
+   "backdrop evened to studio grey",
+   "resized",
+   "background removed (cut-out)",
+   "recoloured (tinted)"
+  ],
+  "illustration": false,
+  "credit": "\"Skirt, short (AM 2005.65.2-1).jpg\" by Auckland Museum, CC BY 4.0, via Wikimedia Commons; modified (cropped, studio margin added, backdrop evened to studio grey, resized, background removed (cut-out), recoloured (tinted)). This image: CC BY 4.0."
+ },
+ {
   "key": "g24",
   "of": null,
   "sources": [

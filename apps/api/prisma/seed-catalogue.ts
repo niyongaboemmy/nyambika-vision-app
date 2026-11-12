@@ -211,8 +211,8 @@ export const PRODUCTS: ProductDef[] = [
   {
     handle: "urudodo-collective", kind: "skirt", category: "skirt",
     title: { rw: "Ijipo yagutse y'amabara azunguruka", en: "Swirl print flare skirt", fr: "Jupe évasée à motifs tourbillons" },
-    colours: [c("g28", "Icyatsi", "Jade swirl", "Tourbillon jade"), c("g28-cobalt", "Ubururu", "Cobalt swirl", "Tourbillon cobalt")],
-    priceRwf: 22000, madeToOrder: true, leadTimeDays: 4, styles: ["bold", "modern"], occasions: ["party", "church"], fabric: "Printed chiffon over cotton",
+    colours: [c("g28", "Icyatsi", "Jade swirl", "Tourbillon jade"), c("g28-cobalt", "Ubururu", "Cobalt swirl", "Tourbillon cobalt"), c("g28-charcoal", "Ibara ry'ivu", "Charcoal swirl", "Tourbillon anthracite"), c("g28-navy", "Ubururu bwijimye", "Navy swirl", "Tourbillon marine")],
+    priceRwf: 22000, madeToOrder: true, leadTimeDays: 4, styles: ["bold", "modern"], occasions: ["party", "church", "office"], fabric: "Printed chiffon over cotton",
   },
   {
     handle: "urudodo-collective", kind: "skirt", category: "skirt",

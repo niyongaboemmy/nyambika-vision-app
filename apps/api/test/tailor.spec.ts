@@ -69,13 +69,14 @@ describe("measurement profile + size recommendation (FR-SIZE-01/02/08)", () => {
     expect(before.body.profile).toBeNull();
     if (before.body.twinSize) expect(before.body.prefill.bustCm).toBeGreaterThan(70);
 
-    await s.put("/measurements").send({ measurements: { bustCm: 90 }, consent: false }).expect(400);
-    await s.put("/measurements").send({ measurements: { bustCm: 90, waistCm: 72, hipsCm: 96, heightCm: 166 }, consent: true }).expect(200);
+    await s.put("/measurements").send({ measurements: { bustCm: 93 }, consent: false }).expect(400);
+    // Size M on the seeded women's chart (bust 91–96, waist 73–78, hips 97–102; seed-catalogue.ts).
+    await s.put("/measurements").send({ measurements: { bustCm: 93, waistCm: 75, hipsCm: 99, heightCm: 166 }, consent: true }).expect(200);
     const user = await prisma.user.findUniqueOrThrow({ where: { phone: `+250${phone.slice(1)}` } });
     const row = await prisma.measurementProfile.findUniqueOrThrow({ where: { userId: user.id } });
     const raw = JSON.stringify(row.fields);
     // Plaintext would appear as a bare JSON value; random hex in the ciphertext may contain the digits.
-    expect(raw).not.toMatch(/(:|")(90|96|166)("|,|\}|\.)/);
+    expect(raw).not.toMatch(/(:|")(93|99|166)("|,|\}|\.)/);
     expect(Object.values(row.fields as Record<string, string>).every((v) => v.startsWith("v1:"))).toBe(true);
     const consent = await prisma.consentRecord.findFirst({ where: { userId: user.id, purpose: "MEASUREMENT_PROFILE", granted: true } });
     expect(consent).toBeTruthy();
