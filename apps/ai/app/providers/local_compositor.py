@@ -360,7 +360,12 @@ class LocalCompositor(VTONProvider):
                 yy, xx = np.mgrid[0:mask.shape[0], 0:mask.shape[1]]
                 trunk = (np.abs(xx - body.cx) <= body.chest_w / 2) & (yy >= body.neck_y + 0.06 * hgt)  # below the shoulder line
                 neck = (np.abs(xx - body.cx) <= body.neck_w * 0.5) & (yy < body.neck_y + 0.04 * hgt)
-                to_skin = exposed & (trunk | arms | neck)
+                # Necklines (V, scoop): old clothing framed by the new garment on both sides of the row is chest skin.
+                g_rows = covered.any(axis=1)
+                g_left = np.where(g_rows, np.argmax(covered, axis=1), mask.shape[1])
+                g_right = np.where(g_rows, mask.shape[1] - np.argmax(covered[:, ::-1], axis=1), 0)
+                framed = (xx > g_left[:, None]) & (xx < g_right[:, None]) & (np.abs(xx - body.cx) <= body.chest_w / 2)
+                to_skin = exposed & (trunk | arms | neck | framed)
                 skin_est = _fill_field(rgb, skin if skin.any() else mask, 0.05 * hgt)
                 clean_bg = erode(~mask, 3)
                 bg_col, bg_spread = background_stats(rgb.astype(np.uint8))
