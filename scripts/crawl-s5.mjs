@@ -33,7 +33,7 @@ await shopper.getByRole("switch").check({ force: true });
 await shopper.getByText(/synthetic demo persona/i).click();
 await shopper.getByRole("button", { name: "Persona 5" }).click();
 await shopper.getByText(/your twin is ready/i).waitFor({ timeout: 20000 });
-await shopper.goto(`${BASE}/m/imena-styles`);
+await shopper.goto(`${BASE}/m/akeza-couture`);
 await shopper.getByRole("listbox", { name: "Collection" }).getByRole("option", { selected: true }).click();
 await shopper.getByRole("button", { name: /try on me/i }).click();
 await shopper.getByText(/looks are resting/i).waitFor({ timeout: 15000 }); // KILL_SWITCH → calm LimitState card
@@ -54,7 +54,7 @@ await shopper.getByText(/ledger verified/i).waitFor();
 await shopper.screenshot({ path: new URL("./crawl-output/s5/91-trust-centre.png", import.meta.url).pathname, fullPage: true });
 await shopper.getByLabel("Render looks on my twin").uncheck({ force: true });
 await shopper.waitForTimeout(500);
-await shopper.goto(`${BASE}/m/kigali-kitenge-house`);
+await shopper.goto(`${BASE}/m/kanombe-kitenge-corner`);
 await shopper.getByRole("listbox", { name: "Collection" }).getByRole("option", { selected: true }).click();
 await shopper.getByRole("button", { name: /try on me/i }).click();
 await shopper.getByText(/looks on your twin are paused/i).waitFor({ timeout: 15000 }); // CONSENT_WITHDRAWN → LimitState with inline "Turn on"

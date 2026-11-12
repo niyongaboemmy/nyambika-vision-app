@@ -83,8 +83,8 @@ await panel.locator("dl").scrollIntoViewIfNeeded();
 await shot("twin-heatmap-XXL-jersey-loose");
 
 // ── Shopper asks Uwase for a custom dress and shares measurements ─────────────────────────────────────────
-const uwase = (await call(page, "GET", "/pages/by-handle/uwase-couture")).body;
-const dress = uwase.products.find((p) => p.title === "Uruziga a-line dress");
+const uwase = (await call(page, "GET", "/pages/by-handle/umurage-wear")).body;
+const dress = uwase.products.find((p) => p.title === "Ineza A-line dress");
 const co = await call(page, "POST", "/custom-orders", { pageId: uwase.id, productId: dress.id, variantId: dress.variants[0].id, spec: { hue: 210, length: "midi", sleeve: "short" }, shareMeasurements: true, shareDays: 7, note: "Drape spike crawl" });
 assert(co.status === 201 && co.body?.id, "custom order requested with measurements shared");
 

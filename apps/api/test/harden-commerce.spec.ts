@@ -201,7 +201,7 @@ describe("sign-in phone numbers outside Rwanda (E41)", () => {
 
 describe("coop Easy-mode / USSD accept pushes like the studio (E31/E38)", () => {
   it("sends the shopper the same order push as a studio accept", async () => {
-    const coop = await prisma.page.findUniqueOrThrow({ where: { handle: "abahizi-coop" } });
+    const coop = await prisma.page.findUniqueOrThrow({ where: { handle: "urudodo-collective" } });
     const maker = await prisma.coopMember.findFirstOrThrow({ where: { pageId: coop.id, phone: "+250788100004" } });
     const v = await prisma.variant.findFirstOrThrow({ where: { product: { status: "PUBLISHED", pageId: coop.id, makers: { some: { coopMemberId: maker.id } } } } });
     await prisma.variant.update({ where: { id: v.id }, data: { stock: { increment: 1 } } });

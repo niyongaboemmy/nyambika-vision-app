@@ -16,7 +16,7 @@ import webpush from "web-push";
 import { describe, expect, it, vi } from "vitest";
 import { ApnsPushProvider, apnsJwt, apnsRequest, fcmMessage, FcmPushProvider, serviceAccountAssertion, WebPushProvider, webPushPayload, type PushTarget } from "./providers";
 
-const base = { orderId: "o1", code: "NY-ABC123", makerName: "Uwase Couture", itemTitle: "dress", readyBy: "2026-11-19T10:00:00Z", updatedAt: "2026-11-14T08:24:00Z" };
+const base = { orderId: "o1", code: "NY-ABC123", makerName: "Umurage Wear", itemTitle: "dress", readyBy: "2026-11-19T10:00:00Z", updatedAt: "2026-11-14T08:24:00Z" };
 
 describe("ambient order state (shared contract)", () => {
   it("walks a ready-made delivery order through four steps with growing progress", () => {
@@ -40,10 +40,10 @@ describe("ambient order state (shared contract)", () => {
     expect(s.steps).toEqual(["PAID", "CUTTING", "SEWING", "DELIVERED"]);
     expect(s.stepIndex).toBe(2);
     const en = ambientCopy(s, "en");
-    expect(en.headline).toBe("Uwase Couture is sewing your dress");
+    expect(en.headline).toBe("Umurage Wear is sewing your dress");
     expect(en.detail).toBe("sewing · ready Thursday");
     expect(en.stepLabels).toEqual(["Paid", "Cutting", "Sewing", "Delivery"]);
-    expect(ambientCopy(s, "rw").headline).toBe("Uwase Couture arimo kudoda dress");
+    expect(ambientCopy(s, "rw").headline).toBe("Umurage Wear arimo kudoda dress");
     expect(ambientCopy(s, "fr").detail).toBe("couture · prêt jeudi");
   });
 
@@ -150,7 +150,7 @@ describe("APNs requests (iOS)", () => {
     const alert = apnsRequest(ios, orderMsg("PAID", true), "rw.nyambika.app", 1000);
     expect(alert.path).toBe(`/3/device/${"ab".repeat(32)}`);
     expect(alert.headers).toMatchObject({ "apns-topic": "rw.nyambika.app", "apns-push-type": "alert", "apns-priority": "10", "apns-collapse-id": "order-o1" });
-    expect(alert.payload).toMatchObject({ aps: { alert: { title: "Paid directly to Uwase Couture" }, "thread-id": "order-o1" }, url: "/orders/o1" });
+    expect(alert.payload).toMatchObject({ aps: { alert: { title: "Paid directly to Umurage Wear" }, "thread-id": "order-o1" }, url: "/orders/o1" });
     const silent = apnsRequest(ios, orderMsg("ACCEPTED", false), "rw.nyambika.app", 1000);
     expect(silent.headers["apns-push-type"]).toBe("background");
     expect(silent.payload.aps).toEqual({ "content-available": 1 });
@@ -198,7 +198,7 @@ describe("APNs provider (mocked HTTP/2)", () => {
     expect(calls[0].authority).toBe("https://api.sandbox.push.apple.com");
     expect(calls[0].headers.authorization).toMatch(/^bearer /);
     expect(calls[0].headers.authorization).toBe(calls[1].headers.authorization);
-    expect(JSON.parse(calls[0].body).aps.alert.title).toBe("Paid directly to Uwase Couture");
+    expect(JSON.parse(calls[0].body).aps.alert.title).toBe("Paid directly to Umurage Wear");
     next = { status: 400, body: '{"reason":"BadDeviceToken"}', apnsId: "" };
     expect(await p.send(ios, orderMsg("PAID", true))).toMatchObject({ ok: false, gone: true });
     next = { status: 410, body: '{"reason":"Unregistered"}', apnsId: "" };

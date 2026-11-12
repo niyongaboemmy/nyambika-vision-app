@@ -41,9 +41,9 @@ beforeAll(async () => {
   await app.init();
   prisma = app.get(PrismaService);
   payments = app.get(PaymentsService);
-  variants.shirt = await stocked("kigali-kitenge-house", "Umuraba kitenge shirt");
-  variants.skirt = await stocked("kigali-kitenge-house", "Inyenyeri kitenge skirt");
-  variants.wrap = await stocked("imena-styles", "Uruziga wrap dress");
+  variants.shirt = await stocked("kanombe-kitenge-corner", "Navy floral print shirt");
+  variants.skirt = await stocked("kanombe-kitenge-corner", "Grey wool midi skirt");
+  variants.wrap = await stocked("akeza-couture", "Long-sleeve black office dress");
 });
 
 afterAll(async () => {
@@ -66,7 +66,7 @@ describe("bag + checkout (E29, FR-ORD-07 direct-to-maker split)", () => {
     expect(kkh.lines.find((l: { variantId: string }) => l.variantId === variants.shirt.id).qty).toBe(2);
     await s.post("/bag/items").send({ variantId: variants.wrap.id, size: "XXL" }).expect(400);
 
-    // Pickup at Imena, delivery from Kigali Kitenge House: fees differ per maker.
+    // Pickup at Imena, delivery from Kanombe Kitenge Corner: fees differ per maker.
     const imena = bag.groups.find((g: { pageName: string }) => /imena/i.test(g.pageName));
     const quote = (await s.post("/bag/quote").send({ delivery: { [imena.key]: "PICKUP" } }).expect(201)).body;
     expect(quote.groups.find((g: { key: string }) => g.key === imena.key).deliveryFeeRwf).toBe(0);

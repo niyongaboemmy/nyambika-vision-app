@@ -190,8 +190,8 @@ const keys = await (await page.request.get(`${BASE}/api/auth/passkeys`)).json();
 assert(keys[0]?.lastUsedAt, "passkey last-used time recorded");
 
 // ── Bag: two makers (split explained), then two items from one maker ─────────
-const kkh = await (await page.request.get(`${BASE}/api/pages/by-handle/kigali-kitenge-house`)).json();
-const imena = await (await page.request.get(`${BASE}/api/pages/by-handle/imena-styles`)).json();
+const kkh = await (await page.request.get(`${BASE}/api/pages/by-handle/kanombe-kitenge-corner`)).json();
+const imena = await (await page.request.get(`${BASE}/api/pages/by-handle/akeza-couture`)).json();
 const pick = (pg, n) => pg.products.filter((p) => !p.madeToOrder && p.readiness === "READY" && p.variants.some((v) => v.inStock)).slice(0, n);
 const [shirt, skirt] = pick(kkh, 2);
 const [wrap] = pick(imena, 1);

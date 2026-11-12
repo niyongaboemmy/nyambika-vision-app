@@ -51,10 +51,10 @@ const roles = {
 const j = (role, path, init) => roles[role].page.evaluate(async ([p, i]) => { const r = await fetch(`/api${p}`, i ?? {}); return r.ok ? r.json() : null; }, [path, init]);
 
 // ── discover ids for dynamic routes ────────────────────────────────────────────────────────────────────────────
-const maker = await j("anon", "/pages/by-handle/uwase-couture");
+const maker = await j("anon", "/pages/by-handle/umurage-wear");
 const variant = maker?.products?.[0]?.variants?.[0]?.id;
-// A product that has a published Digital Product Passport (seeded on the Abahizi coop).
-const coopPublic = await j("anon", "/pages/by-handle/abahizi-coop");
+// A product that has a published Digital Product Passport (seeded on the Urudodo coop).
+const coopPublic = await j("anon", "/pages/by-handle/urudodo-collective");
 let productId = null;
 for (const pr of coopPublic?.products ?? []) if (!productId && (await j("anon", `/passports/${pr.id}`))) productId = pr.id;
 const look = await j("fresh", "/intent", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text: "a kitenge dress for a wedding under 60000", source: "text", locale: "en" }) });
@@ -64,7 +64,7 @@ const customs = (await j("shopper", "/custom-orders/mine")) ?? [];
 const wardrobe = await j("shopper", "/wardrobe");
 const tailorPages = (await j("tailor", "/pages/mine/list")) ?? [];
 const uwase = tailorPages.find((p) => p.name.includes("Uwase")) ?? tailorPages[0];
-const coopPage = ((await j("coop", "/pages/mine/list")) ?? []).find((p) => p.name.includes("Abahizi"));
+const coopPage = ((await j("coop", "/pages/mine/list")) ?? []).find((p) => p.name.includes("Urudodo"));
 const uwaseProducts = uwase ? (await j("tailor", `/pages/${uwase.id}/products`)) ?? [] : [];
 const vr = uwase ? await j("tailor", `/vr/pages/${uwase.id}`) : null;
 const show = vr?.shows?.find((s) => s.phase === "UPCOMING") ?? vr?.shows?.[0];
@@ -81,9 +81,9 @@ const S = [
   ["muse-typing", "shopper", "/", async (p) => { await p.getByRole("button", { name: /type/i }).last().click(); }],
   look && ["looks", "fresh", `/looks/${look.sessionId}`],
   variant && ["look-try", "fresh", `/looks/try?variant=${variant}`],
-  ["maker-space", "anon", "/m/uwase-couture"],
-  ["maker-showroom", "anon", "/m/uwase-couture/showroom"],
-  show && ["maker-show", "anon", `/m/uwase-couture/shows/${show.id}`],
+  ["maker-space", "anon", "/m/umurage-wear"],
+  ["maker-showroom", "anon", "/m/umurage-wear/showroom"],
+  show && ["maker-show", "anon", `/m/umurage-wear/shows/${show.id}`],
   ["makers", "shopper", "/makers"],
   productId && ["passport", "anon", `/p/${productId}`],
   ["mirror", "shopper", "/mirror"],

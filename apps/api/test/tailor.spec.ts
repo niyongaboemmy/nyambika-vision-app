@@ -49,7 +49,7 @@ beforeAll(async () => {
   aiUp = await fetch(`${process.env.AI_GATEWAY_URL ?? "http://localhost:8100"}/health`).then((r) => r.ok).catch(() => false);
   const templated = (await prisma.morphTemplate.findMany()).map((t) => t.productId);
   const product = await prisma.product.findFirstOrThrow({
-    where: { title: "Uruziga a-line dress", page: { handle: "uwase-couture" }, id: { in: templated } },
+    where: { title: "Ineza A-line dress", page: { handle: "umurage-wear" }, id: { in: templated } },
     include: { variants: true },
   });
   productId = product.id;

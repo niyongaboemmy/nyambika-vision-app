@@ -99,8 +99,8 @@ describe("broadcast opt-in and rate limits (E30)", () => {
 
 describe("share links and insights (E30)", () => {
   it("tags links with a source the Maker Space reports to analytics", () => {
-    const u = new URL(shareLink("http://localhost:3103", "uwase-couture", "wa_status", { productId: "p1", campaign: "promo" }));
-    expect(u.pathname).toBe("/m/uwase-couture");
+    const u = new URL(shareLink("http://localhost:3103", "umurage-wear", "wa_status", { productId: "p1", campaign: "promo" }));
+    expect(u.pathname).toBe("/m/umurage-wear");
     expect(Object.fromEntries(u.searchParams)).toEqual({ src: "wa_status", utm_source: "whatsapp", utm_medium: "wa_status", utm_campaign: "promo", p: "p1" });
   });
 

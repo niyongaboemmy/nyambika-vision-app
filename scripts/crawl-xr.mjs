@@ -27,8 +27,8 @@ tailor.on("console", (m) => m.type() === "error" && issues.push(`tailor console:
 tailor.on("pageerror", (e) => issues.push(`tailor pageerror: ${e.message}`));
 tailor.on("response", (r) => r.status() >= 500 && issues.push(`tailor HTTP ${r.status()} ${r.url()}`));
 await signIn(tailor, "0788100001");
-const uwase = await api(tailor, "/pages/by-handle/uwase-couture");
-const seeded = uwase.products.find((p) => p.title === "Uruziga a-line dress");
+const uwase = await api(tailor, "/pages/by-handle/umurage-wear");
+const seeded = uwase.products.find((p) => p.title === "Ineza A-line dress");
 const fresh = uwase.products.find((p) => p.id !== seeded.id && p.variants?.length);
 assert(Boolean(seeded && fresh), "Uwase has a seeded-3D product and one without 3D");
 
@@ -111,7 +111,7 @@ const tampered = await page.request.get(`${BASE}${src.replace(/sig=[0-9a-f]{4}/,
 assert(tampered.status() === 403, "tampered motion link is refused");
 
 // ── Maker Space: 3D section in the product sheet ─────────────────────────────
-await page.goto(`${BASE}/m/uwase-couture`);
+await page.goto(`${BASE}/m/umurage-wear`);
 const option = page.getByRole("listbox", { name: "Collection" }).getByRole("option", { name: new RegExp(seeded.title) }); // not the 3D shelf
 await option.waitFor();
 for (let i = 0; i < 8 && (await option.getAttribute("aria-selected")) !== "true"; i++) {

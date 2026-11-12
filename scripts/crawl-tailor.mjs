@@ -25,9 +25,9 @@ const api = async (p, path, init) => {
 const phone = `07887${String(Date.now()).slice(-5)}`;
 await signIn(page, phone);
 await api(page, "/twin/persona", { persona: 3, consent: true });
-const uwase = await api(page, "/pages/by-handle/uwase-couture");
-const dress = uwase.products.find((p) => p.title === "Uruziga a-line dress");
-assert(Boolean(dress), "Uwase's customizable Uruziga dress is listed");
+const uwase = await api(page, "/pages/by-handle/umurage-wear");
+const dress = uwase.products.find((p) => p.title === "Ineza A-line dress");
+assert(Boolean(dress), "Umurage's customizable Ineza dress is listed");
 
 await page.goto(`${BASE}/looks/try?variant=${dress.variants[0].id}`);
 await page.locator('img[alt*="AI preview"]').first().waitFor({ timeout: 30000 });
@@ -194,7 +194,7 @@ await shot("buy-sheet-size-recommendation");
 await page.keyboard.press("Escape");
 
 // Maker Space services + measurements page
-await page.goto(`${BASE}/m/uwase-couture`);
+await page.goto(`${BASE}/m/umurage-wear`);
 await page.getByText("Made for you").scrollIntoViewIfNeeded();
 await page.getByRole("button", { name: "Request this" }).first().waitFor();
 await page.evaluate(() => window.scrollBy(0, 360));
@@ -205,7 +205,7 @@ await page.getByText("Shared with tailors").waitFor();
 await page.waitForTimeout(300);
 await shot("measurements");
 await page.goto(`${BASE}/custom`);
-await page.getByText("Uruziga a-line dress").first().waitFor();
+await page.getByText("Ineza A-line dress").first().waitFor();
 await shot("my-custom-orders");
 
 await tailorCtx.close();

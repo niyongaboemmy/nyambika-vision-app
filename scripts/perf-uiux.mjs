@@ -44,7 +44,7 @@ const look = await sp.evaluate(async () => {
   return r.ok ? (await r.json()).sessionId : null;
 });
 const products = await sp.evaluate(async () => {
-  const r = await fetch("/api/pages/by-handle/uwase-couture");
+  const r = await fetch("/api/pages/by-handle/umurage-wear");
   return r.ok ? r.json() : null;
 });
 const variant = products?.products?.[0]?.variants?.[0]?.id;
@@ -55,7 +55,7 @@ const ROUTES = [
   ["/", "Muse (home)"],
   look && [`/looks/${look}`, "Looks"],
   variant && [`/looks/try?variant=${variant}`, "Try one look"],
-  ["/m/uwase-couture", "Maker page"],
+  ["/m/umurage-wear", "Maker page"],
   ["/bag", "Bag"],
   ["/orders", "Orders"],
   ["/wardrobe", "Wardrobe"],

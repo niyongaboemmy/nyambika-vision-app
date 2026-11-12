@@ -7,7 +7,7 @@ const { page, shot, finish } = await start("e05");
 
 await signIn(page, "0788100001");
 await page.goto(`${BASE}/studio`);
-await page.getByText("Uwase Couture").first().click();
+await page.getByText("Umurage Wear").first().click();
 await page.getByRole("navigation", { name: "Studio" }).getByRole("link", { name: "Products" }).click();
 await page.getByRole("button", { name: "Add product" }).click();
 await page.getByRole("button", { name: "umushanana" }).first().waitFor().catch(() => {});
@@ -38,7 +38,7 @@ await shot("ai-page-story");
 
 // Maker Spaces are server-rendered with a 10 s revalidate window.
 await page.waitForTimeout(11000);
-await page.goto(`${BASE}/m/uwase-couture`);
+await page.goto(`${BASE}/m/umurage-wear`);
 await page.reload();
 // First tap centres a side card in the coverflow, the second opens it.
 // Scope to the coverflow: the 3D shelf (E35) is a second listbox on the same page.
