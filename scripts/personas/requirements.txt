@@ -1,0 +1,9 @@
+# Persona generation only (not part of the app). Use a fresh venv on the GPU box / ≥ 32 GB Mac.
+# Z-Image-Turbo needs a diffusers release that ships ZImagePipeline (0.36 or newer).
+torch>=2.5
+diffusers>=0.36.0
+transformers>=4.51
+accelerate>=1.2
+sentencepiece>=0.2
+huggingface_hub>=0.30
+pillow>=11
