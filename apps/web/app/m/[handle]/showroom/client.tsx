@@ -59,6 +59,26 @@ function Room({ room, commerce }: { room: Showroom; commerce: Commerce | null })
   const [stage, setStage] = useState<{ item: RoomItem; assets: Garment3d[] } | null>(null);
   const [twin, setTwin] = useState<{ id: string; state: "working" | "on" | "none" | "error"; note?: string } | null>(null);
   const [announce, setAnnounce] = useState("");
+  // Navigation pass: the selected piece lives in ?item= (replace), so a detour (sign in, twin, MR mirror, try on)
+  // and Back return to the same piece, in the flat view as in 3D.
+  useEffect(() => {
+    const pre = new URLSearchParams(window.location.search).get("item");
+    if (pre && room.items.some((i) => i.productId === pre)) setSelected((s) => s ?? pre);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const lastSelected = useRef<string | null>(null);
+  useEffect(() => {
+    // Clear ?item= only when a piece was open and got closed (never on mount, where the URL is the source).
+    const was = lastSelected.current;
+    lastSelected.current = selected;
+    const q = new URLSearchParams(window.location.search);
+    if (selected) q.set("item", selected);
+    else if (was && q.has("item")) q.delete("item");
+    else return;
+    const s = q.toString();
+    const want = `${window.location.pathname}${s ? `?${s}` : ""}`;
+    if (want !== window.location.pathname + window.location.search) window.history.replaceState(null, "", want);
+  }, [selected]);
   const mrMirror = useFlag("mr.mirror_spike"); // R4 spike entry
   const item = room.items.find((i) => i.productId === selected) ?? null;
   const pieces = useMemo(() => {

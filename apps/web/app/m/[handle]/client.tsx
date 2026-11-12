@@ -11,6 +11,7 @@ import { waLink, type MakerProduct, type MakerSpace } from "@/lib/maker";
 import type { Commerce } from "@/lib/region";
 import { useSession } from "@/lib/session";
 import { askSignIn } from "@/lib/auth-ask";
+import { recall, remember } from "@/lib/use-nav";
 import { track, trackOnce } from "@/lib/track";
 import { Icon } from "@/components/icons";
 
@@ -20,6 +21,12 @@ const ProductSheet = dynamic(() => import("./product-sheet").then((m) => m.Produ
 /** 2D coverflow collection (Maker Space v1). Swipe to browse, tap to open. */
 export function Collection({ maker, commerce }: { maker: MakerSpace; commerce?: Commerce | null }) {
   const [i, setI] = useState(0);
+  // Navigation pass: back on this Maker Space (from a try-on, sign in or checkout), the same card is in front.
+  useEffect(() => {
+    const n = recall<number>("coverflow");
+    if (typeof n === "number" && n > 0 && n < maker.products.length) setI(n);
+  }, [maker.products.length]);
+  useEffect(() => remember("coverflow", i), [i]);
   const [open, setOpen] = useState<MakerProduct | null>(null);
   const items = maker.products;
   // E30: share links carry ?src=… (WhatsApp status, QR card, broadcast…) → traffic sources in Insights.
