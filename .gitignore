@@ -21,3 +21,6 @@ scripts/crawl-output/
 .pytest_cache/
 apps/web/.next-build/
 .claude/worktrees/
+
+# seed-assets download cache (third-party photos, untrusted)
+scripts/seed-assets/.cache/
