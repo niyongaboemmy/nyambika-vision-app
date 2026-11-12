@@ -81,11 +81,10 @@ export function ShowroomHero({ handle, name, palette, banner, pieces, showroom, 
       {/* Stage: composed poster first, the live room fades in over it. Decorative; tapping it enters the room. */}
       <div aria-hidden onClick={showroom ? () => router.push(href) : undefined} className={`absolute inset-0 ${showroom ? "cursor-pointer" : ""}`}>
         <div className={`absolute inset-0 transition-opacity duration-700 ${ready ? "opacity-0" : "opacity-100"}`}>
-          <div className="absolute inset-x-[8%] bottom-[34%] h-10 rounded-[50%] bg-[radial-gradient(closest-side,rgba(255,255,255,.14),transparent)]" />
-          <div className="absolute inset-x-[14%] bottom-[37%] h-px bg-gradient-to-r from-transparent via-white/35 to-transparent" />
-          {b && <PosterImg p={b} className="left-[6%] h-[34%] -rotate-[4deg] opacity-80" />}
-          {c && <PosterImg p={c} className="right-[6%] h-[34%] rotate-[4deg] opacity-80" />}
-          {a && <PosterImg p={a} className="left-1/2 h-[46%] -translate-x-1/2" />}
+          <div className="absolute inset-x-[6%] bottom-[30%] h-12 rounded-[50%] bg-[radial-gradient(closest-side,rgba(255,255,255,.16),transparent)]" />
+          {b && <PosterImg p={b} className="bottom-[35%] left-[7%] w-[31%] -rotate-[7deg] opacity-85 lg:left-[14%] lg:w-[22%]" />}
+          {c && <PosterImg p={c} className="bottom-[35%] right-[7%] w-[31%] rotate-[7deg] opacity-85 lg:right-[14%] lg:w-[22%]" />}
+          {a && <PosterImg p={a} className="bottom-[33%] left-1/2 w-[40%] -translate-x-1/2 lg:w-[28%]" />}
         </div>
         {live && <ShowroomPreview name={name} banner={banner} palette={palette} pieces={pieces} visible={ready} onReady={() => setReady(true)} />}
       </div>
@@ -125,7 +124,7 @@ function PosterImg({ p, className }: { p: HeroPiece; className: string }) {
       alt=""
       draggable={false}
       decoding="async"
-      className={`absolute bottom-[36%] w-auto max-w-[44%] object-contain drop-shadow-[0_22px_26px_rgba(0,0,0,.55)] ${className}`}
+      className={`absolute aspect-[3/4] rounded-[22px] bg-white/10 object-cover shadow-[0_24px_40px_-12px_rgba(0,0,0,.7)] ${className}`}
     />
   );
 }

@@ -85,7 +85,7 @@ export default async function MakerSpacePage({ params }: Props) {
           <div className="flex items-center gap-3">
             <span
               aria-hidden
-              className="grid size-12 shrink-0 place-items-center rounded-2xl font-display text-lg font-black text-white shadow-e2"
+              className="grid size-12 shrink-0 place-items-center rounded-2xl font-display text-lg font-black text-[#fff] shadow-e2"
               style={{ background: `linear-gradient(140deg, ${palette.primary}, ${palette.deep})` }}
             >
               {initials}
@@ -106,7 +106,7 @@ export default async function MakerSpacePage({ params }: Props) {
           <h1 className="mt-3 flex min-w-0 items-center gap-1.5 font-display font-black leading-[1.1] tracking-[-0.01em]" style={{ fontSize: nameSize }}>
             <span className="min-w-0 truncate" title={m.name}>{m.name}</span>
             {m.verified && (
-              <span title="Verified member" className="grid size-[0.8em] shrink-0 place-items-center rounded-full bg-sky text-white">
+              <span title="Verified member" className="grid size-[0.8em] shrink-0 place-items-center rounded-full bg-sky text-[#fff]">
                 <Icon name="check" className="size-[0.6em]" />
                 <span className="sr-only">Verified member</span>
               </span>
@@ -125,8 +125,11 @@ export default async function MakerSpacePage({ params }: Props) {
 
       {show && <ShowCard show={show} handle={m.handle} />}
 
-      <CollectionAlerts maker={m} />
-      <TailorServices maker={m} />
+      {/* Lazy sections pad with px-5 / mx-5; pull them onto the page's 16 px gutter (and flush on desktop). */}
+      <div className="-mx-1 lg:-mx-5">
+        <CollectionAlerts maker={m} />
+        <TailorServices maker={m} />
+      </div>
     </div>
   );
 }

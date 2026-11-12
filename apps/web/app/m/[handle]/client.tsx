@@ -81,6 +81,7 @@ export function MakerActions({ maker, showroom }: { maker: MakerSpace; showroom:
       </div>
 
       <div
+        data-maker-bar
         inert={!bar}
         aria-hidden={!bar}
         className={`fixed inset-x-0 bottom-0 z-30 mx-auto w-full max-w-[480px] px-4 pb-[max(env(safe-area-inset-bottom),14px)] transition duration-300 lg:max-w-[440px] ${bar ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-6 opacity-0"}`}
