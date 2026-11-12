@@ -3,7 +3,11 @@
 import type { Intent } from "@nyambika/contracts";
 import { useParams, useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
-import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { toast } from "@/components/toast";
+import { withLookIndex } from "@/lib/nav";
+import { haptic } from "@/lib/native";
+import { useSession } from "@/lib/session";
 import { LooksSkeleton } from "@/components/look-material";
 const LimitState = dynamic(() => import("@/components/limit-state").then((m) => m.LimitState), { ssr: false }); // error-only
 import { Screen } from "@/components/ui";
@@ -37,12 +41,17 @@ function intentLabel(s: SessionData, snapMakers: string | null) {
 /** Looks stream (prototype v2 · 06/07): full-screen vertical feed, progressive generation. */
 function Stream() {
   const { sessionId } = useParams<{ sessionId: string }>();
-  const snap = useSearchParams().get("snap");
+  const search = useSearchParams();
+  const snap = search.get("snap");
+  const { me } = useSession();
   const [data, setData] = useState<SessionData | null>(null);
-  const [index, setIndex] = useState(0);
+  // Navigation pass: the look on screen lives in `?i=` (look 4 of 9 is ?i=3), so every detour that carries
+  // `next` (twin, sign in, measurements…) and the history entry itself come back to the same look.
+  const [index, setIndex] = useState(() => Math.max(0, Number(search.get("i")) || 0));
   const [error, setError] = useState<unknown>(null);
   const advanced = useRef(new Set<number>());
   const container = useRef<HTMLDivElement>(null);
+  const restored = useRef(false);
 
   const load = useCallback(async () => setData(await api<SessionData>(`/intent/${sessionId}`)), [sessionId]);
   useEffect(() => {
@@ -50,6 +59,55 @@ function Stream() {
     void loadHoldToBuy();
     load().catch(setError);
   }, [load]);
+
+  // Back on the stream: jump (no animation) to the remembered look before the first paint of the feed.
+  useLayoutEffect(() => {
+    const el = container.current;
+    if (!data || !el || restored.current) return;
+    restored.current = true;
+    const i = Math.min(index, data.looks.length - 1);
+    if (i > 0) el.scrollTop = i * el.clientHeight;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
+
+  // Keep ?i= in step with the look on screen (replace, not push: paging is not a history step).
+  useEffect(() => {
+    if (!restored.current) return;
+    const want = withLookIndex(window.location.pathname + window.location.search, index);
+    if (want !== window.location.pathname + window.location.search) window.history.replaceState(null, "", want);
+  }, [index]);
+
+  // Twin follow-through: back from making a twin, the looks around the one on screen re-render on it (visible
+  // first, then neighbours; GenerationService caches by twin key). The old render stays under a sheen meanwhile.
+  const retwinAt = useRef(new Set<number>());
+  const stale = useRef(new Map<string, string>());
+  const [retwin, setRetwin] = useState<Set<string>>(() => new Set());
+  useEffect(() => {
+    if (!data || error || !me?.hasTwin || retwinAt.current.has(index)) return;
+    const near = data.looks.slice(Math.max(0, index - 1), index + 3).filter((l) => l.status === "DELIVERED" && l.image && !l.onTwin);
+    if (!near.length) return;
+    retwinAt.current.add(index);
+    for (const l of near) stale.current.set(l.id, l.image!);
+    api<{ queued: number; lookIds: string[] }>(`/intent/${sessionId}/retwin`, { method: "POST", json: { index } })
+      .then((r) => {
+        if (!r.queued) return;
+        setRetwin((s) => new Set([...s, ...r.lookIds]));
+        void load();
+      })
+      .catch(setError); // daily cap / consent / budget: the calm limit card; the model renders stay
+  }, [data, index, me?.hasTwin, error, sessionId, load]);
+  useEffect(() => {
+    if (!data || !retwin.size) return;
+    const done = data.looks.filter((l) => retwin.has(l.id) && !isRendering(l.status));
+    if (!done.length) return;
+    const onYou = done.some((l) => l.onTwin && l.status === "DELIVERED" && data.looks[index]?.id === l.id);
+    setRetwin((s) => new Set([...s].filter((id) => !done.some((l) => l.id === id))));
+    for (const l of done) stale.current.delete(l.id);
+    if (onYou) {
+      haptic("success");
+      toast("On you now");
+    }
+  }, [data, retwin, index]);
 
   // Poll while any visible-soon look is still rendering.
   useEffect(() => {
@@ -123,6 +181,7 @@ function Stream() {
   const replace = (l: Look) => setData((d) => (d ? { ...d, looks: d.looks.map((x) => (x.id === l.id ? l : x)) } : d));
 
   const retry = () => {
+    retwinAt.current.clear();
     setError(null);
     void load().catch(setError);
   };
@@ -142,6 +201,7 @@ function Stream() {
             index={i}
             total={data.looks.length}
             intentLabel={label}
+            staleImage={retwin.has(look.id) && isRendering(look.status) ? stale.current.get(look.id) : undefined}
             onSave={async () => {
               const saved = await api<Look>(`/looks/${look.id}/save`, { method: "POST" });
               if (saved.saved) track("look_saved", { lookId: look.id, index: i });
