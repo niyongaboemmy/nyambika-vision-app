@@ -64,7 +64,7 @@ export default async function PassportPage({ params, searchParams }: Props) {
         </header>
 
         {old && (
-          <p role="status" className="mt-4 rounded-2xl bg-amber-50 px-4 py-3 text-sm text-gold-ink ring-1 ring-inset ring-amber-200">
+          <p role="status" className="mt-4 rounded-2xl bg-amber-50 px-4 py-3 text-sm text-gold-ink">
             You are reading version {p.version}. <Link className="font-bold underline" href={`/p/${p.productId}`}>See the current version ({p.latest})</Link>
           </p>
         )}
@@ -82,7 +82,7 @@ export default async function PassportPage({ params, searchParams }: Props) {
             {d.claims.madeIn && (
               <p className="mt-4 inline-flex flex-wrap items-center gap-2">
                 <span className="rounded-full bg-cocoa px-3.5 py-1.5 text-sm font-bold text-white">{d.claims.madeIn}</span>
-                <span className={`rounded-full px-3 py-1 text-xs font-bold ring-1 ring-inset ${p.claimsVerified ? "bg-emerald-50 text-mint-ink ring-emerald-200" : "bg-white text-cocoa-2 ring-hairline"}`}>
+                <span className={`rounded-full px-3 py-1 text-xs font-bold ring-1 ring-inset ${p.claimsVerified ? "bg-emerald-50 text-mint-ink ring-transparent" : "bg-white text-cocoa-2 ring-transparent"}`}>
                   {p.claimsVerified ? `✓ Verified by Nyambika${p.verifiedAt ? ` · ${date(p.verifiedAt)}` : ""}` : "Declared by the maker"}
                 </span>
               </p>
@@ -168,7 +168,7 @@ export default async function PassportPage({ params, searchParams }: Props) {
 
         <section aria-labelledby="hist-t" className="mt-12 print:hidden">
           <h2 id="hist-t" className="text-[11px] font-bold uppercase tracking-[.28em] text-cocoa-2">Passport history</h2>
-          <ol className="mt-3 divide-y divide-cocoa/10 rounded-[20px] bg-white ring-1 ring-inset ring-hairline">
+          <ol className="mt-3 divide-y divide-cocoa/10 rounded-[20px] bg-white">
             {p.versions.map((x) => (
               <li key={x.version}>
                 <Link href={x.version === p.latest ? `/p/${p.productId}` : `/p/${p.productId}?v=${x.version}`} aria-current={x.version === p.version ? "page" : undefined} className={`flex min-h-14 items-center gap-3 px-4 py-2.5 hover:bg-paper ${x.version === p.version ? "bg-paper" : ""}`}>
@@ -183,7 +183,7 @@ export default async function PassportPage({ params, searchParams }: Props) {
           </ol>
         </section>
 
-        <details className="mt-8 rounded-[20px] bg-white p-4 text-sm ring-1 ring-inset ring-hairline print:hidden">
+        <details className="mt-8 rounded-[20px] bg-white p-4 text-sm print:hidden">
           <summary className="flex min-h-11 cursor-pointer items-center font-bold">EU passport alignment (draft)</summary>
           <p className="mt-2 text-cocoa-2">Field names follow the draft EU ESPR textile passport vocabulary. The delegated act is expected in 2027; this mapping is a draft alignment and may change. Machine-readable data is embedded as JSON-LD.</p>
           <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 font-mono text-xs">

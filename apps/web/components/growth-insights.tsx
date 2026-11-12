@@ -39,11 +39,11 @@ export function SuggestionCards({ items, writer }: { items: Suggestion[]; writer
     <div>
       <ul className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0">
         {items.map((s, i) => (
-          <li key={s.key} className={`animate-rise min-w-[82%] snap-start rounded-[22px] bg-gradient-to-br p-4 ring-1 ring-inset ring-black/5 sm:min-w-0 ${TONE[s.tone]}`} style={{ animationDelay: `${i * 50}ms` }}>
+          <li key={s.key} className={`animate-rise min-w-[82%] snap-start rounded-[22px] bg-gradient-to-br p-4 sm:min-w-0 ${TONE[s.tone]}`} style={{ animationDelay: `${i * 50}ms` }}>
             <p className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider"><Icon name="sparkle" className="size-3.5" /> Suggestion</p>
             <SuggestionText text={s.text} />
             {s.action && (
-              <Link href={s.action.href} className="st-press mt-3 inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-white px-3 text-sm font-bold text-cocoa ring-1 ring-inset ring-hairline hover:ring-cocoa-3">
+              <Link href={s.action.href} className="st-press mt-3 inline-flex min-h-11 items-center gap-1.5 rounded-xl bg-white px-3 text-sm font-bold text-cocoa">
                 {s.action.label} <Icon name="chevron" className="size-4" />
               </Link>
             )}

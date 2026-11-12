@@ -107,7 +107,7 @@ export function TrainingDataConsent({ pageId }: { pageId: string }) {
 
       <ul aria-label="What sharing means" className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         {WHAT.map((w) => (
-          <li key={w.text} className="flex items-center gap-2.5 rounded-2xl bg-white p-2.5 text-sm text-cocoa ring-1 ring-inset ring-hairline">
+          <li key={w.text} className="flex items-center gap-2.5 rounded-2xl bg-white p-2.5 text-sm text-cocoa">
             <span className={`grid size-8 shrink-0 place-items-center rounded-xl ${w.ok ? "bg-emerald-100 text-mint-ink" : "bg-orange-100 text-terra-ink"}`}><Icon name={w.icon} className="size-4" /></span>
             {w.text}
           </li>
@@ -122,7 +122,7 @@ export function TrainingDataConsent({ pageId }: { pageId: string }) {
         <p className="text-sm text-cocoa-2">Share or keep private, per piece</p>
         <ul className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
           {data.products.map((p) => (
-            <li key={p.id} className="overflow-hidden rounded-[20px] bg-paper ring-1 ring-inset ring-hairline">
+            <li key={p.id} className="overflow-hidden rounded-[20px] bg-paper">
               <div className="relative aspect-[4/5] bg-white">
                 {p.image ? <img src={p.image} alt="" className="size-full object-cover" /> : <span className="grid size-full place-items-center text-cocoa-3"><Icon name="camera" className="size-6" /></span>}
                 <span className={`absolute left-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-black ${p.included ? "bg-mint-ink text-white" : p.waitingForMaker ? "bg-amber-100 text-gold-ink" : "bg-white/90 text-cocoa-2"}`}>{p.included ? "Shared" : p.waitingForMaker ? "Waiting" : "Private"}</span>
@@ -142,7 +142,7 @@ export function TrainingDataConsent({ pageId }: { pageId: string }) {
                   aria-pressed={(p.included || p.waitingForMaker)}
                   aria-label={`${(p.included || p.waitingForMaker) ? "Keep private" : "Share"}: ${p.title}`}
                   onClick={() => put(`/pages/${pageId}/training-data/products/${p.id}`, { included: !(p.included || p.waitingForMaker) }, (p.included || p.waitingForMaker) ? `${p.title} is private again.` : `${p.title} is shared.`)}
-                  className={`st-press min-h-11 w-full rounded-xl text-sm font-bold ring-1 ring-inset disabled:opacity-50 ${(p.included || p.waitingForMaker) ? "bg-white text-cocoa ring-hairline" : "bg-violet-ink text-white ring-violet-ink"}`}
+                  className={`st-press min-h-11 w-full rounded-xl text-sm font-bold ring-1 ring-inset disabled:opacity-50 ${(p.included || p.waitingForMaker) ? "bg-white text-cocoa ring-transparent" : "bg-violet-ink text-white ring-violet-ink"}`}
                 >
                   {(p.included || p.waitingForMaker) ? "Keep private" : "Share"}
                 </button>
@@ -230,7 +230,7 @@ export function MakerTrainingConsent({ pageId }: { pageId: string }) {
           <h3 className="font-display text-lg font-black tracking-tight text-cocoa">Pieces credited to you</h3>
           <ul className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
             {data.pieces.map((p) => (
-              <li key={p.id} className="overflow-hidden rounded-[20px] bg-paper ring-1 ring-inset ring-hairline">
+              <li key={p.id} className="overflow-hidden rounded-[20px] bg-paper">
                 <div className="relative aspect-[4/5] bg-white">
                   {p.image ? <img src={p.image} alt="" className="size-full object-cover" /> : <span className="grid size-full place-items-center text-cocoa-3"><Icon name="camera" className="size-6" /></span>}
                   <span className={`absolute left-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-black ${p.included ? "bg-mint-ink text-white" : "bg-white/90 text-cocoa-2"}`}>{p.included ? "Shared" : "Private"}</span>

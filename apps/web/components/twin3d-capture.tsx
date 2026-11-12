@@ -202,7 +202,7 @@ export function TurnCapture({
 
 function CheckChip({ ok, label }: { ok: boolean; label: string }) {
   return (
-    <li className={`rounded-full border px-2 py-0.5 font-semibold backdrop-blur ${ok ? "border-mint/50 bg-mint/20 text-mint" : "border-white/20 bg-black/50 text-white/70"}`}>
+    <li className={`rounded-full border px-2 py-0.5 font-semibold backdrop-blur ${ok ? "border-mint/50 bg-mint/20 text-mint" : "bg-black/50 text-white/70 border-transparent"}`}>
       {ok ? "✓" : "·"} {label}
     </li>
   );

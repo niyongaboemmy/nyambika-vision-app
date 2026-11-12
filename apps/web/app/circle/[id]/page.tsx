@@ -84,7 +84,7 @@ export default function PollOwner() {
           const leading = poll.total > 0 && o.votes === lead;
           return (
             <div key={o.id} className="text-center">
-              <div className={`relative aspect-[9/16] overflow-hidden rounded-[22px] border bg-white/[.06] transition duration-500 ${leading ? "border-gold/80 shadow-[0_0_30px_rgba(242,184,75,.3)]" : "border-white/15"} ${flash && leading ? "scale-[1.03]" : ""}`}>
+              <div className={`relative aspect-[9/16] overflow-hidden rounded-[22px] border bg-white/[.06] transition duration-500 ${leading ? "border-gold/80 shadow-[0_0_30px_rgba(242,184,75,.3)]" : "border-transparent"} ${flash && leading ? "scale-[1.03]" : ""}`}>
                 {o.image ? <img loading="lazy" decoding="async" src={o.image} alt={`${o.label} look`} className="h-full w-full object-cover" /> : <div className="skeleton h-full" />}
                 {leading && <span role="img" aria-label="Leading" className="spring-pop absolute left-1/2 top-2 grid size-8 -translate-x-1/2 place-items-center rounded-full bg-black/55 text-gold backdrop-blur"><Icon name="crown" filled className="size-4" /></span>}
               </div>
@@ -99,7 +99,7 @@ export default function PollOwner() {
       </section>
 
       {winner?.look && (
-        <section className="mx-4 mt-5 animate-rise rounded-3xl border border-gold/40 bg-gradient-to-br from-gold/15 to-terra/10 p-4">
+        <section className="mx-4 mt-5 animate-rise rounded-3xl bg-gradient-to-br from-gold/15 to-terra/10 p-4">
           <p className="text-xs font-semibold uppercase tracking-[.2em] text-gold">Your circle picked</p>
           <div className="mt-1 flex items-center justify-between gap-3">
             <div className="min-w-0">

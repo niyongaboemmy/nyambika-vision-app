@@ -34,7 +34,7 @@ export function PassportCard({ productId, title, canManage }: { productId: strin
   const score = filled.filter(Boolean).length;
 
   return (
-    <section aria-labelledby="dpp-t" className="relative overflow-hidden rounded-[24px] bg-gradient-to-br from-amber-50 via-white to-emerald-50 p-4 ring-1 ring-inset ring-amber-200 sm:p-5">
+    <section aria-labelledby="dpp-t" className="relative overflow-hidden rounded-[24px] bg-gradient-to-br from-amber-50 via-white to-emerald-50 p-4 sm:p-5">
       <div className="flex items-start gap-3">
         <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-cocoa text-white shadow-[0_8px_18px_-8px_rgba(29,24,20,.7)]"><Icon name="qr" className="size-5" /></span>
         <div className="min-w-0 flex-1">
@@ -48,7 +48,7 @@ export function PassportCard({ productId, title, canManage }: { productId: strin
         {d.version > 0 && m.claims.madeIn && <Chip tone={d.claimsVerified ? "mint" : "violet"}>{d.claimsVerified ? "Claims verified" : "Claims awaiting host check"}</Chip>}
       </div>
       <div className="mt-4 grid grid-cols-[auto_1fr] items-center gap-4">
-        <div className={`rounded-2xl bg-white p-1.5 ring-1 ring-hairline ${d.version ? "" : "opacity-40"}`}>
+        <div className={`rounded-2xl bg-white p-1.5 ${d.version ? "" : "opacity-40"}`}>
           <QrCode value={d.url} label={`QR code for the passport of ${title}`} className="size-24" />
         </div>
         <div className="flex flex-col gap-2">
@@ -60,7 +60,7 @@ export function PassportCard({ productId, title, canManage }: { productId: strin
         <ol className="mt-4 space-y-1.5" aria-label="Passport versions">
           {d.versions.slice(0, 4).map((v) => (
             <li key={v.version} className="flex items-center gap-2 text-sm">
-              <span className="grid size-7 shrink-0 place-items-center rounded-full bg-white text-xs font-black text-cocoa ring-1 ring-hairline">v{v.version}</span>
+              <span className="grid size-7 shrink-0 place-items-center rounded-full bg-white text-xs font-black text-cocoa">v{v.version}</span>
               <span className="min-w-0 truncate text-cocoa"><b>{v.note || "Update"}</b> <span className="text-cocoa-2">· {new Date(v.at).toLocaleDateString("en-GB")} · {v.changed.join(", ")}</span></span>
             </li>
           ))}
@@ -146,7 +146,7 @@ function PassportSheet({ draft, onClose, onSaved }: { draft: Draft; onClose: () 
 
         <Field label="How it was made" group>
           {f.process.map((s, i) => (
-            <div key={i} className="grid grid-cols-[1fr_auto] gap-2 rounded-2xl bg-white p-2 ring-1 ring-inset ring-hairline">
+            <div key={i} className="grid grid-cols-[1fr_auto] gap-2 rounded-2xl bg-white p-2">
               <div className="grid gap-2">
                 <Input aria-label={`Step ${i + 1}`} value={s.step} onChange={(e) => set("process", f.process.map((x, j) => (j === i ? { ...x, step: e.target.value } : x)))} />
                 <Input aria-label={`Step ${i + 1} done by`} placeholder="Who" value={s.by} onChange={(e) => set("process", f.process.map((x, j) => (j === i ? { ...x, by: e.target.value } : x)))} />
@@ -176,7 +176,7 @@ function PassportSheet({ draft, onClose, onSaved }: { draft: Draft; onClose: () 
           <Field label="GTIN / barcode" hint="Optional. Enables GS1 Digital Link /01/…"><Input inputMode="numeric" value={f.gtin} onChange={(e) => set("gtin", e.target.value.replace(/\D/g, "").slice(0, 14))} /></Field>
         </div>
 
-        <div className="rounded-2xl bg-white p-3 ring-1 ring-inset ring-hairline">
+        <div className="rounded-2xl bg-white p-3">
           <p className="text-[13px] font-bold text-cocoa">Claims</p>
           <p className="text-xs text-cocoa-2">Host-verified</p>
           <div className="mt-2 space-y-3">

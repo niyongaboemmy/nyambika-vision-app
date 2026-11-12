@@ -77,7 +77,7 @@ export default function Settings() {
       <SectionTitle title="Settings" eyebrow="Your page" />
       <nav aria-label="Settings sections" className="no-scrollbar -mx-4 flex gap-1.5 overflow-x-auto px-4">
         {SECTIONS.map((s) => (
-          <a key={s.id} href={`#${s.id}`} className="st-press inline-flex min-h-11 shrink-0 items-center rounded-full bg-white px-4 text-sm font-bold text-cocoa-2 ring-1 ring-inset ring-hairline hover:text-cocoa">{s.label}</a>
+          <a key={s.id} href={`#${s.id}`} className="st-press inline-flex min-h-11 shrink-0 items-center rounded-full bg-white px-4 text-sm font-bold text-cocoa-2 hover:text-cocoa">{s.label}</a>
         ))}
       </nav>
       <Note error={err} ok={msg} />
@@ -127,7 +127,7 @@ export default function Settings() {
               {Object.keys(THEMES).map((k) => {
                 const on = f.theme === k;
                 return (
-                  <label key={k} className={`st-press flex cursor-pointer items-center gap-2.5 rounded-2xl bg-white p-2 ring-inset ${on ? "ring-2 ring-cocoa" : "ring-1 ring-hairline hover:ring-cocoa-3"}`}>
+                  <label key={k} className={`st-press flex cursor-pointer items-center gap-2.5 rounded-2xl bg-white p-2 ring-inset ${on ? "ring-2 ring-cocoa" : ""}`}>
                     <input type="radio" name="theme" value={k} checked={on} onChange={() => setF({ ...f, theme: k })} className="sr-only" />
                     <span className="relative size-10 shrink-0 rounded-xl" style={{ background: THEMES[k] }}>
                       {on && <Icon name="check" className="absolute inset-0 m-auto size-5 text-white drop-shadow" />}
@@ -174,9 +174,9 @@ export default function Settings() {
               {plans.map((p) => {
                 const on = (plan || currentPlan) === p.code;
                 return (
-                  <label key={p.code} className={`st-press relative flex cursor-pointer flex-col gap-1 rounded-[20px] bg-white p-3.5 ring-inset ${on ? "ring-2 ring-cocoa" : "ring-1 ring-hairline hover:ring-cocoa-3"}`}>
+                  <label key={p.code} className={`st-press relative flex cursor-pointer flex-col gap-1 rounded-[20px] bg-white p-3.5 ring-inset ${on ? "ring-2 ring-cocoa" : ""}`}>
                     <input type="radio" name="plan" value={p.code} checked={on} onChange={() => setPlan(p.code)} className="sr-only" />
-                    {p.code === currentPlan && <span className="absolute right-3 top-3 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-mint-ink ring-1 ring-inset ring-emerald-200">current</span>}
+                    {p.code === currentPlan && <span className="absolute right-3 top-3 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-mint-ink">current</span>}
                     <span className="font-display text-lg font-black text-cocoa">{p.name}</span>
                     <span className="text-sm font-bold text-cocoa">{p.priceRwf ? `${rwf(p.priceRwf)}/month` : "Free"}</span>
                     <span className="text-xs text-cocoa-2">{p.tryOnAllowance} looks · up to {p.maxProducts} products</span>

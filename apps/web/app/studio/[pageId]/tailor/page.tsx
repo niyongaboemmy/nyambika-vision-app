@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Empty, Icon } from "@/components/studio";
 import { Bento, DeskNav, StatusChip } from "@/components/tailor-studio";
-import { rwf } from "@/lib/api";
+import { rwf, rwfCompact } from "@/lib/api";
 import { useApi } from "@/lib/use-api";
 import { CO_TAILOR_LABEL, kigaliTime, specChips, type CustomOrderView } from "@/lib/tailor";
 import { useManagedPage } from "../layout";
@@ -35,7 +35,7 @@ export default function TailorDesk() {
         <Bento label="New requests" value={newCount} hint={newCount ? "Quote today" : "All answered"} accent="bg-gradient-to-br from-amber-200 to-orange-200 text-stone-900" />
         <Bento label="On the table" value={making} hint="Cutting → finishing" />
         <Bento label="Fittings booked" value={fittings} hint="Upcoming" />
-        <Bento label="Paid to you" value={<span className="text-xl">{rwf(deposits)}</span>} hint="Via MoMo" accent="bg-stone-900 text-white" />
+        <Bento label="Paid to you" value={<span className="text-xl" title={rwf(deposits)}>{rwfCompact(deposits)}</span>} hint="Via MoMo" accent="bg-stone-900 text-white" />
       </div>
 
       <div className="no-scrollbar -mx-4 mt-5 flex gap-2 overflow-x-auto px-4" role="tablist" aria-label="Filter">
@@ -43,7 +43,7 @@ export default function TailorDesk() {
           const on = x.key === filter;
           const n = data?.filter((o) => x.match(o.status)).length;
           return (
-            <button key={x.key} role="tab" aria-selected={on} onClick={() => setFilter(x.key)} className={`st-press inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full px-4 text-sm font-semibold ${on ? "bg-stone-900 text-white" : "bg-white text-stone-700 ring-1 ring-stone-300"}`}>
+            <button key={x.key} role="tab" aria-selected={on} onClick={() => setFilter(x.key)} className={`st-press inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full px-4 text-sm font-semibold ${on ? "bg-stone-900 text-white" : "bg-white text-stone-700"}`}>
               {x.label}
               {n !== undefined && <span className={`rounded-full px-1.5 text-[11px] font-bold tabular-nums ${on ? "bg-white/20" : "bg-stone-100"}`}>{n}</span>}
             </button>
@@ -55,7 +55,7 @@ export default function TailorDesk() {
         {!data && [0, 1, 2].map((i) => <div key={i} className="h-36 animate-pulse rounded-3xl bg-stone-200" />)}
         {data && rows.length === 0 && <Empty icon="scissors" title={filter === "open" ? "Nothing to do" : "No orders here"}>{filter === "open" ? "New requests land here and on WhatsApp." : null}</Empty>}
         {rows.map((o) => (
-          <Link key={o.id} href={`/studio/${page.id}/tailor/${o.id}`} className="st-press group flex gap-3 rounded-3xl bg-white p-3 ring-1 ring-stone-200 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-stone-900">
+          <Link key={o.id} href={`/studio/${page.id}/tailor/${o.id}`} className="st-press group flex gap-3 rounded-3xl bg-white p-3 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-stone-900">
             <div className="relative h-32 w-24 shrink-0 overflow-hidden rounded-2xl bg-stone-100">
               {o.image || o.productImage ? <img loading="lazy" decoding="async" src={o.image ?? o.productImage!} alt="" className="h-full w-full object-cover" /> : <span className="grid h-full place-items-center text-stone-400" aria-hidden><Icon name="scissors" className="size-8" /></span>}
               {o.spec.hue !== null && <span className="absolute bottom-1.5 left-1.5 size-5 rounded-full ring-2 ring-white" style={{ background: `hsl(${o.spec.hue} 72% 50%)` }} aria-label={`Custom colour ${o.spec.hue}°`} />}

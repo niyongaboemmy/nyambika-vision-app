@@ -119,7 +119,7 @@ export default function MeasurementsPage() {
                     <p className="text-xs text-mut">{s.active ? `Until ${kigaliTime(s.expiresAt, { day: "numeric", month: "short" })}` : s.revokedAt ? "Ended" : "Expired"}</p>
                   </div>
                   {s.active && (
-                    <button className="min-h-11 rounded-xl border border-white/20 px-4 font-semibold" onClick={async () => { await api(`/measurements/shares/${s.id}/revoke`, { method: "POST" }); await reload(); }}>Stop</button>
+                    <button className="min-h-11 rounded-xl px-4 font-semibold" onClick={async () => { await api(`/measurements/shares/${s.id}/revoke`, { method: "POST" }); await reload(); }}>Stop</button>
                   )}
                 </li>
               ))}

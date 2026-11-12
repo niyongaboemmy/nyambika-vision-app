@@ -15,7 +15,7 @@ export function Button({
   return (
     <button
       {...props}
-      className={`press inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl px-5 font-semibold disabled:opacity-50 ${styles} ${className}`}
+      className={`press inline-flex min-h-12 items-center justify-center gap-2 whitespace-nowrap rounded-2xl px-5 font-semibold disabled:opacity-50 ${styles} ${className}`}
     />
   );
 }

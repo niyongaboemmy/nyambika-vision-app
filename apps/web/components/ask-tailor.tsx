@@ -145,7 +145,7 @@ export function AskTailorSheet({ open, onClose, request }: { open: boolean; onCl
         </fieldset>
 
         {needsProfile && (
-          <fieldset className="mt-4 rounded-2xl border border-gold/30 bg-gold/10 p-3">
+          <fieldset className="mt-4 rounded-2xl bg-gold/10 p-3">
             <legend className="px-1 text-sm font-bold">Your measurements (cm)</legend>
             <p className="mb-2 text-xs text-txt/80">{m?.prefill ? `From your twin (${m.twinSize}, ±3 cm) · adjust if needed` : "A soft tape measure helps. You can refine them later."}</p>
             <div className="grid grid-cols-2 gap-2">

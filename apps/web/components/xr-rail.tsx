@@ -128,7 +128,7 @@ function MotionRail({ look, anchor }: { look: Look; anchor: React.RefObject<HTML
             <p className="text-sm text-mut">4 s loop · see the fabric move</p>
           </div>
         </div>
-        <div className="mt-4 flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-3">
+        <div className="mt-4 flex items-center justify-between rounded-2xl bg-white/5 p-3">
           <span className="text-sm">Premium preview</span>
           <span className="text-right">
             <span className="block font-display font-black text-gold">{state?.quote.label ?? "3 credits"}</span>
@@ -136,9 +136,9 @@ function MotionRail({ look, anchor }: { look: Look; anchor: React.RefObject<HTML
           </span>
         </div>
         <ul className="mt-3 flex flex-wrap gap-1.5 text-xs text-txt/90">
-          <li className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-2.5 py-1"><Icon name="sparkle" className="size-3.5 text-gold" />AI motion preview · C2PA</li>
-          <li className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-2.5 py-1"><Icon name="shield" className="size-3.5 text-gold" />Face never changed</li>
-          <li className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-2.5 py-1"><Icon name="lock" className="size-3.5 text-gold" />Never shared with makers</li>
+          <li className="inline-flex items-center gap-1.5 rounded-full bg-white/5 px-2.5 py-1"><Icon name="sparkle" className="size-3.5 text-gold" />AI motion preview · C2PA</li>
+          <li className="inline-flex items-center gap-1.5 rounded-full bg-white/5 px-2.5 py-1"><Icon name="shield" className="size-3.5 text-gold" />Face never changed</li>
+          <li className="inline-flex items-center gap-1.5 rounded-full bg-white/5 px-2.5 py-1"><Icon name="lock" className="size-3.5 text-gold" />Never shared with makers</li>
         </ul>
         {state && !state.eligible && <p className="mt-3 text-sm text-gold">{state.reason}</p>}
         {error && (isExpectedText(error) ? <LimitState error={error} /> : <p className="mt-3 text-sm text-red-300" role="alert">{error}</p>)}

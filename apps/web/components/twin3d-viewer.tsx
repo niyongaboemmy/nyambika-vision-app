@@ -152,8 +152,8 @@ export function Twin3dViewer({
           <span className="glass rounded-full px-4 py-2 text-sm font-semibold">{busy}</span>
         </div>
       )}
-      <span className="pointer-events-none absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-black/55 px-3 py-1.5 text-xs font-semibold backdrop-blur"><Icon name="cube" className="size-3.5" />{badge}</span>
-      <span className="pointer-events-none absolute right-3 top-3 rounded-full border border-white/15 bg-black/55 px-2.5 py-1.5 text-[11px] font-semibold backdrop-blur inline-flex items-center gap-1"><Icon name="sparkle" className="size-3" /> {label}</span>
+      <span className="pointer-events-none absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-black/55 px-3 py-1.5 text-xs font-semibold backdrop-blur"><Icon name="cube" className="size-3.5" />{badge}</span>
+      <span className="pointer-events-none absolute right-3 top-3 rounded-full bg-black/55 px-2.5 py-1.5 text-[11px] font-semibold backdrop-blur inline-flex items-center gap-1"><Icon name="sparkle" className="size-3" /> {label}</span>
       {!fallback && (
         <div className="absolute bottom-4 right-3 flex flex-col gap-2">
           <button aria-label="Turn left" onClick={() => turn(-45)} className="hit glass grid size-10 place-items-center rounded-full text-lg transition active:scale-90">⟲</button>

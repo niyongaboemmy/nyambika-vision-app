@@ -50,7 +50,7 @@ export function ProductPreview({
     <figure className={`theme-media overflow-hidden rounded-[26px] bg-ink text-txt shadow-[0_24px_50px_-28px_rgba(29,24,20,.8)] ${compact ? "flex items-stretch" : ""}`}>
       <div className={`relative ${compact ? "w-28 shrink-0" : "aspect-[4/5]"}`} style={{ background: THEMES[theme] ?? THEMES.terra }}>
         <div className="absolute inset-0 opacity-20 [background-image:repeating-linear-gradient(45deg,#fff_0_2px,transparent_2px_22px),repeating-linear-gradient(-45deg,#fff_0_2px,transparent_2px_22px)]" />
-        <div className={`absolute ${compact ? "inset-2" : "inset-5"} grid place-items-center overflow-hidden rounded-[20px] border border-white/15 bg-white/10 backdrop-blur-sm`}>
+        <div className={`absolute ${compact ? "inset-2" : "inset-5"} grid place-items-center overflow-hidden rounded-[20px] bg-white/10 backdrop-blur-sm`}>
           {image ? (
             <img src={image} alt="" className="size-full object-cover" />
           ) : (
@@ -86,4 +86,4 @@ export function ProductPreview({
   );
 }
 
-export const EDITOR_STEPS = ["Details", "Colours & sizes", "Photos", "Publish"];
+export const EDITOR_STEPS = ["Details", "Colours", "Photos", "Publish"];

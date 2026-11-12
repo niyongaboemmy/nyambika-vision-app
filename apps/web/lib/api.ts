@@ -73,3 +73,5 @@ function safeJson(t: string) {
 }
 
 export const rwf = (n: number) => `RWF ${n.toLocaleString("en-US")}`;
+/** "RWF 4.39M" for tiles and KPIs that must stay on one line (pass the exact `rwf()` as the element's title). */
+export const rwfCompact = (n: number) => (n < 1_000_000 ? rwf(n) : `RWF ${new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 2 }).format(n)}`);

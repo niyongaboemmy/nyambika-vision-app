@@ -86,7 +86,7 @@ export default function NewProduct() {
   return (
     <div className="space-y-5">
       <div className="flex items-center gap-3">
-        <Link href={`/studio/${page.id}/products`} aria-label="Back to products" className="st-press grid size-11 shrink-0 place-items-center rounded-full bg-white text-cocoa ring-1 ring-inset ring-hairline">
+        <Link href={`/studio/${page.id}/products`} aria-label="Back to products" className="st-press grid size-11 shrink-0 place-items-center rounded-full bg-white text-cocoa">
           <Icon name="back" className="size-5" />
         </Link>
         <div className="min-w-0">
@@ -135,7 +135,7 @@ export default function NewProduct() {
             <fieldset className="space-y-2">
               <legend className="mb-2 text-[13px] font-bold text-cocoa">Colours</legend>
               {variants.map((v, i) => (
-                <div key={i} className="flex items-center gap-2 rounded-2xl bg-paper p-2 ring-1 ring-inset ring-hairline">
+                <div key={i} className="flex items-center gap-2 rounded-2xl bg-paper p-2">
                   <span className="relative size-11 shrink-0 overflow-hidden rounded-xl ring-1 ring-hairline" style={{ background: v.colourHex }}>
                     <input aria-label="Colour" type="color" value={v.colourHex} onChange={(e) => setVariants(variants.map((x, j) => (j === i ? { ...x, colourHex: e.target.value } : x)))} className="absolute inset-0 size-full cursor-pointer opacity-0" />
                   </span>
@@ -153,7 +153,7 @@ export default function NewProduct() {
               </SButton>
             </fieldset>
             <Field group label="Sizes"><TogglePills all={["XS", "S", "M", "L", "XL", "XXL"]} on={sizes} toggle={(v) => toggle(sizes, setSizes, v)} /></Field>
-            <div className="space-y-3 rounded-2xl bg-paper p-3.5 ring-1 ring-inset ring-hairline">
+            <div className="space-y-3 rounded-2xl bg-paper p-3.5">
               <Switch checked={f.madeToOrder} onChange={(v) => setF({ ...f, madeToOrder: v })} label="Made to order" description="Sewn after payment" />
               <div className="flex min-h-11 items-center justify-between gap-3">
                 <span className="text-[15px] font-semibold text-cocoa">Lead time</span>

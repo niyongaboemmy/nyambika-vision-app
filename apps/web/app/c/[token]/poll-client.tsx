@@ -84,7 +84,7 @@ export function PollClient({ token, meta }: { token: string; meta: PollMeta }) {
       <header className="px-5 pt-[max(env(safe-area-inset-top),18px)] text-center">
         <h1 className="font-display text-[28px] font-black leading-tight">{t("circle.title")}</h1>
         <p className="mt-1 text-[17px] text-txt/90">“{meta.question}”</p>
-        <p className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-black/30 px-3 py-1 text-xs text-txt/80">
+        <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-black/30 px-3 py-1 text-xs text-txt/80">
           <span className="size-2 animate-pulse rounded-full bg-mint" aria-hidden /> Live · {poll ? `${poll.total} vote${poll.total === 1 ? "" : "s"}` : "…"} · {timeLeft(poll?.expiresAt ?? meta.expiresAt)}
         </p>
       </header>
@@ -99,7 +99,7 @@ export function PollClient({ token, meta }: { token: string; meta: PollMeta }) {
               onClick={() => (i === index ? vote(o.id) : scrollTo(i))}
               aria-label={`${chosen ? "Your vote: " : "Vote for "}${o.label}`}
               aria-pressed={chosen}
-              className={`relative shrink-0 snap-center overflow-hidden rounded-[32px] border bg-[#15131b] text-left transition duration-300 ${chosen ? "border-gold shadow-[0_0_40px_rgba(242,184,75,.35)]" : "border-white/15"} ${i === index ? "" : "scale-[.94] opacity-70"}`}
+              className={`relative shrink-0 snap-center overflow-hidden rounded-[32px] border bg-[#15131b] text-left transition duration-300 ${chosen ? "border-gold shadow-[0_0_40px_rgba(242,184,75,.35)]" : "border-transparent"} ${i === index ? "" : "scale-[.94] opacity-70"}`}
             >
               {/* Exact look ratio, so the AI-preview stamp at the bottom is never cropped or covered. */}
               <span className="relative block aspect-[9/16] h-[min(50vh,470px)] max-w-[72vw]">

@@ -62,13 +62,13 @@ export function DiscountField({ variantId, open, onChange }: { variantId: string
   return (
     <div className="space-y-2">
       {offer && !applied?.code && (
-        <p className="flex items-center gap-2 rounded-2xl bg-gold/15 px-3 py-2 text-sm text-gold ring-1 ring-inset ring-gold/30">
+        <p className="flex items-center gap-2 rounded-2xl bg-gold/15 px-3 py-2 text-sm text-gold">
           <span aria-hidden><Icon name="tag" className="size-4" /></span>
           <span className="flex-1"><b>{offer.label || "Offer"}</b> {offer.display} · −{rwf(offer.amountRwf)}{ends ? ` · until ${ends}` : ""}</span>
         </p>
       )}
       {applied?.code && (
-        <p className="flex items-center gap-2 rounded-2xl bg-mint/15 px-3 py-2 text-sm text-mint ring-1 ring-inset ring-mint/30">
+        <p className="flex items-center gap-2 rounded-2xl bg-mint/15 px-3 py-2 text-sm text-mint">
           <span aria-hidden>✓</span>
           <span className="flex-1">Code <b className="font-mono">{applied.code}</b> {applied.display} · −{rwf(applied.amountRwf)}</span>
           <button type="button" className="text-xs underline" onClick={() => { setApplied(null); setCode(""); onChange(offer ? { code: null, amountRwf: offer.amountRwf, display: offer.display } : null); }}>Remove</button>

@@ -70,7 +70,7 @@ export function LearnMore({ summary = "Learn more", children, className = "" }: 
 /** Compact fact: icon + short label (replaces a sentence). Purely presentational. */
 export function Fact({ icon, children, className = "" }: { icon: IconName; children: ReactNode; className?: string }) {
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full border border-border bg-surface-3/60 px-2.5 py-1 text-xs font-semibold text-fg ${className}`}>
+    <span className={`inline-flex max-w-full items-center gap-1.5 whitespace-nowrap rounded-full bg-fill px-2.5 py-1 text-xs font-semibold text-fg ${className}`}>
       <Icon name={icon} className="size-3.5 shrink-0 text-accent" />
       {children}
     </span>

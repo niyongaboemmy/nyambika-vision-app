@@ -46,7 +46,7 @@ export default async function Makers({ searchParams }: { searchParams: Promise<{
       <form className="mt-1" role="search"><input name="q" type="search" aria-label="Search makers" defaultValue={q} placeholder="Search makers" className="glass h-12 w-full rounded-2xl px-4 outline-none placeholder:text-white/40" /></form>
       <div className="no-scrollbar mt-3 flex gap-2 overflow-x-auto">
         {filters.map((f) => (
-          <Link key={f.href} href={f.href} aria-current={(type ?? "") === (f.href.split("=")[1] ?? "") ? "page" : undefined} className={`press inline-flex min-h-11 items-center whitespace-nowrap rounded-2xl border px-3.5 text-sm font-semibold ${(type ?? "") === (f.href.split("=")[1] ?? "") ? "border-gold/70 bg-gold/20" : "border-white/20 bg-white/10"}`}>{f.label}</Link>
+          <Link key={f.href} href={f.href} aria-current={(type ?? "") === (f.href.split("=")[1] ?? "") ? "page" : undefined} className={`press inline-flex min-h-11 items-center whitespace-nowrap rounded-full px-4 text-sm font-semibold ${(type ?? "") === (f.href.split("=")[1] ?? "") ? "bg-fg text-surface" : "bg-fill"}`}>{f.label}</Link>
         ))}
       </div>
       <div className="mt-4 space-y-3">

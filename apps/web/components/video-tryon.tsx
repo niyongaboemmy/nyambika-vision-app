@@ -230,7 +230,7 @@ export function VideoRail({ look }: { look: Look }) {
                   ["CLIP", "video", "My short clip", "≤ 4 s · deleted after"],
                 ] as const
               ).map(([v, icon, title, sub]) => (
-                <label key={v} className={`cursor-pointer rounded-2xl border p-3 transition has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-white ${source === v ? "border-terra bg-terra/15" : "border-white/10 bg-white/5"}`}>
+                <label key={v} className={`cursor-pointer rounded-2xl border p-3 transition has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-white ${source === v ? "border-terra bg-terra/15" : "bg-white/5 border-transparent"}`}>
                   <input type="radio" name="video-source" value={v} checked={source === v} onChange={() => setSource(v)} className="sr-only" />
                   <Icon name={icon} className="mb-1 size-6" />
                   <span className="block font-semibold">{title}</span>
@@ -242,20 +242,20 @@ export function VideoRail({ look }: { look: Look }) {
             {source === "CLIP" && (
               <div className="mt-3 space-y-3">
                 <div className="flex items-center gap-3">
-                  {preview ? <img src={preview} alt="A frame from your clip" className="h-20 w-auto rounded-xl border border-white/15" /> : null}
-                  <label className="inline-flex min-h-12 cursor-pointer items-center gap-2 rounded-2xl border border-white/15 bg-white/5 px-4 text-sm font-semibold">
+                  {preview ? <img src={preview} alt="A frame from your clip" className="h-20 w-auto rounded-xl" /> : null}
+                  <label className="inline-flex min-h-12 cursor-pointer items-center gap-2 rounded-2xl bg-white/5 px-4 text-sm font-semibold">
                     <input type="file" accept="video/*" capture="user" className="sr-only" aria-label="Choose or record a short clip" onChange={(e) => void pick(e.target.files?.[0])} />
                     {busy === "frames" ? "Reading clip…" : frames ? "Choose another clip" : "Record or choose a clip"}
                   </label>
                 </div>
-                <label className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/5 p-3 text-sm">
+                <label className="flex items-start gap-3 rounded-2xl bg-white/5 p-3 text-sm">
                   <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5 size-5 accent-[#e0703f]" />
                   <span>{t("video.consent")}</span>
                 </label>
               </div>
             )}
 
-            <div className="mt-4 flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-3">
+            <div className="mt-4 flex items-center justify-between rounded-2xl bg-white/5 p-3">
               <span className="text-sm">Premium video</span>
               <span className="text-right">
                 <span className="block font-display font-black text-gold">{state?.quote.label ?? "5 credits"}</span>
@@ -263,10 +263,10 @@ export function VideoRail({ look }: { look: Look }) {
               </span>
             </div>
             <ul className="mt-3 flex flex-wrap gap-1.5 text-xs text-txt/90">
-              <li className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-2.5 py-1"><Icon name="sparkle" className="size-3.5 text-gold" />{t("video.label")} · C2PA</li>
-              <li className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-2.5 py-1"><Icon name="shield" className="size-3.5 text-gold" />Face + skin tone kept</li>
-              <li className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-2.5 py-1"><Icon name="lock" className="size-3.5 text-gold" />Never shared with makers</li>
-              <li className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-2.5 py-1"><Icon name="wallet" className="size-3.5 text-gold" />Not charged if it fails</li>
+              <li className="inline-flex items-center gap-1.5 rounded-full bg-white/5 px-2.5 py-1"><Icon name="sparkle" className="size-3.5 text-gold" />{t("video.label")} · C2PA</li>
+              <li className="inline-flex items-center gap-1.5 rounded-full bg-white/5 px-2.5 py-1"><Icon name="shield" className="size-3.5 text-gold" />Face + skin tone kept</li>
+              <li className="inline-flex items-center gap-1.5 rounded-full bg-white/5 px-2.5 py-1"><Icon name="lock" className="size-3.5 text-gold" />Never shared with makers</li>
+              <li className="inline-flex items-center gap-1.5 rounded-full bg-white/5 px-2.5 py-1"><Icon name="wallet" className="size-3.5 text-gold" />Not charged if it fails</li>
             </ul>
             {state && !state.eligible && state.reason && <p className="mt-3 text-sm text-gold">{state.reason}</p>}
             {job?.status === "WITHHELD" && <p className="mt-3 text-sm text-gold">Didn't pass our checks · not charged · try again</p>}

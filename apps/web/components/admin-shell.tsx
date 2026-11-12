@@ -66,7 +66,7 @@ export function AdminShell<T extends string>({ tabs, tab, onTab, counts = {}, ch
             <Brand label="Host admin" />
             <span className="flex items-center gap-2">
               <ThemeToggle compact />
-              <a href="/" aria-label="Shopper view" className="st-press grid size-11 place-items-center rounded-2xl bg-white text-cocoa ring-1 ring-inset ring-hairline">
+              <a href="/" aria-label="Shopper view" className="st-press grid size-11 place-items-center rounded-2xl bg-white text-cocoa">
                 <Icon name="eye" className="size-5" />
               </a>
             </span>
@@ -80,7 +80,7 @@ export function AdminShell<T extends string>({ tabs, tab, onTab, counts = {}, ch
                   type="button"
                   onClick={() => pick(t)}
                   aria-current={on ? "page" : undefined}
-                  className={`st-press inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-sm font-bold ${on ? "bg-cocoa text-white" : "bg-white text-cocoa-2 ring-1 ring-inset ring-hairline"}`}
+                  className={`st-press inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-sm font-bold ${on ? "bg-cocoa text-white" : "bg-white text-cocoa-2"}`}
                 >
                   <Icon name={ICONS[t] ?? "grid"} className="size-4" />
                   {t}

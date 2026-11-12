@@ -197,7 +197,7 @@ export function MrMirror({ pieces, wardrobe, twin, arPilot, initial }: { pieces:
                   setPiece(p);
                   setColour(p.assets[0]?.variantId ?? null);
                 }}
-                className={`flex shrink-0 items-center gap-2 rounded-2xl p-1.5 pr-3 text-left ring-1 ring-inset transition active:scale-95 ${piece?.productId === p.productId ? "bg-white/15 ring-gold" : "glass ring-white/10"}`}
+                className={`flex shrink-0 items-center gap-2 rounded-2xl p-1.5 pr-3 text-left ring-1 ring-inset transition active:scale-95 ${piece?.productId === p.productId ? "bg-white/15 ring-gold" : "glass ring-transparent"}`}
               >
                 {p.assets[0]?.poster ? <img src={p.assets[0].poster} alt="" className="size-12 rounded-xl bg-black/30 object-contain" /> : <span className="size-12 rounded-xl bg-white/10" />}
                 <span className="max-w-[130px] truncate text-xs font-bold">{p.title}</span>

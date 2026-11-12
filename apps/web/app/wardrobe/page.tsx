@@ -89,7 +89,7 @@ export default function WardrobePage() {
               </span>
             </>
           );
-          const cls = `relative block overflow-hidden rounded-3xl border border-white/12 bg-white/[.06] animate-rise ${i % 3 === 0 ? "row-span-2" : ""}`;
+          const cls = `relative block overflow-hidden rounded-3xl bg-white/[.06] animate-rise ${i % 3 === 0 ? "row-span-2" : ""}`;
           return t.kind === "owned" ? (
             <Link key={`o${t.id}`} href={t.href} className={cls} style={{ animationDelay: `${i * 40}ms` }}>{inner}</Link>
           ) : (

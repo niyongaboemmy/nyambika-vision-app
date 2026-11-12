@@ -71,7 +71,7 @@ export function MorphOptions({ productId }: { productId: string }) {
     const isBase = (kind === "lengths" ? o.baseLength : o.baseSleeve) === key;
     const on = isBase || (table[key] !== null && table[key] !== undefined);
     return (
-      <div key={key} className={`flex items-center gap-2 rounded-2xl p-2 ring-1 ${on ? "bg-white ring-stone-300" : "bg-stone-50 ring-stone-200"}`}>
+      <div key={key} className={`flex items-center gap-2 rounded-2xl p-2 ring-1 ${on ? "bg-white ring-transparent" : "bg-stone-50 ring-transparent"}`}>
         <label className="flex min-h-11 flex-1 items-center gap-2 text-sm font-semibold">
           <input type="checkbox" className="size-5 accent-stone-900" checked={on} disabled={isBase} onChange={() => setO({ ...o, [kind]: { ...table, [key]: on ? null : 0 } })} />
           {cap(key)}{isBase ? " (as photographed)" : ""}
@@ -79,7 +79,7 @@ export function MorphOptions({ productId }: { productId: string }) {
         {on && !isBase && (
           <label className="flex items-center gap-1 text-sm">
             <span className="text-stone-500">+RWF</span>
-            <input inputMode="numeric" aria-label={`${cap(key)} price change`} value={table[key] ?? 0} onChange={(e) => setO({ ...o, [kind]: { ...table, [key]: Number(e.target.value.replace(/[^\d-]/g, "")) || 0 } })} className="w-20 rounded-lg border border-stone-300 px-2 py-1.5 text-right" />
+            <input inputMode="numeric" aria-label={`${cap(key)} price change`} value={table[key] ?? 0} onChange={(e) => setO({ ...o, [kind]: { ...table, [key]: Number(e.target.value.replace(/[^\d-]/g, "")) || 0 } })} className="w-20 rounded-lg px-2 py-1.5 text-right" />
           </label>
         )}
       </div>
@@ -105,7 +105,7 @@ export function MorphOptions({ productId }: { productId: string }) {
         </div>
         <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${saved ? "bg-emerald-100 text-emerald-900" : "bg-amber-100 text-amber-900"}`}>{saved ? "live" : "not saved"}</span>
       </div>
-      <div className="flex items-center gap-2 rounded-2xl bg-stone-50 p-3 ring-1 ring-stone-200">
+      <div className="flex items-center gap-2 rounded-2xl bg-stone-50 p-3">
         <label className="flex min-h-11 flex-1 items-center gap-2 text-sm font-semibold">
           <input type="checkbox" className="size-5 accent-stone-900" checked={o.colourEnabled} onChange={(e) => setO({ ...o, colourEnabled: e.target.checked })} />
           <span className="size-5 rounded-full bg-[conic-gradient(red,yellow,lime,cyan,blue,magenta,red)]" aria-hidden />
@@ -114,7 +114,7 @@ export function MorphOptions({ productId }: { productId: string }) {
         {o.colourEnabled && (
           <label className="flex items-center gap-1 text-sm">
             <span className="text-stone-500">+RWF</span>
-            <input inputMode="numeric" aria-label="Custom colour price" value={o.colourDeltaRwf} onChange={(e) => setO({ ...o, colourDeltaRwf: Number(e.target.value.replace(/\D/g, "")) || 0 })} className="w-20 rounded-lg border border-stone-300 px-2 py-1.5 text-right" />
+            <input inputMode="numeric" aria-label="Custom colour price" value={o.colourDeltaRwf} onChange={(e) => setO({ ...o, colourDeltaRwf: Number(e.target.value.replace(/\D/g, "")) || 0 })} className="w-20 rounded-lg px-2 py-1.5 text-right" />
           </label>
         )}
       </div>
