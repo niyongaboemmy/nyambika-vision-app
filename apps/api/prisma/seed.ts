@@ -12,6 +12,7 @@ import { seedTailor } from "./seed-tailor";
 import { seed3d } from "./seed-3d";
 import { seedVr } from "./seed-vr";
 import { seedRegion } from "./seed-region";
+import { seedTee } from "./seed-tee";
 
 const prisma = new PrismaClient();
 const AI = process.env.AI_GATEWAY_URL ?? "http://localhost:8100";
@@ -314,6 +315,7 @@ async function main() {
   await seed3d(prisma);
   await seedVr(prisma);
   await seedRegion(prisma);
+  await seedTee(prisma);
   console.log("Seed complete. Demo shopper 0788000001 · tailor 0788100001 · coop admin 0788100002 · seller 0788100003 · coop maker 0788100004 · host 0788900001");
 }
 

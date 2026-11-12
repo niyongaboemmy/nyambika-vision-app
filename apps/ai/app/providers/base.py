@@ -15,6 +15,11 @@ class VTONResult:
     subject_box: tuple[int, int, int, int] | None
     twin_resized: Image.Image
     model_version: str
+    # Optional (local compositor): the twin with its old upper garment hidden where the new one leaves it
+    # exposed, the mask of those edits, and the garment class used (top/skirt/dress).
+    base_image: Image.Image | None = None
+    edit_mask: np.ndarray | None = None
+    garment_class: str | None = None
 
 
 class VTONProvider(ABC):

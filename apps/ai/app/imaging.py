@@ -147,3 +147,25 @@ def dominant_colours(rgb: np.ndarray, mask: np.ndarray, k: int = 3) -> list[str]
         if all(np.abs(mean - o).max() > 40 for o in out):
             out.append(mean)
     return ["#%02x%02x%02x" % tuple(int(v) for v in c) for c in out]
+
+
+def _box_any(m: np.ndarray, r: int, axis: int) -> np.ndarray:
+    """1-D binary dilation by radius r along an axis (sliding-window OR via cumulative sums)."""
+    if r <= 0:
+        return m
+    n = m.shape[axis]
+    cs = np.cumsum(m.astype(np.int32), axis=axis)
+    cs = np.concatenate([np.zeros_like(np.take(cs, [0], axis=axis)), cs], axis=axis)
+    i = np.arange(n)
+    hi = np.take(cs, np.minimum(n, i + r + 1), axis=axis)
+    lo = np.take(cs, np.maximum(0, i - r), axis=axis)
+    return (hi - lo) > 0
+
+
+def dilate(m: np.ndarray, r: int) -> np.ndarray:
+    """Square binary dilation of radius r (side 2r+1)."""
+    return _box_any(_box_any(m, r, 0), r, 1)
+
+
+def erode(m: np.ndarray, r: int) -> np.ndarray:
+    return ~dilate(~m, r)
