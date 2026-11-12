@@ -32,7 +32,7 @@ export function Screen({ children, className = "", aurora = true }: { children: 
  * `large` (iOS large title): the title is drawn big under the bar and collapses into the compact centred title,
  * on a material bar, once it scrolls under it.
  */
-export function TopBar({ title, back, right, large = false }: { title?: ReactNode; back?: string | true; right?: ReactNode; large?: boolean }) {
+export function TopBar({ title, back, right, large = false, onBack }: { title?: ReactNode; back?: string | true; right?: ReactNode; large?: boolean; /** An in-screen step back (e.g. leave the camera) instead of navigating. */ onBack?: () => void }) {
   // Navigation pass: Back returns to the previous screen when it is ours (state kept), else `?next=`, else `back`
   // (or the route's parent) for deep links. The href stays for middle-click / no-JS.
   const goBack = useBack(typeof back === "string" ? back : undefined);
@@ -50,7 +50,7 @@ export function TopBar({ title, back, right, large = false }: { title?: ReactNod
     <>
       <div className={`z-20 flex min-h-14 items-center justify-between gap-3 px-4 pt-[max(env(safe-area-inset-top),14px)] pb-2 ${large ? `sticky top-0 transition-[background-color,box-shadow] duration-200 ${collapsed ? "material hairline-b" : ""}` : "relative"}`}>
         {back ? (
-          <BackLink href={typeof back === "string" ? back : "/"} onBack={goBack} className={ctl} />
+          <BackLink href={typeof back === "string" ? back : "/"} onBack={onBack ?? goBack} className={ctl} />
         ) : (
           <Link href="/" className="flex items-center gap-2" aria-label="Nyambika home">
             <span className="orb size-7 rounded-full shadow-[0_0_18px_rgba(242,184,75,.5)]" />

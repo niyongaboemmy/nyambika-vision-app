@@ -17,6 +17,8 @@ import { useCommerce, useRegion, type Commerce } from "@/lib/region";
 import { haptic } from "@/lib/native";
 import { useSession } from "@/lib/session";
 import { track } from "@/lib/track";
+import { useNeedSignIn } from "@/lib/auth-ask";
+import { go, takeResume } from "@/lib/use-nav";
 
 const HOLD_MS = 1200;
 const DELIVERY_FEE = 2000;
@@ -25,7 +27,17 @@ const DELIVERY_FEE = 2000;
 export function HoldToBuy({ look, autoOpen = false }: { look: Look; /** E35: open the sheet straight away (hand-off from the VR showroom / runway). */ autoOpen?: boolean }) {
   const { me, t } = useSession();
   const router = useRouter();
-  const [open, setOpen] = useState(autoOpen);
+  const [open, setOpen] = useState(autoOpen && Boolean(me));
+  const needSignIn = useNeedSignIn();
+  // Navigation pass: back from a detour that started in this sheet (add measurements), it opens again; an
+  // `autoOpen` hand-off waits for the session instead of being dropped while it loads.
+  const resumeKey = `${look.id}|${look.variant.id}`;
+  const autoDone = useRef(false);
+  useEffect(() => {
+    if (!me) return;
+    if (takeResume("buy", resumeKey) || (autoOpen && !autoDone.current)) setOpen(true);
+    autoDone.current = true;
+  }, [me, resumeKey, autoOpen]);
   const twinSize = me?.twinSize && look.variant.sizes.includes(me.twinSize) ? me.twinSize : null;
   const [size, setSize] = useState(twinSize ?? look.variant.sizes[Math.min(1, look.variant.sizes.length - 1)]);
   const [delivery, setDelivery] = useState<"DELIVERY" | "PICKUP">("DELIVERY");
@@ -61,7 +73,8 @@ export function HoldToBuy({ look, autoOpen = false }: { look: Look; /** E35: ope
         json: { lookId: look.id || undefined, variantId: look.variant.id, size, delivery, wallet, payerPhone: me!.phone, address, discountCode: discount?.code ?? undefined },
       });
       track("hold_started", { lookId: look.id, orderId: o.id, pageId: look.maker.pageId });
-      router.push(`/orders/${o.id}?fresh=1`);
+      haptic("success");
+      go(router, `/orders/${o.id}?fresh=1`, "push");
     } catch (e) {
       setError(e); // ApiError: DAILY/limit/offline codes render calmly via ErrorNote → LimitState
       setBusy(false);
@@ -70,12 +83,17 @@ export function HoldToBuy({ look, autoOpen = false }: { look: Look; /** E35: ope
     }
   }
 
-  if (!me) return null;
+  // Signed out: Buy still shows; it signs in on a sheet over this screen, then opens the buy sheet here.
   return (
     <>
       <button
         type="button"
-        onClick={() => { haptic("light"); setOpen(true); track("buy_sheet_opened", { lookId: look.id }); }}
+        onClick={async () => {
+          haptic("light");
+          if (!(await needSignIn("Sign in to buy"))) return;
+          setOpen(true);
+          track("buy_sheet_opened", { lookId: look.id });
+        }}
         className="grad-cta inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full px-5 text-[15px] font-bold text-white shadow-[0_10px_28px_-10px_rgba(139,92,246,.8)] transition-transform duration-300 active:scale-95 disabled:opacity-60"
         style={{ transitionTimingFunction: SPRING }}
         disabled={!look.variant.inStock}
@@ -83,7 +101,7 @@ export function HoldToBuy({ look, autoOpen = false }: { look: Look; /** E35: ope
         <Icon name="bag" className="size-[18px]" />
         {look.variant.inStock ? "Buy" : "Sold out"}
       </button>
-      <Sheet open={open} onClose={() => !busy && setOpen(false)}>
+      {me && <Sheet open={open} onClose={() => !busy && setOpen(false)}>
         <div className="max-h-[80dvh] overflow-y-auto overscroll-contain pr-1">
         <h3 className="font-display text-2xl font-black">{look.product.title}{look.product.madeToOrder ? " · tailor-made" : ""}</h3>
         <p className="flex flex-wrap items-center gap-x-1 text-sm text-mut">{look.maker.name}{look.maker.verified && <Icon name="checkCircle" className="size-3.5 text-mint" />} · {look.variant.colourName} · ready {eta}</p>
@@ -96,7 +114,7 @@ export function HoldToBuy({ look, autoOpen = false }: { look: Look; /** E35: ope
                 <Chip key={s} active={s === size} onClick={() => { picked.current = true; setSize(s); }}>{s === recSize ? <><Icon name="ruler" className="size-4" />{s} · {rec!.basis === "PROFILE" ? t("size.recommended") : t("buy.sizeFromTwin")}</> : s === twinSize && !recSize ? <><Icon name="ruler" className="size-4" />{s} · {t("buy.sizeFromTwin")}</> : s}</Chip>
               ))}
             </div>
-            <SizeNotes rec={recSize ? rec : null} size={size} />
+            <SizeNotes rec={recSize ? rec : null} size={size} resumeKey={resumeKey} />
           </div>
           {commerce === undefined ? (
             <div className="h-40 animate-pulse rounded-2xl bg-white/5" aria-hidden />
@@ -125,7 +143,7 @@ export function HoldToBuy({ look, autoOpen = false }: { look: Look; /** E35: ope
           )}
         </div>
         </div>
-      </Sheet>
+      </Sheet>}
     </>
   );
 }
@@ -165,7 +183,8 @@ function RegionHold({ look, commerce, size, eta, busy, setBusy }: { look: Look; 
         json: { lookId: look.id || undefined, variantId: look.variant.id, size, method, payerPhone: phone, delivery, address, discountCode: code.trim() || undefined, displayCurrency: prefs.displayCurrency },
       });
       track("hold_started", { lookId: look.id, orderId: r.orderId, pageId: look.maker.pageId, method, currency: commerce.currency });
-      router.push(`/orders/${r.orderId}?fresh=1`);
+      haptic("success");
+      go(router, `/orders/${r.orderId}?fresh=1`, "push");
     } catch (e) {
       setError((e as Error).message);
       setBusy(false);
