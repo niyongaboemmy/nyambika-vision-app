@@ -14,11 +14,15 @@ export async function seedRegion(prisma: PrismaClient) {
   // ---- Kenyan page (synthetic maker, reuses seeded catalogue photos)
   let ke = await prisma.page.findUnique({ where: { handle: KE_HANDLE } });
   if (!ke) {
-    const source = await prisma.page.findUnique({
-      where: { handle: "kanombe-kitenge-corner" },
-      include: { products: { where: { status: "PUBLISHED", readiness: "READY" }, take: 3, orderBy: { createdAt: "asc" }, include: { variants: true } } },
+    // One try-on-ready piece per category (dress, shirt/top, skirt) from the seeded ready-to-wear catalogue.
+    const ready = await prisma.product.findMany({
+      where: { status: "PUBLISHED", readiness: "READY", madeToOrder: false, page: { handle: { not: KE_HANDLE } } },
+      orderBy: { createdAt: "asc" },
+      include: { variants: true },
     });
-    if (!source?.products.length) {
+    const pickCat = (cats: string[]) => ready.find((p) => cats.includes(p.category));
+    const source = { products: [pickCat(["dress"]), pickCat(["shirt", "top", "t-shirt"]), pickCat(["skirt"]) ?? ready.find((p) => p.category === "dress" && p !== pickCat(["dress"]))].filter((p): p is (typeof ready)[number] => Boolean(p)) };
+    if (!source.products.length) {
       console.log("• region seed: base catalogue missing, run the main seed first");
       return;
     }
@@ -47,7 +51,7 @@ export async function seedRegion(prisma: PrismaClient) {
       const p = await prisma.product.create({
         data: {
           pageId: ke.id,
-          title: ["Pwani kaftan maxi", "Kariokor print shirt", "Kariokor wool midi skirt"][i] ?? sp.title,
+          title: `${sp.title} · Kariokor cut`,
           description: `Cut and sewn in Kariokor, Nairobi, by Nairobi Kikoi Studio. ${sp.fabric}. In stock; ships across East Africa in about 4 days.`,
           category: sp.category,
           priceRwf: convertMinor(amountMinor, "KES", "RWF", DEV_FIXED_RATES), // reporting only
