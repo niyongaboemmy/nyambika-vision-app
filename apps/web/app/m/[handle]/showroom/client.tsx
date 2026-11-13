@@ -358,7 +358,7 @@ function Room({ room, commerce }: { room: Showroom; commerce: Commerce | null })
 
       {/* R4 spike: shared presence (flag vr.multiuser_spike; renders nothing while off) */}
       {mode === "3d" && firstView && (
-        <SharedRoom engine={engine.current} room={`showroom:${room.page.handle}`} signedIn={Boolean(me)} signInHref={`/signin?next=${encodeURIComponent(`/m/${room.page.handle}/showroom`)}`} seated={seated} show={room.shows[0] ? { id: room.shows[0].id, title: room.shows[0].title, href: `/m/${room.page.handle}/shows/${room.shows[0].id}` } : null} />
+        <SharedRoom engine={engine.current} room={`showroom:${room.page.handle}`} signedIn={Boolean(me)} seated={seated} show={room.shows[0] ? { id: room.shows[0].id, title: room.shows[0].title, href: `/m/${room.page.handle}/shows/${room.shows[0].id}` } : null} />
       )}
       {stage && <XrStage open onClose={() => setStage(null)} title={stage.item.title} subtitle={`${room.page.name} · ${price(stage.item)}`} assets={stage.assets} initialVariantId={stage.item.variantId} />}
     </main>

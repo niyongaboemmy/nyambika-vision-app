@@ -8,6 +8,7 @@ import { Sheet } from "@/components/ui";
 import type { PresenceLayer } from "@/components/presence-layer";
 import type { ShowroomEngine } from "@/components/vr-engine";
 import { api } from "@/lib/api";
+import { askSignIn } from "@/lib/auth-ask";
 import { CLOSE_TEXT, PresenceClient, type PresenceEvent } from "@/lib/presence";
 import { prefersReducedMotion } from "@/lib/xr";
 import { Icon } from "@/components/icons";
@@ -27,7 +28,7 @@ const WHY = [
  * names, emoji reactions only (no voice, no chat), personal-space bubble, hide + report anyone, host mute /
  * remove / start runway. Renders nothing while the flag is off.
  */
-export function SharedRoom({ engine, room, signedIn, signInHref, seated, show }: { engine: ShowroomEngine | null; room: string; signedIn: boolean; signInHref: string; seated: boolean; show?: { id: string; title: string; href: string } | null }) {
+export function SharedRoom({ engine, room, signedIn, seated, show }: { engine: ShowroomEngine | null; room: string; signedIn: boolean; seated: boolean; show?: { id: string; title: string; href: string } | null }) {
   const [enabled, setEnabled] = useState(false);
   const [phase, setPhase] = useState<Phase>("idle");
   const [intro, setIntro] = useState(false);
@@ -278,9 +279,15 @@ export function SharedRoom({ engine, room, signedIn, signInHref, seated, show }:
             </button>
           </>
         ) : (
-          <Link href={signInHref} className="grad-cta mt-4 flex min-h-12 w-full items-center justify-center rounded-2xl font-bold">
+          <button
+            onClick={async () => {
+              setIntro(false); // one sheet at a time; the intro comes back signed in, ready to join
+              if (await askSignIn("Sign in to join")) setIntro(true);
+            }}
+            className="grad-cta mt-4 flex min-h-12 w-full items-center justify-center rounded-2xl font-bold"
+          >
             Sign in to join
-          </Link>
+          </button>
         )}
       </Sheet>
 
