@@ -51,7 +51,7 @@ function ArPage() {
 
   return (
     <Screen>
-      <TopBar back="/mirror/3d" title={t("twin3d.ar")} />
+      <TopBar back={`/mirror/3d${variant ? `?variant=${variant}` : ""}`} title={t("twin3d.ar")} />
       <main className="px-4 pb-32">
         <ErrorNote error={error} />
         {mrMirror && (

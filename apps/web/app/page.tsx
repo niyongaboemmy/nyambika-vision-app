@@ -12,6 +12,7 @@ import { api, ApiError, rwf } from "@/lib/api";
 import { describeError } from "@/lib/api-errors";
 import { museReply } from "@/lib/muse-reply";
 import { useSession } from "@/lib/session";
+import { askSignIn } from "@/lib/auth-ask";
 import { track } from "@/lib/track";
 import { canRecord, loadPrefs, savePrefs, speak, SPEECH_LANG, stopSpeaking, useRecorder, type SttResult, type VoicePrefs } from "@/lib/voice";
 
@@ -137,6 +138,16 @@ export default function Muse() {
     }
   }
 
+  /** Navigation pass: sign in on a sheet and keep the question; its looks start rendering straight away. */
+  async function signInForLooks() {
+    if (!(await askSignIn("Sign in to see these on you"))) return;
+    try {
+      setSession(await api("/intent", { method: "POST", json: { text: transcript, source: "text", locale } }));
+    } catch (e) {
+      setError(e);
+    }
+  }
+
   async function refine(next: Intent) {
     setIntent(next);
     setEdit(null);
@@ -149,7 +160,7 @@ export default function Muse() {
   }
 
   async function snap(file: File) {
-    if (!me) return router.push("/signin?next=/");
+    if (!me && !(await askSignIn("Sign in to snap a fabric"))) return; // the photo is kept: the snap goes on after
     setPhase("snapping");
     setError(null);
     const fd = new FormData();
@@ -345,7 +356,7 @@ export default function Muse() {
                 )}
               </div>
             ) : (
-              <Link href="/signin?next=/" className="mt-4 block"><Button className="w-full">Sign in to see these looks on you</Button></Link>
+              <Button className="mt-4 w-full" onClick={() => void signInForLooks()}>Sign in to see these looks on you</Button>
             )}
           </div>
         )}

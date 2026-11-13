@@ -5,6 +5,7 @@ import { useCallback, useState } from "react";
 import { Bubble } from "@/components/circle-bits";
 import { HoldToBuy } from "@/components/hold-to-buy";
 import { Button, ErrorNote, Fact, Screen, Sheet, TopBar } from "@/components/ui";
+import { NextReturn } from "@/components/return-button";
 import { api, rwf } from "@/lib/api";
 import { timeLeft, type OwnerPoll, type Snapshot } from "@/lib/social";
 import { useApi } from "@/lib/use-api";
@@ -54,6 +55,7 @@ export default function PollOwner() {
     return (
       <Screen>
         <TopBar back="/circle" />
+        <NextReturn className="px-4 pb-3" />
         <div className="space-y-4 p-5">
           <div className="skeleton mx-auto h-8 w-3/4 rounded-xl" />
           <div className="flex gap-3">{[0, 1, 2].map((i) => <div key={i} className="skeleton h-64 flex-1 rounded-3xl" />)}</div>

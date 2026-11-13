@@ -26,6 +26,7 @@ import {
   type WardrobeItem,
 } from "@/lib/twin3d";
 import { Icon } from "@/components/icons";
+import { DetourLink } from "@/components/detour-link";
 
 type Step = "home" | "capture" | "persona";
 
@@ -150,7 +151,7 @@ function Twin3d() {
   if (step === "capture" || step === "persona") {
     return (
       <Screen>
-        <TopBar back="/mirror/3d" title={t("twin3d.title")} />
+        <TopBar back="/mirror/3d" onBack={() => setStep("home")} title={t("twin3d.title")} />
         <TurnCapture persona={step === "persona" ? turnaround : null} onFrames={framesDone} onPersonaDone={personaDone} onCancel={() => setStep("home")} />
       </Screen>
     );
@@ -521,7 +522,7 @@ function Viewer({
         </ul>
         <div className="mt-4 grid grid-cols-2 gap-2">
           <Button variant="glass" onClick={async () => { setMenu(false); await onRebuild(); }}>Delete &amp; rebuild</Button>
-          <Link href="/trust" className="glass flex min-h-12 items-center justify-center rounded-2xl font-semibold">Privacy</Link>
+          <DetourLink href="/trust" className="glass flex min-h-12 items-center justify-center rounded-2xl font-semibold">Privacy</DetourLink>
         </div>
       </Sheet>
     </main>

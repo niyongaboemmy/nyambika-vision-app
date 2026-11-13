@@ -9,6 +9,8 @@ import { useSession } from "@/lib/session";
 import { useApi } from "@/lib/use-api";
 import { kigaliTime, MEASUREMENT_LABEL, type MeasurementsView } from "@/lib/tailor";
 import { Icon } from "@/components/icons";
+import { ReturnButton } from "@/components/return-button";
+import { returnTarget } from "@/lib/nav";
 
 /** Private measurement profile (FR-SIZE-01/04/08): encrypted, shared only by explicit time-limited choice. */
 export default function MeasurementsPage() {
@@ -20,6 +22,10 @@ export default function MeasurementsPage() {
   const [ok, setOk] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [more, setMore] = useState(false);
+  // Navigation pass: opened from the buy sheet (or a tailor ask) with ?next=: once saved, go back there.
+  const [back, setBack] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+  useEffect(() => setBack(returnTarget()), []);
 
   useEffect(() => {
     if (data) setDraft(data.profile ?? data.prefill ?? {});
@@ -33,6 +39,7 @@ export default function MeasurementsPage() {
       const clean = Object.fromEntries(Object.entries(draft).filter(([, v]) => typeof v === "number" && !Number.isNaN(v)));
       setData(await api<MeasurementsView>("/measurements", { method: "PUT", json: { measurements: clean, consent: true, source: data?.profile ? "MANUAL" : data?.prefill ? "TWIN_ESTIMATE" : "MANUAL" } }));
       setOk("Saved, encrypted. Only you can see these.");
+      setSaved(true);
       navigator.vibrate?.(10);
     } catch (e) {
       setErr((e as Error).message);
@@ -103,6 +110,7 @@ export default function MeasurementsPage() {
             </div>
             <ErrorNote error={err} />
             {ok && <p role="status" className="mt-2 text-sm text-mint">{ok}</p>}
+            {back && saved && <div className="mt-3"><ReturnButton to={back} auto /></div>}
             <Button className="mt-3 w-full" disabled={busy || (!consent && !data.profile)} onClick={save}>{busy ? "Saving…" : data.profile ? "Save changes" : "Save measurements"}</Button>
           </section>
         )}

@@ -17,6 +17,7 @@ import { rwf } from "@/lib/api";
 import { isRendering, type Look } from "@/lib/looks";
 import { haptic } from "@/lib/native";
 import { useSession } from "@/lib/session";
+import { go, useBack } from "@/lib/use-nav";
 
 interface Props {
   look: Look;
@@ -28,6 +29,8 @@ interface Props {
   onHold?: () => void;
   /** A limit card (daily cap, kill switch…) is showing: don't animate a render that isn't coming. */
   paused?: boolean;
+  /** Twin follow-through: the previous render, shown under a sheen while this look re-renders on the twin. */
+  staleImage?: string;
   /** This look is the one on screen (entrance spring, coach mark). Defaults to true (single try-on). */
   active?: boolean;
   children?: ReactNode;
@@ -56,9 +59,10 @@ function intentIcon(label: string): IconName {
  * control floats over it on dark materials. Double-tap saves (animated heart), single tap hides/shows the chrome,
  * swipe left opens the Maker Space, the stream pages vertically (snap + parallax in the page).
  */
-export function LookView({ look, index, total, intentLabel, onSave, onVariant, paused, active = true, children }: Props) {
+export function LookView({ look, index, total, intentLabel, onSave, onVariant, paused, active = true, staleImage, children }: Props) {
   const { t } = useSession();
   const router = useRouter();
+  const back = useBack("/");
   const [ring, setRing] = useState(false);
   const [about, setAbout] = useState(false);
   const [ask, setAsk] = useState(false);
@@ -140,7 +144,7 @@ export function LookView({ look, index, total, intentLabel, onSave, onVariant, p
       const ms = Math.max(1, performance.now() - dragT0.current);
       if (mx < -70 || (mx < -24 && -mx / ms > 0.6)) {
         haptic("medium");
-        router.push(makerHref);
+        go(router, makerHref, "push");
       }
       setDx(0);
     },
@@ -177,6 +181,21 @@ export function LookView({ look, index, total, intentLabel, onSave, onVariant, p
             style={{ transform: "translate3d(0, calc(var(--p, 0) * -22% + max(env(safe-area-inset-top), 12px) + 4dvh), 0) scale(1.04)", transformOrigin: "50% 0" }}
             draggable={false}
           />
+        ) : isRendering(look.status) && staleImage ? (
+          <div className="absolute inset-0" role="status" aria-label={t("looks.generating")} data-retwin>
+            <img
+              src={staleImage}
+              alt=""
+              className="absolute inset-0 size-full object-cover object-[50%_35%]"
+              style={{ transform: "translate3d(0, calc(var(--p, 0) * -22% + max(env(safe-area-inset-top), 12px) + 4dvh), 0) scale(1.04)", transformOrigin: "50% 0" }}
+              draggable={false}
+            />
+            <span aria-hidden className="nv-retwin" />
+            <span className={`absolute left-1/2 top-[42%] inline-flex -translate-x-1/2 items-center gap-2 whitespace-nowrap rounded-full px-3.5 py-2 text-sm font-semibold text-white ${MATERIAL}`}>
+              <Icon name="sparkle" className="size-4 text-gold" />
+              {t("looks.generating")}
+            </span>
+          </div>
         ) : isRendering(look.status) && paused ? (
           <div aria-hidden className="absolute inset-0 bg-[radial-gradient(70%_50%_at_50%_40%,rgba(224,112,63,.18),transparent_70%)]" />
         ) : isRendering(look.status) ? (
@@ -207,9 +226,20 @@ export function LookView({ look, index, total, intentLabel, onSave, onVariant, p
 
       {/* Top bar: ONE compact line — back · intent + page position · AI chip (the AI chip never hides). */}
       <div className="absolute inset-x-0 top-0 z-10 flex items-center gap-2 px-4 pt-[max(env(safe-area-inset-top),12px)]">
-        <Link inert={!chrome} href="/" aria-label="Back to Muse" className={`hit grid size-10 shrink-0 place-items-center rounded-full text-white transition-transform active:scale-90 ${MATERIAL} ${chromeCls}`}>
+        {/* Back: the screen the shopper came from (Muse, Maker Space, wardrobe…), the Muse for a deep link. */}
+        <a
+          inert={!chrome}
+          href="/"
+          aria-label="Back"
+          onClick={(e) => {
+            if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+            e.preventDefault();
+            back();
+          }}
+          className={`hit grid size-10 shrink-0 place-items-center rounded-full text-white transition-transform active:scale-90 ${MATERIAL} ${chromeCls}`}
+        >
           <Icon name="back" className="size-5" />
-        </Link>
+        </a>
         <div inert={!chrome} className={`flex min-w-0 flex-1 justify-center ${chromeCls}`}>
           {intentLabel || (total && total > 1) ? <PageCapsule label={intentLabel?.replace(/^For:\s*/, "") ?? null} icon={intentLabel ? intentIcon(intentLabel) : null} index={index ?? 0} total={total ?? 0} /> : null}
         </div>

@@ -8,6 +8,7 @@ import { api } from "@/lib/api";
 import { waLink, type MakerSpace } from "@/lib/maker";
 import type { Commerce } from "@/lib/region";
 import { useSession } from "@/lib/session";
+import { askSignIn } from "@/lib/auth-ask";
 import { track, trackOnce } from "@/lib/track";
 import type { ShowCard as ShowCardData } from "@/lib/vr";
 import { Icon } from "@/components/icons";
@@ -53,7 +54,7 @@ export function MakerActions({ maker, showroom }: { maker: MakerSpace; showroom:
   const [following, setFollowing] = useState(maker.following);
   const [bar, setBar] = useState(false);
   async function follow() {
-    if (!me) return router.push(`/signin?next=/m/${maker.handle}`);
+    if (!me && !(await askSignIn("Sign in to follow"))) return;
     const r = await api<{ following: boolean }>(`/pages/${maker.id}/follow`, { method: "POST" });
     setFollowing(r.following);
     navigator.vibrate?.(8);

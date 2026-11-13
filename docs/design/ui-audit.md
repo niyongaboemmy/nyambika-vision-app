@@ -894,3 +894,11 @@ Contact sheets: `docs/design/screens/makerspace-before.jpg` (light and dark at 3
   inside a chip.
 - Reviews are no longer listed on the page (the rating chip and JSON-LD keep the aggregate). A reviews sheet behind
   the rating chip would bring them back without lengthening the page.
+## 9. Navigation & workflow pass (Nov 2026)
+
+Detours (sign in, consent, twin, measurements, order, …) now return to the exact screen they left, small
+prerequisites are sheets over the current screen, and Back is history-aware with push/pop motion. The flow map,
+mechanisms, before/after and verification are in [`flows.md`](flows.md); `scripts/crawl-flows.mjs` guards it.
+New primitives: `BackButton` / `BackLink` (`components/back-link.tsx`, re-exported from `ui.tsx`), `DetourLink`,
+`ReturnButton` / `NextReturn`, `SignInFlow` + the lazy sign-in sheet (`askSignIn()`), and `TopBar onBack` for
+in-screen steps. `TopBar`'s existing props are unchanged.

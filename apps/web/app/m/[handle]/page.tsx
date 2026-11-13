@@ -8,6 +8,7 @@ import { CollectionAlerts, TailorServices } from "@/components/maker-lazy";
 import type { Showroom } from "@/lib/vr";
 import { RegionPill } from "@/components/region";
 import { Icon } from "@/components/icons";
+import { BackButton } from "@/components/back-link";
 import type { Commerce } from "@/lib/region";
 
 type Props = { params: Promise<{ handle: string }> };
@@ -74,9 +75,8 @@ export default async function MakerSpacePage({ params }: Props) {
       <div className="lg:grid lg:grid-cols-12 lg:items-end lg:gap-10">
         <div className="relative lg:col-span-7">
           <ShowroomHero handle={m.handle} name={m.name} palette={palette} banner={room?.banner ?? m.name} pieces={pieces} showroom={items.length > 0} label={room?.label ?? null} chip={<AllPieces maker={m} commerce={commerce} in3d={in3d} />} />
-          <a href="/" aria-label="Back to Muse" className="hit press glass absolute left-4 top-[max(env(safe-area-inset-top),14px)] z-20 grid size-10 place-items-center rounded-full !bg-black/40 text-[#fff]">
-            <Icon name="back" className="size-5" />
-          </a>
+          {/* Navigation pass: back to the look, search or show the shopper came from; Browse makers for a deep link. */}
+          <BackButton fallback="/makers" className="hit press glass absolute left-4 top-[max(env(safe-area-inset-top),14px)] z-20 grid size-10 place-items-center rounded-full !bg-black/40 text-[#fff]" />
           <RegionPill className="absolute right-4 top-[max(env(safe-area-inset-top),14px)] z-20 !bg-black/40 text-[#fff]" />
         </div>
 

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { Button, Chip, ErrorNote, Screen, Spinner, TopBar } from "@/components/ui";
+import { NextReturn } from "@/components/return-button";
 import { api, rwf } from "@/lib/api";
 import { useApi } from "@/lib/use-api";
 import { CO_LABEL, JOURNEY, journeyIndex, kigaliTime, specChips, type CustomOrderView } from "@/lib/tailor";
@@ -49,6 +50,7 @@ function CustomOrder() {
   return (
     <Screen>
       <TopBar back="/custom" title={o.code} />
+      <NextReturn className="px-4 pb-3" />
       <main className="space-y-4 px-4 pb-12">
         {fresh && o.status === "REQUESTED" && (
           <section className="flex animate-rise flex-col items-center gap-1.5 rounded-3xl bg-gradient-to-br from-violet/30 to-terra/25 p-5 text-center">

@@ -10,6 +10,8 @@ import { api } from "@/lib/api";
 import type { MakerProduct, MakerSpace } from "@/lib/maker";
 import { COUNTRY_NAMES, useRegion, type Commerce, type OrderMoney } from "@/lib/region";
 import { useSession } from "@/lib/session";
+import { askSignIn } from "@/lib/auth-ask";
+import { withReturn } from "@/lib/nav";
 import { Icon } from "@/components/icons";
 import { track } from "@/lib/track";
 
@@ -63,7 +65,7 @@ export function RegionBuy({ maker, product, variantIndex, commerce }: { maker: M
       });
       track("hold_started", { orderId: r.orderId, pageId: maker.id, productId: product.id, method, currency: commerce.currency });
       if (r.stripe) setCard(r);
-      else router.push(`/orders/${r.orderId}?fresh=1`);
+      else router.push(withReturn(`/orders/${r.orderId}?fresh=1`));
     } catch (e) {
       setError((e as Error).message);
       key.current = "";
@@ -76,8 +78,9 @@ export function RegionBuy({ maker, product, variantIndex, commerce }: { maker: M
     <>
       <Button
         className="col-span-2"
-        onClick={() => {
-          if (!me) return router.push(`/signin?next=/m/${maker.handle}`);
+        onClick={async () => {
+          // Navigation pass: sign in on a sheet, then this buy sheet opens on the same piece and colour.
+          if (!me && !(await askSignIn("Sign in to buy"))) return;
           // Defaults follow the shopper's country at open time (prefs load after mount).
           setDelivery(home ? "DELIVERY" : shipCountries.length ? "SHIP" : "PICKUP");
           setMethod(home ? methods[0] : commerce.card.enabled ? "CARD" : methods[0]);
@@ -91,7 +94,7 @@ export function RegionBuy({ maker, product, variantIndex, commerce }: { maker: M
       <Sheet open={open} onClose={() => !busy && (setOpen(false), setCard(null))}>
         <div className="max-h-[78dvh] overflow-y-auto overscroll-contain pr-1">
           {card?.stripe ? (
-            <CardStep result={card} payee={maker.name} onDone={(id) => router.push(`/orders/${id}?fresh=1`)} />
+            <CardStep result={card} payee={maker.name} onDone={(id) => router.push(withReturn(`/orders/${id}?fresh=1`))} />
           ) : (
             <>
               <h3 className="font-display text-2xl font-black">{product.title}</h3>

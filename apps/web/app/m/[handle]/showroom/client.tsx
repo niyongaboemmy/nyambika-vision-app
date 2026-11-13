@@ -59,6 +59,26 @@ function Room({ room, commerce }: { room: Showroom; commerce: Commerce | null })
   const [stage, setStage] = useState<{ item: RoomItem; assets: Garment3d[] } | null>(null);
   const [twin, setTwin] = useState<{ id: string; state: "working" | "on" | "none" | "error"; note?: string } | null>(null);
   const [announce, setAnnounce] = useState("");
+  // Navigation pass: the selected piece lives in ?item= (replace), so a detour (sign in, twin, MR mirror, try on)
+  // and Back return to the same piece, in the flat view as in 3D.
+  useEffect(() => {
+    const pre = new URLSearchParams(window.location.search).get("item");
+    if (pre && room.items.some((i) => i.productId === pre)) setSelected((s) => s ?? pre);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const lastSelected = useRef<string | null>(null);
+  useEffect(() => {
+    // Clear ?item= only when a piece was open and got closed (never on mount, where the URL is the source).
+    const was = lastSelected.current;
+    lastSelected.current = selected;
+    const q = new URLSearchParams(window.location.search);
+    if (selected) q.set("item", selected);
+    else if (was && q.has("item")) q.delete("item");
+    else return;
+    const s = q.toString();
+    const want = `${window.location.pathname}${s ? `?${s}` : ""}`;
+    if (want !== window.location.pathname + window.location.search) window.history.replaceState(null, "", want);
+  }, [selected]);
   const mrMirror = useFlag("mr.mirror_spike"); // R4 spike entry
   const item = room.items.find((i) => i.productId === selected) ?? null;
   const pieces = useMemo(() => {
@@ -283,11 +303,8 @@ function Room({ room, commerce }: { room: Showroom; commerce: Commerce | null })
               <button onClick={() => (offTwin(), pick(null))} aria-label="Close piece details" className="grid size-9 shrink-0 self-start place-items-center rounded-full bg-white/10"><Icon name="x" className="size-4" /></button>
             </div>
             <div className="mt-3">
-              {me ? (
-                <HoldToBuy key={`buy-${item.productId}-${handoff}`} look={look} autoOpen={handoff > 0} />
-              ) : (
-                <button onClick={() => router.push(`/signin?next=${encodeURIComponent(`/m/${room.page.handle}/showroom?item=${item.productId}`)}`)} className="grad-cta flex min-h-11 w-full items-center justify-center gap-1.5 whitespace-nowrap rounded-2xl px-4 text-sm font-bold"><Icon name="hand" className="size-4" /> Sign in to buy</button>
-              )}
+              {/* Signed out, Buy signs in on a sheet and opens the buy sheet on this piece (navigation pass). */}
+              <HoldToBuy key={`buy-${item.productId}-${handoff}`} look={look} autoOpen={handoff > 0} />
             </div>
             <div className="no-scrollbar mt-3 flex gap-2 overflow-x-auto">
               {item.glb && <Pill onClick={() => void view3d(item)}><Icon name="cube" className="size-4" /> View in 3D</Pill>}

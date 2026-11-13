@@ -7,7 +7,8 @@ import { Twin3dCard } from "@/components/twin3d-card";
 import { Button, ErrorNote, InfoTip, Screen, Spinner, TopBar } from "@/components/ui";
 import { api, ApiError } from "@/lib/api";
 import { useSession } from "@/lib/session";
-import { returnTarget } from "@/lib/nav";
+import { returnTarget, withReturn } from "@/lib/nav";
+import { ReturnButton } from "@/components/return-button";
 import { Icon } from "@/components/icons";
 
 type Step = "intro" | "camera" | "review" | "saving" | "ready";
@@ -138,7 +139,7 @@ export default function Mirror() {
                 ))}
               </div>
             </details>
-            <Link href="/mirror/3d" className="flex min-h-11 items-center justify-center gap-1.5 text-sm text-gold"><Icon name="cube" className="size-4" /> Prefer 3D? Make a 3D twin →</Link>
+            <Link href={back ? withReturn("/mirror/3d", back) : "/mirror/3d"} className="flex min-h-11 items-center justify-center gap-1.5 text-sm text-gold"><Icon name="cube" className="size-4" /> Prefer 3D? Make a 3D twin →</Link>
           </div>
         </main>
       )}
@@ -176,7 +177,7 @@ export default function Mirror() {
           </div>
           <div className="w-full space-y-2">
             {back ? (
-              <ReturnButton to={back} auto={justMade} onGo={(to) => router.push(to)} />
+              <ReturnButton to={back} auto={justMade} />
             ) : (
               <>
                 <Twin3dCard />
@@ -184,7 +185,7 @@ export default function Mirror() {
               </>
             )}
             <div className="grid grid-cols-2 gap-2">
-              <Link href="/trust" className="flex min-h-11 items-center justify-center text-sm text-mut underline">Manage or delete my twin</Link>
+              <Link href={withReturn("/trust", back ? withReturn("/mirror", back) : "/mirror")} className="flex min-h-11 items-center justify-center text-sm text-mut underline">Manage or delete my twin</Link>
               <button onClick={() => setStep("intro")} className="min-h-11 text-sm text-mut underline">Retake twin</button>
             </div>
           </div>
@@ -309,49 +310,5 @@ function Camera({ onCapture, onCancel }: { onCapture: (b: Blob) => void; onCance
         <span className="w-[88px]" />
       </div>
     </main>
-  );
-}
-
-/**
- * "Back to your looks": after a fresh twin, a short countdown ring returns the shopper to where they were (they
- * can go now or stay). Reduced motion skips the animation but keeps the button.
- */
-function ReturnButton({ to, auto, onGo }: { to: string; auto: boolean; onGo: (to: string) => void }) {
-  const SECONDS = 3;
-  const [left, setLeft] = useState(auto ? SECONDS : 0);
-  const [stayed, setStayed] = useState(false);
-  useEffect(() => {
-    if (!auto || stayed) return;
-    if (left <= 0) {
-      onGo(to);
-      return;
-    }
-    const id = setTimeout(() => setLeft((n) => n - 1), 1000);
-    return () => clearTimeout(id);
-  }, [auto, stayed, left, to, onGo]);
-  const counting = auto && !stayed && left > 0;
-  const label = to.startsWith("/looks") ? "Back to your looks" : to.startsWith("/m/") ? "Back to the Maker Space" : "Back to where you were";
-  return (
-    <div className="space-y-2">
-      <Button className="relative w-full overflow-hidden" onClick={() => onGo(to)}>
-        {counting && (
-          <span
-            aria-hidden
-            className="absolute inset-y-0 left-0 bg-white/20 motion-reduce:hidden"
-            style={{ width: "100%", animation: `nv-drain ${SECONDS}s linear forwards` }}
-          />
-        )}
-        <span className="relative inline-flex items-center gap-2">
-          <Icon name="sparkle" className="size-5" /> {label}
-          {counting && <span className="tabular-nums opacity-80">· {left}</span>}
-        </span>
-      </Button>
-      {counting && (
-        <button onClick={() => setStayed(true)} className="min-h-11 w-full text-sm text-mut">
-          Stay here
-        </button>
-      )}
-      <style>{`@keyframes nv-drain { from { transform: translateX(0) } to { transform: translateX(-100%) } }`}</style>
-    </div>
   );
 }

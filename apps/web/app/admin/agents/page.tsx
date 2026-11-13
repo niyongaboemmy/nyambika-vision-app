@@ -49,7 +49,7 @@ export default function AgentsAdmin() {
   const { me, loading } = useSession();
   const router = useRouter();
   useEffect(() => {
-    if (!loading && !me?.isHost) router.replace("/signin?next=/admin/agents");
+    if (!loading && !me?.isHost) router.replace(`/signin?next=${encodeURIComponent(window.location.pathname + window.location.search)}`);
   }, [loading, me, router]);
   const { data, reload } = useApi<Overview>(me?.isHost ? "/admin/agents" : null);
   const [newClient, setNewClient] = useState(false);

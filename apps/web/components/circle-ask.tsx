@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/icons";
+import { DetourLink } from "@/components/detour-link";
 import { Button, Chip, ErrorNote, Sheet } from "@/components/ui";
 import { api } from "@/lib/api";
 import type { Look } from "@/lib/looks";
@@ -153,7 +154,7 @@ export function CircleAsk({ look, open, onClose, intentLabel }: { look: Look; op
             <Button variant="glass" className="flex-1" onClick={async () => { await navigator.clipboard?.writeText(poll.shareUrl).catch(() => {}); setCopied(true); }}>
               {copied ? <><Icon name="check" className="size-4" />Copied</> : <><Icon name="copy" className="size-4" />Copy link</>}
             </Button>
-            <Link href={`/circle/${poll.id}`} className="glass inline-flex min-h-12 flex-1 items-center justify-center rounded-2xl font-semibold">Live results <Icon name="chevron" className="ml-1 size-4" /></Link>
+            <DetourLink href={`/circle/${poll.id}`} className="glass inline-flex min-h-12 flex-1 items-center justify-center rounded-2xl font-semibold">Live results <Icon name="chevron" className="ml-1 size-4" /></DetourLink>
           </div>
         </div>
       )}

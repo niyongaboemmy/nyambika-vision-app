@@ -38,8 +38,17 @@ export default function Admin() {
     return (TABS as readonly string[]).includes(q ?? "") && q !== "Pilot" && q !== "Agents & partners" && q !== "Regions" ? (q as (typeof TABS)[number]) : "Overview";
   });
   useEffect(() => {
-    if (!loading && !me?.isHost) router.replace("/signin?next=/admin");
+    if (!loading && !me?.isHost) router.replace(`/signin?next=${encodeURIComponent(window.location.pathname + window.location.search)}`);
   }, [loading, me, router]);
+  // Navigation pass: the open tab lives in ?tab= (replace, not push), so reload, sign-in and back keep it.
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search);
+    if (tab === "Overview") q.delete("tab");
+    else q.set("tab", tab);
+    const s = q.toString();
+    const want = `${window.location.pathname}${s ? `?${s}` : ""}`;
+    if (want !== window.location.pathname + window.location.search) window.history.replaceState(null, "", want);
+  }, [tab]);
   const { data: counts } = useApi<Overview>(me?.isHost ? "/admin/overview" : null);
   if (!me?.isHost) return null;
   return (

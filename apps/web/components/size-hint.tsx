@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+import { DetourLink } from "@/components/detour-link";
+import { stashResume } from "@/lib/use-nav";
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/icons";
 import { api } from "@/lib/api";
@@ -24,8 +25,16 @@ export function useSizeRecommendation(productId: string, variantId: string, enab
 
 const CONF: Record<string, string> = { high: "great fit", medium: "good fit", low: "estimate" };
 
-export function SizeNotes({ rec, size }: { rec: SizeRecommendation | null; size: string }) {
-  if (!rec) return null;
+export function SizeNotes({ rec, size, resumeKey }: { rec: SizeRecommendation | null; size: string; /** Reopen this buy sheet when the shopper comes back from measurements. */ resumeKey?: string }) {
+  // No chart-based advice for this piece: still one tap to the measurements, and the buy sheet reopens on return.
+  if (!rec)
+    return resumeKey ? (
+      <p className="mt-1.5 text-xs">
+        <DetourLink href="/measurements" onBeforeGo={() => stashResume("buy", resumeKey)} className="inline-flex min-h-8 items-center gap-1 font-semibold text-gold underline-offset-2 hover:underline">
+          <Icon name="ruler" className="size-3.5" /> My measurements
+        </DetourLink>
+      </p>
+    ) : null;
   return (
     <div className="mt-1.5 text-xs text-txt/80" aria-live="polite">
       {rec.size === size ? (
@@ -40,7 +49,7 @@ export function SizeNotes({ rec, size }: { rec: SizeRecommendation | null; size:
         <p>We'd suggest {rec.size} ({rec.notes[0]?.toLowerCase() ?? CONF[rec.confidence]}).</p>
       )}
       {rec.basis === "TWIN" && (
-        <Link href="/measurements" className="font-semibold text-gold underline-offset-2 hover:underline">Add measurements</Link>
+        <DetourLink href="/measurements" onBeforeGo={() => resumeKey && stashResume("buy", resumeKey)} className="font-semibold text-gold underline-offset-2 hover:underline">Add measurements</DetourLink>
       )}
     </div>
   );

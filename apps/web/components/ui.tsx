@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useBack } from "@/lib/use-nav";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import dynamic from "next/dynamic";
 import { recallFriendly } from "@/lib/api-errors";
 import { Icon } from "@/components/icons";
 import { useSheetDrag } from "@/lib/sheet-drag";
+import { BackLink } from "./back-link";
 
 // The limit card only renders after a failed call, so it loads on demand (keeps core routes' first-load JS down).
 const LimitState = dynamic(() => import("./limit-state").then((m) => m.LimitState), { ssr: false });
@@ -32,8 +33,10 @@ export function Screen({ children, className = "", aurora = true }: { children: 
  * `large` (iOS large title): the title is drawn big under the bar and collapses into the compact centred title,
  * on a material bar, once it scrolls under it.
  */
-export function TopBar({ title, back, right, large = false }: { title?: ReactNode; back?: string | true; right?: ReactNode; large?: boolean }) {
-  const router = useRouter();
+export function TopBar({ title, back, right, large = false, onBack }: { title?: ReactNode; back?: string | true; right?: ReactNode; large?: boolean; /** An in-screen step back (e.g. leave the camera) instead of navigating. */ onBack?: () => void }) {
+  // Navigation pass: Back returns to the previous screen when it is ours (state kept), else `?next=`, else `back`
+  // (or the route's parent) for deep links. The href stays for middle-click / no-JS.
+  const goBack = useBack(typeof back === "string" ? back : undefined);
   const ctl = "hit glass press grid size-10 shrink-0 place-items-center rounded-full";
   const big = useRef<HTMLHeadingElement>(null);
   const [collapsed, setCollapsed] = useState(!large);
@@ -48,11 +51,7 @@ export function TopBar({ title, back, right, large = false }: { title?: ReactNod
     <>
       <div className={`z-20 flex min-h-14 items-center justify-between gap-3 px-4 pt-[max(env(safe-area-inset-top),14px)] pb-2 ${large ? `sticky top-0 transition-[background-color,box-shadow] duration-200 ${collapsed ? "material hairline-b" : ""}` : "relative"}`}>
         {back ? (
-          typeof back === "string" ? (
-            <Link href={back} aria-label="Back" className={ctl}><Icon name="back" className="size-5" /></Link>
-          ) : (
-            <button onClick={() => router.back()} aria-label="Back" className={ctl}><Icon name="back" className="size-5" /></button>
-          )
+          <BackLink href={typeof back === "string" ? back : "/"} onBack={onBack ?? goBack} className={ctl} />
         ) : (
           <Link href="/" className="flex items-center gap-2" aria-label="Nyambika home">
             <span className="orb size-7 rounded-full shadow-[0_0_18px_rgba(242,184,75,.5)]" />
@@ -74,6 +73,8 @@ export function TopBar({ title, back, right, large = false }: { title?: ReactNod
     </>
   );
 }
+
+export { BackButton, BackLink } from "./back-link";
 
 // Button lives in button.tsx (no client code: pages can import it without the rest of this kit, JS budget pass).
 export { Button } from "./button";

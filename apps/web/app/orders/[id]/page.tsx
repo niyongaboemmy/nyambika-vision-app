@@ -7,6 +7,7 @@ import { AmbientOrder } from "@/components/ambient-order";
 import { LimitState } from "@/components/limit-state";
 import { PushAsk } from "@/components/push-ask";
 import { Button, Chip, ErrorNote, Screen, Spinner, TopBar } from "@/components/ui";
+import { NextReturn } from "@/components/return-button";
 import { api, rwf } from "@/lib/api";
 import { haptic } from "@/lib/native";
 import { ORDER_LABEL, type OrderView } from "@/lib/orders";
@@ -46,6 +47,7 @@ function Order() {
   return (
     <Screen>
       <TopBar back="/orders" title={o.code} />
+      <NextReturn className="px-4 pb-3" />
       <main className="space-y-4 px-4 pb-10">
         {o.status === "AWAITING_PAYMENT" && (
           <section className="glass flex flex-col items-center gap-3 rounded-3xl p-6 text-center" role="status">

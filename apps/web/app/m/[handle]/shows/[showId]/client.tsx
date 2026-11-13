@@ -14,6 +14,7 @@ import { api, rwf } from "@/lib/api";
 import { Price } from "@/components/region";
 import type { Commerce } from "@/lib/region";
 import { useSession } from "@/lib/session";
+import { askSignIn } from "@/lib/auth-ask";
 import { useLive } from "@/lib/use-live";
 import { countdown, fmtWhen, lookFor, lowEnd, type ShowSnapshot, type ShowView } from "@/lib/vr";
 import { hasWebGL2, prefersReducedMotion } from "@/lib/xr";
@@ -163,7 +164,7 @@ export function ShowClient({ initial }: { initial: ShowView }) {
   }, [watching, replay, offset, show.startsAt, show.items.length, show.walkSec]);
 
   async function rsvp(going: boolean) {
-    if (!me) return router.push(`/signin?next=${encodeURIComponent(location.pathname)}`);
+    if (!me && !(await askSignIn("Sign in to RSVP"))) return;
     setRsvpBusy(true);
     setErr(null);
     try {
@@ -346,7 +347,7 @@ export function ShowClient({ initial }: { initial: ShowView }) {
                 <button onClick={() => void startReplay()} className="glass min-h-12 rounded-2xl px-4 font-bold" aria-label="Restart the replay"><Icon name="refresh" className="size-5" /></button>
               </div>
             )}
-            {look && (me ? <HoldToBuy key={look.variant.id} look={look} /> : <Link href={`/signin?next=${encodeURIComponent(`/m/${show.maker.handle}/shows/${show.id}`)}`} className="grad-cta inline-flex shrink-0 items-center gap-1.5 rounded-2xl px-4 py-2 text-sm font-bold"><Icon name="hand" className="size-4" /> Buy</Link>)}
+            {look && <HoldToBuy key={look.variant.id} look={look} />}
           </div>
           {snap && !replay && (
             <p className="mt-2 text-center text-[11px] text-txt/70">

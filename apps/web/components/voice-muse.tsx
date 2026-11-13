@@ -1,7 +1,7 @@
 "use client";
 
 import type { Locale } from "@nyambika/i18n";
-import Link from "next/link";
+import { DetourLink } from "@/components/detour-link";
 import { useEffect, useState } from "react";
 import { Button, Chip, Sheet } from "@/components/ui";
 import { useSession } from "@/lib/session";
@@ -103,7 +103,7 @@ export function VoiceConsentSheet({ open, onAllow, onType, onClose }: { open: bo
         <Button variant="glass" onClick={onType}><Icon name="keyboard" className="size-5" /> {t("voice.typeInstead")}</Button>
         <Button onClick={onAllow}>{t("voice.allow")}</Button>
       </div>
-      <Link href="/trust" className="mt-3 block text-center text-xs text-mut underline">{t("trust.title")}</Link>
+      <DetourLink href="/trust" className="mt-3 flex min-h-11 items-center justify-center text-xs text-mut underline">{t("trust.title")}</DetourLink>
     </Sheet>
   );
 }

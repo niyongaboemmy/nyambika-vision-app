@@ -32,7 +32,7 @@ export function PasskeyOffer({ onDone }: { onDone: () => void }) {
   return (
     <div className="flex animate-rise flex-col items-center gap-5 text-center">
       <span className={`grid size-24 place-items-center rounded-full text-5xl ${saved ? "bg-mint text-ink" : "glass"} shadow-[0_0_60px_rgba(139,92,246,.45)] transition`} aria-hidden>
-        {saved ? <Icon name="check" className="size-4" /> : <Icon name="key" className="size-4" />}
+        {saved ? <Icon name="check" className="size-10" /> : <Icon name="key" className="size-10" />}
       </span>
       <div>
         <h2 className="font-display text-3xl font-black leading-tight text-grad">{saved ? t("passkey.created") : t("passkey.offerTitle")}</h2>
