@@ -861,3 +861,36 @@ Contact sheets: `docs/design/screens/makerspace-before.jpg` (light and dark at 3
 - `crawl-lib.mjs` gained `openMakerPiece(page, name?)`. s1, s2, e05, xr, region, s5, tryonq and reseed open
   pieces through it instead of stepping the coverflow. mig waits for the heading. vr checks the hero (live
   preview, View in VR, show row) and enters the showroom from it instead of the shelf. growth needed no change.
+
+### Verification
+
+- **JS budget** (production build, `perf-uiux`, Pixel 7, 4× CPU, slow 4G, signed-in shopper, KB gz at the load
+  event): Maker Space **162.6** (polish pass: 163.9; Bag on the same build 161.9). The first build measured 183.9:
+  the show row's cover is a full photo (218 KB) shown at 48 px, and on slow 4G it pushed the load event late enough
+  for the lazy sections' chunks to land before it. The cover now loads after `load` (a play tile until then).
+  three.js and the engine arrive only after `load`, so "JS until idle" is 427.8 KB with the live preview, which is the
+  showroom's own code, now warm in the cache for Enter showroom. `perf-uiux.mjs` gained `ONLY=` (route filter) and
+  `LIST=1` (critical scripts with sizes).
+- **crawl-uiux** `ONLY=maker` (maker-space, maker-showroom, maker-show, makers, coop-makers; light/dark,
+  390/1280, 360): 0 serious/critical axe after two fixes (trust chip contrast; the pieces chip's name now contains
+  its visible text, "7 pieces · 3D · see all"), 0 wraps, 0 outlines, 0 overflow, 0 tap targets under 44 px. Maker
+  Space: 175 → 112 words.
+- **Crawls on slot 3:** makerspace, s1, s2, s5, e05, xr, vr, region, growth, tryonq, reseed and mig are green. The
+  WebGL preview under SwiftShader can delay timers and IntersectionObserver callbacks by seconds, so
+  crawl-makerspace polls the countdown and the bar instead of fixed waits.
+- **Typecheck:** `apps/web` is clean. Web unit tests 22/22, including `no-emoji`.
+
+### Known gaps
+
+- The live preview is untested on real low-end Android phones and on headsets. On devices that pass the gates but
+  are slow, the preview costs GPU time while the hero is on screen (it pauses off screen). The INP proxy on this
+  route was 184–288 ms under 4× CPU throttling with the preview running; the next step, if field data agrees, is to
+  start the preview only after the first idle second without input.
+- View in VR cannot start WebXR from the Maker Space (it needs a user gesture in the room), so it opens the
+  showroom with Enter VR focused.
+- The camera sweep is the same for every room. A room with many pieces shows the banner cut off at the edges of the
+  sweep.
+- Chips can take three rows at 360 px for long type and sector names ("Cooperative", "Nyamirambo"). They never wrap
+  inside a chip.
+- Reviews are no longer listed on the page (the rating chip and JSON-LD keep the aggregate). A reviews sheet behind
+  the rating chip would bring them back without lengthening the page.
