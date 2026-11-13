@@ -274,4 +274,10 @@ export const fr: Messages = {
   "err.auth.signin": "Se connecter",
   "err.check": "À vérifier :",
   "err.dismiss": "Fermer",
+  "maker.enterShowroom": "Entrer dans le showroom",
+  "maker.viewVr": "Voir en VR",
+  "maker.pieces3d": "pièces · 3D",
+  "maker.collectionTitle": "Collection",
+  "maker.rsvp": "Participer",
+  "maker.going": "Inscrit",
 };

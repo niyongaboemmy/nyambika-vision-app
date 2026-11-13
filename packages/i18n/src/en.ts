@@ -272,6 +272,12 @@ export const en = {
   "err.auth.signin": "Sign in",
   "err.check": "Please check:",
   "err.dismiss": "Dismiss",
+  "maker.enterShowroom": "Enter showroom",
+  "maker.viewVr": "View in VR",
+  "maker.pieces3d": "pieces · 3D",
+  "maker.collectionTitle": "Collection",
+  "maker.rsvp": "RSVP",
+  "maker.going": "Going",
 };
 
 export type Messages = typeof en;

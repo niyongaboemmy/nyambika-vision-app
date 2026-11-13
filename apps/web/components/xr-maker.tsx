@@ -29,7 +29,7 @@ export function Garment3dSection({ productId, title, variantId }: { productId: s
   return (
     <button
       onClick={() => setOpen(true)}
-      className="group relative mt-4 flex w-full items-center gap-4 overflow-hidden rounded-[24px] p-3 text-left transition active:scale-[.99]"
+      className="theme-media group relative mt-4 flex w-full items-center gap-4 overflow-hidden rounded-[24px] p-3 text-left text-txt transition active:scale-[.99]"
       style={{ background: "radial-gradient(80% 120% at 0% 50%, rgba(139,92,246,.28), transparent 60%), radial-gradient(60% 90% at 100% 100%, rgba(224,112,63,.22), transparent 70%), #15131b" }}
     >
       <span className="relative grid h-24 w-20 shrink-0 place-items-center [perspective:400px]">

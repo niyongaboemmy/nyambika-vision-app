@@ -63,7 +63,7 @@ const ROUTES = [
   ["/trust", "Trust centre"],
   ["/mirror", "Mirror"],
   ["/signin", "Sign in"],
-].filter(Boolean);
+].filter(Boolean).filter(([path, name]) => !process.env.ONLY || process.env.ONLY.split(",").some((s) => `${path} ${name}`.includes(s))); // ONLY=/m/ measures one route
 
 const rows = [];
 for (const [path, name] of ROUTES) {
@@ -75,12 +75,18 @@ for (const [path, name] of ROUTES) {
   await cdp.send("Network.emulateNetworkConditions", { offline: false, latency: 150, downloadThroughput: (1.6 * 1024 * 1024) / 8, uploadThroughput: (750 * 1024) / 8 });
   let js = 0;
   const reqType = new Map();
-  cdp.on("Network.responseReceived", (e) => reqType.set(e.requestId, e.type));
+  const reqUrl = new Map();
+  let loaded = false;
+  cdp.on("Network.responseReceived", (e) => (reqType.set(e.requestId, e.type), reqUrl.set(e.requestId, e.response.url.replace(/^.*\/_next\//, ""))));
   cdp.on("Network.loadingFinished", (e) => {
-    if (reqType.get(e.requestId) === "Script") js += e.encodedDataLength;
+    if (reqType.get(e.requestId) === "Script") {
+      js += e.encodedDataLength;
+      if (process.env.LIST && !loaded) console.log(`  ${(e.encodedDataLength / 1024).toFixed(1)} KB ${reqUrl.get(e.requestId)}`); // LIST=1: critical scripts
+    }
   });
   await page.goto(`${BASE}${path}`, { waitUntil: "load" });
   const jsAtLoad = js; // critical JS: everything fetched before the load event
+  loaded = true;
   await page.waitForLoadState("networkidle").catch(() => {});
   await page.waitForTimeout(1200);
   // INP proxy: tap a neutral spot, then the first in-page toggle-like control that does not navigate.

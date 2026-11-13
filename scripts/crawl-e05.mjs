@@ -1,5 +1,5 @@
 import { readdirSync } from "node:fs";
-import { BASE, signIn, start } from "./crawl-lib.mjs";
+import { BASE, openMakerPiece, signIn, start } from "./crawl-lib.mjs";
 
 const seedDir = new URL("../apps/api/storage/seed/", import.meta.url).pathname;
 const photo = seedDir + readdirSync(seedDir).find((f) => f.startsWith("umushanana-gold"));
@@ -40,14 +40,8 @@ await shot("ai-page-story");
 await page.waitForTimeout(11000);
 await page.goto(`${BASE}/m/umurage-wear`);
 await page.reload();
-// First tap centres a side card in the coverflow, the second opens it.
-// Scope to the coverflow: the 3D shelf (E35) is a second listbox on the same page.
-const coverflow = page.getByRole("listbox", { name: "Collection" });
-const card = coverflow.getByRole("option", { name: new RegExp(title.slice(0, 12)) }).first();
-await card.click();
-await page.waitForTimeout(400);
-await coverflow.getByRole("option", { selected: true }).click();
-await page.getByRole("dialog").waitFor();
+// The hero's "N pieces" sheet lists every piece; tapping one opens its product sheet.
+await openMakerPiece(page, new RegExp(title.slice(0, 12)));
 await page.locator('img[alt*="on an AI model"]').first().waitFor({ timeout: 10000 });
 await shot("maker-space-studio-gallery");
 await finish();

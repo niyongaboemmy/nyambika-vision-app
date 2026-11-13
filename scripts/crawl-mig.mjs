@@ -76,7 +76,7 @@ r = await page.request.get(`${BASE}${legacy}`, { maxRedirects: 0 });
 console.log(`legacy ${legacy}: HTTP ${r.status()} → ${r.headers()["location"]}`);
 await page.goto(`${BASE}${legacy}`);
 await page.waitForURL(new RegExp(`/m/${tailor.handle}`));
-await page.getByRole("listbox", { name: "Collection" }).waitFor();
+await page.getByRole("heading", { level: 1 }).waitFor(); // Maker Space identity
 await shot("legacy-redirected-maker-space");
 
 // Rollback disables the redirect; misses are recorded

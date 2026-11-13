@@ -1,4 +1,4 @@
-import { BASE, signIn, start } from "./crawl-lib.mjs";
+import { BASE, openMakerPiece, signIn, start } from "./crawl-lib.mjs";
 
 const { browser, context, page, shot, finish } = await start("s5");
 
@@ -34,7 +34,7 @@ await shopper.getByText(/synthetic demo persona/i).click();
 await shopper.getByRole("button", { name: "Persona 5" }).click();
 await shopper.getByText(/your twin is ready/i).waitFor({ timeout: 20000 });
 await shopper.goto(`${BASE}/m/akeza-couture`);
-await shopper.getByRole("listbox", { name: "Collection" }).getByRole("option", { selected: true }).click();
+await openMakerPiece(shopper); // hero "N pieces" sheet → first piece
 await shopper.getByRole("button", { name: /try on me/i }).click();
 await shopper.getByText(/looks are resting/i).waitFor({ timeout: 15000 }); // KILL_SWITCH → calm LimitState card
 await shopper.screenshot({ path: new URL("./crawl-output/s5/90-killswitch-blocks-shopper.png", import.meta.url).pathname });
@@ -55,7 +55,7 @@ await shopper.screenshot({ path: new URL("./crawl-output/s5/91-trust-centre.png"
 await shopper.getByLabel("Render looks on my twin").uncheck({ force: true });
 await shopper.waitForTimeout(500);
 await shopper.goto(`${BASE}/m/kanombe-kitenge-corner`);
-await shopper.getByRole("listbox", { name: "Collection" }).getByRole("option", { selected: true }).click();
+await openMakerPiece(shopper); // hero "N pieces" sheet → first piece
 await shopper.getByRole("button", { name: /try on me/i }).click();
 await shopper.getByText(/looks on your twin are (paused|off)/i).waitFor({ timeout: 15000 }); // CONSENT_WITHDRAWN → LimitState with inline "Turn on"
 await shopper.getByRole("button", { name: "Turn on" }).waitFor();

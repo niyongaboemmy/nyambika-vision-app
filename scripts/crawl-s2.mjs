@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs";
-import { BASE, signIn, start } from "./crawl-lib.mjs";
+import { BASE, openMakerPiece, signIn, start } from "./crawl-lib.mjs";
 
 const persona = new URL("../apps/api/storage/personas/persona-4.png", import.meta.url).pathname;
 const bad = new URL("./crawl-output/bad-twin.png", import.meta.url).pathname;
@@ -40,7 +40,7 @@ await shot("mirror-twin-ready");
 
 // Maker Space → try on → guarded, labelled look on the twin
 await page.goto(`${BASE}/m/umurage-wear`);
-await page.getByRole("listbox", { name: "Collection" }).getByRole("option", { selected: true }).click(); // the 3D shelf is a second listbox
+await openMakerPiece(page); // hero "N pieces" sheet → first piece
 await page.getByRole("button", { name: /try on me/i }).click();
 await page.waitForURL(/looks\/try/);
 await page.locator('img[alt*="AI preview on your twin"]').waitFor({ timeout: 30000 });

@@ -39,7 +39,12 @@ export function ProductSheet({ maker, product, commerce, onClose }: { maker: Mak
           </div>
         </div>
       </div>
-      <div className="mt-5 grid grid-cols-2 gap-2">
+      {/* Maker Space redesign: 3D first (the guided path), then Buy, then try-on and WhatsApp. */}
+      <Garment3dSection productId={product.id} title={product.title} variantId={v.id} />
+      {commerce && (commerce.wallets.length > 0 || commerce.card.enabled) && commerce.prices[product.id] != null && (
+        <div className="mt-4 grid grid-cols-2 gap-2"><RegionBuy maker={maker} product={product} variantIndex={vi} commerce={commerce} /></div>
+      )}
+      <div className="mt-2 grid grid-cols-2 gap-2">
         <Button onClick={tryOn} disabled={product.readiness !== "READY"}><Icon name="sparkle" className="size-5" /> Try on me</Button>
         <a
           className="glass inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl font-semibold"
@@ -52,11 +57,7 @@ export function ProductSheet({ maker, product, commerce, onClose }: { maker: Mak
         </a>
       </div>
       {product.readiness !== "READY" && <p className="mt-2 text-center text-xs text-mut">Try-on isn't available for this item yet.</p>}
-      {commerce && (commerce.wallets.length > 0 || commerce.card.enabled) && commerce.prices[product.id] != null && (
-        <div className="mt-2 grid grid-cols-2 gap-2"><RegionBuy maker={maker} product={product} variantIndex={vi} commerce={commerce} /></div>
-      )}
       {commerce?.passports.includes(product.id) && <div className="mt-3"><PassportLink productId={product.id} /></div>}
-      <Garment3dSection productId={product.id} title={product.title} variantId={v.id} />
       {product.studio.length > 0 && (
         <div className="no-scrollbar mt-4 flex gap-2 overflow-x-auto">
           {product.studio.filter(Boolean).map((src) => (

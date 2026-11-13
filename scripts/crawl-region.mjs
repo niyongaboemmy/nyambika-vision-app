@@ -34,8 +34,13 @@ async function ctx(label) {
   };
   return { c, p, snap };
 }
-const openFirstProduct = async (p) => {
-  await p.locator('[role="option"][aria-selected="true"]').first().click();
+// Prices live in the hero's "N pieces" sheet (Maker Space redesign): open it, check the currency, then a piece.
+const openPieces = async (p) => {
+  await p.getByRole("button", { name: /\d+ pieces.*see all/i }).click();
+  await p.getByRole("list", { name: "Collection" }).waitFor();
+};
+const pickFirst = async (p) => {
+  await p.getByRole("list", { name: "Collection" }).getByRole("button").first().click();
   await p.getByRole("dialog").waitFor();
 };
 
@@ -51,9 +56,10 @@ const rwCount = await K.p.locator('a[href="/m/umurage-wear"]').count();
 assert(rwCount === 0, "Rwandan makers hidden for a Kenyan shopper without cross-border opt-in");
 await K.snap("directory-ke");
 await K.p.goto(`${BASE}/m/nairobi-kikoi-studio`);
+await openPieces(K.p);
 await K.p.getByText(/KES \d/).first().waitFor({ timeout: 20000 });
 await K.snap("maker-space-kes");
-await openFirstProduct(K.p);
+await pickFirst(K.p);
 await K.p.getByRole("button", { name: /Buy · KES/ }).click();
 await K.p.getByLabel("Delivery address").fill("Moi Avenue 12, Nairobi");
 const payer = K.p.getByLabel(/M-Pesa number/);
@@ -87,9 +93,10 @@ await R.p.getByRole("button", { name: "Done" }).click();
 await R.p.getByText("ships to you").first().waitFor({ timeout: 15000 });
 await R.snap("directory-cross-border");
 await R.p.goto(`${BASE}/m/nairobi-kikoi-studio`);
+await openPieces(R.p);
 await R.p.getByText(/≈ USD/).first().waitFor({ timeout: 20000 });
 await R.snap("maker-space-approx-usd");
-await openFirstProduct(R.p);
+await pickFirst(R.p);
 await R.snap("product-sheet");
 await R.p.getByRole("button", { name: /Buy · KES/ }).click();
 await R.p.getByLabel("Delivery address").fill("KG 7 Ave 3, Kacyiru, Kigali");
