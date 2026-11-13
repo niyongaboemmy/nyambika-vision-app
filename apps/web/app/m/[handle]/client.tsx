@@ -113,6 +113,14 @@ export function ShowCard({ show, handle }: { show: ShowCardData; handle: string 
   const [now, setNow] = useState<number | null>(null);
   const [going, setGoing] = useState(false);
   const [busy, setBusy] = useState(false);
+  // The cover is a full photo shown at 48 px: fetch it after the page's load event so it never delays first load.
+  const [afterLoad, setAfterLoad] = useState(false);
+  useEffect(() => {
+    if (document.readyState === "complete") return setAfterLoad(true);
+    const on = () => setAfterLoad(true);
+    window.addEventListener("load", on, { once: true });
+    return () => window.removeEventListener("load", on);
+  }, []);
   const href = `/m/${handle}/shows/${show.id}`;
   const isLive = show.phase === "LIVE";
   const start = new Date(show.startsAt).getTime();
@@ -151,7 +159,7 @@ export function ShowCard({ show, handle }: { show: ShowCardData; handle: string 
     <section aria-label={`${t("vr.fashionShow")}: ${show.title}`} className="mt-5 px-4 lg:px-0">
       <div className="theme-media relative flex items-center gap-3 overflow-hidden rounded-[22px] bg-ink-2 p-2.5 text-txt">
         <Link href={href} className="press flex min-w-0 flex-1 items-center gap-3">
-          {show.cover ? <img src={show.cover} alt="" loading="lazy" decoding="async" className="size-12 shrink-0 rounded-[14px] object-cover" /> : <span className="grid size-12 shrink-0 place-items-center rounded-[14px] bg-white/10"><Icon name="play" className="size-6" /></span>}
+          {show.cover && afterLoad ? <img src={show.cover} alt="" loading="lazy" decoding="async" className="size-12 shrink-0 rounded-[14px] object-cover" /> : <span className="grid size-12 shrink-0 place-items-center rounded-[14px] bg-white/10"><Icon name="play" className="size-6" /></span>}
           <span className="min-w-0 flex-1">
             <span className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[.14em]">
               {isLive ? <span className="inline-flex items-center gap-1 rounded-full bg-terra px-2 py-0.5 text-white"><span className="size-1.5 animate-pulse rounded-full bg-white motion-reduce:animate-none" />{t("vr.live")}</span> : <span className="text-gold">{t("vr.fashionShow")}</span>}
